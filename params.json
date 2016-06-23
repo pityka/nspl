@@ -1,0 +1,6 @@
+{
+  "name": "new scala plotting library",
+  "tagline": "Scala plotting library",
+  "body": "# 2d Plotting Library for Scala (including scala-js)\r\n\r\nRenders the same plots to\r\n* java Graphics2D\r\n* PDF/SVG/EPS (via [VectorGraphics2D](https://github.com/eseifert/vectorgraphics2d))\r\n* Html5 Canvas ([scala-js](scala-js.org))\r\n\r\nCreates scatter, line, contour, raster, barplots and boxplots, histograms, density plots. Creates composite figure of multiple plots\r\n\r\nMinimal dependencies (VectorGraphics2D for PDF output).\r\n\r\nConvenient interface for [SADDLE](https://saddle.github.io/) data structures.\r\n\r\nCan work from streams of data without keeping them in memory, thus can create plots from huge files to raster output.\r\n\r\nSee `canvas/src/main/scala/org/nspl/test.scala` for Html5 Canvas examples.\r\nSee `saddle/src/test/scala/plots/plots.test.scala` for JVM examples.\r\n",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
