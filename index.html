@@ -42,16 +42,16 @@
 <h1>Usage</h1>
 <h3>JVM</h3>
 <pre><code>
-  import org.nspl._
-  import awtrenderer._
-  val x : Seq[Double] = ???
-  val y : Seq[Double] = ???
-  val plot = xyplot(x -> y))(
-    ylab = "y",
-    xlab = "x",
-    main = "main"
-  )
-  show(plot)
+    import org.nspl._
+    import awtrenderer._
+    val x : Seq[Double] = Seq(1d,2d,3d)
+    val y : Seq[Double] = Seq(6d,7d,10d)
+    val plot = xyplot(x -> y)(
+      ylab = "y",
+      xlab = "x",
+      main = "main"
+    )
+    show(plot)
 </code></pre>
 <h3>Browser</h3>
 <pre><code>
@@ -62,9 +62,9 @@
 
   val canvas = dom.document.createElement("canvas").asInstanceOf[html.Canvas]
 
-  val x : Seq[Double] = ???
-  val y : Seq[Double] = ???
-  val plot = xyplot(x -> y))(
+  val x : Seq[Double] = Seq(1d,2d,3d)
+  val y : Seq[Double] = Seq(6d,7d,10d)
+  val plot = xyplot(x -> y)(
     ylab = "y",
     xlab = "x",
     main = "main"
