@@ -1,4 +1,4 @@
-New Scala Plotting Library
+[New Scala Plotting Library](https://pityka.github.io/nspl/)
 
 # 2d Plotting Library for Scala (including scala-js)
 
@@ -14,6 +14,8 @@ Minimal dependencies (VectorGraphics2D for PDF output).
 Convenient interface for [SADDLE](https://saddle.github.io/) data structures.
 
 Can work from streams of data without keeping them in memory, thus can create plots from huge files to raster output.
+
+Easily extendible, typesafe scene graph.
 
 See `canvas/src/main/scala/org/nspl/test.scala` for Html5 Canvas examples.
 See `saddle/src/test/scala/plots/plots.test.scala` for JVM examples.
