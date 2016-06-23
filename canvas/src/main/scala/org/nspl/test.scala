@@ -12,11 +12,11 @@ import js.annotation.JSExport
 @JSExport
 object Test {
   @JSExport
-  def main(): Unit = {
+  def bind(n: Node): Unit = {
     println("Hi")
     val canvas = dom.document.createElement("canvas").asInstanceOf[html.Canvas]
 
-    dom.document.body.appendChild(canvas)
+    n.appendChild(canvas)
 
     def random = 1 to 1000 map (i => scala.util.Random.nextDouble)
     def random2 = 1 to 1000 map (i => scala.util.Random.nextGaussian)
