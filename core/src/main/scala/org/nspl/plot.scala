@@ -51,7 +51,7 @@ trait Plots {
     }, origin.map(_.y).getOrElse(Double.MaxValue))
 
     val yMax = ylim.map(_._2).getOrElse {
-      dataYMax - axisMargin * (dataYMax - dataYMin)
+      dataYMax + axisMargin * (dataYMax - dataYMin)
     }
 
     val xAxis = xAxisSetting.axisFactory.make(xMin, xMax, xAxisSetting.width)
