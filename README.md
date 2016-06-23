@@ -5,7 +5,7 @@
 Renders to
 * java Graphics2D
 * PDF/SVG/EPS (via [VectorGraphics2D](https://github.com/eseifert/vectorgraphics2d))
-* Html5 Canvas ([scala-js](scala-js.org))
+* Html5 Canvas ([scala-js](http://www.scala-js.org))
 
 Creates scatter, line, contour, raster, barplots and boxplots, histograms, density plots. Creates composite figure of multiple plots
 
