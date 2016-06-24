@@ -41,12 +41,14 @@ object Log10AxisFactory extends AxisFactory {
 case class AxisSettings(
     axisFactory: AxisFactory,
     numTicks: Int = 4,
+    numMinorTicksFactor: Int = 5,
     tickLength: RelFontSize = .35 fts,
     tickLabelDistance: RelFontSize = 1 fts,
     customTicks: Seq[(Double, String)] = Nil,
     labelRotation: Double = 0,
     width: RelFontSize = 20 fts,
-    fontSize: RelFontSize = 1 fts
+    fontSize: RelFontSize = 1 fts,
+    tickAlignment: Double = -1.0
 ) {
 
   def renderable(
@@ -58,14 +60,14 @@ case class AxisSettings(
 
     val tickSpace = {
       val (mantissa, exponent) = scientific((axis.max - axis.min) / (numTicks - 1))
-      val rounded = (mantissa * 10d).round / 10d
+      val rounded = (mantissa * 5d).round / 5d
       rounded * math.pow(10d, exponent)
     }
 
     def makeTick(world: Double, text: String) = {
       val view = worldToView(world)
       group(
-        ShapeElem(Shape.line(Point(view, 0d), Point(view, tickLength)), stroke = Some(Stroke(2d))),
+        ShapeElem(Shape.line(Point(view, 0d), Point(view, tickAlignment * tickLength)), stroke = Some(Stroke(2d))),
         translate(
           transform(
             TextBox(text, Point(view, 0.0), fontSize = fontSize, width = fontSize.value * 4),
@@ -79,6 +81,11 @@ case class AxisSettings(
         ),
         FreeLayout
       )
+    }
+
+    def makeMinorTick(world: Double) = {
+      val view = worldToView(world)
+      ShapeElem(Shape.line(Point(view, 0d), Point(view, tickLength * 0.5 * tickAlignment)), stroke = Some(Stroke(1d)))
     }
 
     val line = ShapeElem(
@@ -98,7 +105,17 @@ case class AxisSettings(
       }).filter(_.isDefined).map(_.get) ++ extra
     )
 
-    group(line, ticks, FreeLayout)
+    val minorTicks = sequence(
+      ((0 until (numTicks * numMinorTicksFactor) toList) map { i =>
+        val world = math.min(axis.min + i * tickSpace / numMinorTicksFactor, axis.max)
+        if (customTicks.map(_._1).contains(world)) None
+        else Some {
+          makeMinorTick(world)
+        }
+      }).filter(_.isDefined).map(_.get)
+    )
+
+    group(line, ticks, minorTicks, FreeLayout)
 
   }
 }

@@ -106,7 +106,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
         density(rotated.firstCol("PC1").toVec.toSeq) -> line()
       )(xlab = "PC1", ylab = "dens.", main = "Loading distribution")
 
-      val gallery = group(r1, hist1, contour, density1, fig0, fig1, fig2, fig3, fig4, TableLayout(3))
+      val gallery = group(xyplot(Seq(0d -> 0d, 1d -> 1d, 2d -> 2d))(), r1, hist1, contour, density1, fig0, fig1, fig2, fig3, fig4, TableLayout(3))
 
       show(gallery)
       println(pngToFile(gallery))
