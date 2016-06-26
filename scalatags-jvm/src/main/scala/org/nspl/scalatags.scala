@@ -147,7 +147,7 @@ object scalatagrenderer {
                 svgAttrs.x := elem.loc.x,
                 svgAttrs.y := y1 + elem.fontSize,
                 svgAttrs.transform := elem.tx.svg,
-                svgAttrs.style := s"font:family: monospace;font-size: ${elem.fontSize.toInt}"
+                svgAttrs.style := s"font-family: monospace;font-size: ${elem.fontSize.toInt}"
               )(line)
 
               ctx.elems.append(svgElem)
@@ -162,7 +162,7 @@ object scalatagrenderer {
           svgAttrs.x := elem.loc.x,
           svgAttrs.y := y1 + elem.fontSize,
           svgAttrs.transform := elem.tx.svg,
-          svgAttrs.style := s"font:family: monospace;font-size: ${elem.fontSize.toInt}"
+          svgAttrs.style := s"font-family: monospace;font-size: ${elem.fontSize.toInt}"
         )(line)
 
         ctx.elems.append(svgElem)
