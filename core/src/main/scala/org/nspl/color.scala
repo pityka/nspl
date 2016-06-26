@@ -1,5 +1,27 @@
 package org.nspl
 
+trait Colormap {
+  def apply(v: Double): Color
+  def withRange(min: Double, max: Double): Colormap
+}
+case class Color(r: Int, g: Int, b: Int, a: Int) extends Colormap {
+  def apply(v: Double) = this
+  def withRange(min: Double, max: Double) = this
+}
+object Color {
+  val black = Color(0, 0, 0, 255)
+  val white = Color(255, 255, 255, 255)
+  val transparent = Color(0, 0, 0, 0)
+  val red = Color(255, 0, 0, 255)
+  val blue = Color(0, 0, 255, 255)
+  val green = Color(0, 255, 0, 255)
+  val gray1 = Color(50, 50, 50, 255)
+  val gray2 = Color(100, 100, 100, 255)
+  val gray3 = Color(150, 150, 150, 255)
+  val gray4 = Color(200, 200, 200, 255)
+  val gray5 = Color(220, 220, 220, 255)
+}
+
 case class HeatMapColors(min: Double = 0.0, max: Double = 1.0) extends Colormap {
 
   def apply(value: Double): Color = {

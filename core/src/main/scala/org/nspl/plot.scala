@@ -24,7 +24,9 @@ trait Plots {
     ylim: Option[(Double, Double)] = None,
     axisMargin: Double = 0.05,
     xCol: Int = 0,
-    yCol: Int = 1
+    yCol: Int = 1,
+    xgrid: Boolean = true,
+    ygrid: Boolean = true
   ) = {
 
     val xMinMax =
@@ -33,10 +35,10 @@ trait Plots {
     val yMinMax =
       data.map(_._1.columnMinMax(yCol))
 
-    val dataXMin = xMinMax.map(_.min).min
-    val dataXMax = xMinMax.map(_.max).max
-    val dataYMin = yMinMax.map(_.min).min
-    val dataYMax = yMinMax.map(_.max).max
+    val dataXMin = if (xlim.isDefined) 0.0 else xMinMax.map(_.min).min
+    val dataXMax = if (xlim.isDefined) 0.0 else xMinMax.map(_.max).max
+    val dataYMin = if (ylim.isDefined) 0.0 else yMinMax.map(_.min).min
+    val dataYMax = if (ylim.isDefined) 0.0 else yMinMax.map(_.max).max
 
     val xMin = math.min(xlim.map(_._1).getOrElse {
       dataXMin - axisMargin * (dataXMax - dataXMin)
@@ -57,14 +59,10 @@ trait Plots {
     val xAxis = xAxisSetting.axisFactory.make(xMin, xMax, xAxisSetting.width)
     val yAxis = yAxisSetting.axisFactory.make(yMin, yMax, yAxisSetting.width)
 
-    val xAxisElem = xAxisSetting.renderable(xAxis)
-    val yAxisElem = yAxisSetting.renderable(
-      yAxis,
-      labelTransformation = (b: Bounds) =>
-      AffineTransform.reflectXCenter(b)
-        .concat(AffineTransform.rotateCenter(-0.5 * math.Pi)(b))
-        .concat(AffineTransform.translate(b.w * -0.5, 0))
-    )
+    val xMinV = xAxis.worldToView(xMin)
+    val xMaxV = xAxis.worldToView(xMax)
+    val yMinV = yAxis.worldToView(yMin)
+    val yMaxV = yAxis.worldToView(yMax)
 
     val originWX1 = origin.map { origin =>
       xlim.map {
@@ -84,6 +82,19 @@ trait Plots {
       } getOrElse origin.y
     } getOrElse yMin
 
+    val noXTick = if (origin.isEmpty) Nil else List(originWX1)
+    val noYTick = if (origin.isEmpty) Nil else List(originWY1)
+
+    val (xMajorTicks, xAxisElem) = xAxisSetting.renderable(xAxis, noXTick)
+    val (yMajorTicks, yAxisElem) = yAxisSetting.renderable(
+      yAxis,
+      noYTick,
+      labelTransformation = (b: Bounds) =>
+      AffineTransform.reflectXCenter(b)
+        .concat(AffineTransform.rotateCenter(-0.5 * math.Pi)(b))
+        .concat(AffineTransform.translate(b.w * -0.5, 0))
+    )
+
     val originX = xAxis.worldToView(originWX1)
     val originY = yAxis.worldToView(originWY1)
 
@@ -102,7 +113,16 @@ trait Plots {
         DataElem(ds, xAxis, yAxis, drs, axes.bounds, AffineTransform.reflectX)
     })
 
-    group(axes, dataelem, FreeLayout)
+    val xgridElem = sequence(xMajorTicks map { w =>
+      val v = xAxis.worldToView(w)
+      ShapeElem(Shape.line(Point(v, yMinV), Point(v, -1 * yMaxV)), stroke = if (xgrid) Some(Stroke(1d)) else None, strokeColor = Color.gray5)
+    })
+    val ygridElem = sequence(yMajorTicks map { w =>
+      val v = yAxis.worldToView(w)
+      ShapeElem(Shape.line(Point(xMinV, -1 * v + xMinV), Point(xMaxV, -1 * v + xMinV)), stroke = if (ygrid) Some(Stroke(1d)) else None, strokeColor = Color.gray5)
+    })
+
+    group(xgridElem, ygridElem, dataelem, axes, FreeLayout)
 
   }
 
@@ -171,7 +191,7 @@ trait Plots {
     val axisSettings = AxisSettings(LinearAxisFactory, fontSize = fontSize, width = width, numTicks = 2)
     val axis = axisSettings.axisFactory.make(min, max, width)
 
-    val axisElem = axisSettings.renderable(axis, labelTransformation = (b: Bounds) => AffineTransform.reflectXCenter(b).concat(AffineTransform.rotateCenter(-0.5 * math.Pi)(b)))
+    val (majorTicks, axisElem) = axisSettings.renderable(axis, labelTransformation = (b: Bounds) => AffineTransform.reflectXCenter(b).concat(AffineTransform.rotateCenter(-0.5 * math.Pi)(b)))
 
     val n = 500
     val space = (max - min) / n.toDouble

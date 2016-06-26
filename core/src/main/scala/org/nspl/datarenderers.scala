@@ -311,7 +311,7 @@ trait Renderers {
     width: Double = 1,
     stroke: Stroke = Stroke(1d),
     strokeColor: Color = Color.black,
-    fill: Colormap = Color.transparent
+    fill: Colormap = Color.white
   ) = new DataRenderer {
     def asLegend = Some(PointLegend(shapeList(1), fill(0)))
 

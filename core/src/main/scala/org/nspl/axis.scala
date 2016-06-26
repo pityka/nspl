@@ -53,6 +53,7 @@ case class AxisSettings(
 
   def renderable(
     axis: Axis,
+    disableTicksAt: List[Double] = Nil,
     labelTransformation: Bounds => AffineTransform = _ => AffineTransform.identity
   ) = {
 
@@ -109,6 +110,7 @@ case class AxisSettings(
       ((0 to ((axis.max - baseTick) / tickSpace).toInt map (i => baseTick + i * tickSpace)) ++
         (1 to ((baseTick - axis.min) / tickSpace).toInt map (i => baseTick - i * tickSpace)))
         .filterNot(x => customTicks.map(_._1).contains(x))
+        .filterNot(x => disableTicksAt.contains(x))
         .toList
         .map(w => math.max(math.min(w, axis.max), axis.min))
         .distinct
@@ -123,14 +125,13 @@ case class AxisSettings(
         .filterNot(majorTicks.contains)
         .distinct
 
-
     val majorTickElems = sequence(
       majorTicks.map(w => makeTick(w, if (w == 0.0) "0" else f"$w%.2g")) ++ extra
     )
 
     val minorTickElems = sequence(minorTicks.map(makeMinorTick))
 
-    group(line, majorTickElems, minorTickElems, FreeLayout)
+    majorTicks -> group(line, majorTickElems, minorTickElems, FreeLayout)
 
   }
 }

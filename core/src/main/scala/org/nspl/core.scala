@@ -6,19 +6,7 @@ case class Bounds(x: Double, y: Double, w: Double, h: Double) {
   def centerX = x + w * 0.5
   def centerY = y + h * 0.5
 }
-trait Colormap {
-  def apply(v: Double): Color
-  def withRange(min: Double, max: Double): Colormap
-}
-case class Color(r: Int, g: Int, b: Int, a: Int) extends Colormap {
-  def apply(v: Double) = this
-  def withRange(min: Double, max: Double) = this
-}
-object Color {
-  val black = Color(0, 0, 0, 255)
-  val transparent = Color(0, 0, 0, 0)
-  val red = Color(255, 0, 0, 255)
-}
+
 case class Stroke(width: Double)
 
 case class Point(x: Double, y: Double) {

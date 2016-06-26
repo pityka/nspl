@@ -17,7 +17,7 @@ object awtrenderer extends JavaAWTUtil {
             graphics2.setPaint(elem.fill)
             graphics2.fill(elem.shape)
           }
-          if (elem.stroke.isDefined) {
+          if (elem.stroke.isDefined && elem.strokeColor.a > 0) {
             graphics2.setStroke(elem.stroke.get)
             graphics2.setPaint(elem.strokeColor)
             graphics2.draw(elem.shape)
