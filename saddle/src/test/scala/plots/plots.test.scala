@@ -5,7 +5,7 @@ import org.scalatest.Matchers
 import org.nspl.saddle._
 import org.nspl.data._
 import org.saddle._
-import awtrenderer._
+
 import org.saddle.io._
 
 class SaddlePlotSpec extends FunSpec with Matchers {
@@ -120,11 +120,17 @@ class SaddlePlotSpec extends FunSpec with Matchers {
 
       val gallery = group(empty2, xyplot(Seq(0d -> 0d, 1d -> 1d, 2d -> 2d))(), r1, hist1, contour, density1, fig0, fig1, fig2, fig3, fig4, TableLayout(3))
 
-      show(gallery)
-      println(pngToFile(gallery))
-      println(pdfToFile(gallery))
-      println(pdfToFile(gallery))
-      println(writeToFile(gallery, 1000, "image/svg"))
+      {
+        import awtrenderer._
+        show(gallery)
+        println(pngToFile(gallery))
+        println(pdfToFile(gallery))
+        println(writeToFile(gallery, 1000, "image/svg"))
+      }
+      {
+        import scalatagrenderer._
+        println(svgToFile(gallery))
+      }
     }
 
   }

@@ -43,6 +43,13 @@ lazy val awt = project.in(file("awt")).
       libraryDependencies += "de.erichseifert.vectorgraphics2d" % "VectorGraphics2D" % "0.11"
 		).dependsOn(core)
 
+lazy val scalatagsJvm = project.in(file("scalatags-jvm")).
+    		settings(commonSettings).
+    		settings(
+    			name:="nspl-scalatags-jvm",
+          libraryDependencies +="com.lihaoyi" %% "scalatags" % "0.5.5"
+    		).dependsOn(core)
+
 lazy val saddle = (project in file("saddle")).settings(commonSettings).
 	settings(
 		name:="nspl-saddle",
@@ -51,7 +58,7 @@ lazy val saddle = (project in file("saddle")).settings(commonSettings).
 			"com.googlecode.efficient-java-matrix-library" % "ejml" % "0.19" % "test",
       "org.scalatest" %% "scalatest" % "2.1.5" % "test"
 			)
-	).dependsOn(core,awt)
+	).dependsOn(core,awt,scalatagsJvm)
 	.aggregate(core,awt,coreJS,canvas)
 
 onLoad in Global := (Command.process("project saddle", _: State)) compose (onLoad in Global).value
