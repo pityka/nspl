@@ -20,24 +20,31 @@
 
     <section class="main-content">
       <h1>
-<a id="2d-plotting-library-for-scala-including-scala-js" class="anchor" href="#2d-plotting-library-for-scala-including-scala-js" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>2d Plotting Library for Scala (including scala-js)</h1>
+<a id="2d-plotting-library-for-scala-including-scala-js" class="anchor" href="#2d-plotting-library-for-scala-including-scala-js" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>2d Plotting Library in pure Scala (including scala-js)</h1>
 
-<p>Renders the same plots to</p>
+<p>Renders the same plots both to vector (pdf, svg, eps) and raster formats (png, jpg), java Graphics2D or Html5 Canvas. Runs on the JVM or in the browser with minimal dependencies. </p>
 
+<p>Output formats on the JVM:</p>
 <ul>
-<li>java Graphics2D</li>
+<li>PNG/JPEG/BMP/GIF</li>
+<li>java.awt.Graphics2D</li>
 <li>PDF/SVG/EPS (using <a href="https://github.com/eseifert/vectorgraphics2d">VectorGraphics2D</a>)</li>
+<li>SVG (using <a href="http://www.lihaoyi.com/scalatags/">ScalaTags</a>)</li>
+</ul>
+
+<p>Output formats in the browser:</p>
+<ul>
 <li>SVG (using <a href="http://www.lihaoyi.com/scalatags/">ScalaTags</a>)</li>
 <li>Html5 Canvas (<a href="scala-js.org">scala-js</a>)</li>
 </ul>
 
 <p>Creates scatter, line, contour, raster, barplots and boxplots, histograms, density plots. Creates composite figure of multiple plots</p>
 
-<p>Minimal dependencies (VectorGraphics2D for PDF output).</p>
+<p>Minimal external dependencies (VectorGraphics2D for PDF output, ScalaTags for SVG).</p>
 
 <p>Convenient interface for <a href="https://saddle.github.io/">SADDLE</a> data structures.</p>
 
-<p>Can work from streams of data without keeping them in memory, thus can create plots from huge files to raster output.</p>
+<p>Can work from streams of data without keeping them in memory, thus can create plots from huge files to raster images.</p>
 
 <p>Easily extendible via simple to use typesafe scene graph.</p>
 
@@ -100,9 +107,9 @@ and <code>saddle/src/test/scala/plots/plots.test.scala</code> for JVM examples.<
 <div id="plot2">
 </div>
 
-<script type="text/javascript" src="example/nspl-core-canvas-js-opt.js"></script>
+<script type="text/javascript" src="example/nspl-scalatags-js-opt.js"></script>
 <script>
-    org.nspl.TestSVG().bind(document.getElementById("plot2"));
+    org.nspl.TestSvg().bind(document.getElementById("plot2"));
 </script>
 
 
