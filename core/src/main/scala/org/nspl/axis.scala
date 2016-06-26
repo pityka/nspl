@@ -59,9 +59,9 @@ case class AxisSettings(
     import axis._
 
     val tickSpace = {
-      val (mantissa, exponent) = scientific((axis.max - axis.min) / (numTicks - 1))
-      val rounded = (mantissa * 5d).round / 5d
-      rounded * math.pow(10d, exponent)
+      val (mantissa, exponent) = scientific((axis.max - axis.min) / (numTicks))
+      val rounded = (mantissa * 10d).round / 10d
+      math.abs(rounded * math.pow(10d, exponent))
     }
 
     def makeTick(world: Double, text: String) = {
@@ -93,29 +93,44 @@ case class AxisSettings(
       stroke = Some(Stroke(2d))
     )
 
+    val baseTick = {
+      if (axis.min <= 0 && axis.max >= 0) 0d
+      else {
+        val (maxM, maxE) = scientific(axis.max)
+        val minM = axis.min / math.pow(10d, maxE)
+        ((maxM - minM) * 0.5 + minM).floor * math.pow(10d, maxE)
+      }
+    }
+
     val extra = customTicks filter (i => i._1 >= axis.min && i._1 <= axis.max) map { i => makeTick(i._1, i._2) }
-    val ticks = sequence(
-      ((0 until numTicks toList) map { i =>
-        val world = math.min(axis.min + i * tickSpace, axis.max)
-        if (customTicks.map(_._1).contains(world)) None
-        else Some {
-          val text = if (world == 0.0) "0" else f"$world%.2g"
-          makeTick(world, text)
-        }
-      }).filter(_.isDefined).map(_.get) ++ extra
+
+    val majorTicks = if (numTicks == 0) Nil
+    else
+      ((0 to ((axis.max - baseTick) / tickSpace).toInt map (i => baseTick + i * tickSpace)) ++
+        (1 to ((baseTick - axis.min) / tickSpace).toInt map (i => baseTick - i * tickSpace)))
+        .filterNot(x => customTicks.map(_._1).contains(x))
+        .toList
+        .map(w => math.max(math.min(w, axis.max), axis.min))
+        .distinct
+
+    val minorTicks = if (numTicks == 0) Nil
+    else
+      ((0 to ((axis.max - baseTick) / (tickSpace / numMinorTicksFactor)).toInt map (i => baseTick + i * tickSpace / numMinorTicksFactor)) ++
+        (1 to ((baseTick - axis.min) / (tickSpace / numMinorTicksFactor)).toInt map (i => baseTick - i * tickSpace / numMinorTicksFactor)))
+        .filterNot(x => customTicks.map(_._1).contains(x))
+        .toList
+        .map(w => math.max(math.min(w, axis.max), axis.min))
+        .filterNot(majorTicks.contains)
+        .distinct
+
+
+    val majorTickElems = sequence(
+      majorTicks.map(w => makeTick(w, if (w == 0.0) "0" else f"$w%.2g")) ++ extra
     )
 
-    val minorTicks = sequence(
-      ((0 until (numTicks * numMinorTicksFactor) toList) map { i =>
-        val world = math.min(axis.min + i * tickSpace / numMinorTicksFactor, axis.max)
-        if (customTicks.map(_._1).contains(world)) None
-        else Some {
-          makeMinorTick(world)
-        }
-      }).filter(_.isDefined).map(_.get)
-    )
+    val minorTickElems = sequence(minorTicks.map(makeMinorTick))
 
-    group(line, ticks, minorTicks, FreeLayout)
+    group(line, majorTickElems, minorTickElems, FreeLayout)
 
   }
 }
