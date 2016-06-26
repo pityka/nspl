@@ -10,7 +10,7 @@ import scala.scalajs.js
 import js.annotation.JSExport
 
 @JSExport
-object Test {
+object TestSvg {
   @JSExport
   def bind(n: Node): Unit = {
     println("Hi")
