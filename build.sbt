@@ -35,6 +35,16 @@ lazy val canvas = project.in(file("canvas")).
     .enablePlugins(ScalaJSPlugin)
     .dependsOn(coreJS)
 
+lazy val scalatagsJs = project.in(file("scalatags-js")).
+		settings(commonSettings).
+		settings(
+			name:="nspl-scalatags-js",
+      libraryDependencies ++=  Seq(
+        "org.scala-js" %%% "scalajs-dom" % "0.9.0",
+        "com.lihaoyi" %%% "scalatags" % "0.5.5")
+		)
+    .enablePlugins(ScalaJSPlugin)
+    .dependsOn(coreJS)
 
 lazy val awt = project.in(file("awt")).
 		settings(commonSettings).
