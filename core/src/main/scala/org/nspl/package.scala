@@ -25,6 +25,7 @@ package object nspl
     def value = rel2ft(v)
   }
 
+  /* Calculates the total bounds of the members. */
   def outline(members: Seq[Bounds]) = {
     val x = members.map(_.x).min
     val y = members.map(_.y).min
@@ -99,6 +100,7 @@ package object nspl
     }
   }
 
+  /* Normalized scientific notation. */
   def scientific(x: Double) = x / math.pow(10d, math.log10(x).round) -> math.log10(x).round
 
 }

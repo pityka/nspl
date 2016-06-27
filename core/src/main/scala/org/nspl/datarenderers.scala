@@ -52,26 +52,49 @@ trait Renderers {
 
           val vX = xAxis.worldToView(wX)
           val vY = yAxis.worldToView(wY)
-          val shape1: ShapeElem = ShapeElem(shape, fill = color1).scale(factorX, factorY).translate(vX, vY).transform(_ => tx)
+          val shape1: ShapeElem = ShapeElem(
+            shape,
+            fill = color1
+          )
+            .scale(factorX, factorY)
+            .translate(vX, vY)
+            .transform(_ => tx)
+
           re.render(ctx, shape1)
 
           if (valueText) {
-            val tb = TextBox(data.label, color = labelColor).reflectYCenter.rotate(math.Pi).translate(vX, vY).transform(_ => tx)
+            val tb = TextBox(
+              data.label,
+              color = labelColor
+            )
+              .reflectYCenter
+              .rotate(math.Pi)
+              .translate(vX, vY)
+              .transform(_ => tx)
+
             rt.render(ctx, tb)
           }
 
           if (data.dimension > errorTopCol) {
             val errorTop = data(errorTopCol)
-            val shape1: ShapeElem = ShapeElem(Shape.line(Point(vX, vY), Point(vX, yAxis.worldToView(wY + errorTop))), stroke = Some(errorBarStroke)).transform(_ => tx)
+            val shape1: ShapeElem = ShapeElem(
+              Shape.line(Point(vX, vY), Point(vX, yAxis.worldToView(wY + errorTop))),
+              stroke = Some(errorBarStroke)
+            ).transform(_ => tx)
             re.render(ctx, shape1)
           }
           if (data.dimension > errorBottomCol) {
             val errorTop = data(errorBottomCol)
-            val shape1: ShapeElem = ShapeElem(Shape.line(Point(vX, vY), Point(vX, yAxis.worldToView(wY - errorTop))), stroke = Some(errorBarStroke)).transform(_ => tx)
+            val shape1: ShapeElem = ShapeElem(
+              Shape.line(Point(vX, vY), Point(vX, yAxis.worldToView(wY - errorTop))),
+              stroke = Some(errorBarStroke)
+            ).transform(_ => tx)
             re.render(ctx, shape1)
           }
         }
-      } else throw new RuntimeException(s"Record has no X or Y elements. size: ${data.dimension} vs idx $xCol $yCol")
+      } else throw new RuntimeException(
+        s"Record has no X or Y elements. size: ${data.dimension} vs idx $xCol $yCol"
+      )
     }
   }
 
@@ -87,7 +110,13 @@ trait Renderers {
     def asLegend = Some(LineLegend(stroke, color(0)))
     override def clear = currentPoint = None
 
-    def render[R <: RenderingContext](data: Row, xAxis: Axis, yAxis: Axis, ctx: R, tx: AffineTransform)(implicit re: Renderer[ShapeElem, R], rt: Renderer[TextBox, R]): Unit = {
+    def render[R <: RenderingContext](
+      data: Row,
+      xAxis: Axis,
+      yAxis: Axis,
+      ctx: R,
+      tx: AffineTransform
+    )(implicit re: Renderer[ShapeElem, R], rt: Renderer[TextBox, R]): Unit = {
 
       val wX = data(xCol)
       val wY = data(yCol)
@@ -120,6 +149,8 @@ trait Renderers {
     }
   }
 
+  /* Paints the area between the (x,y) and (x,0) or
+   *  between (x,y) and (x,y2) if y2 is present */
   def area(
     xCol: Int = 0,
     yCol: Int = 1,
@@ -136,7 +167,13 @@ trait Renderers {
       currentPoint1 = None
     }
 
-    def render[R <: RenderingContext](data: Row, xAxis: Axis, yAxis: Axis, ctx: R, tx: AffineTransform)(implicit re: Renderer[ShapeElem, R], rt: Renderer[TextBox, R]): Unit = {
+    def render[R <: RenderingContext](
+      data: Row,
+      xAxis: Axis,
+      yAxis: Axis,
+      ctx: R,
+      tx: AffineTransform
+    )(implicit re: Renderer[ShapeElem, R], rt: Renderer[TextBox, R]): Unit = {
 
       val wX = data(xCol)
       val wY = data(yCol)
@@ -156,7 +193,8 @@ trait Renderers {
         val vY = yAxis.worldToView(wY)
 
         val p1 = Point(vX, vY)
-        val p2 = Point(vX, wYBottom.map(w => yAxis.worldToView(w)).getOrElse(yAxis.worldToView(yAxis.min)))
+        val p2 = Point(vX, wYBottom.map(w =>
+          yAxis.worldToView(w)).getOrElse(yAxis.worldToView(yAxis.min)))
 
         if (currentPoint1.isEmpty) {
           currentPoint1 = Some(p1)
@@ -201,7 +239,14 @@ trait Renderers {
       }
       p
     }
-    def render[R <: RenderingContext](data: Row, xAxis: Axis, yAxis: Axis, ctx: R, tx: AffineTransform)(implicit re: Renderer[ShapeElem, R], rt: Renderer[TextBox, R]): Unit = {
+
+    def render[R <: RenderingContext](
+      data: Row,
+      xAxis: Axis,
+      yAxis: Axis,
+      ctx: R,
+      tx: AffineTransform
+    )(implicit re: Renderer[ShapeElem, R], rt: Renderer[TextBox, R]): Unit = {
 
       val r = renderer()
 
@@ -227,7 +272,13 @@ trait Renderers {
     widthCol: Int = 3
   ) = new DataRenderer {
     def asLegend = Some(PointLegend(shapeList(1), fill(0)))
-    def render[R <: RenderingContext](data: Row, xAxis: Axis, yAxis: Axis, ctx: R, tx: AffineTransform)(implicit re: Renderer[ShapeElem, R], rt: Renderer[TextBox, R]): Unit = {
+    def render[R <: RenderingContext](
+      data: Row,
+      xAxis: Axis,
+      yAxis: Axis,
+      ctx: R,
+      tx: AffineTransform
+    )(implicit re: Renderer[ShapeElem, R], rt: Renderer[TextBox, R]): Unit = {
 
       val wX = data(xCol)
       val wY = data(yCol)
@@ -315,7 +366,13 @@ trait Renderers {
   ) = new DataRenderer {
     def asLegend = Some(PointLegend(shapeList(1), fill(0)))
 
-    def render[R <: RenderingContext](data: Row, xAxis: Axis, yAxis: Axis, ctx: R, tx: AffineTransform)(implicit re: Renderer[ShapeElem, R], rt: Renderer[TextBox, R]): Unit = {
+    def render[R <: RenderingContext](
+      data: Row,
+      xAxis: Axis,
+      yAxis: Axis,
+      ctx: R,
+      tx: AffineTransform
+    )(implicit re: Renderer[ShapeElem, R], rt: Renderer[TextBox, R]): Unit = {
 
       val wX1 = data(xCol)
       val q2 = data(medianCol)
@@ -390,7 +447,13 @@ trait Renderers {
 
     def asLegend = Some(LineLegend(stroke, color(0)))
 
-    def render[R <: RenderingContext](data: Row, xAxis: Axis, yAxis: Axis, ctx: R, tx: AffineTransform)(implicit re: Renderer[ShapeElem, R], rt: Renderer[TextBox, R]): Unit = {
+    def render[R <: RenderingContext](
+      data: Row,
+      xAxis: Axis,
+      yAxis: Axis,
+      ctx: R,
+      tx: AffineTransform
+    )(implicit re: Renderer[ShapeElem, R], rt: Renderer[TextBox, R]): Unit = {
 
       val wX = data(xCol)
       val wY = data(yCol)

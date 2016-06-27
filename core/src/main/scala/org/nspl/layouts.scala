@@ -5,10 +5,15 @@ case object Right extends Alignment
 case object Center extends Alignment
 case object Left extends Alignment
 
+/* A Layout which does nothing. */
 object FreeLayout extends Layout {
   def apply(s: Seq[Bounds]) = s
 }
 
+/**
+ * A Layout which stacks elements on top of each other
+ *  and aligns the horizontal axis.
+ */
 case class VerticalStack(alignment: Alignment = Left, gap: Double = 0.0) extends Layout {
   def apply(s: Seq[Bounds]) = {
     if (s.isEmpty) Nil
@@ -31,6 +36,10 @@ case class VerticalStack(alignment: Alignment = Left, gap: Double = 0.0) extends
   }
 }
 
+/**
+ * A Layout which stacks elements beside each other
+ *  and aligns the vertical axis.
+ */
 case class HorizontalStack(alignment: Alignment, gap: Double = 0.0) extends Layout {
   def apply(s: Seq[Bounds]) = {
     if (s.isEmpty) Nil
@@ -53,6 +62,7 @@ case class HorizontalStack(alignment: Alignment, gap: Double = 0.0) extends Layo
   }
 }
 
+/* A Layout which puts elements into rows.*/
 case class TableLayout(columns: Int) extends Layout {
   val horiz = HorizontalStack(Left, 10d)
   val vertic = VerticalStack(Center, 10d)
@@ -69,6 +79,7 @@ case class TableLayout(columns: Int) extends Layout {
   }
 }
 
+/* A Layout which puts elements into columns.*/
 case class ColumnLayout(numRows: Int) extends Layout {
   val horiz = HorizontalStack(Left, 10d)
   val vertic = VerticalStack(Center, 10d)

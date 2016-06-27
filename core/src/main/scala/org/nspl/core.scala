@@ -23,6 +23,7 @@ trait Renderer[E, R <: RenderingContext] {
   def render(r: R, e: E): Unit
 }
 
+/* Basic unit of the scene graph.*/
 trait Renderable[K] { self: K =>
   def transform(v: Bounds => AffineTransform): K
   def bounds: Bounds
@@ -42,6 +43,7 @@ trait Renderable[K] { self: K =>
 
 }
 
+/* Layouts tranform the bounding box of their members. */
 trait Layout {
   def apply(s: Seq[Bounds]): Seq[Bounds]
 }

@@ -31,6 +31,7 @@ case class HeatMapColors(min: Double = 0.0, max: Double = 1.0) extends Colormap 
     def scaleHue(v: Double) = (2.0 / 3.0) - v * (2.0 / 3.0)
 
     val (r, g, b) = hsl2rgb2(scaleHue(v), 1d, 0.5d)
+
     Color((r * 255).toInt, (g * 255).toInt, (b * 255).toInt, 255)
   }
 

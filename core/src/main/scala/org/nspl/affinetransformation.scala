@@ -1,5 +1,8 @@
 package org.nspl
 
+/**
+ * 2D Affine Transformation Matrix in row major order
+ */
 case class AffineTransform(m0: Double, m1: Double, m2: Double, m3: Double, m4: Double, m5: Double) {
 
   def inverse = {

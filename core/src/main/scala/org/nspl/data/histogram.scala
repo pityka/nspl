@@ -93,7 +93,11 @@ object HistogramData {
     (data.min +: ps.dropRight(1)) zip ps
   }
 
-  def bin(data: Seq[Double], binning: Seq[Double], boundaries: Seq[(Double, Double)]): Seq[(Double, Double, Seq[Double])] = {
+  def bin(
+    data: Seq[Double],
+    binning: Seq[Double],
+    boundaries: Seq[(Double, Double)]
+  ): Seq[(Double, Double, Seq[Double])] = {
     val zp = data zip binning
     boundaries.map { b =>
       (b._1, b._2, zp.filter(d => b._1 <= d._2 && b._2 > d._2).map(_._1))

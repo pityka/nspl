@@ -6,6 +6,7 @@ sealed trait LegendConfig
 case object NotInLegend extends LegendConfig
 case class InLegend(text: String) extends LegendConfig
 
+/* Factory methods for common plots. */
 trait SimplePlots {
   def xyplot(data: (DataSource, List[DataRenderer], LegendConfig)*)(
     xlog: Boolean = false,
@@ -36,22 +37,39 @@ trait SimplePlots {
       (dataSourceFromRows(List(0.0 -> 1.0)), List(polynom())) +: data.map(x => x._1 -> x._2)
     else data.map(x => x._1 -> x._2)
 
-    val legend1 = legend(
-      (((data map {
-      case (ds, render, conf) =>
-        conf match {
-          case NotInLegend => None
-          case InLegend(name) => Some(name -> render.map(_.asLegend).find(_.isDefined).flatten)
-        }
-    }).filter(x => x.isDefined && x.get._2.isDefined).map(_.get)).map(x => x._1 -> x._2.get) ++ extraLegend).toList
-    )
+    val legend1 =
+      legend(
+        (
+        (
+          (data map {
+            case (ds, render, conf) =>
+              conf match {
+                case NotInLegend => None
+                case InLegend(name) => Some(name -> render.map(_.asLegend).find(_.isDefined).flatten)
+              }
+          }).filter(x => x.isDefined && x.get._2.isDefined)
+          .map(_.get)
+        ).map(x => x._1 -> x._2.get) ++ extraLegend
+      ).toList
+      )
 
     group(
       figure(
         xyplotarea(
           data1,
-          AxisSettings(xFac, customTicks = xnames, fontSize = xLabFontSize, numTicks = xNumTicks),
-          AxisSettings(yFac, customTicks = ynames, fontSize = yLabFontSize, numTicks = yNumTicks, tickLabelDistance = 0.0 fts),
+          AxisSettings(
+            xFac,
+            customTicks = xnames,
+            fontSize = xLabFontSize,
+            numTicks = xNumTicks
+          ),
+          AxisSettings(
+            yFac,
+            customTicks = ynames,
+            fontSize = yLabFontSize,
+            numTicks = yNumTicks,
+            tickLabelDistance = 0.0 fts
+          ),
           None,
           xlim = xlim,
           ylim = ylim,
@@ -86,8 +104,17 @@ trait SimplePlots {
     figure(
       xyplotarea(
         List(bxdata -> List(boxwhisker())),
-        AxisSettings(LinearAxisFactory, customTicks = xnames.zipWithIndex.map(x => x._2.toDouble + 1 -> x._1), numTicks = 0, fontSize = fontSize),
-        AxisSettings(LinearAxisFactory, fontSize = fontSize, tickLabelDistance = 0.0 fts),
+        AxisSettings(
+          LinearAxisFactory,
+          customTicks = xnames.zipWithIndex.map(x => x._2.toDouble + 1 -> x._1),
+          numTicks = 0,
+          fontSize = fontSize
+        ),
+        AxisSettings(
+          LinearAxisFactory,
+          fontSize = fontSize,
+          tickLabelDistance = 0.0 fts
+        ),
         None,
         xlim = Some(0d -> (bxdata.iterator.size + 1)),
         ylim = Some(min -> max)
@@ -113,7 +140,12 @@ trait SimplePlots {
   ) = {
 
     xyplot(
-      boxplotData(dim1, dim2, 1 to bins map (i => i / bins.toDouble), Vector.fill(bins)(0d)) -> boxwhisker()
+      boxplotData(
+        dim1,
+        dim2,
+        1 to bins map (i => i / bins.toDouble),
+        Vector.fill(bins)(0d)
+      ) -> boxwhisker()
     )(
         xlab = xlab,
         ylab = ylab,
@@ -144,9 +176,16 @@ trait SimplePlots {
 
     xyplot(
       linesegments(contours)
-    )(ylim = Some(ylim), xlim = Some(xlim), xlab = xlab, ylab = ylab, main = main, xLabFontSize = fontSize,
+    )(
+        ylim = Some(ylim),
+        xlim = Some(xlim),
+        xlab = xlab,
+        ylab = ylab,
+        main = main,
+        xLabFontSize = fontSize,
         yLabFontSize = fontSize,
-        mainFontSize = fontSize)
+        mainFontSize = fontSize
+      )
   }
 
   def rasterplot(
@@ -183,8 +222,22 @@ trait SimplePlots {
             shapes = Vector(Shape.rectangle(0.0, 0.0, 1.0, 1.0)),
             size = 1d
           ))),
-          AxisSettings(LinearAxisFactory, customTicks = xnames, fontSize = xFontSize, numTicks = (if (xnames.isEmpty) (xmax - xmin).toInt else 0), tickLength = 0 fts, labelRotation = -.5 * math.Pi),
-          AxisSettings(LinearAxisFactory, customTicks = ynames, fontSize = yFontSize, numTicks = (if (ynames.isEmpty) (ymax - ymin).toInt else 0), tickLabelDistance = 0.0 fts, tickLength = 0 fts),
+          AxisSettings(
+            LinearAxisFactory,
+            customTicks = xnames,
+            fontSize = xFontSize,
+            numTicks = (if (xnames.isEmpty) (xmax - xmin).toInt else 0),
+            tickLength = 0 fts,
+            labelRotation = -.5 * math.Pi
+          ),
+          AxisSettings(
+            LinearAxisFactory,
+            customTicks = ynames,
+            fontSize = yFontSize,
+            numTicks = (if (ynames.isEmpty) (ymax - ymin).toInt else 0),
+            tickLabelDistance = 0.0 fts,
+            tickLength = 0 fts
+          ),
           None,
           xlim = Some(xmin -> (xmax + 1)),
           ylim = Some(ymin -> (ymax + 1)),

@@ -115,17 +115,29 @@ trait Plots {
 
     val xgridElem = sequence(xMajorTicks map { w =>
       val v = xAxis.worldToView(w)
-      ShapeElem(Shape.line(Point(v, yMinV), Point(v, -1 * yMaxV)), stroke = if (xgrid) Some(Stroke(1d)) else None, strokeColor = Color.gray5)
+      ShapeElem(
+        Shape.line(Point(v, yMinV), Point(v, -1 * yMaxV)),
+        stroke = if (xgrid) Some(Stroke(1d)) else None,
+        strokeColor = Color.gray5
+      )
     })
     val ygridElem = sequence(yMajorTicks map { w =>
       val v = yAxis.worldToView(w)
-      ShapeElem(Shape.line(Point(xMinV, -1 * v + xMinV), Point(xMaxV, -1 * v + xMinV)), stroke = if (ygrid) Some(Stroke(1d)) else None, strokeColor = Color.gray5)
+      ShapeElem(
+        Shape.line(
+          Point(xMinV, -1 * v + xMinV),
+          Point(xMaxV, -1 * v + xMinV)
+        ),
+        stroke = if (ygrid) Some(Stroke(1d)) else None,
+        strokeColor = Color.gray5
+      )
     })
 
     group(xgridElem, ygridElem, dataelem, axes, FreeLayout)
 
   }
 
+  /* Decorates with main, xlab and ylab labels. */
   def figure[T <: Renderable[T]](
     plot: T,
     main: String = "",
@@ -171,9 +183,21 @@ trait Plots {
       case (text, elem) =>
         val elem1 = elem match {
           case PointLegend(s, c) => fitToBounds(ShapeElem(s, fill = c), Bounds(0, 0, 1 fts, 1 fts))
-          case LineLegend(s, c) => fitToBounds(ShapeElem(Shape.line(Point(0, 0), Point(1 fts, 0)), strokeColor = c, stroke = Some(s)), Bounds(0, 0, 1 fts, 1 fts))
+          case LineLegend(s, c) =>
+            fitToBounds(
+              ShapeElem(
+                Shape.line(Point(0, 0), Point(1 fts, 0)),
+                strokeColor = c,
+                stroke = Some(s)
+              ),
+              Bounds(0, 0, 1 fts, 1 fts)
+            )
         }
-        group(elem1, TextBox(text, fontSize = fontSize, width = width), HorizontalStack(Center, 1 fts))
+        group(
+          elem1,
+          TextBox(text, fontSize = fontSize, width = width),
+          HorizontalStack(Center, 1 fts)
+        )
     }, VerticalStack(Left))
   }
 
@@ -188,10 +212,20 @@ trait Plots {
 
     val color1 = color.withRange(min, max)
 
-    val axisSettings = AxisSettings(LinearAxisFactory, fontSize = fontSize, width = width, numTicks = 2)
+    val axisSettings = AxisSettings(
+      LinearAxisFactory,
+      fontSize = fontSize,
+      width = width,
+      numTicks = 2
+    )
     val axis = axisSettings.axisFactory.make(min, max, width)
 
-    val (majorTicks, axisElem) = axisSettings.renderable(axis, labelTransformation = (b: Bounds) => AffineTransform.reflectXCenter(b).concat(AffineTransform.rotateCenter(-0.5 * math.Pi)(b)))
+    val (majorTicks, axisElem) =
+      axisSettings.renderable(
+        axis,
+        labelTransformation = (b: Bounds) => AffineTransform.reflectXCenter(b)
+        .concat(AffineTransform.rotateCenter(-0.5 * math.Pi)(b))
+      )
 
     val n = 500
     val space = (max - min) / n.toDouble
@@ -199,7 +233,11 @@ trait Plots {
       ((0 until n toList) map { i =>
         val world = axis.min + i * space
         val view = axis.worldToView(world)
-        ShapeElem(Shape.line(Point(view, 0d), Point(view, -1 * height)), stroke = Some(Stroke(2d)), strokeColor = color1(world))
+        ShapeElem(
+          Shape.line(Point(view, 0d), Point(view, -1 * height)),
+          stroke = Some(Stroke(2d)),
+          strokeColor = color1(world)
+        )
       })
     )
 

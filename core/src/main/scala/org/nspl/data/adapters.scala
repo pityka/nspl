@@ -129,7 +129,8 @@ trait DataAdaptors extends DataTuples {
       val minmax = s.columnMinMax(i)
       val quantiles = s.quantilesOfColumn(i, Vector(0.25, 0.5, 0.75))
 
-      VectorRow(Vector(i.toDouble + .5, quantiles(1), quantiles(0), quantiles(2), minmax.min, minmax.max), "")
+      VectorRow(Vector(i.toDouble + .5, quantiles(1),
+        quantiles(0), quantiles(2), minmax.min, minmax.max), "")
     }
     list
   }
@@ -144,7 +145,8 @@ trait DataAdaptors extends DataTuples {
       val minmax = s.columnMinMax(i)
       val quantiles = s.quantilesOfColumn(i, Vector(0.25, 0.5, 0.75))
 
-      VectorRow(Vector(x(i), quantiles(1), quantiles(0), quantiles(2), minmax.min, minmax.max, x(i) + 1, colors(i)), labels(i))
+      VectorRow(Vector(x(i), quantiles(1), quantiles(0),
+        quantiles(2), minmax.min, minmax.max, x(i) + 1, colors(i)), labels(i))
     }
     list
   }
@@ -198,11 +200,13 @@ trait DataAdaptors extends DataTuples {
     val w1 = (max1 - min1) / n
     val w2 = (max2 - min2) / n
     val h1 =
-      if (bandwidth1 <= 0.0) 1.06 * math.sqrt(sampleVariance(data.map(_._1))) * math.pow(n.toDouble, -0.2)
+      if (bandwidth1 <= 0.0)
+        1.06 * math.sqrt(sampleVariance(data.map(_._1))) * math.pow(n.toDouble, -0.2)
       else bandwidth1
 
     val h2 =
-      if (bandwidth2 <= 0.0) 1.06 * math.sqrt(sampleVariance(data.map(_._2))) * math.pow(n.toDouble, -0.2)
+      if (bandwidth2 <= 0.0)
+        1.06 * math.sqrt(sampleVariance(data.map(_._2))) * math.pow(n.toDouble, -0.2)
       else bandwidth2
 
     linesegments(contour(

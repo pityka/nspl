@@ -2,13 +2,14 @@ package org.nspl
 
 trait Shapes {
 
+  /* Collection of various shapes. */
   val shapeList = Vector(
     Ellipse(-5, -5, 10, 10),
-    Rectangle(-5, -5, 10, 10), {
+    Rectangle(-5, -5, 10, 10),
 
-      SimplePath(List(Point(-100, -100), Point(-100, 100), Point((-100 + math.sqrt(3) * 100).toInt, 0)))
-        .transform(_ => AffineTransform.scale(0.08, 0.08))
-    },
+    SimplePath(
+      List(Point(-100, -100), Point(-100, 100), Point((-100 + math.sqrt(3) * 100).toInt, 0))
+    ).transform(_ => AffineTransform.scale(0.08, 0.08)),
     Shape.rectangle(-5, -5, 10, 10).transform(_ => AffineTransform.rotate(0.785398163)), {
       val t = 1.0f
       val l = 5.0f
