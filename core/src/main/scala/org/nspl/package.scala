@@ -11,6 +11,8 @@ package object nspl
     with SimplePlots
     with ImplicitConversions {
 
+  type AxisElem = Elems3[ShapeElem, ElemList[Elems2[ShapeElem, TextBox]], ElemList[ShapeElem]]
+
   implicit val fontSize = BaseFontSize(10d)
 
   implicit def rel2ft(v: RelFontSize)(implicit s: BaseFontSize): Double = v.v * s.v //* 1.5

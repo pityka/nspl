@@ -15,6 +15,8 @@ case class DataElem(
 
 trait Plots {
 
+  type XYPlotArea = Elems4[ElemList[ShapeElem], ElemList[ShapeElem], ElemList[DataElem], Elems2[AxisElem, AxisElem]]
+
   def xyplotarea(
     data: Seq[(DataSource, List[DataRenderer])],
     xAxisSetting: AxisSettings = AxisSettings(LinearAxisFactory),
@@ -27,7 +29,7 @@ trait Plots {
     yCol: Int = 1,
     xgrid: Boolean = true,
     ygrid: Boolean = true
-  ) = {
+  ): XYPlotArea = {
 
     val xMinMax =
       data.map(_._1.columnMinMax(xCol))
@@ -137,6 +139,8 @@ trait Plots {
 
   }
 
+  type Figure[T <: Renderable[T]] = Elems2[TextBox, Elems2[Elems2[TextBox, T], TextBox]]
+
   /* Decorates with main, xlab and ylab labels. */
   def figure[T <: Renderable[T]](
     plot: T,
@@ -151,7 +155,7 @@ trait Plots {
     ylabFontSize: RelFontSize = 1.0 fts,
     ylabDistance: RelFontSize = 1.0 fts,
     ylabAlignment: Alignment = Center
-  ) = {
+  ): Figure[T] = {
     val renderedPlot = plot
     val mainBox = TextBox(main, fontSize = mainFontSize, width = renderedPlot.bounds.w)
     val xlabBox = TextBox(xlab, fontSize = xlabFontSize, width = renderedPlot.bounds.w)
@@ -173,11 +177,13 @@ trait Plots {
   case class PointLegend(shape: Shape, color: Color) extends LegendElem
   case class LineLegend(stroke: Stroke, color: Color) extends LegendElem
 
+  type Legend = ElemList[Elems2[ShapeElem, TextBox]]
+
   def legend(
     entries: List[(String, LegendElem)],
     fontSize: RelFontSize = 1.0 fts,
     width: RelFontSize = 30 fts
-  ) = {
+  ): Legend = {
     sequence(entries.map {
       case (text, elem) =>
         val elem1 = elem match {
@@ -200,6 +206,8 @@ trait Plots {
     }, VerticalStack(Left))
   }
 
+  type HeatmapLegend = Elems2[Elems3[ShapeElem, ElemList[Elems2[ShapeElem, TextBox]], ElemList[ShapeElem]], ElemList[ShapeElem]]
+
   def heatmapLegend(
     min: Double,
     max: Double,
@@ -207,7 +215,7 @@ trait Plots {
     fontSize: RelFontSize = 1.0 fts,
     width: RelFontSize = 10 fts,
     height: RelFontSize = 1 fts
-  ) = {
+  ): HeatmapLegend = {
 
     val color1 = color.withRange(min, max)
 

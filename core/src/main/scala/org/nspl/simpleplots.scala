@@ -1,6 +1,6 @@
 package org.nspl
 
-import org.nspl.data._
+import data._
 
 sealed trait LegendConfig
 case object NotInLegend extends LegendConfig
@@ -8,6 +8,9 @@ case class InLegend(text: String) extends LegendConfig
 
 /* Factory methods for common plots. */
 trait SimplePlots {
+
+  type XYPlot = Elems2[Figure[XYPlotArea], Legend]
+
   def xyplot(data: (DataSource, List[DataRenderer], LegendConfig)*)(
     xlog: Boolean = false,
     ylog: Boolean = false,
@@ -30,7 +33,7 @@ trait SimplePlots {
     legendWidth: RelFontSize = 30 fts,
     xgrid: Boolean = true,
     ygrid: Boolean = true
-  ) = {
+  ): XYPlot = {
     val xFac = if (xlog) Log10AxisFactory else LinearAxisFactory
     val yFac = if (ylog) Log10AxisFactory else LinearAxisFactory
 
@@ -95,6 +98,8 @@ trait SimplePlots {
     )
   }
 
+  type BoxPlot = Figure[XYPlotArea]
+
   def boxplot(
     data: DataSourceWithQuantiles,
     main: String = "",
@@ -102,7 +107,7 @@ trait SimplePlots {
     ylab: String = "",
     xnames: Seq[String] = Nil,
     fontSize: RelFontSize = 1 fts
-  ) = {
+  ): BoxPlot = {
 
     val bxdata = boxplotData(data)
 
@@ -145,7 +150,7 @@ trait SimplePlots {
     xnames: Seq[String] = Nil,
     fontSize: RelFontSize = 1 fts,
     bins: Int = 10
-  ) = {
+  ): XYPlot = {
 
     xyplot(
       boxplotData(
@@ -175,7 +180,7 @@ trait SimplePlots {
     xlab: String = "",
     ylab: String = "",
     fontSize: RelFontSize = 1 fts
-  ) = {
+  ): XYPlot = {
 
     val contours = data.contour(
       xlim._1,
@@ -196,6 +201,8 @@ trait SimplePlots {
       )
   }
 
+  type RasterPlot = Elems2[Figure[XYPlotArea], HeatmapLegend]
+
   def rasterplot(
     data: DataSource,
     main: String = "",
@@ -210,7 +217,7 @@ trait SimplePlots {
     xCol: Int = 0,
     yCol: Int = 1,
     zCol: Int = 2
-  ) = {
+  ): RasterPlot = {
     val minmaxx = data.columnMinMax(xCol)
     val minmaxy = data.columnMinMax(yCol)
     val minmaxz = data.columnMinMax(zCol)

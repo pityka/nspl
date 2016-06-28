@@ -56,7 +56,7 @@ case class AxisSettings(
     axis: Axis,
     disableTicksAt: List[Double] = Nil,
     labelTransformation: Bounds => AffineTransform = _ => AffineTransform.identity
-  ) = {
+  ): (List[Double], AxisElem) = {
 
     import axis._
 
