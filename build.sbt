@@ -69,6 +69,6 @@ lazy val saddle = (project in file("saddle")).settings(commonSettings).
       "org.scalatest" %% "scalatest" % "2.1.5" % "test"
 			)
 	).dependsOn(core,awt,scalatagsJvm)
-	.aggregate(core,awt,coreJS,canvas,scalatagsJs)
+	.aggregate(core,awt,coreJS,canvas,scalatagsJs,scalatagsJvm)
 
 onLoad in Global := (Command.process("project saddle", _: State)) compose (onLoad in Global).value
