@@ -32,7 +32,9 @@ trait SimplePlots {
     legendFontSize: RelFontSize = 1 fts,
     legendWidth: RelFontSize = 30 fts,
     xgrid: Boolean = true,
-    ygrid: Boolean = true
+    ygrid: Boolean = true,
+    xWidth: RelFontSize = 20 fts,
+    yHeight: RelFontSize = 20 fts
   ): XYPlot = {
     val xFac = if (xlog) Log10AxisFactory else LinearAxisFactory
     val yFac = if (ylog) Log10AxisFactory else LinearAxisFactory
@@ -70,14 +72,16 @@ trait SimplePlots {
             xFac,
             customTicks = xnames,
             fontSize = xLabFontSize,
-            numTicks = xNumTicks
+            numTicks = xNumTicks,
+            width = xWidth
           ),
           AxisSettings(
             yFac,
             customTicks = ynames,
             fontSize = yLabFontSize,
             numTicks = yNumTicks,
-            tickLabelDistance = 0.0 fts
+            tickLabelDistance = 0.0 fts,
+            width = yHeight
           ),
           None,
           xlim = xlim,
@@ -106,7 +110,11 @@ trait SimplePlots {
     xlab: String = "",
     ylab: String = "",
     xnames: Seq[String] = Nil,
-    fontSize: RelFontSize = 1 fts
+    fontSize: RelFontSize = 1 fts,
+    xgrid: Boolean = true,
+    ygrid: Boolean = true,
+    xWidth: RelFontSize = 20 fts,
+    yHeight: RelFontSize = 20 fts
   ): BoxPlot = {
 
     val bxdata = boxplotData(data)
@@ -121,16 +129,20 @@ trait SimplePlots {
           LinearAxisFactory,
           customTicks = xnames.zipWithIndex.map(x => x._2.toDouble + 1 -> x._1),
           numTicks = 0,
-          fontSize = fontSize
+          fontSize = fontSize,
+          width = xWidth
         ),
         AxisSettings(
           LinearAxisFactory,
           fontSize = fontSize,
-          tickLabelDistance = 0.0 fts
+          tickLabelDistance = 0.0 fts,
+          width = yHeight
         ),
         None,
         xlim = Some(0d -> (bxdata.iterator.size + 1)),
-        ylim = Some(min -> max)
+        ylim = Some(min -> max),
+        xgrid = xgrid,
+        ygrid = ygrid
       ),
       main = main,
       xlab = xlab,
@@ -149,7 +161,11 @@ trait SimplePlots {
     ylab: String = "",
     xnames: Seq[String] = Nil,
     fontSize: RelFontSize = 1 fts,
-    bins: Int = 10
+    bins: Int = 10,
+    xgrid: Boolean = true,
+    ygrid: Boolean = true,
+    xWidth: RelFontSize = 20 fts,
+    yHeight: RelFontSize = 20 fts
   ): XYPlot = {
 
     xyplot(
@@ -166,7 +182,11 @@ trait SimplePlots {
         ylim = Some(dim1.min -> dim1.max),
         xLabFontSize = fontSize,
         yLabFontSize = fontSize,
-        mainFontSize = fontSize
+        mainFontSize = fontSize,
+        xgrid = xgrid,
+        ygrid = ygrid,
+        xWidth = xWidth,
+        yHeight = yHeight
       )
   }
 
@@ -179,7 +199,11 @@ trait SimplePlots {
     main: String = "",
     xlab: String = "",
     ylab: String = "",
-    fontSize: RelFontSize = 1 fts
+    fontSize: RelFontSize = 1 fts,
+    xgrid: Boolean = true,
+    ygrid: Boolean = true,
+    xWidth: RelFontSize = 20 fts,
+    yHeight: RelFontSize = 20 fts
   ): XYPlot = {
 
     val contours = data.contour(
@@ -197,7 +221,11 @@ trait SimplePlots {
         main = main,
         xLabFontSize = fontSize,
         yLabFontSize = fontSize,
-        mainFontSize = fontSize
+        mainFontSize = fontSize,
+        xgrid = xgrid,
+        ygrid = ygrid,
+        xWidth = xWidth,
+        yHeight = yHeight
       )
   }
 
@@ -216,7 +244,9 @@ trait SimplePlots {
     ynames: Seq[(Double, String)] = Seq(),
     xCol: Int = 0,
     yCol: Int = 1,
-    zCol: Int = 2
+    zCol: Int = 2,
+    xWidth: RelFontSize = 20 fts,
+    yHeight: RelFontSize = 20 fts
   ): RasterPlot = {
     val minmaxx = data.columnMinMax(xCol)
     val minmaxy = data.columnMinMax(yCol)
@@ -244,7 +274,8 @@ trait SimplePlots {
             numTicks = (if (xnames.isEmpty) (xmax - xmin).toInt else 0),
             numMinorTicksFactor = 0,
             tickLength = 0 fts,
-            labelRotation = -.5 * math.Pi
+            labelRotation = -.5 * math.Pi,
+            width = xWidth
           ),
           AxisSettings(
             LinearAxisFactory,
@@ -253,7 +284,8 @@ trait SimplePlots {
             numTicks = (if (ynames.isEmpty) (ymax - ymin).toInt else 0),
             numMinorTicksFactor = 0,
             tickLabelDistance = 0.0 fts,
-            tickLength = 0 fts
+            tickLength = 0 fts,
+            width = yHeight
           ),
           None,
           xlim = Some(xmin -> (xmax + 1)),

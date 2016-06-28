@@ -125,7 +125,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
         show(gallery)
         println(pngToFile(gallery))
         println(pdfToFile(gallery))
-        println(writeToFile(gallery, 1000, "image/svg"))
+        println(renderToFile(gallery, 1000, "image/svg"))
       }
       {
         import scalatagrenderer._

@@ -17,7 +17,8 @@ trait JavaAWTUtil {
     case Line(x1, y1, x2, y2) => new java.awt.geom.Line2D.Double(x1, y1, x2, y2)
     case SimplePath(points) => {
       val path = new java.awt.geom.GeneralPath()
-      points.foreach { p =>
+      path.moveTo(points.head.x, points.head.y)
+      points.drop(1).foreach { p =>
         path.lineTo(p.x, p.y)
       }
       path.closePath
