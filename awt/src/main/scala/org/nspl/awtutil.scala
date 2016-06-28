@@ -198,7 +198,7 @@ trait JavaAWTUtil {
     bs.toByteArray
   }
 
-  def writeToFile[K <: Renderable[K]](
+  def renderToFile[K <: Renderable[K]](
     elem: K,
     width: Int = 1000,
     mimeType: String = "image/png"
@@ -216,7 +216,7 @@ trait JavaAWTUtil {
     f
   }
 
-  def writeToFile[K <: Renderable[K]](
+  def renderToFile[K <: Renderable[K]](
     f: File,
     elem: K,
     width: Int,
@@ -242,7 +242,7 @@ trait JavaAWTUtil {
     implicit
     er: Renderer[K, JavaRC]
   ) = {
-    writeToFile(elem, width, "application/pdf")
+    renderToFile(elem, width, "application/pdf")
     f
   }
 
@@ -254,7 +254,7 @@ trait JavaAWTUtil {
     er: Renderer[K, JavaRC]
   ) = {
     val f = java.io.File.createTempFile("nspl", ".pdf")
-    writeToFile(f, elem, width, "application/pdf")
+    renderToFile(f, elem, width, "application/pdf")
     f
   }
 
@@ -266,7 +266,7 @@ trait JavaAWTUtil {
     implicit
     er: Renderer[K, JavaRC]
   ) = {
-    writeToFile(f, elem, width, "image/png")
+    renderToFile(f, elem, width, "image/png")
     f
   }
 
@@ -277,7 +277,7 @@ trait JavaAWTUtil {
     implicit
     er: Renderer[K, JavaRC]
   ) = {
-    writeToFile(elem, width, "image/png")
+    renderToFile(elem, width, "image/png")
   }
 
 }

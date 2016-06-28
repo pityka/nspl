@@ -127,7 +127,7 @@ case class AxisSettings(
         .map(w => math.max(math.min(w, axis.max), axis.min))
         .distinct
 
-    val minorTicks = if (numTicks == 0) Nil
+    val minorTicks = if (numTicks == 0 || numMinorTicksFactor <= 0) Nil
     else
       ((0 to ((axis.max - baseTick) / (tickSpace / numMinorTicksFactor)).toInt map (i =>
         baseTick + i * tickSpace / numMinorTicksFactor)) ++

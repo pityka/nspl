@@ -25,7 +25,11 @@ trait SimplePlots {
     mainFontSize: RelFontSize = 1 fts,
     xNumTicks: Int = 4,
     yNumTicks: Int = 4,
-    axisMargin: Double = 0.05
+    axisMargin: Double = 0.05,
+    legendFontSize: RelFontSize = 1 fts,
+    legendWidth: RelFontSize = 30 fts,
+    xgrid: Boolean = true,
+    ygrid: Boolean = true
   ) = {
     val xFac = if (xlog) Log10AxisFactory else LinearAxisFactory
     val yFac = if (ylog) Log10AxisFactory else LinearAxisFactory
@@ -39,18 +43,20 @@ trait SimplePlots {
 
     val legend1 =
       legend(
-        (
-        (
-          (data map {
-            case (ds, render, conf) =>
-              conf match {
-                case NotInLegend => None
-                case InLegend(name) => Some(name -> render.map(_.asLegend).find(_.isDefined).flatten)
-              }
-          }).filter(x => x.isDefined && x.get._2.isDefined)
-          .map(_.get)
-        ).map(x => x._1 -> x._2.get) ++ extraLegend
-      ).toList
+        entries = (
+          (
+            (data map {
+              case (ds, render, conf) =>
+                conf match {
+                  case NotInLegend => None
+                  case InLegend(name) => Some(name -> render.map(_.asLegend).find(_.isDefined).flatten)
+                }
+            }).filter(x => x.isDefined && x.get._2.isDefined)
+            .map(_.get)
+          ).map(x => x._1 -> x._2.get) ++ extraLegend
+        ).toList,
+        fontSize = legendFontSize,
+        width = legendWidth
       )
 
     group(
@@ -73,7 +79,9 @@ trait SimplePlots {
           None,
           xlim = xlim,
           ylim = ylim,
-          axisMargin = axisMargin
+          axisMargin = axisMargin,
+          xgrid = xgrid,
+          ygrid = ygrid
         ),
         main = main,
         xlab = xlab,
@@ -227,6 +235,7 @@ trait SimplePlots {
             customTicks = xnames,
             fontSize = xFontSize,
             numTicks = (if (xnames.isEmpty) (xmax - xmin).toInt else 0),
+            numMinorTicksFactor = 0,
             tickLength = 0 fts,
             labelRotation = -.5 * math.Pi
           ),
@@ -235,6 +244,7 @@ trait SimplePlots {
             customTicks = ynames,
             fontSize = yFontSize,
             numTicks = (if (ynames.isEmpty) (ymax - ymin).toInt else 0),
+            numMinorTicksFactor = 0,
             tickLabelDistance = 0.0 fts,
             tickLength = 0 fts
           ),

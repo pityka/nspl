@@ -150,8 +150,7 @@ trait Plots {
     ylab: String = "",
     ylabFontSize: RelFontSize = 1.0 fts,
     ylabDistance: RelFontSize = 1.0 fts,
-    ylabAlignment: Alignment = Center,
-    entries: List[(String, LegendElem)] = Nil
+    ylabAlignment: Alignment = Center
   ) = {
     val renderedPlot = plot
     val mainBox = TextBox(main, fontSize = mainFontSize, width = renderedPlot.bounds.w)
@@ -177,7 +176,7 @@ trait Plots {
   def legend(
     entries: List[(String, LegendElem)],
     fontSize: RelFontSize = 1.0 fts,
-    width: RelFontSize = 10 fts
+    width: RelFontSize = 30 fts
   ) = {
     sequence(entries.map {
       case (text, elem) =>
