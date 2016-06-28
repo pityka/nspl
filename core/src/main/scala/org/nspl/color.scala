@@ -9,6 +9,7 @@ case class Color(r: Int, g: Int, b: Int, a: Int) extends Colormap {
   def withRange(min: Double, max: Double) = this
 }
 object Color {
+  def apply(r: Int, g: Int, b: Int): Color = Color(r, g, b, 255)
   val black = Color(0, 0, 0, 255)
   val white = Color(255, 255, 255, 255)
   val transparent = Color(0, 0, 0, 0)
@@ -20,6 +21,11 @@ object Color {
   val gray3 = Color(150, 150, 150, 255)
   val gray4 = Color(200, 200, 200, 255)
   val gray5 = Color(220, 220, 220, 255)
+  val BLACK = black
+  val WHITE = white
+  val RED = red
+  val GREEN = green
+  val BLUE = blue
 }
 
 case class HeatMapColors(min: Double = 0.0, max: Double = 1.0) extends Colormap {
