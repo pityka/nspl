@@ -246,7 +246,10 @@ trait SimplePlots {
     yCol: Int = 1,
     zCol: Int = 2,
     xWidth: RelFontSize = 20 fts,
-    yHeight: RelFontSize = 20 fts
+    yHeight: RelFontSize = 20 fts,
+    valueText: Boolean = false,
+    valueColor: Color = Color.black,
+    valueFontSize: RelFontSize = 0.4 fts
   ): RasterPlot = {
     val minmaxx = data.columnMinMax(xCol)
     val minmaxy = data.columnMinMax(yCol)
@@ -265,13 +268,17 @@ trait SimplePlots {
             pointSizeIsInDataSpaceUnits = true,
             color = colormap.withRange(zmin, zmax),
             shapes = Vector(Shape.rectangle(0.0, 0.0, 1.0, 1.0)),
-            size = 1d
+            size = 1d,
+            valueText = valueText,
+            labelColor = valueColor,
+            labelFontSize = valueFontSize
           ))),
           AxisSettings(
             LinearAxisFactory,
             customTicks = xnames,
             fontSize = xFontSize,
             numTicks = (if (xnames.isEmpty) (xmax - xmin).toInt else 0),
+            tickSpace = (if (!xnames.isEmpty) None else Some(1d)),
             numMinorTicksFactor = 0,
             tickLength = 0 fts,
             labelRotation = -.5 * math.Pi,
@@ -282,6 +289,7 @@ trait SimplePlots {
             customTicks = ynames,
             fontSize = yFontSize,
             numTicks = (if (ynames.isEmpty) (ymax - ymin).toInt else 0),
+            tickSpace = (if (!ynames.isEmpty) None else Some(1d)),
             numMinorTicksFactor = 0,
             tickLabelDistance = 0.0 fts,
             tickLength = 0 fts,

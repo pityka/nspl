@@ -28,7 +28,7 @@ case class DataMatrix(rows: Array[Double], numCols: Int, numRows: Int) extends D
 
         def label = ""
 
-        override def toString = "(" + j + ", " + i + ", " + rows(K) + ")"
+        override def toString = rows(K).toString
       }
 
       k += 1;

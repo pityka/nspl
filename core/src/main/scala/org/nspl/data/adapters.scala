@@ -43,6 +43,26 @@ trait DataAdaptors extends DataTuples {
       }
     }
 
+  def rasterFromSeq(
+    s1: Seq[Double],
+    numCols: Int,
+    numRows: Int,
+    minmax: MinMax
+  ): DataSource =
+    new DataSource {
+
+      def iterator = s1.zipWithIndex.iterator.map {
+        case (v, i) =>
+          productsToRow(((i % numCols).toDouble, (i / numCols).toDouble, v))
+      }
+      def dimension = 3
+      def columnMinMax(i: Int) = i match {
+        case 0 => MinMaxImpl(0, numCols - 1d)
+        case 1 => MinMaxImpl(0, numRows - 1d)
+        case 2 => minmax
+      }
+    }
+
   def dataSource[T](s1: Iterator[T], minmax: IndexedSeq[MinMax])(
     implicit
     f: T => Row

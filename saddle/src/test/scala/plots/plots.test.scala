@@ -118,10 +118,15 @@ class SaddlePlotSpec extends FunSpec with Matchers {
           )
         )
 
-      val gallery = group(empty2, xyplot(Seq(0d -> 0d, 1d -> 1d, 2d -> 2d))(), r1, hist1, contour, density1, fig0, fig1, fig2, fig3, fig4, TableLayout(3))
+      val rs = 1 to 100 map (i => scala.util.Random.nextGaussian)
+
+      val p6 = rasterplot(rasterFromSeq(rs, 10, 10, MinMaxImpl(0.0, 1.0)), xFontSize = 0.5 fts, yFontSize = 0.5 fts, valueText = true, valueColor = Color.white, valueFontSize = 0.6 fts)
+
+      val gallery = group(p6, empty2, xyplot(Seq(0d -> 0d, 1d -> 1d, 2d -> 2d))(), r1, hist1, contour, density1, fig0, fig1, fig2, fig3, fig4, TableLayout(3))
 
       {
         import awtrenderer._
+
         show(gallery)
         println(pngToFile(gallery))
         println(pdfToFile(gallery))

@@ -14,7 +14,15 @@ object saddle {
     xLabFontSize: RelFontSize = 1 fts,
     yLabFontSize: RelFontSize = 1 fts,
     mainFontSize: RelFontSize = 1 fts,
-    colormap: Colormap = HeatMapColors(0, 1)
+    colormap: Colormap = HeatMapColors(0, 1),
+    xCol: Int = 0,
+    yCol: Int = 1,
+    zCol: Int = 2,
+    xWidth: RelFontSize = 20 fts,
+    yHeight: RelFontSize = 20 fts,
+    valueText: Boolean = false,
+    valueColor: Color = Color.black,
+    valueFontSize: RelFontSize = 0.4 fts
   ) =
     rasterplot(
       asRaster(dataFrame.toMat),
@@ -26,7 +34,12 @@ object saddle {
       mainFontSize,
       colormap,
       dataFrame.colIx.toSeq.map(_.toString).zipWithIndex.map(x => x._2.toDouble + 0.5 -> x._1),
-      dataFrame.rowIx.toSeq.map(_.toString).zipWithIndex.map(x => x._2.toDouble + 0.5 -> x._1)
+      dataFrame.rowIx.toSeq.map(_.toString).zipWithIndex.map(x => x._2.toDouble + 0.5 -> x._1),
+      xWidth = xWidth,
+      yHeight = yHeight,
+      valueText = valueText,
+      valueColor = valueColor,
+      valueFontSize = valueFontSize
     )
 
   def asRaster(mat: Mat[Double]): DataMatrix =

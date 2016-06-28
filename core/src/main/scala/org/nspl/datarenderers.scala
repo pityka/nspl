@@ -23,6 +23,8 @@ trait Renderers {
     shapes: Vector[Shape] = shapeList,
     pointSizeIsInDataSpaceUnits: Boolean = false,
     valueText: Boolean = false,
+    labelText: Boolean = false,
+    labelFontSize: RelFontSize = 0.4 fts,
     labelColor: Color = Color.black,
     errorBarStroke: Stroke = Stroke(1d)
   ) = new DataRenderer {
@@ -64,13 +66,14 @@ trait Renderers {
 
           if (valueText) {
             val tb = TextBox(
-              data.label,
-              color = labelColor
+              f"${data(colorCol)}%.2g",
+              color = labelColor,
+              fontSize = labelFontSize
             )
               .reflectYCenter
               .rotate(math.Pi)
               .translate(vX, vY)
-              .transform(_ => tx)
+              .transform(b => tx.concat(AffineTransform.translate(b.w, b.h)))
 
             rt.render(ctx, tb)
           }
