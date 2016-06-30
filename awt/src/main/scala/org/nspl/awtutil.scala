@@ -94,7 +94,7 @@ trait JavaAWTUtil {
   def writeVector[K <: Renderable[K]](
     elem: K,
     os: java.io.OutputStream,
-    width: Int = 1000,
+    width: Int = 500,
     format: String = "pdf"
   )(
     implicit
@@ -249,7 +249,7 @@ trait JavaAWTUtil {
 
   def pdfToFile[K <: Renderable[K]](
     elem: K,
-    width: Int = 1000
+    width: Int = 500
   )(
     implicit
     er: Renderer[K, JavaRC]

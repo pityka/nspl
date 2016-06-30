@@ -32,7 +32,7 @@ object awtrenderer extends JavaAWTUtil {
     def getTextLayouts(
       text: String,
       font: Font,
-      breakWidth: Double,
+      breakWidth: Option[Double],
       graphics: Graphics2D,
       x: Double,
       y: Double
@@ -50,8 +50,8 @@ object awtrenderer extends JavaAWTUtil {
       new Iterator[java.awt.Shape] {
         def hasNext = lineMeasurer.getPosition() < paragraphEnd
         def next = {
-          val layout = lineMeasurer.nextLayout(breakWidth.toFloat);
-          val drawPosX = (if (layout.isLeftToRight()) 0 else breakWidth - layout.getAdvance) + x
+          val layout = lineMeasurer.nextLayout(breakWidth.map(_.toFloat).getOrElse(Float.MaxValue));
+          val drawPosX = x
           drawPosY += layout.getAscent();
           val shape = layout.getOutline(java.awt.geom.AffineTransform.getTranslateInstance(drawPosX, drawPosY))
           drawPosY += layout.getDescent() + layout.getLeading();

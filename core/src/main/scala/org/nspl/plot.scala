@@ -15,7 +15,7 @@ case class DataElem(
 
 trait Plots {
 
-  type XYPlotArea = Elems4[ElemList[ShapeElem], ElemList[ShapeElem], ElemList[DataElem], Elems2[AxisElem, AxisElem]]
+  type XYPlotArea = org.nspl.Elems5[org.nspl.ElemList[org.nspl.ShapeElem], org.nspl.ElemList[org.nspl.ShapeElem], org.nspl.ElemList[org.nspl.DataElem], org.nspl.Elems2[org.nspl.AxisElem, org.nspl.AxisElem], org.nspl.ElemList[org.nspl.ShapeElem]]
 
   def xyplotarea(
     data: Seq[(DataSource, List[DataRenderer])],
@@ -28,7 +28,8 @@ trait Plots {
     xCol: Int = 0,
     yCol: Int = 1,
     xgrid: Boolean = true,
-    ygrid: Boolean = true
+    ygrid: Boolean = true,
+    frame: Boolean = true
   ): XYPlotArea = {
 
     val xMinMax =
@@ -91,10 +92,7 @@ trait Plots {
     val (yMajorTicks, yAxisElem) = yAxisSetting.renderable(
       yAxis,
       noYTick,
-      labelTransformation = (b: Bounds) =>
-      AffineTransform.reflectXCenter(b)
-        .concat(AffineTransform.rotateCenter(-0.5 * math.Pi)(b))
-        .concat(AffineTransform.translate(b.w * -0.5, 0))
+      horizontal = false
     )
 
     val originX = xAxis.worldToView(originWX1)
@@ -103,9 +101,7 @@ trait Plots {
     val axes = group(
       translate(xAxisElem, 0, -1 * originY),
       translate(
-        reflectY(rotate(
-          yAxisElem, 0.5 * math.Pi
-        )), originX, 0
+        yAxisElem, originX, -1 * yMaxV
       ),
       FreeLayout
     )
@@ -123,6 +119,25 @@ trait Plots {
         strokeColor = Color.gray5
       )
     })
+
+    val frameStroke = if (frame) Some(Stroke(2d)) else None
+    val frameElem = sequence(
+      List(
+        ShapeElem(
+          Shape.line(Point(xMinV, -1 * yMaxV), Point(xMaxV, -1 * yMaxV)), stroke = frameStroke
+        ),
+        ShapeElem(
+          Shape.line(Point(xMaxV, -1 * yMaxV), Point(xMaxV, yMinV)), stroke = frameStroke
+        ),
+        ShapeElem(
+          Shape.line(Point(xMinV, yMinV), Point(xMaxV, yMinV)), stroke = frameStroke
+        ),
+        ShapeElem(
+          Shape.line(Point(xMinV, -1 * yMaxV), Point(xMinV, yMinV)), stroke = frameStroke
+        )
+      )
+    )
+
     val ygridElem = sequence(yMajorTicks map { w =>
       val v = yAxis.worldToView(w)
       ShapeElem(
@@ -135,7 +150,7 @@ trait Plots {
       )
     })
 
-    group(xgridElem, ygridElem, dataelem, axes, FreeLayout)
+    group(xgridElem, ygridElem, dataelem, axes, frameElem, FreeLayout)
 
   }
 
@@ -157,9 +172,9 @@ trait Plots {
     ylabAlignment: Alignment = Center
   ): Figure[T] = {
     val renderedPlot = plot
-    val mainBox = TextBox(main, fontSize = mainFontSize, width = renderedPlot.bounds.w)
-    val xlabBox = TextBox(xlab, fontSize = xlabFontSize, width = renderedPlot.bounds.w)
-    val ylabBox = TextBox(ylab, fontSize = ylabFontSize, width = renderedPlot.bounds.h)
+    val mainBox = TextBox(main, fontSize = mainFontSize, width = Some(renderedPlot.bounds.w))
+    val xlabBox = TextBox(xlab, fontSize = xlabFontSize, width = Some(renderedPlot.bounds.w))
+    val ylabBox = TextBox(ylab, fontSize = ylabFontSize, width = Some(renderedPlot.bounds.h))
 
     group(
       rotate(ylabBox, 0.5 * math.Pi),
@@ -200,13 +215,13 @@ trait Plots {
         }
         group(
           elem1,
-          TextBox(text, fontSize = fontSize, width = width),
+          TextBox(text, fontSize = fontSize, width = Some(width)),
           HorizontalStack(Center, 1 fts)
         )
     }, VerticalStack(Left))
   }
 
-  type HeatmapLegend = Elems2[Elems3[ShapeElem, ElemList[Elems2[ShapeElem, TextBox]], ElemList[ShapeElem]], ElemList[ShapeElem]]
+  type HeatmapLegend = Elems2[ElemList[ShapeElem], Elems3[ShapeElem, ElemList[Elems2[ShapeElem, TextBox]], ElemList[ShapeElem]]]
 
   def heatmapLegend(
     min: Double,
@@ -223,15 +238,15 @@ trait Plots {
       LinearAxisFactory,
       fontSize = fontSize,
       width = width,
-      numTicks = 2
+      numTicks = 2,
+      tickAlignment = 1
     )
     val axis = axisSettings.axisFactory.make(min, max, width)
 
     val (majorTicks, axisElem) =
       axisSettings.renderable(
         axis,
-        labelTransformation = (b: Bounds) => AffineTransform.reflectXCenter(b)
-        .concat(AffineTransform.rotateCenter(-0.5 * math.Pi)(b))
+        horizontal = false
       )
 
     val n = 500
@@ -239,16 +254,16 @@ trait Plots {
     val ticks = sequence(
       ((0 until n toList) map { i =>
         val world = axis.min + i * space
-        val view = axis.worldToView(world)
+        val view = axis.worldToView(min) - axis.worldToView(world)
         ShapeElem(
-          Shape.line(Point(view, 0d), Point(view, -1 * height)),
+          Shape.line(Point(0d, view), Point(height, view)),
           stroke = Some(Stroke(2d)),
           strokeColor = color1(world)
         )
       })
     )
 
-    reflectY(rotate(group(axisElem, ticks, FreeLayout), 0.5 * math.Pi))
+    group(ticks, translate(axisElem, 0, -1 * axis.worldToView(max)), FreeLayout)
 
   }
 

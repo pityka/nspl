@@ -177,7 +177,7 @@ object canvasrenderer {
 
   implicit val textRenderer = new CER[TextBox] {
 
-    def wrapText(ctx: CRC, text: String, x: Double, y: Double, maxWidth: Double, lineHeight: Double) = {
+    def wrapText(ctx: CRC, text: String, x: Double, y: Double, maxWidth: Option[Double], lineHeight: Double) = {
       val words = text.split(" ");
       var line = "";
       var y1 = y
@@ -187,7 +187,7 @@ object canvasrenderer {
           val testLine = line + word + " ";
           val metrics = ctx.measureText(testLine)
           val testWidth = metrics.width
-          if (testWidth > maxWidth && n > 0) {
+          if (maxWidth.isDefined && testWidth > maxWidth.get && n > 0) {
             ctx.fillText(line, x, y1 + lineHeight)
             line = word + " "
             y1 += lineHeight
@@ -195,7 +195,7 @@ object canvasrenderer {
             line = testLine
           }
       }
-      ctx.fillText(line, x, y1 + lineHeight, maxWidth)
+      ctx.fillText(line, x, y1 + lineHeight)
     }
 
     def render(ctx: CanvasRC, elem: TextBox): Unit = {

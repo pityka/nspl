@@ -141,7 +141,7 @@ object scalatagrenderer {
           case (word, n) =>
             val testLine = line + word + " ";
             val testWidth: Double = testLine.size * elem.fontSize * 0.6
-            if (testWidth > elem.width && n > 0) {
+            if (elem.width.isDefined && testWidth > elem.width.get && n > 0) {
 
               val svgElem = svgTags.text(
                 svgAttrs.x := elem.loc.x,

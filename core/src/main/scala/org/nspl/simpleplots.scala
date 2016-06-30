@@ -34,7 +34,8 @@ trait SimplePlots {
     xgrid: Boolean = true,
     ygrid: Boolean = true,
     xWidth: RelFontSize = 20 fts,
-    yHeight: RelFontSize = 20 fts
+    yHeight: RelFontSize = 20 fts,
+    frame: Boolean = true
   ): XYPlot = {
     val xFac = if (xlog) Log10AxisFactory else LinearAxisFactory
     val yFac = if (ylog) Log10AxisFactory else LinearAxisFactory
@@ -80,7 +81,6 @@ trait SimplePlots {
             customTicks = ynames,
             fontSize = yLabFontSize,
             numTicks = yNumTicks,
-            tickLabelDistance = 0.0 fts,
             width = yHeight
           ),
           None,
@@ -88,7 +88,8 @@ trait SimplePlots {
           ylim = ylim,
           axisMargin = axisMargin,
           xgrid = xgrid,
-          ygrid = ygrid
+          ygrid = ygrid,
+          frame = frame
         ),
         main = main,
         xlab = xlab,
@@ -98,7 +99,7 @@ trait SimplePlots {
         mainFontSize = mainFontSize
       ),
       legend1,
-      HorizontalStack(Center)
+      HorizontalStack(Center, 5d)
     )
   }
 
@@ -114,7 +115,9 @@ trait SimplePlots {
     xgrid: Boolean = true,
     ygrid: Boolean = true,
     xWidth: RelFontSize = 20 fts,
-    yHeight: RelFontSize = 20 fts
+    yHeight: RelFontSize = 20 fts,
+    boxColor: Colormap = Color.white,
+    frame: Boolean = true
   ): BoxPlot = {
 
     val bxdata = boxplotData(data)
@@ -124,7 +127,7 @@ trait SimplePlots {
 
     figure(
       xyplotarea(
-        List(bxdata -> List(boxwhisker())),
+        List(bxdata -> List(boxwhisker(fill = boxColor))),
         AxisSettings(
           LinearAxisFactory,
           customTicks = xnames.zipWithIndex.map(x => x._2.toDouble + 1 -> x._1),
@@ -135,14 +138,14 @@ trait SimplePlots {
         AxisSettings(
           LinearAxisFactory,
           fontSize = fontSize,
-          tickLabelDistance = 0.0 fts,
           width = yHeight
         ),
         None,
         xlim = Some(0d -> (bxdata.iterator.size + 1)),
         ylim = Some(min -> max),
         xgrid = xgrid,
-        ygrid = ygrid
+        ygrid = ygrid,
+        frame = frame
       ),
       main = main,
       xlab = xlab,
@@ -162,10 +165,12 @@ trait SimplePlots {
     xnames: Seq[String] = Nil,
     fontSize: RelFontSize = 1 fts,
     bins: Int = 10,
-    xgrid: Boolean = true,
+    xgrid: Boolean = false,
     ygrid: Boolean = true,
     xWidth: RelFontSize = 20 fts,
-    yHeight: RelFontSize = 20 fts
+    yHeight: RelFontSize = 20 fts,
+    boxColor: Colormap = Color.white,
+    frame: Boolean = true
   ): XYPlot = {
 
     xyplot(
@@ -174,7 +179,7 @@ trait SimplePlots {
         dim2,
         1 to bins map (i => i / bins.toDouble),
         Vector.fill(bins)(0d)
-      ) -> boxwhisker()
+      ) -> boxwhisker(fill = boxColor)
     )(
         xlab = xlab,
         ylab = ylab,
@@ -186,7 +191,8 @@ trait SimplePlots {
         xgrid = xgrid,
         ygrid = ygrid,
         xWidth = xWidth,
-        yHeight = yHeight
+        yHeight = yHeight,
+        frame = frame
       )
   }
 
@@ -203,7 +209,8 @@ trait SimplePlots {
     xgrid: Boolean = true,
     ygrid: Boolean = true,
     xWidth: RelFontSize = 20 fts,
-    yHeight: RelFontSize = 20 fts
+    yHeight: RelFontSize = 20 fts,
+    frame: Boolean = true
   ): XYPlot = {
 
     val contours = data.contour(
@@ -225,7 +232,8 @@ trait SimplePlots {
         xgrid = xgrid,
         ygrid = ygrid,
         xWidth = xWidth,
-        yHeight = yHeight
+        yHeight = yHeight,
+        frame = frame
       )
   }
 
@@ -249,7 +257,10 @@ trait SimplePlots {
     yHeight: RelFontSize = 20 fts,
     valueText: Boolean = false,
     valueColor: Color = Color.black,
-    valueFontSize: RelFontSize = 0.4 fts
+    valueFontSize: RelFontSize = 0.4 fts,
+    tickLength: RelFontSize = 0.4 fts,
+    zlim: Option[(Double, Double)] = None,
+    frame: Boolean = true
   ): RasterPlot = {
     val minmaxx = data.columnMinMax(xCol)
     val minmaxy = data.columnMinMax(yCol)
@@ -258,8 +269,8 @@ trait SimplePlots {
     val xmax = minmaxx.max
     val ymin = minmaxy.min
     val ymax = minmaxy.max
-    val zmin = minmaxz.min
-    val zmax = minmaxz.max
+    val zmin = zlim.map(_._1).getOrElse(minmaxz.min)
+    val zmax = zlim.map(_._2).getOrElse(minmaxz.max)
 
     group(
       figure(
@@ -280,7 +291,7 @@ trait SimplePlots {
             numTicks = (if (xnames.isEmpty) (xmax - xmin).toInt else 0),
             tickSpace = (if (!xnames.isEmpty) None else Some(1d)),
             numMinorTicksFactor = 0,
-            tickLength = 0 fts,
+            tickLength = tickLength,
             labelRotation = -.5 * math.Pi,
             width = xWidth
           ),
@@ -291,14 +302,14 @@ trait SimplePlots {
             numTicks = (if (ynames.isEmpty) (ymax - ymin).toInt else 0),
             tickSpace = (if (!ynames.isEmpty) None else Some(1d)),
             numMinorTicksFactor = 0,
-            tickLabelDistance = 0.0 fts,
-            tickLength = 0 fts,
+            tickLength = tickLength,
             width = yHeight
           ),
           None,
           xlim = Some(xmin -> (xmax + 1)),
           ylim = Some(ymin -> (ymax + 1)),
-          axisMargin = 0.0
+          axisMargin = 0.0,
+          frame = frame
         ),
         main = main,
         xlab = xlab,
@@ -308,7 +319,7 @@ trait SimplePlots {
         mainFontSize = mainFontSize
       ),
       heatmapLegend(zmin, zmax, colormap),
-      HorizontalStack(Center)
+      HorizontalStack(Center, 5d)
     )
 
   }

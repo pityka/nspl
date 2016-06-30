@@ -22,7 +22,7 @@ case class ShapeElem(
 case class TextBox(
     text: String,
     loc: Point = Point(0d, 0d),
-    width: Double = 30d,
+    width: Option[Double] = None,
     fontSize: RelFontSize = 1 fts,
     color: Color = Color.black,
     tx: AffineTransform = AffineTransform.identity
@@ -30,12 +30,14 @@ case class TextBox(
   def bounds = {
     if (text.isEmpty) Bounds(0, 0, 0, 0)
     else {
-      val charWidth = fontSize * 0.8
-      val maxCharInLine = math.min((width / charWidth).toInt, text.size)
-      val lines = text.size / maxCharInLine
-      val finalLine = if (lines * maxCharInLine >= text.size) 0 else 1
-      val h = (lines + finalLine) * fontSize * 1.15
-      tx.transform(Bounds(loc.x, loc.y, maxCharInLine * charWidth, h))
+      val charWidth = fontSize * 0.6
+      width.map { width =>
+        val maxCharInLine = math.min((width / charWidth).toInt, text.size)
+        val lines = text.size / maxCharInLine
+        val finalLine = if (lines * maxCharInLine >= text.size) 0 else 1
+        val h = (lines + finalLine) * fontSize * 1.15
+        tx.transform(Bounds(loc.x, loc.y, maxCharInLine * charWidth, h))
+      }.getOrElse(tx.transform(Bounds(loc.x, loc.y, text.size * charWidth, fontSize * 1.15)))
     }
   }
   def transform(tx: Bounds => AffineTransform) = this.copy(tx = tx(bounds).concat(this.tx))

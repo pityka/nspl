@@ -57,7 +57,7 @@ case class AxisSettings(
   def renderable(
     axis: Axis,
     disableTicksAt: List[Double] = Nil,
-    labelTransformation: Bounds => AffineTransform = _ => AffineTransform.identity
+    horizontal: Boolean = true
   ): (List[Double], AxisElem) = {
 
     import axis._
@@ -81,36 +81,66 @@ case class AxisSettings(
 
     def makeTick(world: Double, text: String) = {
       val view = worldToView(world)
-      group(
-        ShapeElem(
-          Shape.line(Point(view, 0d), Point(view, tickAlignment * tickLength)),
-          stroke = Some(Stroke(2d))
-        ),
-        translate(
-          transform(
-            TextBox(text, Point(view, 0.0), fontSize = fontSize, width = fontSize.value * 4),
-            (b: Bounds) =>
-              AffineTransform.translate(b.w * (-0.5), 0)
-                .concat(labelTransformation(b)
-                  .concat(AffineTransform.rotateCenter(labelRotation)(b)))
+      if (horizontal)
+        group(
+          ShapeElem(
+            Shape.line(Point(view, 0d), Point(view, tickAlignment * tickLength)),
+            stroke = Some(Stroke(2d))
           ),
-          0,
-          tickLabelDistance
-        ),
-        FreeLayout
-      )
+          transform(
+            transform(
+              transform(
+                TextBox(text, Point(view, 0.0), fontSize = fontSize),
+                (b: Bounds) =>
+                  AffineTransform.rotate(labelRotation, b.x, b.centerY)
+              ),
+              (b: Bounds) => AffineTransform.translate(0, tickLabelDistance)
+            ),
+            (b: Bounds) => AffineTransform.translate(if (labelRotation == 0.0) b.w * (-0.5) else 0, 0)
+          ), FreeLayout
+        )
+      else
+        group(
+          ShapeElem(
+            Shape.line(Point(0d, axis.width - view), Point(-1 * tickAlignment * tickLength, axis.width - view)),
+            stroke = Some(Stroke(2d))
+          ),
+          transform(
+            transform(
+              transform(
+                TextBox(text, Point(0.0, axis.width - view), fontSize = fontSize),
+                (b: Bounds) =>
+                  AffineTransform.rotate(labelRotation, b.x + b.w, b.centerY)
+              ),
+              (b: Bounds) => AffineTransform.translate(-1 * tickLabelDistance - b.w, 0)
+            ),
+            (b: Bounds) => AffineTransform.translate(0, if (labelRotation == 0.0) b.h * (-0.5) else 0)
+          ),
+          FreeLayout
+        )
     }
 
     def makeMinorTick(world: Double) = {
       val view = worldToView(world)
-      ShapeElem(
-        Shape.line(Point(view, 0d), Point(view, tickLength * 0.5 * tickAlignment)),
-        stroke = Some(Stroke(1d))
-      )
+      if (horizontal)
+        ShapeElem(
+          Shape.line(Point(view, 0d), Point(view, tickLength * 0.5 * tickAlignment)),
+          stroke = Some(Stroke(1d))
+        )
+      else
+        ShapeElem(
+          Shape.line(Point(0d, axis.width - view), Point(-1 * tickLength * 0.5 * tickAlignment, axis.width - view)),
+          stroke = Some(Stroke(1d))
+        )
     }
 
-    val line = ShapeElem(
-      Shape.line(Point(0d, 0d), Point(axis.width, 0d)),
+    val line = if (horizontal)
+      ShapeElem(
+        Shape.line(Point(0d, 0d), Point(axis.width, 0d)),
+        stroke = Some(Stroke(2d))
+      )
+    else ShapeElem(
+      Shape.line(Point(0d, 0d), Point(0d, axis.width)),
       stroke = Some(Stroke(2d))
     )
 
