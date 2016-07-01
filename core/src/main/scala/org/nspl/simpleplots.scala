@@ -37,8 +37,8 @@ trait SimplePlots {
     yHeight: RelFontSize = 20 fts,
     frame: Boolean = true
   ): XYPlot = {
-    val xFac = if (xlog) Log10AxisFactory else LinearAxisFactory
-    val yFac = if (ylog) Log10AxisFactory else LinearAxisFactory
+    val xFac = LinearAxisFactory //if (xlog) Log10AxisFactory else LinearAxisFactory
+    val yFac = LinearAxisFactory //if (ylog) Log10AxisFactory else LinearAxisFactory
 
     val originX = if (xlog) 1.0 else 0.0
     val originY = if (ylog) 1.0 else 0.0
@@ -116,7 +116,7 @@ trait SimplePlots {
     ygrid: Boolean = true,
     xWidth: RelFontSize = 20 fts,
     yHeight: RelFontSize = 20 fts,
-    boxColor: Colormap = Color.white,
+    boxColor: Colormap = Color.gray4,
     frame: Boolean = true
   ): BoxPlot = {
 
@@ -169,7 +169,7 @@ trait SimplePlots {
     ygrid: Boolean = true,
     xWidth: RelFontSize = 20 fts,
     yHeight: RelFontSize = 20 fts,
-    boxColor: Colormap = Color.white,
+    boxColor: Colormap = Color.gray4,
     frame: Boolean = true
   ): XYPlot = {
 
@@ -183,6 +183,7 @@ trait SimplePlots {
     )(
         xlab = xlab,
         ylab = ylab,
+        main = main,
         xlim = Some(dim2.min -> dim2.max),
         ylim = Some(dim1.min -> dim1.max),
         xLabFontSize = fontSize,

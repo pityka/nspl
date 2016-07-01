@@ -16,7 +16,12 @@ case class ShapeElem(
   def transform(tx: Bounds => AffineTransform) =
     this.copy(shape = shape.transform(tx))
 
-  def bounds = shape.bounds
+  def bounds = {
+    val b = shape.bounds
+    stroke.map(stroke =>
+      Bounds(b.x - 0.5 * stroke.width, b.y - 0.5 * stroke.width, b.w + 0.5 * stroke.width, b.h + 0.5 * stroke.width)) getOrElse (b)
+  }
+
 }
 
 case class TextBox(

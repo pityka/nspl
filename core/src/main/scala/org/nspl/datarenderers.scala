@@ -60,7 +60,7 @@ trait Renderers {
           )
             .scale(factorX, factorY)
             .translate(vX, vY)
-            .transform(_ => tx)
+            .transform(b => tx.concat(AffineTransform.translate(0, -1 * b.h)))
 
           re.render(ctx, shape1)
 
@@ -70,10 +70,8 @@ trait Renderers {
               color = labelColor,
               fontSize = labelFontSize
             )
-              .reflectYCenter
-              .rotate(math.Pi)
               .translate(vX, vY)
-              .transform(b => tx.concat(AffineTransform.translate(b.w, b.h)))
+              .transform(b => tx.concat(AffineTransform.translate(0, -1 * b.h)))
 
             rt.render(ctx, tb)
           }
@@ -81,7 +79,7 @@ trait Renderers {
           if (data.dimension > errorTopCol) {
             val errorTop = data(errorTopCol)
             val shape1: ShapeElem = ShapeElem(
-              Shape.line(Point(vX, vY), Point(vX, yAxis.worldToView(wY + errorTop))),
+              Shape.line(Point(vX, vY), Point(vX, yAxis.worldToView(wY - errorTop))),
               stroke = Some(errorBarStroke)
             ).transform(_ => tx)
             re.render(ctx, shape1)
@@ -89,7 +87,7 @@ trait Renderers {
           if (data.dimension > errorBottomCol) {
             val errorTop = data(errorBottomCol)
             val shape1: ShapeElem = ShapeElem(
-              Shape.line(Point(vX, vY), Point(vX, yAxis.worldToView(wY - errorTop))),
+              Shape.line(Point(vX, vY), Point(vX, yAxis.worldToView(wY + errorTop))),
               stroke = Some(errorBarStroke)
             ).transform(_ => tx)
             re.render(ctx, shape1)
@@ -307,7 +305,7 @@ trait Renderers {
           val vHeight = math.abs(vY2 - vY)
 
           val shape1 = ShapeElem(
-            Shape.rectangle(vX - vWidth * 0.5, vY - vHeight, vWidth, vHeight),
+            Shape.rectangle(vX - vWidth * 0.5, vY, vWidth, vHeight),
             fill = color1,
             stroke = Some(stroke),
             strokeColor = strokeColor
@@ -399,7 +397,7 @@ trait Renderers {
         val vHeight = math.abs(vQ1 - vQ3)
 
         val shape1 = ShapeElem(
-          Shape.rectangle(vX - vWidth * 0.5, vQ1, vWidth, vHeight),
+          Shape.rectangle(vX - vWidth * 0.5, vQ3, vWidth, vHeight),
           fill = color1,
           stroke = Some(stroke),
           strokeColor = strokeColor

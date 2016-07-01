@@ -15,7 +15,7 @@ case class DataElem(
 
 trait Plots {
 
-  type XYPlotArea = org.nspl.Elems5[org.nspl.ElemList[org.nspl.ShapeElem], org.nspl.ElemList[org.nspl.ShapeElem], org.nspl.ElemList[org.nspl.DataElem], org.nspl.Elems2[org.nspl.AxisElem, org.nspl.AxisElem], org.nspl.ElemList[org.nspl.ShapeElem]]
+  type XYPlotArea = Elems5[ElemList[ShapeElem], ElemList[ShapeElem], ElemList[DataElem], Elems2[AxisElem, AxisElem], ShapeElem]
 
   def xyplotarea(
     data: Seq[(DataSource, List[DataRenderer])],
@@ -59,8 +59,8 @@ trait Plots {
       dataYMax + axisMargin * (dataYMax - dataYMin)
     }
 
-    val xAxis = xAxisSetting.axisFactory.make(xMin, xMax, xAxisSetting.width)
-    val yAxis = yAxisSetting.axisFactory.make(yMin, yMax, yAxisSetting.width)
+    val xAxis = xAxisSetting.axisFactory.make(xMin, xMax, xAxisSetting.width, true)
+    val yAxis = yAxisSetting.axisFactory.make(yMin, yMax, yAxisSetting.width, false)
 
     val xMinV = xAxis.worldToView(xMin)
     val xMaxV = xAxis.worldToView(xMax)
@@ -91,59 +91,44 @@ trait Plots {
     val (xMajorTicks, xAxisElem) = xAxisSetting.renderable(xAxis, noXTick)
     val (yMajorTicks, yAxisElem) = yAxisSetting.renderable(
       yAxis,
-      noYTick,
-      horizontal = false
+      noYTick
     )
 
     val originX = xAxis.worldToView(originWX1)
     val originY = yAxis.worldToView(originWY1)
 
     val axes = group(
-      translate(xAxisElem, 0, -1 * originY),
-      translate(
-        yAxisElem, originX, -1 * yMaxV
-      ),
+      translate(xAxisElem, 0, originY),
+      translate(yAxisElem, originX, 0),
       FreeLayout
     )
 
     val dataelem = sequence(data.toList.map {
       case (ds, drs) =>
-        DataElem(ds, xAxis, yAxis, drs, axes.bounds, AffineTransform.reflectX)
+        DataElem(ds, xAxis, yAxis, drs, axes.bounds, AffineTransform.identity)
     })
 
     val xgridElem = sequence(xMajorTicks map { w =>
       val v = xAxis.worldToView(w)
       ShapeElem(
-        Shape.line(Point(v, yMinV), Point(v, -1 * yMaxV)),
+        Shape.line(Point(v, yMinV), Point(v, yMaxV)),
         stroke = if (xgrid) Some(Stroke(1d)) else None,
         strokeColor = Color.gray5
       )
     })
 
-    val frameStroke = if (frame) Some(Stroke(2d)) else None
-    val frameElem = sequence(
-      List(
-        ShapeElem(
-          Shape.line(Point(xMinV, -1 * yMaxV), Point(xMaxV, -1 * yMaxV)), stroke = frameStroke
-        ),
-        ShapeElem(
-          Shape.line(Point(xMaxV, -1 * yMaxV), Point(xMaxV, yMinV)), stroke = frameStroke
-        ),
-        ShapeElem(
-          Shape.line(Point(xMinV, yMinV), Point(xMaxV, yMinV)), stroke = frameStroke
-        ),
-        ShapeElem(
-          Shape.line(Point(xMinV, -1 * yMaxV), Point(xMinV, yMinV)), stroke = frameStroke
-        )
+    val frameStroke = if (frame) Some(Stroke(1d)) else None
+    val frameElem =
+      ShapeElem(
+        Shape.rectangle(xMinV, yMaxV, xMaxV - xMinV, math.abs(yMinV - yMaxV)), stroke = frameStroke, fill = Color.transparent
       )
-    )
 
     val ygridElem = sequence(yMajorTicks map { w =>
       val v = yAxis.worldToView(w)
       ShapeElem(
         Shape.line(
-          Point(xMinV, -1 * v + xMinV),
-          Point(xMaxV, -1 * v + xMinV)
+          Point(xMinV, v),
+          Point(xMaxV, v)
         ),
         stroke = if (ygrid) Some(Stroke(1d)) else None,
         strokeColor = Color.gray5
@@ -241,12 +226,11 @@ trait Plots {
       numTicks = 2,
       tickAlignment = 1
     )
-    val axis = axisSettings.axisFactory.make(min, max, width)
+    val axis = axisSettings.axisFactory.make(min, max, width, false)
 
     val (majorTicks, axisElem) =
       axisSettings.renderable(
-        axis,
-        horizontal = false
+        axis
       )
 
     val n = 500
@@ -254,16 +238,16 @@ trait Plots {
     val ticks = sequence(
       ((0 until n toList) map { i =>
         val world = axis.min + i * space
-        val view = axis.worldToView(min) - axis.worldToView(world)
+        val view = axis.worldToView(world)
         ShapeElem(
-          Shape.line(Point(0d, view), Point(height, view)),
+          Shape.line(Point(1d, view), Point(height, view)),
           stroke = Some(Stroke(2d)),
           strokeColor = color1(world)
         )
       })
     )
 
-    group(ticks, translate(axisElem, 0, -1 * axis.worldToView(max)), FreeLayout)
+    group(ticks, axisElem, FreeLayout)
 
   }
 
