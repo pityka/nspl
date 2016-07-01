@@ -2,7 +2,7 @@ scalaVersion := "2.11.8"
 
 lazy val commonSettings = Seq(
   organization := "org.nspl",
-  version := "0.0.5",
+  version := "0.0.6-SNAPSHOT",
   scalaVersion := "2.11.8",
   javacOptions ++= Seq("-Xdoclint:none")
 
