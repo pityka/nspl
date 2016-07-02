@@ -137,6 +137,7 @@ trait Renderers {
 
           val shape1 = ShapeElem(
             Shape.line(currentPoint.get, p),
+            fill = Color.transparent,
             strokeColor = color1,
             stroke = Some(stroke)
           ).transform(_ => tx)
