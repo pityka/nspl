@@ -7,7 +7,12 @@ case class Bounds(x: Double, y: Double, w: Double, h: Double) {
   def centerY = y + h * 0.5
 }
 
-case class Stroke(width: Double)
+sealed trait Cap
+case object CapButt extends Cap
+case object CapSquare extends Cap
+case object CapRound extends Cap
+
+case class Stroke(width: Double, cap: Cap = CapSquare)
 
 case class Point(x: Double, y: Double) {
   def distance(p: Point) = {

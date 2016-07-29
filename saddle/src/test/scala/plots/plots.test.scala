@@ -50,7 +50,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
       )(xlab = "PC1", ylab = "freq.", main = "Loading distribution")
 
       val density1 = xyplot(
-        density(rotated.firstCol("PC1").toVec.toSeq) -> line()
+        density(rotated.firstCol("PC1").toVec.toSeq) -> line(stroke = Stroke(3d))
       )(xlab = "PC1", ylab = "dens.", main = "Loading distribution")
 
       val r1 = rasterplotFromFrame(rotated, yLabFontSize = 0.1 fts)

@@ -40,7 +40,11 @@ trait JavaAWTUtil {
   implicit def col2col(c: Color): java.awt.Paint =
     new java.awt.Color(c.r, c.g, c.b, c.a)
 
-  implicit def str2str(s: Stroke) = new java.awt.BasicStroke(s.width.toFloat)
+  implicit def str2str(s: Stroke) = new java.awt.BasicStroke(s.width.toFloat, s.cap match {
+    case CapButt => java.awt.BasicStroke.CAP_BUTT
+    case CapSquare => java.awt.BasicStroke.CAP_SQUARE
+    case CapRound => java.awt.BasicStroke.CAP_ROUND
+  }, java.awt.BasicStroke.JOIN_MITER)
 
   implicit def rec2bounds(r: java.awt.geom.Rectangle2D) =
     Bounds(r.getX, r.getY, r.getWidth, r.getHeight)

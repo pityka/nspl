@@ -139,7 +139,7 @@ trait Renderers {
             Shape.line(currentPoint.get, p),
             fill = Color.transparent,
             strokeColor = color1,
-            stroke = Some(stroke)
+            stroke = Some(stroke.copy(cap = CapRound))
           ).transform(_ => tx)
 
           re.render(ctx, shape1)
@@ -478,7 +478,7 @@ trait Renderers {
         val shape1 = ShapeElem(
           Shape.line(p, p2),
           strokeColor = color1,
-          stroke = Some(stroke)
+          stroke = Some(stroke.copy(cap = CapRound))
         ).transform(_ => tx)
 
         re.render(ctx, shape1)
