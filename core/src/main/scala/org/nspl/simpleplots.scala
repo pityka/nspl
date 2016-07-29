@@ -279,7 +279,7 @@ trait SimplePlots {
           List(data -> List(point(
             pointSizeIsInDataSpaceUnits = true,
             color = colormap.withRange(zmin, zmax),
-            shapes = Vector(Shape.rectangle(0.0, 0.0, 1.0, 1.0)),
+            shapes = Vector(Shape.rectangle(0.0, -1.0, 1.0, 1.0)),
             size = 1d,
             valueText = valueText,
             labelColor = valueColor,

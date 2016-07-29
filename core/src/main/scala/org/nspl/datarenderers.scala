@@ -60,7 +60,7 @@ trait Renderers {
           )
             .scale(factorX, factorY)
             .translate(vX, vY)
-            .transform(b => tx.concat(AffineTransform.translate(0, -1 * b.h)))
+            .transform(b => tx)
 
           re.render(ctx, shape1)
 
