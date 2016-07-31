@@ -84,10 +84,18 @@ object scalatagrenderer {
 
       val filled = if (elem.fill.a > 0.0)
         svgShape(fill := elem.fill.css)
-      else svgShape
+      else svgShape(fill := "none")
 
       val stroked = if (elem.stroke.isDefined && elem.strokeColor.a > 0)
-        filled(stroke := elem.strokeColor.css, strokeWidth := elem.stroke.get.width)
+        filled(
+          stroke := elem.strokeColor.css,
+          strokeWidth := elem.stroke.get.width,
+          strokeLinecap := (elem.stroke.get.cap match {
+            case CapRound => "round"
+            case CapButt => "butt"
+            case CapSquare => "square"
+          })
+        )
       else filled
 
       ctx.elems.append(stroked)
