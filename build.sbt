@@ -40,8 +40,8 @@ lazy val scalatagsJs = project.in(file("scalatags-js")).
 		settings(
 			name:="nspl-scalatags-js",
       libraryDependencies ++=  Seq(
-        "org.scala-js" %%% "scalajs-dom" % "0.9.0",
-        "com.lihaoyi" %%% "scalatags" % "0.5.5")
+        "org.scala-js" %%% "scalajs-dom" % "0.9.1",
+        "com.lihaoyi" %%% "scalatags" % "0.6.0")
 		)
     .enablePlugins(ScalaJSPlugin)
     .dependsOn(coreJS)
@@ -57,7 +57,7 @@ lazy val scalatagsJvm = project.in(file("scalatags-jvm")).
     		settings(commonSettings).
     		settings(
     			name:="nspl-scalatags-jvm",
-          libraryDependencies +="com.lihaoyi" %% "scalatags" % "0.5.5"
+          libraryDependencies +="com.lihaoyi" %% "scalatags" % "0.6.0"
     		).dependsOn(core)
 
 lazy val saddle = (project in file("saddle")).settings(commonSettings).
