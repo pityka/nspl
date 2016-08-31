@@ -6,8 +6,75 @@ sealed trait LegendConfig
 case object NotInLegend extends LegendConfig
 case class InLegend(text: String) extends LegendConfig
 
+trait CommonOptions {
+  def main: String
+  def xlab: String
+  def ylab: String
+  def xnames: Seq[(Double, String)]
+  def ynames: Seq[(Double, String)]
+  def xlim: Option[(Double, Double)]
+  def ylim: Option[(Double, Double)]
+  def xLabFontSize: RelFontSize
+  def yLabFontSize: RelFontSize
+  def mainFontSize: RelFontSize
+  def xNumTicks: Int
+  def yNumTicks: Int
+  def axisMargin: Double
+  def legendFontSize: RelFontSize
+  def legendWidth: RelFontSize
+  def xgrid: Boolean
+  def ygrid: Boolean
+  def xWidth: RelFontSize
+  def yHeight: RelFontSize
+  def frame: Boolean
+}
+
 /* Factory methods for common plots. */
 trait SimplePlots {
+
+  // def options(
+  //   main: String = "",
+  //   xlab: String = "",
+  //   ylab: String = "",
+  //   xnames: Seq[(Double, String)] = Seq(),
+  //   ynames: Seq[(Double, String)] = Seq(),
+  //   xlim: Option[(Double, Double)] = None,
+  //   ylim: Option[(Double, Double)] = None,
+  //   xLabFontSize: RelFontSize = 1 fts,
+  //   yLabFontSize: RelFontSize = 1 fts,
+  //   mainFontSize: RelFontSize = 1 fts,
+  //   xNumTicks: Int = 4,
+  //   yNumTicks: Int = 4,
+  //   axisMargin: Double = 0.05,
+  //   legendFontSize: RelFontSize = 1 fts,
+  //   legendWidth: RelFontSize = 30 fts,
+  //   xgrid: Boolean = true,
+  //   ygrid: Boolean = true,
+  //   xWidth: RelFontSize = 20 fts,
+  //   yHeight: RelFontSize = 20 fts,
+  //   frame: Boolean = true
+  // ) = new CommonOptions {
+  //   def main = _main
+  //   def xlab = _xlab
+  //   def ylab = _ylab
+  //   def xnames = _xnames
+  //   def ynames = _ynames
+  //   def xlim = _xlim
+  //   def ylim = _ylim
+  //   def xLabFontSize = _xLabFontSize
+  //   def yLabFontSize: RelFontSize = 1 fts,
+  //   def mainFontSize: RelFontSize = 1 fts,
+  //   def xNumTicks: Int = 4,
+  //   def yNumTicks: Int = 4,
+  //   def axisMargin: Double = 0.05,
+  //   def legendFontSize: RelFontSize = 1 fts,
+  //   def legendWidth: RelFontSize = 30 fts,
+  //   def xgrid: Boolean = true,
+  //   def ygrid: Boolean = true,
+  //   def xWidth: RelFontSize = 20 fts,
+  //   def yHeight: RelFontSize = 20 fts,
+  //   def frame: Boolean = true
+  // }
 
   type XYPlot = Elems2[Figure[XYPlotArea], Legend]
 
@@ -101,6 +168,79 @@ trait SimplePlots {
       legend1,
       HorizontalStack(Center, 5d)
     )
+  }
+
+  def stackedBarPlot(
+    data: DataSource,
+    legend: Seq[(Int, String, Colormap)],
+    xCol: Int = 0,
+    relative: Boolean = false,
+    main: String = "",
+    xlab: String = "",
+    ylab: String = "",
+    xnames: Seq[(Double, String)] = Seq(),
+    ynames: Seq[(Double, String)] = Seq(),
+    xlim: Option[(Double, Double)] = None,
+    ylim: Option[(Double, Double)] = None,
+    xLabFontSize: RelFontSize = 1 fts,
+    yLabFontSize: RelFontSize = 1 fts,
+    mainFontSize: RelFontSize = 1 fts,
+    xNumTicks: Int = 4,
+    yNumTicks: Int = 4,
+    axisMargin: Double = 0.05,
+    legendFontSize: RelFontSize = 1 fts,
+    legendWidth: RelFontSize = 30 fts,
+    xgrid: Boolean = true,
+    ygrid: Boolean = true,
+    xWidth: RelFontSize = 20 fts,
+    yHeight: RelFontSize = 20 fts,
+    frame: Boolean = true
+  ) = {
+    {
+      val data1: Seq[Seq[VectorRow]] = data.iterator.map { row =>
+        val x = row(xCol)
+        val sum = if (relative) legend.map(x => row(x._1)).sum else 1.0
+
+        val data = legend.map(x => row(x._1) / sum)
+
+        val accum: Seq[Double] = data.drop(1).scanLeft(data.head)((y, l) => y + l)
+
+        accum zip (0.0 +: accum.dropRight(1)) map (y => VectorRow(Vector(x, y._1, y._2), ""))
+
+      }.toVector.transpose
+
+      val legend1 = legend.zipWithIndex.map(x => (x._2, x._1._2, x._1._3))
+
+      val renderers = legend1.zip(data1).map {
+        case ((idx, label, color), data) =>
+          val ds: DataSource = data
+          (ds, List(bar(fill = color, fillCol = ds.dimension + 1, widthCol = ds.dimension + 2, yCol = 1, yCol2 = Some(2))), InLegend(label))
+      }
+
+      xyplot(renderers: _*)(
+        main = main,
+        xlab = xlab,
+        ylab = ylab,
+        xnames = xnames,
+        ynames = ynames,
+        xlim = xlim,
+        ylim = ylim,
+        xLabFontSize = xLabFontSize,
+        yLabFontSize = yLabFontSize,
+        mainFontSize = mainFontSize,
+        xNumTicks = xNumTicks,
+        yNumTicks = yNumTicks,
+        axisMargin = axisMargin,
+        legendFontSize = legendFontSize,
+        legendWidth = legendWidth,
+        xgrid = xgrid,
+        ygrid = ygrid,
+        xWidth = xWidth,
+        yHeight = yHeight,
+        frame = frame
+      )
+
+    }
   }
 
   type BoxPlot = Figure[XYPlotArea]

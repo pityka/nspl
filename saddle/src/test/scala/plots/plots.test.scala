@@ -122,7 +122,13 @@ class SaddlePlotSpec extends FunSpec with Matchers {
 
       val p6 = rasterplot(rasterFromSeq(rs, 10, 10, MinMaxImpl(0.0, 1.0)), xFontSize = 0.5 fts, yFontSize = 0.5 fts, valueText = true, valueColor = Color.white, valueFontSize = 0.6 fts, xnames = Seq(0.0 -> "sdfsf", 1.0 -> "dsfds adfdf adfs f"), ynames = Seq(0.0 -> "dsfsdf", 2.0 -> "dfsdf asdfdf asdfds sdfadsf"))
 
-      val gallery = group(p6, empty2, xyplot(Seq(0d -> 0d, 1d -> 1d, 2d -> 2d))(), r1, hist1, contour, density1, fig0, fig1, fig2, fig3, fig4, TableLayout(3))
+      val barplot2 = {
+        val dataraw: IndexedSeq[(Double, Double, Double, Double)] = 1 to 100 map (i => (i.toDouble, scala.util.Random.nextInt(i).toDouble, scala.util.Random.nextInt(101 - i).toDouble, scala.util.Random.nextInt(50).toDouble))
+
+        stackedBarPlot(dataraw, List((1, "red", Color.red), (2, "blue", Color.blue), (3, "green", Color.green)), relative = true)
+      }
+
+      val gallery = group(p6, empty2, xyplot(Seq(0d -> 0d, 1d -> 1d, 2d -> 2d))(), r1, hist1, contour, density1, fig0, fig1, fig2, fig3, fig4, barplot2, TableLayout(3))
 
       {
         import awtrenderer._

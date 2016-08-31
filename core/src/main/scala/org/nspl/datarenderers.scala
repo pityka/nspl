@@ -297,12 +297,13 @@ trait Renderers {
             if (w > yAxis.max) yAxis.max
             else if (w < yAxis.min) yAxis.min
             else w
-          }
+          }.getOrElse(0.0)
 
           val vWidth = math.abs(xAxis.worldToView(0.0) - xAxis.worldToView(width1))
           val vX = xAxis.worldToView(wX)
+          val vY2 = yAxis.worldToView(wYBottom)
           val vY = yAxis.worldToView(wY)
-          val vY2 = wYBottom.map(w => yAxis.worldToView(w)).getOrElse(yAxis.worldToView(yAxis.min))
+
           val vHeight = math.abs(vY2 - vY)
 
           val shape1 = ShapeElem(
@@ -321,12 +322,12 @@ trait Renderers {
             if (w > xAxis.max) xAxis.max
             else if (w < xAxis.min) xAxis.min
             else w
-          }
+          }.getOrElse(0.0)
 
           val vWidth = math.abs(yAxis.worldToView(0.0) - yAxis.worldToView(width))
           val vX = yAxis.worldToView(wX)
           val vY = xAxis.worldToView(wY)
-          val vY2 = wYBottom.map(w => xAxis.worldToView(w)).getOrElse(xAxis.worldToView(yAxis.min))
+          val vY2 = xAxis.worldToView(wYBottom)
           val vHeight = math.abs(vY2 - vY)
 
           val shape1 = ShapeElem(
