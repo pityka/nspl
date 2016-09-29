@@ -73,16 +73,8 @@ lazy val saddle = (project in file("saddle")).settings(commonSettings).
 
 onLoad in Global := (Command.process("project saddle", _: State)) compose (onLoad in Global).value
 
-
-
 pomExtra in Global := {
   <url>https://pityka.github.io/nspl/</url>
-  <licenses>
-    <license>
-      <name>MIT</name>
-      <url>https://opensource.org/licenses/MIT</url>
-    </license>
-  </licenses>
   <scm>
     <connection>scm:git:github.com/pityka/nspl</connection>
     <developerConnection>scm:git:git@github.com:pityka/nspl</developerConnection>
