@@ -2,10 +2,10 @@ scalaVersion := "2.11.8"
 
 lazy val commonSettings = Seq(
   organization := "io.github.pityka",
-  version := "0.0.7-SNAPSHOT",
+  version := "0.0.7",
   scalaVersion := "2.11.8",
-  javacOptions ++= Seq("-Xdoclint:none")
-
+  javacOptions ++= Seq("-Xdoclint:none"),
+  licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 )
 
 lazy val core = project.in(file("core")).
@@ -72,6 +72,8 @@ lazy val saddle = (project in file("saddle")).settings(commonSettings).
 	.aggregate(core,awt,coreJS,canvas,scalatagsJs,scalatagsJvm)
 
 onLoad in Global := (Command.process("project saddle", _: State)) compose (onLoad in Global).value
+
+
 
 pomExtra in Global := {
   <url>https://pityka.github.io/nspl/</url>
