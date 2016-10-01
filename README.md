@@ -23,6 +23,12 @@ Easily extendible, typesafe scene graph.
 See `canvas/src/main/scala/org/nspl/test.scala` for Html5 Canvas examples.
 See `saddle/src/test/scala/plots/plots.test.scala` for JVM examples.
 
+## Usage
+
+* JVM AWT backend: `libraryDependencies += "io.github.pityka" %% "nspl-awt" % "0.0.7"`
+* JVM SVG via scalatags: `libraryDependencies += "io.github.pityka" %% "nspl-scalatags-jvm" % "0.0.7"`
+
+
 ## Limitations
 * static plots (no user interaction)
 * only fixed with font type for labels
