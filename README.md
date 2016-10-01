@@ -27,6 +27,7 @@ See `saddle/src/test/scala/plots/plots.test.scala` for JVM examples.
 
 * JVM AWT backend: `libraryDependencies += "io.github.pityka" %% "nspl-awt" % "0.0.7"`
 * JVM SVG via scalatags: `libraryDependencies += "io.github.pityka" %% "nspl-scalatags-jvm" % "0.0.7"`
+* scala-js svg via scalatags: `libraryDependencies += "io.github.pityka" %% "nspl-scalatags-js" % "0.0.7"` 
 
 
 ## Limitations
