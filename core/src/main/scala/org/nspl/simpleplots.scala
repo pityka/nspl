@@ -102,7 +102,9 @@ trait SimplePlots {
     ygrid: Boolean = true,
     xWidth: RelFontSize = 20 fts,
     yHeight: RelFontSize = 20 fts,
-    frame: Boolean = true
+    frame: Boolean = true,
+    xLabelRotation: Double = 0d,
+    yLabelRotation: Double = 0d
   ): XYPlot = {
     val xFac = LinearAxisFactory //if (xlog) Log10AxisFactory else LinearAxisFactory
     val yFac = LinearAxisFactory //if (ylog) Log10AxisFactory else LinearAxisFactory
@@ -141,14 +143,16 @@ trait SimplePlots {
             customTicks = xnames,
             fontSize = xLabFontSize,
             numTicks = xNumTicks,
-            width = xWidth
+            width = xWidth,
+            labelRotation = xLabelRotation
           ),
           AxisSettings(
             yFac,
             customTicks = ynames,
             fontSize = yLabFontSize,
             numTicks = yNumTicks,
-            width = yHeight
+            width = yHeight,
+            labelRotation = yLabelRotation
           ),
           None,
           xlim = xlim,
@@ -194,7 +198,9 @@ trait SimplePlots {
     ygrid: Boolean = true,
     xWidth: RelFontSize = 20 fts,
     yHeight: RelFontSize = 20 fts,
-    frame: Boolean = true
+    frame: Boolean = true,
+    xLabelRotation: Double = 0d,
+    yLabelRotation: Double = 0d
   ) = {
     {
       val data1: Seq[Seq[VectorRow]] = data.iterator.map { row =>
@@ -237,7 +243,9 @@ trait SimplePlots {
         ygrid = ygrid,
         xWidth = xWidth,
         yHeight = yHeight,
-        frame = frame
+        frame = frame,
+        xLabelRotation = xLabelRotation,
+        yLabelRotation = yLabelRotation
       )
 
     }
@@ -257,7 +265,9 @@ trait SimplePlots {
     xWidth: RelFontSize = 20 fts,
     yHeight: RelFontSize = 20 fts,
     boxColor: Colormap = Color.gray4,
-    frame: Boolean = true
+    frame: Boolean = true,
+    xLabelRotation: Double = 0d,
+    yLabelRotation: Double = 0d
   ): BoxPlot = {
 
     val bxdata = boxplotData(data)
@@ -273,12 +283,14 @@ trait SimplePlots {
           customTicks = xnames.zipWithIndex.map(x => x._2.toDouble + 1 -> x._1),
           numTicks = 0,
           fontSize = fontSize,
-          width = xWidth
+          width = xWidth,
+          labelRotation = xLabelRotation
         ),
         AxisSettings(
           LinearAxisFactory,
           fontSize = fontSize,
-          width = yHeight
+          width = yHeight,
+          labelRotation = yLabelRotation
         ),
         None,
         xlim = Some(0d -> (bxdata.iterator.size + 1)),
@@ -310,7 +322,9 @@ trait SimplePlots {
     xWidth: RelFontSize = 20 fts,
     yHeight: RelFontSize = 20 fts,
     boxColor: Colormap = Color.gray4,
-    frame: Boolean = true
+    frame: Boolean = true,
+    xLabelRotation: Double = 0d,
+    yLabelRotation: Double = 0d
   ): XYPlot = {
 
     xyplot(
@@ -333,7 +347,9 @@ trait SimplePlots {
         ygrid = ygrid,
         xWidth = xWidth,
         yHeight = yHeight,
-        frame = frame
+        frame = frame,
+        xLabelRotation = xLabelRotation,
+        yLabelRotation = yLabelRotation
       )
   }
 
@@ -401,7 +417,9 @@ trait SimplePlots {
     valueFontSize: RelFontSize = 0.4 fts,
     tickLength: RelFontSize = 0.4 fts,
     zlim: Option[(Double, Double)] = None,
-    frame: Boolean = true
+    frame: Boolean = true,
+    xLabelRotation: Double = -.5 * math.Pi,
+    yLabelRotation: Double = 0d
   ): RasterPlot = {
     val minmaxx = data.columnMinMax(xCol)
     val minmaxy = data.columnMinMax(yCol)
@@ -433,7 +451,7 @@ trait SimplePlots {
             tickSpace = (if (!xnames.isEmpty) None else Some(1d)),
             numMinorTicksFactor = 0,
             tickLength = tickLength,
-            labelRotation = -.5 * math.Pi,
+            labelRotation = xLabelRotation,
             width = xWidth
           ),
           AxisSettings(
@@ -444,6 +462,7 @@ trait SimplePlots {
             tickSpace = (if (!ynames.isEmpty) None else Some(1d)),
             numMinorTicksFactor = 0,
             tickLength = tickLength,
+            labelRotation = yLabelRotation,
             width = yHeight
           ),
           None,

@@ -32,31 +32,28 @@ object awtrenderer extends JavaAWTUtil {
     def getTextLayouts(
       text: String,
       font: Font,
-      breakWidth: Option[Double],
+      maxCharInLine: Int,
       graphics: Graphics2D,
       x: Double,
       y: Double
     ): Iterator[java.awt.Shape] = {
-      val attributedString = new AttributedString(text)
-      attributedString.addAttribute(java.awt.font.TextAttribute.FONT, font);
-      val paragraph = attributedString.getIterator();
-      val paragraphStart = paragraph.getBeginIndex();
-      val paragraphEnd = paragraph.getEndIndex();
       val frc = graphics.getFontRenderContext();
-      val lineMeasurer = new LineBreakMeasurer(paragraph, frc);
       var drawPosY = y;
-      lineMeasurer.setPosition(paragraphStart);
 
-      new Iterator[java.awt.Shape] {
-        def hasNext = lineMeasurer.getPosition() < paragraphEnd
-        def next = {
-          val layout = lineMeasurer.nextLayout(breakWidth.map(_.toFloat).getOrElse(Float.MaxValue));
-          val drawPosX = x
-          drawPosY += layout.getAscent();
-          val shape = layout.getOutline(java.awt.geom.AffineTransform.getTranslateInstance(drawPosX, drawPosY))
-          drawPosY += layout.getDescent() + layout.getLeading();
-          shape
-        }
+      text.toSeq.grouped(maxCharInLine).map(_.mkString).map { line =>
+        val attributedString = new AttributedString(line)
+        attributedString.addAttribute(java.awt.font.TextAttribute.FONT, font);
+        val paragraph = attributedString.getIterator();
+        val paragraphStart = paragraph.getBeginIndex();
+        val paragraphEnd = paragraph.getEndIndex();
+        val lineMeasurer = new LineBreakMeasurer(paragraph, frc);
+        lineMeasurer.setPosition(paragraphStart);
+        val layout = lineMeasurer.nextLayout(Float.MaxValue)
+        val drawPosX = x
+        drawPosY += layout.getAscent();
+        val shape = layout.getOutline(java.awt.geom.AffineTransform.getTranslateInstance(drawPosX, drawPosY))
+        drawPosY += layout.getDescent() + layout.getLeading();
+        shape
       }
 
     }
@@ -67,16 +64,28 @@ object awtrenderer extends JavaAWTUtil {
           saveStroke(graphics) { graphics2 =>
             // graphics2.draw(elem.bounds)
             graphics2.setPaint(elem.color)
-            getTextLayouts(
+            val it = getTextLayouts(
               elem.text,
-              new Font(Font.MONOSPACED, Font.PLAIN, elem.fontSize.toInt),
-              elem.width,
+              new Font(Font.MONOSPACED, Font.PLAIN, 12),
+              elem.maxCharInLine,
               graphics2,
-              elem.loc.x,
-              elem.loc.y
-            ).foreach { shape =>
-                graphics2.fill(elem.tx.createTransformedShape(shape))
-              }
+              0d, 0d
+            )
+            val first = it.next
+            (List(first).iterator ++ it).foreach { shape =>
+              graphics2.fill(elem.tx.concat(
+                AffineTransform.translate(
+                  elem.loc.x,
+                  elem.loc.y
+                )
+                  .concat(
+                    AffineTransform.scale(
+                      elem.lineWidth / first.getBounds.getWidth,
+                      elem.lineWidth / first.getBounds.getWidth
+                    )
+                  )
+              ).createTransformedShape(shape))
+            }
           }
         }
       }

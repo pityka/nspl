@@ -32,18 +32,27 @@ case class TextBox(
     color: Color = Color.black,
     tx: AffineTransform = AffineTransform.identity
 ) extends Renderable[TextBox] {
-  def bounds = {
+
+  val charWidth = fontSize * 0.67
+
+  val maxCharInLine = width.map(width => math.min((width / charWidth).toInt, text.size)).getOrElse(text.size)
+
+  val lineWidth = width.map { width =>
+    maxCharInLine * charWidth
+  } getOrElse text.size * charWidth
+
+  val lineNumber = width.map { width =>
+    val lines = if (text.isEmpty) 1 else text.size / maxCharInLine
+    val finalLine = if (lines * maxCharInLine >= text.size) 0 else 1
+    (lines + finalLine)
+  } getOrElse 1
+
+  val lineHeight = fontSize * 1.2
+  val lineAscentHeight = 1d
+
+  def bounds =
     if (text.isEmpty) Bounds(0, 0, 0, 0)
-    else {
-      val charWidth = fontSize * 0.6
-      width.map { width =>
-        val maxCharInLine = math.min((width / charWidth).toInt, text.size)
-        val lines = text.size / maxCharInLine
-        val finalLine = if (lines * maxCharInLine >= text.size) 0 else 1
-        val h = (lines + finalLine) * fontSize * 1.15
-        tx.transform(Bounds(loc.x, loc.y, maxCharInLine * charWidth, h))
-      }.getOrElse(tx.transform(Bounds(loc.x, loc.y, text.size * charWidth, fontSize * 1.15)))
-    }
-  }
+    else tx.transform(Bounds(loc.x, loc.y, lineWidth, lineNumber * lineHeight + lineAscentHeight * math.max(0, lineNumber - 1)))
+
   def transform(tx: Bounds => AffineTransform) = this.copy(tx = tx(bounds).concat(this.tx))
 }
