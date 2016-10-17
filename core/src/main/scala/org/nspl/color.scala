@@ -32,7 +32,7 @@ case class HeatMapColors(min: Double = 0.0, max: Double = 1.0) extends Colormap 
 
   def apply(value: Double): Color = {
 
-    val v = if (value > max) max else if (value < min) min else (value - min) / (max - min)
+    val v = if (value > max) 1.0 else if (value < min) 0.0 else (value - min) / (max - min)
 
     def scaleHue(v: Double) = (2.0 / 3.0) - v * (2.0 / 3.0)
 
@@ -42,6 +42,25 @@ case class HeatMapColors(min: Double = 0.0, max: Double = 1.0) extends Colormap 
   }
 
   def withRange(min: Double, max: Double) = HeatMapColors(min, max)
+}
+
+case class LogHeatMapColors(min: Double = 0.0, max: Double = 1.0) extends Colormap {
+
+  val min1 = 1d
+  val max1 = (max - min) + 1
+
+  def apply(value: Double): Color = {
+
+    val v = if (value > max) 1.0 else if (value < min) 0d else math.log10(value - min + 1) / math.log10(max1)
+
+    def scaleHue(v: Double) = (2.0 / 3.0) - v * (2.0 / 3.0)
+
+    val (r, g, b) = hsl2rgb2(scaleHue(v), 1d, 0.5d)
+
+    Color((r * 255).toInt, (g * 255).toInt, (b * 255).toInt, 255)
+  }
+
+  def withRange(min: Double, max: Double) = LogHeatMapColors(min, max)
 }
 
 case class DiscreteColors(max: Int) extends Colormap {

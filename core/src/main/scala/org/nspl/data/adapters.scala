@@ -4,7 +4,7 @@ import scala.collection.mutable.ArrayBuffer
 
 trait DataAdaptors extends DataTuples {
 
-  implicit def dataSourceFrom1DSeq(vec: Seq[Double]): DataTable =
+  def dataSourceFrom1DSeq(vec: Seq[Double]): DataTable =
     new DataTable(vec.toArray, 1)
 
   implicit def zipped2(
@@ -46,8 +46,7 @@ trait DataAdaptors extends DataTuples {
   def rasterFromSeq(
     s1: Seq[Double],
     numCols: Int,
-    numRows: Int,
-    minmax: MinMax
+    numRows: Int
   ): DataSource =
     new DataSource {
 
@@ -59,7 +58,7 @@ trait DataAdaptors extends DataTuples {
       def columnMinMax(i: Int) = i match {
         case 0 => MinMaxImpl(0, numCols - 1d)
         case 1 => MinMaxImpl(0, numRows - 1d)
-        case 2 => minmax
+        case 2 => MinMaxImpl(s1.min, s1.max)
       }
     }
 
@@ -126,7 +125,7 @@ trait DataAdaptors extends DataTuples {
       }
     }
 
-  def indexed(s: Seq[Double]): DataSourceWithQuantiles =
+  implicit def indexed(s: Seq[Double]): DataSourceWithQuantiles =
     new DataSourceWithQuantiles {
       def iterator =
         s.iterator.zipWithIndex.map(x => productsToRow(x._2.toDouble -> x._1))

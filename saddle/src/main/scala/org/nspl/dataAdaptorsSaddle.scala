@@ -11,13 +11,10 @@ object saddle {
     main: String = "",
     xlab: String = "",
     ylab: String = "",
-    xLabFontSize: RelFontSize = 1 fts,
-    yLabFontSize: RelFontSize = 1 fts,
+    xLabFontSize: Option[RelFontSize] = None,
+    yLabFontSize: Option[RelFontSize] = None,
     mainFontSize: RelFontSize = 1 fts,
     colormap: Colormap = HeatMapColors(0, 1),
-    xCol: Int = 0,
-    yCol: Int = 1,
-    zCol: Int = 2,
     xWidth: RelFontSize = 20 fts,
     yHeight: RelFontSize = 20 fts,
     valueText: Boolean = false,
@@ -29,8 +26,8 @@ object saddle {
       main,
       xlab,
       ylab,
-      xLabFontSize,
-      yLabFontSize,
+      xLabFontSize.getOrElse(math.min(2.0, xWidth.v / dataFrame.numCols) fts),
+      yLabFontSize.getOrElse(math.min(2.0, yHeight.v / dataFrame.numRows) fts),
       mainFontSize,
       colormap,
       dataFrame.colIx.toSeq.map(_.toString).zipWithIndex.map(x => x._2.toDouble + 0.5 -> x._1),
@@ -48,8 +45,26 @@ object saddle {
   implicit def dataSourceFromMat(mat: Mat[Double]): DataTable =
     new DataTable(mat.contents, mat.numCols)
 
-  implicit def dataSourceFrom1DVec(vec: Vec[Double]): DataTable =
-    new DataTable(vec, 1)
+  implicit def dataSourceFrom1DVec(vec: Vec[Double]): DataSourceWithQuantiles =
+    indexed(vec.toSeq)
+
+  implicit def dataSourceFromSeries[R](s: Series[R, Double]): DataSourceWithQuantiles =
+    new DataSourceWithQuantiles {
+      def iterator =
+        s.toSeq.iterator.zipWithIndex.map(x => VectorRow(Vector(x._2, x._1._2), x._1._1.toString))
+      def dimension = 2
+      def columnMinMax(i: Int) = i match {
+        case 0 => MinMaxImpl(0, s.length - 1d)
+        case 1 => MinMaxImpl(s.min.get, s.max.get)
+      }
+      def quantilesOfColumn(i: Int, qs: Vector[Double]) = {
+        assert(i == 1 || i == 0)
+        val v =
+          if (i == 1) s.toVec.toSeq.sorted
+          else (0 until s.length).map(_.toDouble)
+        percentile(v, qs).toVector
+      }
+    }
 
   def dataSourceFromRowMajorVec(vec: Vec[Double], numCols: Int): DataTable =
     new DataTable(vec, numCols)

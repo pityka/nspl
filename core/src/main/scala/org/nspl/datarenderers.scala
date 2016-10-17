@@ -76,6 +76,18 @@ trait Renderers {
             rt.render(ctx, tb)
           }
 
+          if (labelText) {
+            val tb = TextBox(
+              data.label,
+              color = labelColor,
+              fontSize = labelFontSize
+            )
+              .translate(vX, vY)
+              .transform(b => tx.concat(AffineTransform.translate(0, -1 * b.h)))
+
+            rt.render(ctx, tb)
+          }
+
           if (data.dimension > errorTopCol) {
             val errorTop = data(errorTopCol)
             val shape1: ShapeElem = ShapeElem(
