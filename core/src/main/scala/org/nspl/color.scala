@@ -78,9 +78,7 @@ trait Colors {
   def colorPick(idx: Int, max: Int) = {
     if (max <= colorList.size && idx < colorList.size) colorList(idx)
     else
-      synchronized {
-        randomColorStream(idx)
-      }
+      myColorStream(idx)
   }
 
   // https://en.wikipedia.org/wiki/HSL_and_HSV#From_HSL
@@ -102,12 +100,64 @@ trait Colors {
     (r1 + m, g1 + m, b1 + m)
   }
 
+  lazy val myColorStream = {
+
+    def nextP(p: Int) = {
+      def isPrime(number: Int): Boolean =
+        if (number == 2 || number == 3) true
+        else if (number % 2 == 0 || number % 3 == 0) false
+        else {
+          var divisor = 6
+          var b = true
+          while (divisor * divisor - 2 * divisor + 1 <= number && b) {
+
+            if (number % (divisor - 1) == 0)
+              b = false
+
+            if (number % (divisor + 1) == 0)
+              b = false
+
+            divisor += 6
+          }
+          b
+        }
+
+      def loop(i: Int): Int = if (isPrime(i)) i else loop(i + 1)
+
+      loop(p + 1)
+
+    }
+
+    def nextQ(p: Int, q: Int): (Int, Int) = {
+      val q1 = if (p + 1 == q) nextP(q) else q
+      val p1 = if (q == q1) p + 1 else 1
+      (p1, q1)
+    }
+
+    def next(p: Int, q: Int, bb: Int): (Int, Int, Int, Color) = {
+      val (hueP, hueQ) = if (bb == 3) nextQ(p, q) else (p, q)
+      val b1: Int = if (bb == 3) 1 else bb + 1
+      val hue = hueP.toDouble / hueQ
+      val saturation = 1.0
+      val brightness = (b1 / 3d) * 0.9
+      val (r, g, b) = hsl2rgb2(hue, saturation, brightness)
+      val color = Color((r * 255).toInt, (g * 255).toInt, (b * 255).toInt, 255)
+      (hueP, hueQ, b1, color)
+    }
+
+    def loop(p: Int, q: Int, b: Int): Stream[Color] = {
+      val (p1, q1, b1, c) = next(p, q, b)
+      c #:: loop(p1, q1, b1)
+    }
+    loop(0, 1, 0)
+  }
+
   lazy val random = new scala.util.Random(1232432);
   lazy val randomColorStream = {
     def newRandomColor = {
-      val hue = (1.0f + random.nextFloat()) / 2.0f
-      val saturation = (1.0f + random.nextFloat()) / 2.0f
-      val brightness = (1.0f + random.nextFloat()) / 2.0f
+      val hue = (random.nextFloat())
+      val saturation = 0.6 + random.nextFloat() * 0.4
+      val brightness = 0.4 + random.nextFloat() * 0.3
       val (r, g, b) = hsl2rgb2(hue, saturation, brightness)
       Color((r * 255).toInt, (g * 255).toInt, (b * 255).toInt, 255)
     }

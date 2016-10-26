@@ -131,7 +131,12 @@ class SaddlePlotSpec extends FunSpec with Matchers {
         stackedBarPlot(dataraw, List((1, "red", Color.red), (2, "blue", Color.blue), (3, "green", Color.green)), relative = true)
       }
 
-      val gallery = group(p6, p6b, empty2, xyplot(Seq(0d -> 0d, 1d -> 1d, 2d -> 2d))(), r1, hist1, contour, density1, fig0, fig1, fig2, fig3, fig4, barplot2, TableLayout(3))
+      val colortest = xyplot(indexed(1 to 60 map (_.toDouble) toSeq) -> point(color = DiscreteColors(60), colorCol = 1))()
+
+      val gallery = group(
+        colortest, p6, p6b, empty2, xyplot(Seq(0d -> 0d, 1d -> 1d, 2d -> 2d))(), r1, hist1, contour, density1, fig0, fig1, fig2, fig3, fig4, barplot2,
+        TableLayout(3)
+      )
 
       // fitToBounds(group(
       // TextBox("abc def hijklmn abc def",width=Some(30d)),
