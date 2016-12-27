@@ -47,7 +47,10 @@ class SaddlePlotSpec extends FunSpec with Matchers {
 
       val hist1 = xyplot(
         HistogramData(rotated.firstCol("PC1").toVec.toSeq, 10) -> bar()
-      )(xlab = "PC1", ylab = "freq.", main = "Loading distribution")
+      )(xlab = "PC1", ylab = "freq.", main = "Loading distribution", ylim = Some(0d, Double.NaN))
+
+      val bar1 = barplotVertical(Series("a" -> (-2d), "b" -> (-1d), "c" -> 0d, "d" -> 1d, "e" -> 2d), color = RedBlue(-2, 2))
+      val bar2 = barplotHorizontal(Series("a" -> (-2d), "b" -> (-1d), "c" -> 0d, "d" -> 1d, "e" -> 2d))
 
       val density1 = xyplot(
         density(rotated.firstCol("PC1").toVec.toSeq) -> line(stroke = Stroke(3d))
@@ -95,6 +98,8 @@ class SaddlePlotSpec extends FunSpec with Matchers {
         xLabelRotation = -0.3
       )
 
+      val boxpl2 = boxplotFromLabels(List("a" -> 0d, "a" -> 1d, "b" -> 3d, "b" -> 4d))
+
       val contour = contourplot(
         xlim = -2d -> 2d,
         ylim = -2d -> 2d,
@@ -134,6 +139,8 @@ class SaddlePlotSpec extends FunSpec with Matchers {
       val colortest = xyplot(indexed(1 to 60 map (_.toDouble) toSeq) -> point(color = DiscreteColors(60), colorCol = 1))()
 
       val gallery = group(
+        bar1,
+        bar2, boxpl2,
         colortest, p6, p6b, empty2, xyplot(Seq(0d -> 0d, 1d -> 1d, 2d -> 2d))(), r1, hist1, contour, density1, fig0, fig1, fig2, fig3, fig4, barplot2,
         TableLayout(3)
       )

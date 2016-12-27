@@ -29,33 +29,42 @@ trait Plots {
     yCol: Int = 1,
     xgrid: Boolean = true,
     ygrid: Boolean = true,
-    frame: Boolean = true
+    frame: Boolean = true,
+    boundsData: Seq[DataSource] = Nil
   ): XYPlotArea = {
 
     val xMinMax =
-      data.map(_._1.columnMinMax(xCol))
+      if (boundsData.isEmpty) data.map(_._1.columnMinMax(xCol))
+      else boundsData.map(_.columnMinMax(xCol))
 
     val yMinMax =
-      data.map(_._1.columnMinMax(yCol))
+      if (boundsData.isEmpty) data.map(_._1.columnMinMax(yCol))
+      else boundsData.map(_.columnMinMax(yCol))
 
-    val dataXMin = if (xlim.isDefined) 0.0 else xMinMax.map(_.min).min
-    val dataXMax = if (xlim.isDefined) 0.0 else xMinMax.map(_.max).max
-    val dataYMin = if (ylim.isDefined) 0.0 else yMinMax.map(_.min).min
-    val dataYMax = if (ylim.isDefined) 0.0 else yMinMax.map(_.max).max
+    val xLimMin = xlim.map(_._1).filterNot(_.isNaN)
+    val xLimMax = xlim.map(_._2).filterNot(_.isNaN)
 
-    val xMin = math.min(xlim.map(_._1).getOrElse {
+    val yLimMin = ylim.map(_._1).filterNot(_.isNaN)
+    val yLimMax = ylim.map(_._2).filterNot(_.isNaN)
+
+    val dataXMin = if (xLimMin.isDefined) 0.0 else xMinMax.map(_.min).min
+    val dataXMax = if (xLimMax.isDefined) 0.0 else xMinMax.map(_.max).max
+    val dataYMin = if (yLimMin.isDefined) 0.0 else yMinMax.map(_.min).min
+    val dataYMax = if (yLimMax.isDefined) 0.0 else yMinMax.map(_.max).max
+
+    val xMin = math.min(xLimMin.getOrElse {
       dataXMin - axisMargin * (dataXMax - dataXMin)
     }, origin.map(_.x).getOrElse(Double.MaxValue))
 
-    val xMax = xlim.map(_._2).getOrElse {
+    val xMax = xLimMax.getOrElse {
       dataXMax + axisMargin * (dataXMax - dataXMin)
     }
 
-    val yMin = math.min(ylim.map(_._1).getOrElse {
+    val yMin = math.min(yLimMin.getOrElse {
       dataYMin - axisMargin * (dataYMax - dataYMin)
     }, origin.map(_.y).getOrElse(Double.MaxValue))
 
-    val yMax = ylim.map(_._2).getOrElse {
+    val yMax = yLimMax.getOrElse {
       dataYMax + axisMargin * (dataYMax - dataYMin)
     }
 

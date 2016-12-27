@@ -6,6 +6,73 @@ import org.saddle._
 
 object saddle {
 
+  def barplotVertical(
+    series: Series[String, Double],
+    main: String = "",
+    xlab: String = "",
+    ylab: String = "",
+    xLabFontSize: RelFontSize = 1 fts,
+    yLabFontSize: Option[RelFontSize] = None,
+    mainFontSize: RelFontSize = 1 fts,
+    color: Colormap = Color.white,
+    xWidth: RelFontSize = 20 fts,
+    yHeight: RelFontSize = 20 fts,
+    xLabelRotation: Double = 0d,
+    yLabelRotation: Double = 0d,
+    xlim: Option[(Double, Double)] = None,
+    ylim: Option[(Double, Double)] = None,
+    frame: Boolean = true
+  ) = xyplot(
+    series.toSeq.map(_._2).zipWithIndex.map(x => x._1 -> x._2.toDouble) -> bar(horizontal = true, fill = color, fillCol = 0)
+  )(
+      main = main,
+      xlab = xlab,
+      ylab = ylab,
+      xLabFontSize = xLabFontSize,
+      yLabFontSize = yLabFontSize.getOrElse(math.min(2.0, yHeight.v / series.length) fts),
+      mainFontSize = mainFontSize,
+      xWidth = xWidth,
+      yHeight = yHeight,
+      ynames = series.toSeq.map(_._1.toString).zipWithIndex.map(x => x._1 -> x._2.toDouble).map(_.swap),
+      yNumTicks = 0,
+      xLabelRotation = xLabelRotation,
+      yLabelRotation = yLabelRotation,
+      xlim = xlim, ylim = ylim, frame = frame
+    )
+
+  def barplotHorizontal(
+    series: Series[String, Double],
+    main: String = "",
+    xlab: String = "",
+    ylab: String = "",
+    yLabFontSize: RelFontSize = 1 fts,
+    xLabFontSize: Option[RelFontSize] = None,
+    mainFontSize: RelFontSize = 1 fts,
+    color: Colormap = Color.white,
+    xWidth: RelFontSize = 20 fts,
+    yHeight: RelFontSize = 20 fts,
+    xLabelRotation: Double = 0d,
+    yLabelRotation: Double = 0d,
+    xlim: Option[(Double, Double)] = None,
+    ylim: Option[(Double, Double)] = None,
+    frame: Boolean = true
+  ) = xyplot(
+    series.toSeq.map(_._2).zipWithIndex.map(x => x._1 -> x._2.toDouble).map(_.swap) -> bar(horizontal = false, fill = color, fillCol = 1)
+  )(
+      main = main,
+      xlab = xlab,
+      ylab = ylab,
+      yLabFontSize = yLabFontSize,
+      xLabFontSize = xLabFontSize.getOrElse(math.min(2.0, yHeight.v / series.length) fts),
+      mainFontSize = mainFontSize,
+      xWidth = xWidth,
+      yHeight = yHeight,
+      xnames = series.toSeq.map(_._1.toString).zipWithIndex.map(x => x._1 -> x._2.toDouble).map(_.swap),
+      xNumTicks = 0,
+      xLabelRotation = xLabelRotation,
+      yLabelRotation = yLabelRotation, ylim = ylim, xlim = xlim, frame = frame
+    )
+
   def rasterplotFromFrame[RX, CX](
     dataFrame: Frame[RX, CX, Double],
     main: String = "",
@@ -19,7 +86,8 @@ object saddle {
     yHeight: RelFontSize = 20 fts,
     valueText: Boolean = false,
     valueColor: Color = Color.black,
-    valueFontSize: RelFontSize = 0.4 fts
+    valueFontSize: RelFontSize = 0.4 fts,
+    zlim: Option[(Double, Double)] = None
   ) =
     rasterplot(
       asRaster(dataFrame.toMat),
@@ -36,7 +104,8 @@ object saddle {
       yHeight = yHeight,
       valueText = valueText,
       valueColor = valueColor,
-      valueFontSize = valueFontSize
+      valueFontSize = valueFontSize,
+      zlim = zlim
     )
 
   def asRaster(mat: Mat[Double]): DataMatrix =

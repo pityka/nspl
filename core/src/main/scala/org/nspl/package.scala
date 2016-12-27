@@ -76,7 +76,7 @@ package object nspl
       )
     }
 
-  def sequence[T <: Renderable[T]](members: List[T], layout: Layout = FreeLayout) =
+  def sequence[T <: Renderable[T]](members: Seq[T], layout: Layout = FreeLayout) =
     {
       val orig = members.map(_.bounds)
       val n = layout(orig)

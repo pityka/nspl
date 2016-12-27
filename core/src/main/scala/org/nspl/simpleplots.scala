@@ -160,7 +160,8 @@ trait SimplePlots {
           axisMargin = axisMargin,
           xgrid = xgrid,
           ygrid = ygrid,
-          frame = frame
+          frame = frame,
+          boundsData = data.map(_._1)
         ),
         main = main,
         xlab = xlab,
@@ -272,6 +273,26 @@ trait SimplePlots {
 
     val bxdata = boxplotData(data)
 
+    boxplotImpl(bxdata, main, xlab, ylab, xnames, fontSize, xgrid, ygrid, xWidth, yHeight, boxColor, frame, xLabelRotation, yLabelRotation)
+  }
+
+  def boxplotImpl(
+    bxdata: DataSource,
+    main: String = "",
+    xlab: String = "",
+    ylab: String = "",
+    xnames: Seq[String] = Nil,
+    fontSize: RelFontSize = 1 fts,
+    xgrid: Boolean = true,
+    ygrid: Boolean = true,
+    xWidth: RelFontSize = 20 fts,
+    yHeight: RelFontSize = 20 fts,
+    boxColor: Colormap = Color.gray4,
+    frame: Boolean = true,
+    xLabelRotation: Double = 0d,
+    yLabelRotation: Double = 0d
+  ): BoxPlot = {
+
     val min = bxdata.iterator.map(_(4)).min
     val max = bxdata.iterator.map(_(5)).max
 
@@ -281,7 +302,7 @@ trait SimplePlots {
         AxisSettings(
           LinearAxisFactory,
           customTicks = xnames.zipWithIndex.map(x => x._2.toDouble + 1 -> x._1),
-          numTicks = 0,
+          numTicks = if (xnames.isEmpty) 5 else 0,
           fontSize = fontSize,
           width = xWidth,
           labelRotation = xLabelRotation
@@ -306,6 +327,27 @@ trait SimplePlots {
       ylabFontSize = fontSize,
       mainFontSize = fontSize
     )
+  }
+
+  def boxplotFromLabels[T: Ordering](
+    data: Seq[(T, Double)],
+    main: String = "",
+    xlab: String = "",
+    ylab: String = "",
+    fontSize: RelFontSize = 1 fts,
+    xgrid: Boolean = true,
+    ygrid: Boolean = true,
+    xWidth: RelFontSize = 20 fts,
+    yHeight: RelFontSize = 20 fts,
+    boxColor: Colormap = Color.gray4,
+    frame: Boolean = true,
+    xLabelRotation: Double = 0d,
+    yLabelRotation: Double = 0d,
+    useLabels: Boolean = true
+  ) = {
+    val bxdata = boxplotData(data.toSeq)
+
+    boxplotImpl(bxdata, main, xlab, ylab, if (useLabels) bxdata.iterator.map(_.label).toList else Nil, fontSize, xgrid, ygrid, xWidth, yHeight, boxColor, frame, xLabelRotation, yLabelRotation)
   }
 
   def binnedboxplot(

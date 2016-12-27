@@ -154,6 +154,19 @@ trait DataAdaptors extends DataTuples {
     list
   }
 
+  def boxplotData[T: Ordering](s: Seq[(T, Double)]): DataSource = {
+    val list = s.groupBy(_._1).toSeq.sortBy(_._1).zipWithIndex.map {
+      case ((label, data), i) =>
+        val s = dataSourceFrom1DSeq(data.map(_._2))
+        val minmax = s.columnMinMax(0)
+        val quantiles = s.quantilesOfColumn(0, Vector(0.25, 0.5, 0.75))
+
+        VectorRow(Vector(i.toDouble + .5, quantiles(1),
+          quantiles(0), quantiles(2), minmax.min, minmax.max), label.toString)
+    }
+    list
+  }
+
   def boxplotData(
     s: DataSourceWithQuantiles,
     x: Vector[Double],

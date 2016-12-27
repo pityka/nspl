@@ -280,7 +280,7 @@ trait Renderers {
     horizontal: Boolean = false,
     stroke: Stroke = Stroke(1d),
     strokeColor: Color = Color.black,
-    fill: Colormap = Color.black,
+    fill: Colormap = Color.white,
     width: Double = 1d,
     yCol2: Option[Int] = None,
     widthCol: Int = 3
@@ -309,17 +309,29 @@ trait Renderers {
             if (w > yAxis.max) yAxis.max
             else if (w < yAxis.min) yAxis.min
             else w
-          }.getOrElse(0.0)
+          }.getOrElse(if (0d > yAxis.max) yAxis.max
+          else if (0d < yAxis.min) yAxis.min
+          else 0d)
 
-          val vWidth = math.abs(xAxis.worldToView(0.0) - xAxis.worldToView(width1))
           val vX = xAxis.worldToView(wX)
+          val vXMin = xAxis.worldToView(xAxis.min)
+          val vXMax = xAxis.worldToView(xAxis.max)
+          val vWidth1 = math.abs(xAxis.worldToView(0.0) - xAxis.worldToView(width1))
+
+          val outOfBoundsLeft = math.max(0d, vXMin - (vX - vWidth1 * 0.5))
+          val outOfBoundsRight = math.max(0d, vX + vWidth1 * 0.5 - vXMax)
+
+          val vWidth = vWidth1 - outOfBoundsLeft - outOfBoundsRight
+
           val vY2 = yAxis.worldToView(wYBottom)
           val vY = yAxis.worldToView(wY)
 
           val vHeight = math.abs(vY2 - vY)
 
+          val rectangle = if (vY2 > vY) Shape.rectangle(vX - vWidth1 * 0.5 + outOfBoundsLeft, vY, vWidth, vHeight) else Shape.rectangle(vX - vWidth1 * 0.5 + outOfBoundsLeft, vY2, vWidth, vHeight)
+
           val shape1 = ShapeElem(
-            Shape.rectangle(vX - vWidth * 0.5, vY, vWidth, vHeight),
+            rectangle,
             fill = color1,
             stroke = Some(stroke),
             strokeColor = strokeColor
@@ -329,22 +341,34 @@ trait Renderers {
 
         } else {
 
-          val wYBottom = yCol2.map { i =>
+          val wXBottom = yCol2.map { i =>
             val w = data(i)
             if (w > xAxis.max) xAxis.max
             else if (w < xAxis.min) xAxis.min
             else w
-          }.getOrElse(0.0)
+          }.getOrElse(if (0d > xAxis.max) xAxis.max
+          else if (0d < xAxis.min) xAxis.min
+          else 0d)
 
-          val vWidth = math.abs(yAxis.worldToView(0.0) - yAxis.worldToView(width))
-          val vX = yAxis.worldToView(wX)
-          val vY = xAxis.worldToView(wY)
-          val vY2 = xAxis.worldToView(wYBottom)
-          val vHeight = math.abs(vY2 - vY)
+          val vY = yAxis.worldToView(wY)
+          val vYMin = yAxis.worldToView(yAxis.min)
+          val vYMax = yAxis.worldToView(yAxis.max)
+
+          val vWidth1 = math.abs(yAxis.worldToView(0.0) - yAxis.worldToView(width))
+
+          val outOfBoundsTop = math.max(0d, vYMax - (vY - vWidth1 * 0.5))
+          val outOfBoundsBottom = math.max(0d, vY + vWidth1 * 0.5 - vYMin)
+
+          val vWidth = vWidth1 - outOfBoundsTop - outOfBoundsBottom
+
+          val vX = xAxis.worldToView(wX)
+          val vX2 = xAxis.worldToView(wXBottom)
+          val vHeight = math.abs(vX2 - vX)
+
+          val rectangle = if (wX > 0) Shape.rectangle(vX2, vY - vWidth1 * 0.5 + outOfBoundsTop, vHeight, vWidth) else Shape.rectangle(vX, vY - vWidth1 * 0.5 + outOfBoundsTop, vHeight, vWidth)
 
           val shape1 = ShapeElem(
-            // Shape.rectangle(vX - vWidth * 0.5, vY - vHeight, vWidth, vHeight),
-            Shape.rectangle(vY2, vX - vWidth * 0.5, vHeight, vWidth),
+            rectangle,
             fill = color1,
             stroke = Some(stroke),
             strokeColor = strokeColor
