@@ -229,7 +229,7 @@ trait JavaAWTUtil {
   )(
     implicit
     er: Renderer[K, JavaRC]
-  ) = {
+  ): File = {
     val os = new BufferedOutputStream(new FileOutputStream(f))
     try {
       write(elem, os, width, mimeType)
@@ -246,10 +246,18 @@ trait JavaAWTUtil {
   )(
     implicit
     er: Renderer[K, JavaRC]
-  ) = {
-    renderToFile(elem, width, "application/pdf")
+  ): File = {
+    renderToFile(f, elem, width, "application/pdf")
     f
   }
+
+  def pdfToFile[K <: Renderable[K]](
+    f: File,
+    elem: K
+  )(
+    implicit
+    er: Renderer[K, JavaRC]
+  ): File = pdfToFile(f, elem, 500)
 
   def pdfToFile[K <: Renderable[K]](
     elem: K,
@@ -270,10 +278,18 @@ trait JavaAWTUtil {
   )(
     implicit
     er: Renderer[K, JavaRC]
-  ) = {
+  ): File = {
     renderToFile(f, elem, width, "image/png")
     f
   }
+
+  def pngToFile[K <: Renderable[K]](
+    f: File,
+    elem: K
+  )(
+    implicit
+    er: Renderer[K, JavaRC]
+  ): File = pngToFile(f, elem, 1000)
 
   def pngToFile[K <: Renderable[K]](
     elem: K,
@@ -281,7 +297,7 @@ trait JavaAWTUtil {
   )(
     implicit
     er: Renderer[K, JavaRC]
-  ) = {
+  ): File = {
     renderToFile(elem, width, "image/png")
   }
 
