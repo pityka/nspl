@@ -1,8 +1,14 @@
 package org.nspl
 
-trait Colormap {
+trait Colormap { self =>
   def apply(v: Double): Color
   def withRange(min: Double, max: Double): Colormap
+}
+object Colormap {
+  def map(cm: Colormap)(f: Color => Color) = new Colormap {
+    def apply(v: Double) = f(cm.apply(v))
+    def withRange(min: Double, max: Double) = this
+  }
 }
 case class Color(r: Int, g: Int, b: Int, a: Int) extends Colormap {
   def apply(v: Double) = this
