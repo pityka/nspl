@@ -31,7 +31,7 @@ object TestSvg {
     )(xlab = "x", ylab = "dens.")
     val p3 = xyplot(
       z2 -> z3 -> point(size = 1d, color = Color(200, 200, 200, 255)),
-      density2d(z2 zip z3, 0d, 0d, n = 100, levels = 10)
+      density2d(z2 zip z3, n = 100, levels = 10)
     )()
     val p4 = xyplot(
       (x zip y zip z map (x => (x._1._1, x._1._2, x._2, x._2 * 10))) -> point(color = HeatMapColors(0.0, 1.0), shapeCol = 3, sizeCol = 5)

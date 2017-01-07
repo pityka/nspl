@@ -2,6 +2,10 @@ package org.nspl
 
 package object data {
 
+  def linspace(min: Double, max: Double, n: Int) = 0 until n map { i =>
+    min + (max - min) / n * i
+  }
+
   def mean(s: Seq[Double]) = s.sum / s.size
 
   def sampleVariance(s: Seq[Double]) = {

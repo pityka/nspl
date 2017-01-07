@@ -77,6 +77,10 @@ class SaddlePlotSpec extends FunSpec with Matchers {
           main = "PC1 vs PC2"
         )
 
+      val densmap = rasterplot(
+        densityMatrix(rotated.firstCol("PC1").toVec.toSeq zip rotated.firstCol("PC2").toVec.toSeq)
+      )
+
       val fig2 = xyplot(
         Frame((rotated.col("PC2", "PC3").toColSeq :+ ("spec" -> spec)): _*)
       )(
@@ -141,7 +145,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
       val gallery = group(
         bar1,
         bar2, boxpl2,
-        colortest, p6, p6b, empty2, xyplot(Seq(0d -> 0d, 1d -> 1d, 2d -> 2d))(), r1, hist1, contour, density1, fig0, fig1, fig2, fig3, fig4, barplot2,
+        colortest, p6, p6b, empty2, xyplot(Seq(0d -> 0d, 1d -> 1d, 2d -> 2d))(), r1, hist1, contour, density1, fig0, fig1, densmap, fig2, fig3, fig4, barplot2,
         TableLayout(3)
       )
 

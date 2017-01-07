@@ -87,6 +87,7 @@ object saddle {
     valueText: Boolean = false,
     valueColor: Color = Color.black,
     valueFontSize: RelFontSize = 0.4 fts,
+    tickLength: RelFontSize = 0.4 fts,
     zlim: Option[(Double, Double)] = None
   ) =
     rasterplot(
@@ -105,7 +106,8 @@ object saddle {
       valueText = valueText,
       valueColor = valueColor,
       valueFontSize = valueFontSize,
-      zlim = zlim
+      zlim = zlim,
+      tickLength = tickLength
     )
 
   def asRaster(mat: Mat[Double]): DataMatrix =

@@ -9,12 +9,13 @@ object KDE {
     1d / (n * bandwidth) * d.foldLeft(0.0)((s, xi) => normPDF((x - xi) / bandwidth, 0, 1) + s)
   }
 
-  def density2d(d: IndexedSeq[(Double, Double)], x: (Double, Double), bw1: Double, bw2: Double) = {
+  def density2d(d: IndexedSeq[(Double, Double)], x: (Double, Double), bw: Double) = {
     // def norm2(x: (Double, Double), y: (Double, Double)) = x._1 * y._1 + x._2 * y._2
-    val n = 1.0 / d.size
+    val n = 1.0 / (d.size * bw * bw)
+    val rbw = 1d / bw
     n * d.foldLeft(0.0) { (s, xi) =>
-      (1 / bw1 * normPDF(x._1 - xi._1 / bw1, 0, 1) *
-        1 / bw2 * normPDF(x._2 - xi._2 / bw2, 0, 1)) + s
+      val sqdist = (x._1 - xi._1) * (x._1 - xi._1) + (x._2 - xi._2) * (x._2 - xi._2)
+      math.exp(-0.5 * sqdist * rbw) + s
     }
   }
 }

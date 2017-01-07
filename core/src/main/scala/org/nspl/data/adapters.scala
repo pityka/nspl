@@ -1,6 +1,7 @@
 package org.nspl.data
 
 import scala.collection.mutable.ArrayBuffer
+import org.nspl._
 
 trait DataAdaptors extends DataTuples {
 
@@ -220,10 +221,11 @@ trait DataAdaptors extends DataTuples {
 
   def density2d(
     data: IndexedSeq[(Double, Double)],
-    bandwidth1: Double = 0.0,
-    bandwidth2: Double = 0.0,
+    bandwidth: Double = 0.1,
     n: Int = 50,
-    levels: Int = 10
+    levels: Int = 10,
+    stroke: Stroke = Stroke(1d),
+    color: Colormap = HeatMapColors(0, 1)
   ) = {
     val min1 = data.map(_._1).min
     val max1 = data.map(_._1).max
@@ -231,15 +233,6 @@ trait DataAdaptors extends DataTuples {
     val max2 = data.map(_._2).max
     val w1 = (max1 - min1) / n
     val w2 = (max2 - min2) / n
-    val h1 =
-      if (bandwidth1 <= 0.0)
-        1.06 * math.sqrt(sampleVariance(data.map(_._1))) * math.pow(n.toDouble, -0.2)
-      else bandwidth1
-
-    val h2 =
-      if (bandwidth2 <= 0.0)
-        1.06 * math.sqrt(sampleVariance(data.map(_._2))) * math.pow(n.toDouble, -0.2)
-      else bandwidth2
 
     linesegments(contour(
       min1,
@@ -248,12 +241,39 @@ trait DataAdaptors extends DataTuples {
       max2,
       n,
       levels
-    )((x, y) => KDE.density2d(data, (x, y), h1, h2)))
+    )((x, y) => KDE.density2d(data, (x, y), bandwidth)), stroke = stroke, color = color)
+
+  }
+
+  def densityMatrix(
+    data: IndexedSeq[(Double, Double)],
+    bandwidth: Double = 0.1,
+    xlim: Option[(Double, Double)] = None,
+    ylim: Option[(Double, Double)] = None,
+    n: Int = 50
+  ) = {
+
+    val min1 = xlim.map(_._1) getOrElse data.map(_._1).min
+    val max1 = xlim.map(_._2) getOrElse data.map(_._1).max
+    val min2 = ylim.map(_._1) getOrElse data.map(_._2).min
+    val max2 = ylim.map(_._2) getOrElse data.map(_._2).max
+    val w1 = linspace(min1, max1, n)
+    val w2 = linspace(min2, max2, n)
+
+    println(w1)
+
+    new DataMatrix(w2.flatMap { y =>
+      w1.map { x =>
+        KDE.density2d(data, (x, y), bandwidth)
+      }
+    }.toArray, n, n)
 
   }
 
   def linesegments(
-    data: Seq[(Double, Seq[((Double, Double), (Double, Double))])]
+    data: Seq[(Double, Seq[((Double, Double), (Double, Double))])],
+    stroke: Stroke = Stroke(1d),
+    color: Colormap = HeatMapColors(0, 1)
   ) = {
     val datasource: DataSourceWithQuantiles = data.flatMap {
       case (z, pairs) =>
@@ -264,6 +284,6 @@ trait DataAdaptors extends DataTuples {
     }
     val zmin = data.map(_._1).min
     val zmax = data.map(_._1).max
-    datasource -> org.nspl.lineSegment(color = org.nspl.HeatMapColors(zmin, zmax))
+    datasource -> org.nspl.lineSegment(stroke = stroke, color = color.withRange(zmin, zmax))
   }
 }
