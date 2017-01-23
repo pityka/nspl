@@ -260,8 +260,6 @@ trait DataAdaptors extends DataTuples {
     val w1 = linspace(min1, max1, n)
     val w2 = linspace(min2, max2, n)
 
-    println(w1)
-
     new DataMatrix(w2.flatMap { y =>
       w1.map { x =>
         KDE.density2d(data, (x, y), bandwidth)
