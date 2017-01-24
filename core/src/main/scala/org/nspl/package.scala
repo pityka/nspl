@@ -84,6 +84,20 @@ package object nspl
       ElemList(transformed.toList)
     }
 
+  def sequence2[T1 <: Renderable[T1], T2 <: Renderable[T2]](members: Seq[Either[T1, T2]], layout: Layout = FreeLayout): ElemList2[T1, T2] =
+    {
+      val orig = members.map(_ match {
+        case scala.util.Left(x) => x.bounds
+        case scala.util.Right(x) => x.bounds
+      })
+      val n = layout(orig)
+      val transformed = n zip members map (x => x._2 match {
+        case scala.util.Left(y) => scala.util.Left(fitToBounds(y, x._1))
+        case scala.util.Right(y) => scala.util.Right(fitToBounds(y, x._1))
+      })
+      ElemList2(transformed)
+    }
+
   implicit def compositeListRenderer[T <: Renderable[T], R <: RenderingContext](implicit r: Renderer[T, R]) =
     new Renderer[ElemList[T], R] {
       def render(ctx: R, elem: ElemList[T]): Unit = {

@@ -6,6 +6,15 @@ case class ElemList[T <: Renderable[T]](members: Seq[T])
   def bounds = if (members.size > 0) outline(members.map(_.bounds)) else Bounds(0, 0, 0, 0)
 }
 
+case class ElemList2[T1 <: Renderable[T1], T2 <: Renderable[T2]](members: Seq[Either[T1, T2]])
+    extends Renderable[ElemList2[T1, T2]] {
+  def transform(tx: Bounds => AffineTransform) = ElemList2(members.map(_ match {
+    case scala.util.Left(x) => scala.util.Left(x.transform(tx))
+    case scala.util.Right(x) => scala.util.Right(x.transform(tx))
+  }))
+  def bounds = if (members.size > 0) outline(members.map(_.merge.bounds)) else Bounds(0, 0, 0, 0)
+}
+
 case class ShapeElem(
     shape: Shape,
     fill: Color = Color.black,
