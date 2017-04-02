@@ -15,8 +15,6 @@ lazy val core = project.in(file("core")).
 		)
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
 
-
-
 lazy val coreJS = project.in(file("core")).
 		settings(commonSettings).
 		settings(
@@ -85,10 +83,9 @@ lazy val saddle = (project in file("saddle")).settings(commonSettings).
 			"com.googlecode.efficient-java-matrix-library" % "ejml" % "0.19" % "test",
       "org.scalatest" %% "scalatest" % "2.1.5" % "test"
 			)
-	).dependsOn(core,awt,scalatagsJvm)
-	// .aggregate(core,awt,coreJS,canvas,scalatagsJs,scalatagsJvm)
+	).dependsOn(core,awt,scalatagsJvm)	
 
-// onLoad in Global := (Command.process("project saddle", _: State)) compose (onLoad in Global).value
+publishArtifact := false
 
 pomExtra in Global := {
   <url>https://pityka.github.io/nspl/</url>
