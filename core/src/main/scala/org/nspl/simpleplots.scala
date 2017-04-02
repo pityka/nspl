@@ -175,6 +175,32 @@ trait SimplePlots {
     )
   }
 
+  // def hist(data: Seq[Double], breaks: Int = 50,
+  //   main: String = "",
+  //   xlab: String = "",
+  //   ylab: String = "",
+  //   xnames: Seq[(Double, String)] = Seq(),
+  //   ynames: Seq[(Double, String)] = Seq(),
+  //   xlim: Option[(Double, Double)] = None,
+  //   ylim: Option[(Double, Double)] = None,
+  //   draw1Line: Boolean = false,
+  //   extraLegend: Seq[(String, LegendElem)] = Nil,
+  //   xLabFontSize: RelFontSize = 1 fts,
+  //   yLabFontSize: RelFontSize = 1 fts,
+  //   mainFontSize: RelFontSize = 1 fts,
+  //   xNumTicks: Int = 4,
+  //   yNumTicks: Int = 4,
+  //   axisMargin: Double = 0.05,
+  //   legendFontSize: RelFontSize = 1 fts,
+  //   legendWidth: RelFontSize = 30 fts,
+  //   xgrid: Boolean = true,
+  //   ygrid: Boolean = true,
+  //   xWidth: RelFontSize = 20 fts,
+  //   yHeight: RelFontSize = 20 fts,
+  //   frame: Boolean = true,
+  //   xLabelRotation: Double = 0d,
+  //   yLabelRotation: Double = 0d) = xyplot(HistogramData(data, breaks) -> bar())(main, xlab, ylab, xnames, ynames, xlim, ylim, false, extraLegend, xLabFontSize, yLabFontSize, mainFontSize, xNumTicks, yNumTicks, 0.0, legendFontSize, legendWidth, xgrid, ygrid, xWidth, yHeight, frame, xLabelRotation, yLabelRotation)
+
   def stackedBarPlot(
     data: DataSource,
     legend: Seq[(Int, String, Colormap)],
