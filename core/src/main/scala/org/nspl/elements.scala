@@ -40,28 +40,17 @@ case class TextBox(
     fontSize: RelFontSize = 1 fts,
     color: Color = Color.black,
     tx: AffineTransform = AffineTransform.identity
-) extends Renderable[TextBox] {
+)(implicit fc: FontConfiguration) extends Renderable[TextBox] {
 
-  val charWidth = fontSize * 0.67
+  val layout: TextLayout = TextLayout(width, text, fontSize)
 
-  val maxCharInLine = width.map(width => math.min((width / charWidth).toInt, text.size)).getOrElse(text.size)
+  val font = fc.font
 
-  val lineWidth = width.map { width =>
-    maxCharInLine * charWidth
-  } getOrElse text.size * charWidth
-
-  val lineNumber = width.map { width =>
-    val lines = if (text.isEmpty) 1 else text.size / maxCharInLine
-    val finalLine = if (lines * maxCharInLine >= text.size) 0 else 1
-    (lines + finalLine)
-  } getOrElse 1
-
-  val lineHeight = fontSize * 1.2
-  val lineAscentHeight = 1d
+  val txLoc = tx.concat(AffineTransform.translate(loc.x, loc.y))
 
   def bounds =
     if (text.isEmpty) Bounds(0, 0, 0, 0)
-    else tx.transform(Bounds(loc.x, loc.y, lineWidth, lineNumber * lineHeight + lineAscentHeight * math.max(0, lineNumber - 1)))
+    else txLoc.transform(layout.bounds)
 
   def transform(tx: Bounds => AffineTransform) = this.copy(tx = tx(bounds).concat(this.tx))
 }

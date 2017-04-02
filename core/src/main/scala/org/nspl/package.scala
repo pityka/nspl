@@ -13,9 +13,11 @@ package object nspl
 
   type AxisElem = Elems3[ShapeElem, ElemList[Elems2[ShapeElem, TextBox]], ElemList[ShapeElem]]
 
-  implicit val fontSize = BaseFontSize(10d)
+  implicit def defaultFont = Monospace
 
-  implicit def rel2ft(v: RelFontSize)(implicit s: BaseFontSize): Double = v.v * s.v //* 1.5
+  implicit def baseFont(implicit fc: FontConfiguration): BaseFontSize = BaseFontSize(fc.font.size)
+
+  implicit def rel2ft(v: RelFontSize)(implicit s: BaseFontSize): Double = v.v * s.v
 
   implicit class ConvD(v: Double) {
     def fts = RelFontSize(v)
@@ -75,6 +77,13 @@ package object nspl
         if (current.h != 0d) bounds.h / current.h else 1d
       )
     }
+
+  def fitToWidth[T <: Renderable[T]](elem: T, width: Double) = {
+    val aspect = elem.bounds.h / elem.bounds.w
+    val height = (width * aspect).toInt
+    val bounds = Bounds(0, 0, width, height)
+    fitToBounds(elem, bounds)
+  }
 
   def sequence[T <: Renderable[T]](members: Seq[T], layout: Layout = FreeLayout) =
     {

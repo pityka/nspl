@@ -177,40 +177,24 @@ object canvasrenderer {
 
   implicit val textRenderer = new CER[TextBox] {
 
-    def wrapText(ctx: CRC, text: String, x: Double, y: Double, maxWidth: Option[Double], lineHeight: Double) = {
-      val words = text.split(" ");
-      var line = "";
-      var y1 = y
-
-      words.zipWithIndex.foreach {
-        case (word, n) =>
-          val testLine = line + word + " ";
-          val metrics = ctx.measureText(testLine)
-          val testWidth = metrics.width
-          if (maxWidth.isDefined && testWidth > maxWidth.get && n > 0) {
-            ctx.fillText(line, x, y1 + lineHeight)
-            line = word + " "
-            y1 += lineHeight
-          } else {
-            line = testLine
-          }
-      }
-      ctx.fillText(line, x, y1 + lineHeight)
-    }
-
     def render(ctx: CanvasRC, elem: TextBox): Unit = {
       AffineTransform.identity.applyTo(ctx.graphics)
-      elem.tx.applyTo(ctx.graphics)
-
+      ctx.graphics.strokeRect(elem.bounds.x, elem.bounds.y, elem.bounds.w, elem.bounds.h)
       if (elem.text.size > 0) {
         savePaint(ctx.graphics) { graphics =>
           saveStroke(graphics) { graphics2 =>
             graphics2.fillStyle = elem.color.css
-            graphics2.font = s"${elem.fontSize.toInt}pt monospace"
-            wrapText(graphics2, elem.text, elem.loc.x, elem.loc.y, elem.width, elem.fontSize)
+            graphics2.font = s"${elem.font.size}pt monospace"
+            elem.layout.lines.foreach {
+              case (line, lineTx) =>
+                val tx = elem.txLoc.concat(lineTx)
+                tx.applyTo(graphics2)
+                graphics2.fillText(line, 0, 0)
+            }
           }
         }
       }
+      AffineTransform.identity.applyTo(ctx.graphics)
     }
   }
 }

@@ -136,45 +136,19 @@ object scalatagrenderer {
   }
 
   implicit val textRenderer = new SER[TextBox] {
-
     def render(ctx: ScalaTagRC, elem: TextBox): Unit = {
-
       if (elem.text.size > 0) {
-
-        val words = elem.text.split(" ");
-        var line = "";
-        var y1 = elem.loc.y
-
-        words.zipWithIndex.foreach {
-          case (word, n) =>
-            val testLine = line + word + " ";
-            val testWidth: Double = testLine.size * elem.fontSize * 0.6
-            if (elem.width.isDefined && testWidth > elem.width.get && n > 0) {
-
-              val svgElem = svgTags.text(
-                svgAttrs.x := elem.loc.x,
-                svgAttrs.y := y1 + elem.fontSize,
-                svgAttrs.transform := elem.tx.svg,
-                svgAttrs.style := s"font-family: monospace;font-size: ${elem.fontSize.toInt}"
-              )(line)
-
-              ctx.elems.append(svgElem)
-
-              line = word + " "
-              y1 += elem.fontSize
-            } else {
-              line = testLine
-            }
+        elem.layout.lines.foreach {
+          case (line, lineTx) =>
+            val tx = elem.txLoc.concat(lineTx)
+            val svgElem = text(
+              svgAttrs.x := 0,
+              svgAttrs.y := 0,
+              svgAttrs.transform := tx.svg,
+              svgAttrs.style := s"font-family: monospace;font-size: ${elem.font.size}"
+            )(line)
+            ctx.elems.append(svgElem)
         }
-        val svgElem = text(
-          svgAttrs.x := elem.loc.x,
-          svgAttrs.y := y1 + elem.fontSize,
-          svgAttrs.transform := elem.tx.svg,
-          svgAttrs.style := s"font-family: monospace;font-size: ${elem.fontSize.toInt}"
-        )(line)
-
-        ctx.elems.append(svgElem)
-
       }
     }
   }

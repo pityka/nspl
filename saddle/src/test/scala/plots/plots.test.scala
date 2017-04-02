@@ -149,22 +149,29 @@ class SaddlePlotSpec extends FunSpec with Matchers {
         TableLayout(3)
       )
 
-      // fitToBounds(group(
-      // TextBox("abc def hijklmn abc def",width=Some(30d)),
-      // TextBox("abc def hijklmn abc def",fontSize=0.1 fts),
-      // VerticalStack()),Bounds(0d,0d,500d,500d))
+  val text = fitToWidth(group(
+    ShapeElem(Shape.circle(1)),
+    TextBox("abc def ghijklmn opqrstvuwxyz"),
+      TextBox("abc def ghijklmn opqrstvuwxyz",width=Some(30d)).translate(10,30),
+      TextBox("abc def ghijklmn opqrstvuwxyz",width=Some(30d)).translate(10,30).rotate(math.Pi/2,0d,0d),
+      TextBox("abc def ghijklmn",fontSize=0.1 fts).rotate(1d),
+      TextBox("opqrstvuwxyz",fontSize=0.1 fts).translate(10,30),
+      TextBox("abc def ghijklmn opqrstvuwxyz",fontSize=1 fts).translate(100,30),
+      FreeLayout),200)
 
       {
         import awtrenderer._
 
+// show(text)
+// show(bar1)
         show(gallery)
-        println(pngToFile(gallery))
-        println(pdfToFile(gallery))
-        println(renderToFile(gallery, 1000, "image/svg"))
+        // println(pngToFile(gallery))
+        // println(pdfToFile(gallery))
+        // println(renderToFile(gallery, 1000, "image/svg"))
       }
       {
         import scalatagrenderer._
-        println(svgToFile(gallery))
+        // println(svgToFile(gallery))
       }
     }
 

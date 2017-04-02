@@ -54,4 +54,4 @@ trait Layout {
 }
 
 case class RelFontSize(v: Double) extends AnyVal
-case class BaseFontSize(v: Double) extends AnyVal
+case class BaseFontSize(v: Int) extends AnyVal

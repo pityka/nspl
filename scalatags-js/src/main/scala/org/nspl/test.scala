@@ -41,6 +41,17 @@ object TestSvg {
 
     val p6 = rasterplot(rasterFromStream(z3.iterator, 30, 30, MinMaxImpl(0.0, 1.0)), xFontSize = 0.5 fts, yFontSize = 0.5 fts)
 
+    val text = fitToWidth(group(
+      ShapeElem(Shape.circle(1)),
+      TextBox("abc def ghijklmn opqrstvuwxyz"),
+      TextBox("abc def ghijklmn opqrstvuwxyz", width = Some(30d)).translate(10, 30),
+      TextBox("abc def ghijklmn opqrstvuwxyz", width = Some(30d)).translate(10, 30).rotate(math.Pi / 2, 0d, 0d),
+      TextBox("abc def ghijklmn", fontSize = 0.1 fts).rotate(1d),
+      TextBox("opqrstvuwxyz", fontSize = 0.1 fts).translate(10, 30),
+      TextBox("abc def ghijklmn opqrstvuwxyz", fontSize = 1 fts).translate(100, 30),
+      FreeLayout
+    ), 200)
+
     val gallery = group(
       p1,
       p2,
@@ -48,6 +59,7 @@ object TestSvg {
       p4,
       p5,
       p6,
+      text,
       ColumnLayout(3)
     )
 
