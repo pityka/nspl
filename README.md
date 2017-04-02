@@ -20,6 +20,8 @@ Ability to use streams of data without keeping them in memory, thus can create p
 
 Easily extendible, typesafe scene graph.
 
+Text labels may use any font accessible to the JVM or the browser. Font widths are properly measured.
+
 See `canvas/src/main/scala/org/nspl/test.scala` for Html5 Canvas examples.
 See `saddle/src/test/scala/plots/plots.test.scala` for JVM examples.
 
@@ -32,7 +34,6 @@ See `saddle/src/test/scala/plots/plots.test.scala` for JVM examples.
 
 ## Limitations
 * static plots (no user interaction)
-* only fixed with font type for labels
 
 ## Alternatives
 
