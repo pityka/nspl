@@ -5,10 +5,16 @@ import scalatags.JsDom.svgTags._
 import scalatags.JsDom.svgAttrs._
 import scalatags.JsDom.svgAttrs
 import scalatags.JsDom.svgTags
+import org.scalajs.dom
+import org.scalajs.dom.html
 
 case class ScalaTagRC(elems: scala.collection.mutable.ArrayBuffer[Modifier]) extends RenderingContext
 
 object scalatagrenderer {
+
+  implicit val defaultGlyphMeasurer = CanvasGlyphMeasurer
+
+  implicit val defaultAWTFont: FontConfiguration = importFont("Arial")
 
   type SER[T] = Renderer[T, ScalaTagRC]
 
@@ -113,7 +119,7 @@ object scalatagrenderer {
               svgAttrs.x := 0,
               svgAttrs.y := 0,
               svgAttrs.transform := tx.svg,
-              svgAttrs.style := s"font-family: monospace;font-size: ${elem.font.size}"
+              svgAttrs.style := svgFont(elem.font)
             )(line)
             ctx.elems.append(svgElem)
         }

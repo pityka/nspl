@@ -2,7 +2,7 @@ scalaVersion := "2.11.8"
 
 lazy val commonSettings = Seq(
   organization := "io.github.pityka",
-  version := "0.0.14",
+  version := "0.0.15",
   scalaVersion := "2.11.8",
   javacOptions ++= Seq("-Xdoclint:none"),
   licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
@@ -15,6 +15,8 @@ lazy val core = project.in(file("core")).
 		)
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
 
+
+
 lazy val coreJS = project.in(file("core")).
 		settings(commonSettings).
 		settings(
@@ -26,6 +28,15 @@ lazy val coreJS = project.in(file("core")).
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
 
 
+lazy val sharedJs = project.in(file("shared-js")).
+		settings(commonSettings).
+		settings(
+			name:="nspl-shared-js",
+      libraryDependencies +=  "org.scala-js" %%% "scalajs-dom" % "0.9.0"
+		)
+    .enablePlugins(ScalaJSPlugin)
+    .dependsOn(coreJS)
+
 lazy val canvas = project.in(file("canvas")).
 		settings(commonSettings).
 		settings(
@@ -33,7 +44,7 @@ lazy val canvas = project.in(file("canvas")).
       libraryDependencies +=  "org.scala-js" %%% "scalajs-dom" % "0.9.0"
 		)
     .enablePlugins(ScalaJSPlugin)
-    .dependsOn(coreJS)
+    .dependsOn(coreJS,sharedJs)
 
 lazy val scalatagsJs = project.in(file("scalatags-js")).
 		settings(commonSettings).
@@ -44,21 +55,27 @@ lazy val scalatagsJs = project.in(file("scalatags-js")).
         "com.lihaoyi" %%% "scalatags" % "0.6.0")
 		)
     .enablePlugins(ScalaJSPlugin)
-    .dependsOn(coreJS)
+    .dependsOn(coreJS,sharedJs)
+
+lazy val sharedJvm = project.in(file("shared-jvm")).
+    		settings(commonSettings).
+    		settings(
+    			name:="nspl-shared-jvm"
+    		).dependsOn(core)
 
 lazy val awt = project.in(file("awt")).
 		settings(commonSettings).
 		settings(
 			name:="nspl-awt",
       libraryDependencies += "de.erichseifert.vectorgraphics2d" % "VectorGraphics2D" % "0.11"
-		).dependsOn(core)
+		).dependsOn(core,sharedJvm)
 
 lazy val scalatagsJvm = project.in(file("scalatags-jvm")).
     		settings(commonSettings).
     		settings(
     			name:="nspl-scalatags-jvm",
           libraryDependencies +="com.lihaoyi" %% "scalatags" % "0.6.0"
-    		).dependsOn(core)
+    		).dependsOn(core,sharedJvm)
 
 lazy val saddle = (project in file("saddle")).settings(commonSettings).
 	settings(

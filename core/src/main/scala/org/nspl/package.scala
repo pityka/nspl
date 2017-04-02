@@ -9,8 +9,7 @@ package object nspl
     with data.DataAdaptors
     with Plots
     with SimplePlots
-    with ImplicitConversions
-    with LowPriorityDefaultFontImplicit {
+    with ImplicitConversions {
 
   type AxisElem = Elems3[ShapeElem, ElemList[Elems2[ShapeElem, TextBox]], ElemList[ShapeElem]]
 
@@ -29,6 +28,8 @@ package object nspl
   implicit class ConvRFS(v: RelFontSize) {
     def value(implicit bs: FontConfiguration) = rel2ft(v)(bs)
   }
+
+  def importFont(name: String)(implicit gm: GlyphMeasurer[NamedFont#F]) = GenericFontConfig(NamedFont(name, 10))(gm)
 
   /* Calculates the total bounds of the members. */
   def outline(members: Seq[Bounds]) = {

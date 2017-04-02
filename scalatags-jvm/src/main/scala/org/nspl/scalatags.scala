@@ -10,6 +10,10 @@ case class ScalaTagRC(elems: scala.collection.mutable.ArrayBuffer[Modifier]) ext
 
 object scalatagrenderer {
 
+  implicit val defaultGlyphMeasurer = AwtGlyphMeasurer
+
+  implicit val defaultAWTFont: FontConfiguration = importFont("Arial")
+
   type SER[T] = Renderer[T, ScalaTagRC]
 
   implicit class PimpedColor(c: Color) {

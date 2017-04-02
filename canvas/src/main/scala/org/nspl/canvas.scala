@@ -8,6 +8,10 @@ case class CanvasRC(graphics: CanvasRenderingContext2D) extends RenderingContext
 
 object canvasrenderer {
 
+  implicit val defaultGlyphMeasurer = CanvasGlyphMeasurer
+
+  implicit val defaultAWTFont: FontConfiguration = importFont("Arial")
+
   def render[K <: Renderable[K]](
     elem: K,
     canvas: html.Canvas,
@@ -179,12 +183,12 @@ object canvasrenderer {
 
     def render(ctx: CanvasRC, elem: TextBox): Unit = {
       AffineTransform.identity.applyTo(ctx.graphics)
-      ctx.graphics.strokeRect(elem.bounds.x, elem.bounds.y, elem.bounds.w, elem.bounds.h)
+      // ctx.graphics.strokeRect(elem.bounds.x, elem.bounds.y, elem.bounds.w, elem.bounds.h)
       if (elem.text.size > 0) {
         savePaint(ctx.graphics) { graphics =>
           saveStroke(graphics) { graphics2 =>
             graphics2.fillStyle = elem.color.css
-            graphics2.font = s"${elem.font.size}pt monospace"
+            graphics2.font = canvasFont(elem.font)
             elem.layout.lines.foreach {
               case (line, lineTx) =>
                 val tx = elem.txLoc.concat(lineTx)
