@@ -9,6 +9,15 @@ case class JavaRC(graphics: Graphics2D) extends RenderingContext
 
 object awtrenderer extends JavaAWTUtil {
 
+  // case class TrueTypeFontConfig(font: TrueTypeFont, measure: GlyphMeasurer[TrueTypeFont#F]) extends FontConfiguration {
+  //   def advance(c: Char) = measure.advance(c, font)
+  //   def lineMetrics = measure.lineMetrics(font)
+  // }
+  object AwtGlyphMeasurer extends GlyphMeasurer[Font#F] {
+    def advance(s: Char, f: Font#F): Double = ???
+    def lineMetrics(f: Font#F): LineMetrics = ???
+  }
+
   implicit val shapeRenderer = new AER[ShapeElem] {
     def render(ctx: JavaRC, elem: ShapeElem): Unit = {
       savePaint(ctx.graphics) { graphics =>
@@ -36,7 +45,7 @@ object awtrenderer extends JavaAWTUtil {
             graphics2.draw(elem.bounds)
             graphics2.setPaint(elem.color)
 
-            val font = new JFont(JFont.MONOSPACED, JFont.PLAIN, elem.font.size)
+            val font: JFont = elem.font
             val frc = graphics2.getFontRenderContext()
 
             def getOutline(text: String) =

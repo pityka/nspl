@@ -9,11 +9,10 @@ package object nspl
     with data.DataAdaptors
     with Plots
     with SimplePlots
-    with ImplicitConversions {
+    with ImplicitConversions
+    with LowPriorityDefaultFontImplicit {
 
   type AxisElem = Elems3[ShapeElem, ElemList[Elems2[ShapeElem, TextBox]], ElemList[ShapeElem]]
-
-  implicit def defaultFont = Monospace
 
   implicit def baseFont(implicit fc: FontConfiguration): BaseFontSize = BaseFontSize(fc.font.size)
 

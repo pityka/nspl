@@ -1,6 +1,6 @@
 package org.nspl
 
-import java.awt.Graphics2D
+import java.awt.{ Graphics2D, Font => JFont }
 import java.io._
 
 trait JavaAWTUtil {
@@ -56,6 +56,14 @@ trait JavaAWTUtil {
     new java.awt.geom.AffineTransform(
       tx.m0, tx.m3, tx.m1, tx.m4, tx.m2, tx.m5
     )
+
+  implicit def font2font(myFont: Font): JFont = myFont match {
+    case Monospace => new JFont(JFont.MONOSPACED, JFont.PLAIN, Monospace.size)
+    case NamedFont(name, size) => new JFont(name, JFont.PLAIN, size)
+    case TrueTypeFont(data, size) => //might need to cache these somehow
+      val bais = new java.io.ByteArrayInputStream(data)
+      JFont.createFont(JFont.TRUETYPE_FONT, bais)
+  }
 
   def show[K <: Renderable[K]](elem: K)(
     implicit

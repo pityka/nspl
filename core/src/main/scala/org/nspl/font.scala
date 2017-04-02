@@ -24,7 +24,12 @@ case object Monospace extends Font with FontConfiguration {
   def lineMetrics = FixGlyphMeasurer.lineMetrics(font)
 }
 
+trait LowPriorityDefaultFontImplicit {
+  implicit def defaultFont = Monospace
+}
+
 case class TrueTypeFont(data: Array[Byte], size: Int) extends Font
+case class NamedFont(name: String, size: Int) extends Font
 
 /* https://docs.oracle.com/javase/tutorial/2d/text/fontconcepts.html */
 case class LineMetrics(ascent: Double, descent: Double, leading: Double)
@@ -35,24 +40,24 @@ object FixGlyphMeasurer extends GlyphMeasurer[Font#F] {
     LineMetrics(ascent = f.size.toDouble * 0.78, descent = f.size.toDouble * 0.22, leading = 0d)
 }
 
-object TrueTypeGlyphMeasurer extends GlyphMeasurer[TrueTypeFont#F] {
-  def advance(s: Char, f: TrueTypeFont#F): Double = ???
-  def lineMetrics(f: TrueTypeFont#F): LineMetrics = ???
-}
+// object TrueTypeGlyphMeasurer extends GlyphMeasurer[TrueTypeFont#F] {
+//   def advance(s: Char, f: TrueTypeFont#F): Double = ???
+//   def lineMetrics(f: TrueTypeFont#F): LineMetrics = ???
+// }
 
-case class TrueTypeFontConfig(font: TrueTypeFont, measure: GlyphMeasurer[TrueTypeFont#F]) extends FontConfiguration {
-  def advance(c: Char) = measure.advance(c, font)
-  def lineMetrics = measure.lineMetrics(font)
-}
+// case class TrueTypeFontConfig(font: TrueTypeFont, measure: GlyphMeasurer[TrueTypeFont#F]) extends FontConfiguration {
+//   def advance(c: Char) = measure.advance(c, font)
+//   def lineMetrics = measure.lineMetrics(font)
+// }
 
-object FontsTest {
-  val nf = Monospace
-  val nf2 = TrueTypeFont(Array(1), 1)
-  nf.advance('d', 1)(FixGlyphMeasurer)
-  // nf.advance('d', 1)(TrueTypeGlyphMeasurer) // should not compile
-  nf2.advance('a', 1)(TrueTypeGlyphMeasurer)
-  nf.advance('a', 1)(FixGlyphMeasurer)
-}
+// object FontsTest {
+//   val nf = Monospace
+//   val nf2 = TrueTypeFont(Array(1), 1)
+//   nf.advance('d', 1)(FixGlyphMeasurer)
+//   // nf.advance('d', 1)(TrueTypeGlyphMeasurer) // should not compile
+//   nf2.advance('a', 1)(TrueTypeGlyphMeasurer)
+//   nf.advance('a', 1)(FixGlyphMeasurer)
+// }
 
 case class TextLayout(lines: Seq[(String, AffineTransform)], bounds: Bounds)
 
