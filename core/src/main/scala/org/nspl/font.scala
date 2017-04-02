@@ -24,11 +24,15 @@ case object Monospace extends Font with FontConfiguration {
   def lineMetrics = FixGlyphMeasurer.lineMetrics(font)
 }
 
-trait LowPriorityDefaultFontImplicit {
-  implicit def defaultFont = Monospace
+object FontConfiguration {
+  implicit def defaultMonospace: FontConfiguration = Monospace
 }
 
-case class TrueTypeFont(data: Array[Byte], size: Int) extends Font
+trait LowPriorityDefaultFontImplicit {
+
+}
+
+// case class TrueTypeFont(data: Array[Byte], size: Int) extends Font
 case class NamedFont(name: String, size: Int) extends Font
 
 /* https://docs.oracle.com/javase/tutorial/2d/text/fontconcepts.html */
@@ -45,10 +49,10 @@ object FixGlyphMeasurer extends GlyphMeasurer[Font#F] {
 //   def lineMetrics(f: TrueTypeFont#F): LineMetrics = ???
 // }
 
-// case class TrueTypeFontConfig(font: TrueTypeFont, measure: GlyphMeasurer[TrueTypeFont#F]) extends FontConfiguration {
-//   def advance(c: Char) = measure.advance(c, font)
-//   def lineMetrics = measure.lineMetrics(font)
-// }
+case class GenericFontConfig[F <: Font](font: F, measure: GlyphMeasurer[F#F]) extends FontConfiguration {
+  def advance(c: Char) = measure.advance(c, font)
+  def lineMetrics = measure.lineMetrics(font)
+}
 
 // object FontsTest {
 //   val nf = Monospace

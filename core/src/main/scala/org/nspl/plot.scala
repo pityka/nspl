@@ -17,10 +17,10 @@ trait Plots {
 
   type XYPlotArea = Elems5[ElemList[ShapeElem], ElemList[ShapeElem], ElemList[DataElem], Elems2[AxisElem, AxisElem], ShapeElem]
 
-  def xyplotarea(
+  def xyplotarea[F: FC](
     data: Seq[(DataSource, List[DataRenderer])],
-    xAxisSetting: AxisSettings = AxisSettings(LinearAxisFactory),
-    yAxisSetting: AxisSettings = AxisSettings(LinearAxisFactory),
+    xAxisSetting: AxisSettings,
+    yAxisSetting: AxisSettings,
     origin: Option[Point] = None,
     xlim: Option[(Double, Double)] = None,
     ylim: Option[(Double, Double)] = None,
@@ -151,7 +151,7 @@ trait Plots {
   type Figure[T <: Renderable[T]] = Elems2[TextBox, Elems2[Elems2[TextBox, T], TextBox]]
 
   /* Decorates with main, xlab and ylab labels. */
-  def figure[T <: Renderable[T]](
+  def figure[T <: Renderable[T], F: FC](
     plot: T,
     main: String = "",
     mainFontSize: RelFontSize = 1.2 fts,
@@ -188,7 +188,7 @@ trait Plots {
 
   type Legend = ElemList[Elems2[ShapeElem, TextBox]]
 
-  def legend(
+  def legend[F: FC](
     entries: List[(String, LegendElem)],
     fontSize: RelFontSize = 1.0 fts,
     width: RelFontSize = 30 fts
@@ -217,7 +217,7 @@ trait Plots {
 
   type HeatmapLegend = Elems2[ElemList[ShapeElem], Elems3[ShapeElem, ElemList[Elems2[ShapeElem, TextBox]], ElemList[ShapeElem]]]
 
-  def heatmapLegend(
+  def heatmapLegend[F: FC](
     min: Double,
     max: Double,
     color: Colormap = HeatMapColors(0d, 1d),

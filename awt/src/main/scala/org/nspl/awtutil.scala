@@ -60,9 +60,9 @@ trait JavaAWTUtil {
   implicit def font2font(myFont: Font): JFont = myFont match {
     case Monospace => new JFont(JFont.MONOSPACED, JFont.PLAIN, Monospace.size)
     case NamedFont(name, size) => new JFont(name, JFont.PLAIN, size)
-    case TrueTypeFont(data, size) => //might need to cache these somehow
-      val bais = new java.io.ByteArrayInputStream(data)
-      JFont.createFont(JFont.TRUETYPE_FONT, bais)
+    // case TrueTypeFont(data, size) => //might need to cache these somehow
+    //   val bais = new java.io.ByteArrayInputStream(data)
+    //   JFont.createFont(JFont.TRUETYPE_FONT, bais)
   }
 
   def show[K <: Renderable[K]](elem: K)(

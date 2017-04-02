@@ -14,9 +14,11 @@ package object nspl
 
   type AxisElem = Elems3[ShapeElem, ElemList[Elems2[ShapeElem, TextBox]], ElemList[ShapeElem]]
 
+  type FC[_] = FontConfiguration
+
   implicit def baseFont(implicit fc: FontConfiguration): BaseFontSize = BaseFontSize(fc.font.size)
 
-  implicit def rel2ft(v: RelFontSize)(implicit s: BaseFontSize): Double = v.v * s.v
+  implicit def rel2ft(v: RelFontSize)(implicit s: FontConfiguration): Double = v.v * s.font.size
 
   implicit class ConvD(v: Double) {
     def fts = RelFontSize(v)
@@ -25,7 +27,7 @@ package object nspl
     def fts = RelFontSize(v.toDouble)
   }
   implicit class ConvRFS(v: RelFontSize) {
-    def value = rel2ft(v)
+    def value(implicit bs: FontConfiguration) = rel2ft(v)(bs)
   }
 
   /* Calculates the total bounds of the members. */

@@ -78,7 +78,7 @@ trait SimplePlots {
 
   type XYPlot = Elems2[Figure[XYPlotArea], Legend]
 
-  def xyplot(data: (DataSource, List[DataRenderer], LegendConfig)*)(
+  def xyplot[F: FC](data: (DataSource, List[DataRenderer], LegendConfig)*)(
     xlog: Boolean = false,
     ylog: Boolean = false,
     main: String = "",
@@ -201,7 +201,7 @@ trait SimplePlots {
   //   xLabelRotation: Double = 0d,
   //   yLabelRotation: Double = 0d) = xyplot(HistogramData(data, breaks) -> bar())(main, xlab, ylab, xnames, ynames, xlim, ylim, false, extraLegend, xLabFontSize, yLabFontSize, mainFontSize, xNumTicks, yNumTicks, 0.0, legendFontSize, legendWidth, xgrid, ygrid, xWidth, yHeight, frame, xLabelRotation, yLabelRotation)
 
-  def stackedBarPlot(
+  def stackedBarPlot[F: FC](
     data: DataSource,
     legend: Seq[(Int, String, Colormap)],
     xCol: Int = 0,
@@ -280,7 +280,7 @@ trait SimplePlots {
 
   type BoxPlot = Figure[XYPlotArea]
 
-  def boxplot(
+  def boxplot[F: FC](
     data: DataSourceWithQuantiles,
     main: String = "",
     xlab: String = "",
@@ -302,7 +302,7 @@ trait SimplePlots {
     boxplotImpl(bxdata, main, xlab, ylab, xnames, fontSize, xgrid, ygrid, xWidth, yHeight, boxColor, frame, xLabelRotation, yLabelRotation)
   }
 
-  def boxplotImpl(
+  def boxplotImpl[F: FC](
     bxdata: DataSource,
     main: String = "",
     xlab: String = "",
@@ -355,7 +355,7 @@ trait SimplePlots {
     )
   }
 
-  def boxplotFromLabels[T: Ordering](
+  def boxplotFromLabels[T: Ordering, F: FC](
     data: Seq[(T, Double)],
     main: String = "",
     xlab: String = "",
@@ -376,7 +376,7 @@ trait SimplePlots {
     boxplotImpl(bxdata, main, xlab, ylab, if (useLabels) bxdata.iterator.map(_.label).toList else Nil, fontSize, xgrid, ygrid, xWidth, yHeight, boxColor, frame, xLabelRotation, yLabelRotation)
   }
 
-  def binnedboxplot(
+  def binnedboxplot[F: FC](
     dim1: Seq[Double],
     dim2: Seq[Double],
     main: String = "",
@@ -421,7 +421,7 @@ trait SimplePlots {
       )
   }
 
-  def contourplot(
+  def contourplot[F: FC](
     xlim: (Double, Double),
     ylim: (Double, Double),
     f: (Double, Double) => Double,
@@ -464,7 +464,7 @@ trait SimplePlots {
 
   type RasterPlot = Elems2[Figure[XYPlotArea], HeatmapLegend]
 
-  def rasterplot(
+  def rasterplot[F: FC](
     data: DataSource,
     main: String = "",
     xlab: String = "",

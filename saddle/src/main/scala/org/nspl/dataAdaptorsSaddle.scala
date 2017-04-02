@@ -6,7 +6,7 @@ import org.saddle._
 
 object saddle {
 
-  def barplotVertical(
+  def barplotVertical[F: FC](
     series: Series[String, Double],
     main: String = "",
     xlab: String = "",
@@ -40,7 +40,7 @@ object saddle {
       xlim = xlim, ylim = ylim, frame = frame
     )
 
-  def barplotHorizontal(
+  def barplotHorizontal[F: FC](
     series: Series[String, Double],
     main: String = "",
     xlab: String = "",
@@ -73,7 +73,7 @@ object saddle {
       yLabelRotation = yLabelRotation, ylim = ylim, xlim = xlim, frame = frame
     )
 
-  def rasterplotFromFrame[RX, CX](
+  def rasterplotFromFrame[RX, CX, F: FC](
     dataFrame: Frame[RX, CX, Double],
     main: String = "",
     xlab: String = "",

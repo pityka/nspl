@@ -10,7 +10,7 @@ trait DataRenderer {
 
 trait Renderers {
 
-  def point(
+  def point[T: FC](
     xCol: Int = 0,
     yCol: Int = 1,
     colorCol: Int = 2,

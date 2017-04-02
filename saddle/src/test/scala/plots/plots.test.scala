@@ -4,11 +4,14 @@ import org.scalatest.Matchers
 
 import org.nspl.saddle._
 import org.nspl.data._
+import org.nspl.awtrenderer._
 import org.saddle._
 
 import org.saddle.io._
 
 class SaddlePlotSpec extends FunSpec with Matchers {
+
+  implicit val myfont = importFont("Hasklig")
 
   def readFrameFromClasspath(s: String) =
     CsvParser.parse(new CsvSource {
@@ -151,7 +154,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
 
   val text = fitToWidth(group(
     ShapeElem(Shape.circle(1)),
-    TextBox("abc def ghijklmn opqrstvuwxyz"),
+    TextBox("ABC abc def ghijklmn opqrstvuwxyz"),
       TextBox("abc def ghijklmn opqrstvuwxyz",width=Some(30d)).translate(10,30),
       TextBox("abc def ghijklmn opqrstvuwxyz",width=Some(30d)).translate(10,30).rotate(math.Pi/2,0d,0d),
       TextBox("abc def ghijklmn",fontSize=0.1 fts).rotate(1d),
@@ -162,7 +165,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
       {
         import awtrenderer._
 
-// show(text)
+show(text)
 // show(bar1)
         show(gallery)
         // println(pngToFile(gallery))

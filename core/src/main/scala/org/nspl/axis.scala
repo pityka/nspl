@@ -64,7 +64,7 @@ case class AxisSettings(
     fontSize: RelFontSize = 1 fts,
     tickAlignment: Double = -1.0,
     lineWidth: Double = 1.0
-) {
+)(implicit fc: FontConfiguration) {
 
   def renderable(
     axis: Axis,
