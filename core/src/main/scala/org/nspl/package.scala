@@ -5,11 +5,18 @@ package object nspl
     with Tuples2
     with Colors
     with Shapes
-    with Renderers
-    with data.DataAdaptors
-    with Plots
-    with SimplePlots
-    with ImplicitConversions {
+    // with Renderers
+    // with data.DataAdaptors
+    // with Plots
+    // with SimplePlots
+    // with ImplicitConversions
+    with Events {
+
+  type Build[A] = Event => A
+
+  implicit class defaultBuild[T](b: Build[T]) {
+    def build = b(BuildEvent)
+  }
 
   type AxisElem = Elems3[ShapeElem, ElemList[Elems2[ShapeElem, TextBox]], ElemList[ShapeElem]]
 
@@ -80,6 +87,9 @@ package object nspl
       )
     }
 
+  implicit def renderable2build[T <: Renderable[T]](elem: T): Build[T] =
+    Build { case _ => elem }
+
   def fitToWidth[T <: Renderable[T]](elem: T, width: Double) = {
     val aspect = elem.bounds.h / elem.bounds.w
     val height = (width * aspect).toInt
@@ -87,7 +97,7 @@ package object nspl
     fitToBounds(elem, bounds)
   }
 
-  def sequence[T <: Renderable[T]](members: Seq[T], layout: Layout = FreeLayout) =
+  def sequence[T <: Renderable[T]](members: Seq[T], layout: Layout): ElemList[T] =
     {
       val orig = members.map(_.bounds)
       val n = layout(orig)
@@ -95,13 +105,39 @@ package object nspl
       ElemList(transformed.toList)
     }
 
-  def sequence2[T1 <: Renderable[T1], T2 <: Renderable[T2]](members: Seq[Either[T1, T2]], layout: Layout = FreeLayout): ElemList2[T1, T2] =
-    {
-      val orig = members.map(_ match {
-        case scala.util.Left(x) => x.bounds
-        case scala.util.Right(x) => x.bounds
+  def sequence[T <: Renderable[T]](members: Seq[T]): ElemList[T] = sequence(members, FreeLayout)
+
+  def sequence[T <: Renderable[T]](members: Seq[Build[T]], layout: Layout): Build[ElemList[T]] =
+    { (e: Event) =>
+      val members1_build = members.map(_.build.bounds)
+      val n = layout(members1_build)
+      val members1 = n zip members1_build zip members map {
+        case ((to, from), build) =>
+          build(e.mapBounds(to, from))
+      }
+      val transformed = n zip members1 map (x => fitToBounds(x._2, x._1))
+      ElemList(transformed.toList)
+    }
+
+  def sequence[T <: Renderable[T]](members: Seq[Build[T]]): Build[ElemList[T]] = sequence(members, FreeLayout)
+
+  def sequence2[T1 <: Renderable[T1], T2 <: Renderable[T2]](members1: Seq[Either[Build[T1], Build[T2]]], layout: Layout = FreeLayout): Build[ElemList2[T1, T2]] =
+    { (e: Event) =>
+      val members1_build = members1.map(_ match {
+        case scala.util.Left(x) => x.build.bounds
+        case scala.util.Right(x) => x.build.bounds
       })
-      val n = layout(orig)
+
+      val n = layout(members1_build)
+
+      val members: Seq[Either[T1, T2]] = (n zip members1_build zip members1).map {
+        case ((from, to), build) =>
+          build match {
+            case scala.util.Left(x) => scala.util.Left(x(e.mapBounds(from, to)))
+            case scala.util.Right(x) => scala.util.Right(x(e.mapBounds(from, to)))
+          }
+      }
+
       val transformed = n zip members map (x => x._2 match {
         case scala.util.Left(y) => scala.util.Left(fitToBounds(y, x._1))
         case scala.util.Right(y) => scala.util.Right(fitToBounds(y, x._1))
@@ -116,18 +152,29 @@ package object nspl
       }
     }
 
-  implicit def dataElemRenderer[RC <: RenderingContext](implicit re: Renderer[ShapeElem, RC], rt: Renderer[TextBox, RC]) = new Renderer[DataElem, RC] {
-    def render(r: RC, e: DataElem): Unit = {
-      e.data.iterator.foreach { row =>
-        e.renderers.foreach { dr =>
-          dr.render(row, e.xAxis, e.yAxis, r, e.tx)
-        }
-      }
-      e.renderers.foreach(_.clear)
-    }
-  }
+  // implicit def dataElemRenderer[RC <: RenderingContext](implicit re: Renderer[ShapeElem, RC], rt: Renderer[TextBox, RC]) = new Renderer[DataElem, RC] {
+  //   def render(r: RC, e: DataElem): Unit = {
+  //     e.data.iterator.foreach { row =>
+  //       e.renderers.foreach { dr =>
+  //         dr.render(row, e.xAxis, e.yAxis, r, e.tx)
+  //       }
+  //     }
+  //     e.renderers.foreach(_.clear)
+  //   }
+  // }
 
   /* Normalized scientific notation. */
   def scientific(x: Double) = x / math.pow(10d, math.log10(x).round) -> math.log10(x).round
+
+  def mapPoint(p: Point, from: Bounds, to: Bounds): Point =
+    if (from.w == 0 || from.h == 0) Point(0d, 0d)
+    else {
+      val xF = to.w / from.w
+      val yF = to.h / from.h
+      Point(
+        (p.x - from.x) * xF + to.x,
+        (p.y - from.y) * yF + to.y
+      )
+    }
 
 }

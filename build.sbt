@@ -65,7 +65,8 @@ lazy val awt = project.in(file("awt")).
 		settings(commonSettings).
 		settings(
 			name:="nspl-awt",
-      libraryDependencies += "de.erichseifert.vectorgraphics2d" % "VectorGraphics2D" % "0.11"
+      libraryDependencies ++= Seq("de.erichseifert.vectorgraphics2d" % "VectorGraphics2D" % "0.11",      
+      "org.scalatest" %% "scalatest" % "2.1.5" % "test")
 		).dependsOn(core,sharedJvm)
 
 lazy val scalatagsJvm = project.in(file("scalatags-jvm")).
@@ -83,7 +84,7 @@ lazy val saddle = (project in file("saddle")).settings(commonSettings).
 			"com.googlecode.efficient-java-matrix-library" % "ejml" % "0.19" % "test",
       "org.scalatest" %% "scalatest" % "2.1.5" % "test"
 			)
-	).dependsOn(core,awt,scalatagsJvm)	
+	).dependsOn(core,awt,scalatagsJvm)
 
 publishArtifact := false
 

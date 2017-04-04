@@ -1,6 +1,8 @@
 package org.nspl
 
 import java.awt.{ Graphics2D, Font => JFont }
+import java.awt.event._
+import javax.swing.event.MouseInputAdapter
 import java.io._
 
 trait JavaAWTUtil {
@@ -82,6 +84,67 @@ trait JavaAWTUtil {
       }, java.awt.BorderLayout.CENTER);
 
     val d = new java.awt.Dimension(elem.bounds.w.toInt, elem.bounds.h.toInt)
+    frame.addMouseListener(new MouseInputAdapter {
+      override def mouseClicked(e: MouseEvent) = {
+        val componentBounds = e.getComponent.getBounds
+        val componentX = e.getX
+        val componentY = e.getY
+        val scaleX = componentBounds.getWidth / elem.bounds.w
+        val scaleY = componentBounds.getHeight / elem.bounds.h
+
+        println((componentX / scaleX, componentY / scaleY))
+      }
+    })
+    frame.pack();
+    frame.setSize(d);
+    frame.setVisible(true);
+  }
+
+  def show[K <: Renderable[K]](elem: Build[K])(
+    implicit
+    er: Renderer[K, JavaRC]
+  ): Unit = {
+    import javax.swing._
+    import java.awt.{ Graphics, RenderingHints }
+    val frame = new JFrame("");
+    var paintableElem = elem(BuildEvent)
+    frame.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
+    frame
+      .getContentPane()
+      .add(new JComponent {
+        override def paintComponent(g: Graphics) = {
+          super.paintComponent(g)
+          val g2 = g.asInstanceOf[Graphics2D]
+          g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.
+            VALUE_ANTIALIAS_ON)
+          g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
+          val bounds = getBounds()
+
+          fitToBounds(paintableElem, bounds).render(JavaRC(g2))
+        }
+      }, java.awt.BorderLayout.CENTER);
+
+    val d = new java.awt.Dimension(paintableElem.bounds.w.toInt, paintableElem.bounds.h.toInt)
+    frame.addMouseListener(new MouseInputAdapter {
+      override def mouseClicked(e: MouseEvent) = {
+        val componentBounds = e.getComponent.getBounds
+        val componentX = e.getX
+        val componentY = e.getY
+        val scaleX = componentBounds.getWidth / paintableElem.bounds.w
+        val scaleY = componentBounds.getHeight / paintableElem.bounds.h
+
+        val event = Click(componentX / scaleX, componentY / scaleY)
+        paintableElem = elem(event)
+
+        e.getComponent.repaint
+      }
+      override def mouseWheelMoved(e: MouseWheelEvent) = {
+
+        paintableElem = elem(Scroll(e.getPreciseWheelRotation))
+
+        e.getComponent.repaint
+      }
+    })
     frame.pack();
     frame.setSize(d);
     frame.setVisible(true);

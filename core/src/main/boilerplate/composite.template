@@ -18,6 +18,16 @@ trait Tuples2 {
   }#
   ]
 
+  [#def group[[#T1<:Renderable[T1]#]]([#m1b:Build[T1]#],layout:Layout) : Build[org.nspl.Elems1[[#T1#]]] = { (e:Event) =>
+      [# val m1_build = m1b.build.bounds #
+      ]
+      val n = layout(List([#m1_build#]))
+      [#val m1 = m1b(e.mapBounds(m1_build, n(0))) #
+      ]
+      org.nspl.Elems1([#fitToBounds(m1,n(0))#])
+  }#
+  ]
+
   [#implicit def compositeRenderer1[[#T1<:Renderable[T1]#],R<:RenderingContext](implicit [#r1:Renderer[T1,R]#]) = new Renderer[org.nspl.Elems1[[#T1#]],R] {
     def render(ctx:R,elem:Elems1[[#T1#]]) : Unit ={
         [#r1.render(ctx,elem.m1)#
