@@ -117,34 +117,48 @@ package object nspl
 
   def sequence[T <: Renderable[T]](members: Seq[Build[T]], layout: Layout): Build[ElemList[T]] =
     {
-      case (old: Option[ElemList[T]], e: Event) =>
-        val members1_build = members.map(_.build.bounds)
-        val n = layout(members1_build)
-        val members1 = (n zip members1_build zip members).zipWithIndex map {
+      case (Some(old), e: Event) =>
+        val bounds = old.members.map(_.bounds)
+        val n = layout(bounds)
+        val members1 = (n zip bounds zip members).zipWithIndex map {
           case (((to, from), build), idx) =>
-            build((old.map(_.members(idx)), e.mapBounds(to, from)))
+            build(Some(old.members(idx)), e.mapBounds(to, from))
         }
         val transformed = n zip members1 map (x => fitToBounds(x._2, x._1))
         ElemList(transformed.toList)
+      case (None, BuildEvent) =>
+        sequence(members.map(_.build), layout)
+      case _ => throw new RuntimeException("should not happen")
     }
 
   def sequence[T <: Renderable[T]](members: Seq[Build[T]]): Build[ElemList[T]] = sequence(members, FreeLayout)
 
-  def sequence2[T1 <: Renderable[T1], T2 <: Renderable[T2]](members1: Seq[Either[Build[T1], Build[T2]]], layout: Layout = FreeLayout): Build[ElemList2[T1, T2]] =
+  def sequence2[T1 <: Renderable[T1], T2 <: Renderable[T2]](members: Seq[Either[T1, T2]], layout: Layout): ElemList2[T1, T2] =
     {
-      case (old: Option[ElemList2[T1, T2]], e: Event) =>
-        val members1_build = members1.map(_ match {
-          case scala.util.Left(x) => x.build.bounds
-          case scala.util.Right(x) => x.build.bounds
-        })
+      val bounds = members.map(_.fold(_.bounds, _.bounds))
 
-        val n = layout(members1_build)
+      val n = layout(bounds)
 
-        val members: Seq[Either[T1, T2]] = (n zip members1_build zip members1).zipWithIndex.map {
+      val transformed = n zip members map (x => x._2 match {
+        case scala.util.Left(y) => scala.util.Left(fitToBounds(y, x._1))
+        case scala.util.Right(y) => scala.util.Right(fitToBounds(y, x._1))
+      })
+      ElemList2(transformed)
+    }
+
+  def sequence2[T1 <: Renderable[T1], T2 <: Renderable[T2]](members1: Seq[Either[Build[T1], Build[T2]]], layout: Layout): Build[ElemList2[T1, T2]] =
+    {
+      case (None, BuildEvent) => sequence2(members1.map(_.fold(x => scala.util.Left(x.build), x => scala.util.Right(x.build))), layout)
+      case (Some(old), e: Event) =>
+        val bounds = old.members.map(_.fold(_.bounds, _.bounds))
+
+        val n = layout(bounds)
+
+        val members: Seq[Either[T1, T2]] = (n zip bounds zip members1).zipWithIndex.map {
           case (((from, to), build), idx) =>
             build match {
-              case scala.util.Left(x) => scala.util.Left(x(old.map(_.members(idx).left.get) -> e.mapBounds(from, to)))
-              case scala.util.Right(x) => scala.util.Right(x(old.map(_.members(idx).right.get) -> e.mapBounds(from, to)))
+              case scala.util.Left(x) => scala.util.Left(x(Some(old.members(idx).left.get) -> e.mapBounds(from, to)))
+              case scala.util.Right(x) => scala.util.Right(x(Some(old.members(idx).right.get) -> e.mapBounds(from, to)))
             }
         }
 
@@ -153,6 +167,7 @@ package object nspl
           case scala.util.Right(y) => scala.util.Right(fitToBounds(y, x._1))
         })
         ElemList2(transformed)
+      case _ => throw new RuntimeException("should not happen")
     }
 
   /* Normalized scientific notation. */

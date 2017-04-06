@@ -58,7 +58,6 @@ trait Plots {
   ): Build[XYPlotArea] = Build(xyplotarea(data, xAxisSetting, yAxisSetting, origin, xlim, ylim, axisMargin, xCol, yCol, xgrid, ygrid, frame, boundsData)) {
     case (Some(old), Scroll(v1)) =>
       import old._
-      println(old)
       val v = if (v1 > 0) 1.1 else 0.9
       val xMid = xMin + (xMax - xMin) * 0.5
       val yMid = yMin + (yMax - yMin) * 0.5
@@ -66,7 +65,10 @@ trait Plots {
       val xMax1 = xMid + (xMax - xMin) * 0.5 * v
       val yMin1 = yMid - (yMax - yMin) * 0.5 * v
       val yMax1 = yMid + (yMax - yMin) * 0.5 * v
-      xyplotarea(data, xAxisSetting, yAxisSetting, origin, Some(xMin1 -> xMax1), Some(yMin1 -> yMax1), axisMargin, xCol, yCol, xgrid, ygrid, frame, boundsData)
+      println(xMin1, xMax1, yMin1, yMax1, v)
+      if (xMin1.isNaN || xMax1.isNaN || yMin1.isNaN || yMax1.isNaN) old
+      else
+        xyplotarea(data, xAxisSetting, yAxisSetting, origin, Some(xMin1 -> xMax1), Some(yMin1 -> yMax1), axisMargin, xCol, yCol, xgrid, ygrid, frame, boundsData)
   }
 
   def xyplotarea[F: FC](
@@ -218,10 +220,10 @@ trait Plots {
     ylabFontSize: RelFontSize = 1.0 fts,
     ylabDistance: RelFontSize = 1.0 fts,
     ylabAlignment: Alignment = Center
-  ): Build[Figure[T]] = {
-    case (old: Option[Figure[T]], e: Event) =>
-      figure(plot(mapEvent(old -> e)(_.m2.m1.m2)), main, mainFontSize, mainDistance, xlab, xlabFontSize, xlabDistance, xlabAlignment, ylab, ylabFontSize, ylabDistance, ylabAlignment)
-  }
+  ): Build[Figure[T]] =
+    Build(figure(plot.build, main, mainFontSize, mainDistance, xlab, xlabFontSize, xlabDistance, xlabAlignment, ylab, ylabFontSize, ylabDistance, ylabAlignment)) {
+      case (Some(old), e) => old.copy(m2 = old.m2.copy(m1 = old.m2.m1.copy(m2 = plot(mapEvent(Some(old), e)(_.m2.m1.m2)))))
+    }
 
   /* Decorates with main, xlab and ylab labels. */
   def figure[T <: Renderable[T], F: FC](
