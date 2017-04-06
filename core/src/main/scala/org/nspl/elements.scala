@@ -6,6 +6,15 @@ case class ElemList[T <: Renderable[T]](members: Seq[T])
   def bounds = if (members.size > 0) outline(members.map(_.bounds)) else Bounds(0, 0, 0, 0)
 }
 
+object ElemList {
+  implicit def compositeListRenderer[T <: Renderable[T], R <: RenderingContext](implicit r: Renderer[T, R]) =
+    new Renderer[ElemList[T], R] {
+      def render(ctx: R, elem: ElemList[T]): Unit = {
+        elem.members.foreach(e => r.render(ctx, e))
+      }
+    }
+}
+
 case class ElemList2[T1 <: Renderable[T1], T2 <: Renderable[T2]](members: Seq[Either[T1, T2]])
     extends Renderable[ElemList2[T1, T2]] {
   def transform(tx: Bounds => AffineTransform) = ElemList2(members.map(_ match {

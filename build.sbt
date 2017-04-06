@@ -5,6 +5,7 @@ lazy val commonSettings = Seq(
   version := "0.0.15",
   scalaVersion := "2.11.8",
   javacOptions ++= Seq("-Xdoclint:none"),
+  // scalacOptions ++= Seq("-Xlog-implicits"),
   licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 )
 
@@ -65,7 +66,7 @@ lazy val awt = project.in(file("awt")).
 		settings(commonSettings).
 		settings(
 			name:="nspl-awt",
-      libraryDependencies ++= Seq("de.erichseifert.vectorgraphics2d" % "VectorGraphics2D" % "0.11",      
+      libraryDependencies ++= Seq("de.erichseifert.vectorgraphics2d" % "VectorGraphics2D" % "0.11",
       "org.scalatest" %% "scalatest" % "2.1.5" % "test")
 		).dependsOn(core,sharedJvm)
 

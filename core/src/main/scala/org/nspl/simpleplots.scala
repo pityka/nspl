@@ -76,7 +76,7 @@ trait SimplePlots {
   //   def frame: Boolean = true
   // }
 
-  type XYPlot = Elems2[Figure[XYPlotArea], Legend]
+  // type XYPlot = Elems2[Figure[Build[XYPlotArea]], Legend]
 
   def xyplot[F: FC](data: (DataSource, List[DataRenderer], LegendConfig)*)(
     xlog: Boolean = false,
@@ -105,7 +105,7 @@ trait SimplePlots {
     frame: Boolean = true,
     xLabelRotation: Double = 0d,
     yLabelRotation: Double = 0d
-  ): XYPlot = {
+  ) = {
     val xFac = LinearAxisFactory //if (xlog) Log10AxisFactory else LinearAxisFactory
     val yFac = LinearAxisFactory //if (ylog) Log10AxisFactory else LinearAxisFactory
 
@@ -134,45 +134,51 @@ trait SimplePlots {
         width = legendWidth
       )
 
-    group(
-      figure(
-        xyplotarea(
-          data1,
-          AxisSettings(
-            xFac,
-            customTicks = xnames,
-            fontSize = xLabFontSize,
-            numTicks = xNumTicks,
-            width = xWidth,
-            labelRotation = xLabelRotation
-          ),
-          AxisSettings(
-            yFac,
-            customTicks = ynames,
-            fontSize = yLabFontSize,
-            numTicks = yNumTicks,
-            width = yHeight,
-            labelRotation = yLabelRotation
-          ),
-          None,
-          xlim = xlim,
-          ylim = ylim,
-          axisMargin = axisMargin,
-          xgrid = xgrid,
-          ygrid = ygrid,
-          frame = frame,
-          boundsData = data.map(_._1)
+    val plotArea =
+      xyplotareaBuild(
+        data1,
+        AxisSettings(
+          xFac,
+          customTicks = xnames,
+          fontSize = xLabFontSize,
+          numTicks = xNumTicks,
+          width = xWidth,
+          labelRotation = xLabelRotation
         ),
-        main = main,
-        xlab = xlab,
-        ylab = ylab,
-        xlabFontSize = xLabFontSize,
-        ylabFontSize = yLabFontSize,
-        mainFontSize = mainFontSize
-      ),
+        AxisSettings(
+          yFac,
+          customTicks = ynames,
+          fontSize = yLabFontSize,
+          numTicks = yNumTicks,
+          width = yHeight,
+          labelRotation = yLabelRotation
+        ),
+        None,
+        xlim = xlim,
+        ylim = ylim,
+        axisMargin = axisMargin,
+        xgrid = xgrid,
+        ygrid = ygrid,
+        frame = frame,
+        boundsData = data.map(_._1)
+      )
+
+    val fig = figureBuild(
+      plotArea,
+      main = main,
+      xlab = xlab,
+      ylab = ylab,
+      xlabFontSize = xLabFontSize,
+      ylabFontSize = yLabFontSize,
+      mainFontSize = mainFontSize
+    )
+
+    group(
+      fig,
       legend1,
       HorizontalStack(Center, 5d)
     )
+
   }
 
   // def hist(data: Seq[Double], breaks: Int = 50,
@@ -278,7 +284,7 @@ trait SimplePlots {
     }
   }
 
-  type BoxPlot = Figure[XYPlotArea]
+  // type BoxPlot = Figure[XYPlotArea]
 
   def boxplot[F: FC](
     data: DataSourceWithQuantiles,
@@ -295,7 +301,7 @@ trait SimplePlots {
     frame: Boolean = true,
     xLabelRotation: Double = 0d,
     yLabelRotation: Double = 0d
-  ): BoxPlot = {
+  ) = {
 
     val bxdata = boxplotData(data)
 
@@ -317,7 +323,7 @@ trait SimplePlots {
     frame: Boolean = true,
     xLabelRotation: Double = 0d,
     yLabelRotation: Double = 0d
-  ): BoxPlot = {
+  ) = {
 
     val min = bxdata.iterator.map(_(4)).min
     val max = bxdata.iterator.map(_(5)).max
@@ -393,7 +399,7 @@ trait SimplePlots {
     frame: Boolean = true,
     xLabelRotation: Double = 0d,
     yLabelRotation: Double = 0d
-  ): XYPlot = {
+  ) = {
 
     xyplot(
       boxplotData(
@@ -436,7 +442,7 @@ trait SimplePlots {
     xWidth: RelFontSize = 20 fts,
     yHeight: RelFontSize = 20 fts,
     frame: Boolean = true
-  ): XYPlot = {
+  ) = {
 
     val contours = data.contour(
       xlim._1,
@@ -462,7 +468,7 @@ trait SimplePlots {
       )
   }
 
-  type RasterPlot = Elems2[Figure[XYPlotArea], HeatmapLegend]
+  // type RasterPlot = Elems2[Figure[XYPlotArea], HeatmapLegend]
 
   def rasterplot[F: FC](
     data: DataSource,
@@ -488,7 +494,7 @@ trait SimplePlots {
     frame: Boolean = true,
     xLabelRotation: Double = -.5 * math.Pi,
     yLabelRotation: Double = 0d
-  ): RasterPlot = {
+  ) = {
     val minmaxx = data.columnMinMax(xCol)
     val minmaxy = data.columnMinMax(yCol)
     val minmaxz = data.columnMinMax(zCol)

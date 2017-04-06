@@ -13,9 +13,61 @@ case class DataElem(
   def transform(tx: Bounds => AffineTransform) = this.copy(tx = tx(bounds).concat(this.tx))
 }
 
+object DataElem {
+  implicit def dataElemRenderer[RC <: RenderingContext](implicit re: Renderer[ShapeElem, RC], rt: Renderer[TextBox, RC]) = new Renderer[DataElem, RC] {
+    def render(r: RC, e: DataElem): Unit = {
+      e.data.iterator.foreach { row =>
+        e.renderers.foreach { dr =>
+          dr.render(row, e.xAxis, e.yAxis, r, e.tx)
+        }
+      }
+      e.renderers.foreach(_.clear)
+    }
+  }
+}
+
 trait Plots {
 
-  type XYPlotArea = Elems5[ElemList[ShapeElem], ElemList[ShapeElem], ElemList[DataElem], Elems2[AxisElem, AxisElem], ShapeElem]
+  type XYPlotAreaType = Elems5[ElemList[ShapeElem], ElemList[ShapeElem], ElemList[DataElem], Elems2[AxisElem, AxisElem], ShapeElem]
+
+  case class XYPlotArea(elem: XYPlotAreaType, xMin: Double, xMax: Double, yMin: Double, yMax: Double) extends Renderable[XYPlotArea] {
+    def transform(v: Bounds => AffineTransform) = this.copy(elem = elem.transform(v))
+    def bounds: Bounds = elem.bounds
+  }
+
+  object XYPlotArea {
+    implicit def renderer[RC <: RenderingContext](implicit re: Renderer[ShapeElem, RC], rt: Renderer[TextBox, RC]) = new Renderer[XYPlotArea, RC] {
+      def render(r: RC, e: XYPlotArea): Unit = implicitly[Renderer[XYPlotAreaType, RC]].render(r, e.elem)
+    }
+  }
+
+  def xyplotareaBuild[F: FC](
+    data: Seq[(DataSource, List[DataRenderer])],
+    xAxisSetting: AxisSettings,
+    yAxisSetting: AxisSettings,
+    origin: Option[Point] = None,
+    xlim: Option[(Double, Double)] = None,
+    ylim: Option[(Double, Double)] = None,
+    axisMargin: Double = 0.05,
+    xCol: Int = 0,
+    yCol: Int = 1,
+    xgrid: Boolean = true,
+    ygrid: Boolean = true,
+    frame: Boolean = true,
+    boundsData: Seq[DataSource] = Nil
+  ): Build[XYPlotArea] = Build(xyplotarea(data, xAxisSetting, yAxisSetting, origin, xlim, ylim, axisMargin, xCol, yCol, xgrid, ygrid, frame, boundsData)) {
+    case (Some(old), Scroll(v1)) =>
+      import old._
+      println(old)
+      val v = if (v1 > 0) 1.1 else 0.9
+      val xMid = xMin + (xMax - xMin) * 0.5
+      val yMid = yMin + (yMax - yMin) * 0.5
+      val xMin1 = xMid - (xMax - xMin) * 0.5 * v
+      val xMax1 = xMid + (xMax - xMin) * 0.5 * v
+      val yMin1 = yMid - (yMax - yMin) * 0.5 * v
+      val yMax1 = yMid + (yMax - yMin) * 0.5 * v
+      xyplotarea(data, xAxisSetting, yAxisSetting, origin, Some(xMin1 -> xMax1), Some(yMin1 -> yMax1), axisMargin, xCol, yCol, xgrid, ygrid, frame, boundsData)
+  }
 
   def xyplotarea[F: FC](
     data: Seq[(DataSource, List[DataRenderer])],
@@ -144,11 +196,32 @@ trait Plots {
       )
     })
 
-    group(xgridElem, ygridElem, dataelem, axes, frameElem, FreeLayout)
+    val elem = group(xgridElem, ygridElem, dataelem, axes, frameElem, FreeLayout)
+
+    XYPlotArea(elem, xMin, xMax, yMin, yMax)
 
   }
 
   type Figure[T <: Renderable[T]] = Elems2[TextBox, Elems2[Elems2[TextBox, T], TextBox]]
+
+  /* Decorates with main, xlab and ylab labels. */
+  def figureBuild[T <: Renderable[T], F: FC](
+    plot: Build[T],
+    main: String = "",
+    mainFontSize: RelFontSize = 1.2 fts,
+    mainDistance: RelFontSize = 1.2 fts,
+    xlab: String = "",
+    xlabFontSize: RelFontSize = 1.0 fts,
+    xlabDistance: RelFontSize = 1.0 fts,
+    xlabAlignment: Alignment = Center,
+    ylab: String = "",
+    ylabFontSize: RelFontSize = 1.0 fts,
+    ylabDistance: RelFontSize = 1.0 fts,
+    ylabAlignment: Alignment = Center
+  ): Build[Figure[T]] = {
+    case (old: Option[Figure[T]], e: Event) =>
+      figure(plot(mapEvent(old -> e)(_.m2.m1.m2)), main, mainFontSize, mainDistance, xlab, xlabFontSize, xlabDistance, xlabAlignment, ylab, ylabFontSize, ylabDistance, ylabAlignment)
+  }
 
   /* Decorates with main, xlab and ylab labels. */
   def figure[T <: Renderable[T], F: FC](

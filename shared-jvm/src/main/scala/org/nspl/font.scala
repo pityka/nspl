@@ -12,7 +12,7 @@ object JavaFontConversion {
 object AwtGlyphMeasurer extends GlyphMeasurer[Font#F] {
   import JavaFontConversion._
   import java.awt.image.BufferedImage
-  val bimage = new BufferedImage(100, 100, BufferedImage.TYPE_INT_ARGB)
+  val bimage = new BufferedImage(50, 50, BufferedImage.TYPE_BYTE_BINARY)
   val g2d = bimage.createGraphics();
   val frc = g2d.getFontRenderContext
   val abc = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPRQRSTUVWXYZ0123456789%,./][()]"

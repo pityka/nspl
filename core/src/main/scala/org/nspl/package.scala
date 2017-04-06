@@ -38,6 +38,14 @@ package object nspl
 
   def importFont(name: String)(implicit gm: GlyphMeasurer[NamedFont#F]) = GenericFontConfig(NamedFont(name, 10))(gm)
 
+  def mapEvent[A <: Renderable[A], B <: Renderable[B]](old: (Option[A], Event))(f: A => B): (Option[B], Event) = old match {
+    case (None, BuildEvent) => None -> BuildEvent
+    case (Some(old), e) =>
+      val b = f(old)
+      Some(b) -> e.mapBounds(old.bounds, b.bounds)
+    case _ => throw new RuntimeException("should not happen")
+  }
+
   /* Calculates the total bounds of the members. */
   def outline(members: Seq[Bounds]) = {
     val x = members.map(_.x).min
@@ -146,24 +154,6 @@ package object nspl
         })
         ElemList2(transformed)
     }
-
-  implicit def compositeListRenderer[T <: Renderable[T], R <: RenderingContext](implicit r: Renderer[T, R]) =
-    new Renderer[ElemList[T], R] {
-      def render(ctx: R, elem: ElemList[T]): Unit = {
-        elem.members.foreach(e => r.render(ctx, e))
-      }
-    }
-
-  // implicit def dataElemRenderer[RC <: RenderingContext](implicit re: Renderer[ShapeElem, RC], rt: Renderer[TextBox, RC]) = new Renderer[DataElem, RC] {
-  //   def render(r: RC, e: DataElem): Unit = {
-  //     e.data.iterator.foreach { row =>
-  //       e.renderers.foreach { dr =>
-  //         dr.render(row, e.xAxis, e.yAxis, r, e.tx)
-  //       }
-  //     }
-  //     e.renderers.foreach(_.clear)
-  //   }
-  // }
 
   /* Normalized scientific notation. */
   def scientific(x: Double) = x / math.pow(10d, math.log10(x).round) -> math.log10(x).round
