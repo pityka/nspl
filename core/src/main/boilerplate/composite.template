@@ -18,11 +18,11 @@ trait Tuples2 {
   }#
   ]
 
-  [#def group[[#T1<:Renderable[T1]#]]([#m1b:Build[T1]#],layout:Layout) : Build[org.nspl.Elems1[[#T1#]]] = { (e:Event) =>
+  [#def group[[#T1<:Renderable[T1]#]]([#m1b:Build[T1]#],layout:Layout) : Build[org.nspl.Elems1[[#T1#]]] = { case (old: Option[Elems1[[#T1#]]],e:Event) =>
       [# val m1_build = m1b.build.bounds #
       ]
       val n = layout(List([#m1_build#]))
-      [#val m1 = m1b(e.mapBounds(m1_build, n(0))) #
+      [#val m1 = m1b(old.map(_.m1) -> e.mapBounds(m1_build, n(0))) #
       ]
       org.nspl.Elems1([#fitToBounds(m1,n(0))#])
   }#

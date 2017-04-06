@@ -107,7 +107,7 @@ trait JavaAWTUtil {
     import javax.swing._
     import java.awt.{ Graphics, RenderingHints }
     val frame = new JFrame("");
-    var paintableElem = elem(BuildEvent)
+    var paintableElem = elem.build
     frame.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
     frame
       .getContentPane()
@@ -125,7 +125,7 @@ trait JavaAWTUtil {
       }, java.awt.BorderLayout.CENTER);
 
     val d = new java.awt.Dimension(paintableElem.bounds.w.toInt, paintableElem.bounds.h.toInt)
-    frame.addMouseListener(new MouseInputAdapter {
+    val listener = new MouseAdapter {
       override def mouseClicked(e: MouseEvent) = {
         val componentBounds = e.getComponent.getBounds
         val componentX = e.getX
@@ -133,18 +133,19 @@ trait JavaAWTUtil {
         val scaleX = componentBounds.getWidth / paintableElem.bounds.w
         val scaleY = componentBounds.getHeight / paintableElem.bounds.h
 
-        val event = Click(componentX / scaleX, componentY / scaleY)
-        paintableElem = elem(event)
+        val event = Click(Point(componentX / scaleX, componentY / scaleY))
+        paintableElem = elem(Some(paintableElem) -> event)
 
         e.getComponent.repaint
       }
       override def mouseWheelMoved(e: MouseWheelEvent) = {
-
-        paintableElem = elem(Scroll(e.getPreciseWheelRotation))
+        paintableElem = elem(Some(paintableElem) -> Scroll(e.getPreciseWheelRotation))
 
         e.getComponent.repaint
       }
-    })
+    }
+    frame.addMouseListener(listener)
+    frame.addMouseWheelListener(listener)
     frame.pack();
     frame.setSize(d);
     frame.setVisible(true);

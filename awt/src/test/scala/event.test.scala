@@ -11,21 +11,17 @@ class EventsSpec extends FunSpec with Matchers {
     it("a") {
 
       println("boo")
-      val build = Build {
-        case Click(x, y) =>
-          println(x, y)
-          group(
-            ShapeElem(Shape.rectangle(0, 0, 100, 100), fill = Color.transparent, stroke = Some(Stroke(2d))),
-            ShapeElem(Shape.circle(10)).translate(x, y),
-            FreeLayout
-          )
-        case e =>
-          group(
-            ShapeElem(Shape.rectangle(0, 0, 100, 100)),
-            ShapeElem(Shape.circle(0)),
-            FreeLayout
-          )
+      val build = Build(group(
+        ShapeElem(Shape.rectangle(0, 0, 100, 100), fill = Color.transparent, stroke = Some(Stroke(1f))),
+        ShapeElem(Shape.circle(0)),
+        FreeLayout
+      )) {
+        case (Some(old), Scroll(v)) =>
+          old.scale(v, v)
+        case (Some(old), Click(Point(x, y))) =>
+          old.copy(m2 = ShapeElem(Shape.circle(5)).translate(x, y))
       }
+
       show(build)
     }
   }

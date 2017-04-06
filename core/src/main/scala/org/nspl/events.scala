@@ -1,10 +1,15 @@
 package org.nspl
 
 object Build {
-  def apply[A](pf: PartialFunction[Event, A]): Build[A] = pf
-  def const[A](f: => A): Build[A] = apply[A]({
-    case _ => f
-  })
+  def apply[A](f: => A)(pf: PartialFunction[(Option[A], Event), A]): Build[A] =
+    { case x => pf.applyOrElse(x, (x: (Option[A], Event)) => f) }
+
+  def const[A](f: => A): Build[A] = {
+    val pf: PartialFunction[Event, A] = { case _ => f }
+    withoutState(pf)
+  }
+  def withState[A](pf: PartialFunction[(Option[A], Event), A]): Build[A] = pf
+  def withoutState[A](pf: PartialFunction[Event, A]): Build[A] = { case (o, e) => pf(e) }
 }
 
 trait Events {

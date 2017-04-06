@@ -5,17 +5,17 @@ package object nspl
     with Tuples2
     with Colors
     with Shapes
-    // with Renderers
-    // with data.DataAdaptors
-    // with Plots
-    // with SimplePlots
-    // with ImplicitConversions
+    with Renderers
+    with data.DataAdaptors
+    with Plots
+    with SimplePlots
+    with ImplicitConversions
     with Events {
 
-  type Build[A] = Event => A
+  type Build[A] = ((Option[A], Event)) => A
 
   implicit class defaultBuild[T](b: Build[T]) {
-    def build = b(BuildEvent)
+    def build: T = b(None -> BuildEvent)
   }
 
   type AxisElem = Elems3[ShapeElem, ElemList[Elems2[ShapeElem, TextBox]], ElemList[ShapeElem]]
@@ -88,7 +88,7 @@ package object nspl
     }
 
   implicit def renderable2build[T <: Renderable[T]](elem: T): Build[T] =
-    Build { case _ => elem }
+    Build.const(elem)
 
   def fitToWidth[T <: Renderable[T]](elem: T, width: Double) = {
     val aspect = elem.bounds.h / elem.bounds.w
@@ -108,41 +108,43 @@ package object nspl
   def sequence[T <: Renderable[T]](members: Seq[T]): ElemList[T] = sequence(members, FreeLayout)
 
   def sequence[T <: Renderable[T]](members: Seq[Build[T]], layout: Layout): Build[ElemList[T]] =
-    { (e: Event) =>
-      val members1_build = members.map(_.build.bounds)
-      val n = layout(members1_build)
-      val members1 = n zip members1_build zip members map {
-        case ((to, from), build) =>
-          build(e.mapBounds(to, from))
-      }
-      val transformed = n zip members1 map (x => fitToBounds(x._2, x._1))
-      ElemList(transformed.toList)
+    {
+      case (old: Option[ElemList[T]], e: Event) =>
+        val members1_build = members.map(_.build.bounds)
+        val n = layout(members1_build)
+        val members1 = (n zip members1_build zip members).zipWithIndex map {
+          case (((to, from), build), idx) =>
+            build((old.map(_.members(idx)), e.mapBounds(to, from)))
+        }
+        val transformed = n zip members1 map (x => fitToBounds(x._2, x._1))
+        ElemList(transformed.toList)
     }
 
   def sequence[T <: Renderable[T]](members: Seq[Build[T]]): Build[ElemList[T]] = sequence(members, FreeLayout)
 
   def sequence2[T1 <: Renderable[T1], T2 <: Renderable[T2]](members1: Seq[Either[Build[T1], Build[T2]]], layout: Layout = FreeLayout): Build[ElemList2[T1, T2]] =
-    { (e: Event) =>
-      val members1_build = members1.map(_ match {
-        case scala.util.Left(x) => x.build.bounds
-        case scala.util.Right(x) => x.build.bounds
-      })
+    {
+      case (old: Option[ElemList2[T1, T2]], e: Event) =>
+        val members1_build = members1.map(_ match {
+          case scala.util.Left(x) => x.build.bounds
+          case scala.util.Right(x) => x.build.bounds
+        })
 
-      val n = layout(members1_build)
+        val n = layout(members1_build)
 
-      val members: Seq[Either[T1, T2]] = (n zip members1_build zip members1).map {
-        case ((from, to), build) =>
-          build match {
-            case scala.util.Left(x) => scala.util.Left(x(e.mapBounds(from, to)))
-            case scala.util.Right(x) => scala.util.Right(x(e.mapBounds(from, to)))
-          }
-      }
+        val members: Seq[Either[T1, T2]] = (n zip members1_build zip members1).zipWithIndex.map {
+          case (((from, to), build), idx) =>
+            build match {
+              case scala.util.Left(x) => scala.util.Left(x(old.map(_.members(idx).left.get) -> e.mapBounds(from, to)))
+              case scala.util.Right(x) => scala.util.Right(x(old.map(_.members(idx).right.get) -> e.mapBounds(from, to)))
+            }
+        }
 
-      val transformed = n zip members map (x => x._2 match {
-        case scala.util.Left(y) => scala.util.Left(fitToBounds(y, x._1))
-        case scala.util.Right(y) => scala.util.Right(fitToBounds(y, x._1))
-      })
-      ElemList2(transformed)
+        val transformed = n zip members map (x => x._2 match {
+          case scala.util.Left(y) => scala.util.Left(fitToBounds(y, x._1))
+          case scala.util.Right(y) => scala.util.Right(fitToBounds(y, x._1))
+        })
+        ElemList2(transformed)
     }
 
   implicit def compositeListRenderer[T <: Renderable[T], R <: RenderingContext](implicit r: Renderer[T, R]) =
