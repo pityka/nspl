@@ -63,13 +63,31 @@ trait Plots {
   ) = Build(xyplotarea(data, xAxisSetting, yAxisSetting, origin, xlim, ylim, axisMargin, xCol, yCol, xgrid, ygrid, frame, boundsData)) {
     case (Some(old), Scroll(v1, p)) if old.elem.m5.bounds.contains(p) =>
       import old._
-      val v = if (v1 > 0) 1.1 else 0.9
-      val xMid = xMin + (xMax - xMin) * 0.5
-      val yMid = yMin + (yMax - yMin) * 0.5
-      val xMin1 = xMid - (xMax - xMin) * 0.5 * v
-      val xMax1 = xMid + (xMax - xMin) * 0.5 * v
-      val yMin1 = yMid - (yMax - yMin) * 0.5 * v
-      val yMax1 = yMid + (yMax - yMin) * 0.5 * v
+      val v = if (v1 > 0) 1.05 else 0.95
+      val mappedPoint = mapPoint(p, old.elem.m5.bounds, Bounds(xMin, yMin, xMax - xMin, yMax - yMin))
+      val xMid = mappedPoint.x
+      val yMid = mappedPoint.y
+      val xF = (xMid - xMin) / (xMax - xMin)
+      val yF = (yMid - yMin) / (yMax - yMin)
+      val xMin1 = xMid - (xMax - xMin) * xF * v
+      val xMax1 = xMid + (xMax - xMin) * (1 - xF) * v
+      val yMin1 = yMid - (yMax - yMin) * yF * v
+      val yMax1 = yMid + (yMax - yMin) * (1 - yF) * v
+      xyplotarea(data, xAxisSetting, yAxisSetting, origin, Some(xMin1 -> xMax1), Some(yMin1 -> yMax1), axisMargin, xCol, yCol, xgrid, ygrid, frame, boundsData)
+
+    case (Some(old), Drag(dragStart, dragTo)) if old.elem.m5.bounds.contains(dragStart) =>
+      import old._
+      val dragStartWorld = mapPoint(dragStart, old.elem.m5.bounds, Bounds(xMin, yMin, xMax - xMin, yMax - yMin))
+      val dragToWorld = mapPoint(dragTo, old.elem.m5.bounds, Bounds(xMin, yMin, xMax - xMin, yMax - yMin))
+      val dragDirection = Point(dragStartWorld.x - dragToWorld.x, dragStartWorld.y - dragToWorld.y)
+
+      val xT = dragDirection.x
+      val yT = dragDirection.y
+
+      val xMin1 = xMin + xT
+      val xMax1 = xMax + xT
+      val yMin1 = yMin - yT
+      val yMax1 = yMax - yT
       xyplotarea(data, xAxisSetting, yAxisSetting, origin, Some(xMin1 -> xMax1), Some(yMin1 -> yMax1), axisMargin, xCol, yCol, xgrid, ygrid, frame, boundsData)
   }
 

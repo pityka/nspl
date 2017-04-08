@@ -14,15 +14,10 @@ object Build {
 
 trait Events {
 
-  trait Event { self =>
-    def mapBounds(from: Bounds, to: Bounds) = self
-  }
-  case class Click(point: Point) extends Event {
-    override def mapBounds(from: Bounds, to: Bounds) = Click(mapPoint(point, from, to))
-  }
-  case class Scroll(v: Double, location: Point) extends Event {
-    override def mapBounds(from: Bounds, to: Bounds) = Scroll(v, mapPoint(location, from, to))
-  }
+  trait Event
+  case class Click(point: Point) extends Event
+  case class Scroll(v: Double, location: Point) extends Event
+  case class Drag(start: Point, current: Point) extends Event
   case object BuildEvent extends Event
 
 }

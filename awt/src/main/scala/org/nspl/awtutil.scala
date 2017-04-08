@@ -115,25 +115,40 @@ trait JavaAWTUtil {
       }, java.awt.BorderLayout.CENTER);
 
     val d = new java.awt.Dimension((paintableElem.bounds.w * 3).toInt, (paintableElem.bounds.h * 3).toInt)
+    var dragStart = Point(0, 0)
     val listener = new MouseAdapter {
       override def mouseClicked(e: MouseEvent) = {
         val componentBounds = e.getComponent.getBounds
 
-        val event = Click(Point(e.getX, e.getY)).mapBounds(componentBounds, paintableElem.bounds)
+        val event = Click(mapPoint(Point(e.getX, e.getY), componentBounds, paintableElem.bounds))
         paintableElem = elem(Some(paintableElem) -> event)
 
         e.getComponent.repaint
       }
       override def mouseWheelMoved(e: MouseWheelEvent) = {
         val componentBounds = e.getComponent.getBounds
-        val p = Point(e.getX, e.getY)
-        paintableElem = elem(Some(paintableElem) -> Scroll(e.getPreciseWheelRotation, p).mapBounds(componentBounds, paintableElem.bounds))
+        val p = mapPoint(Point(e.getX, e.getY), componentBounds, paintableElem.bounds)
+        paintableElem = elem(Some(paintableElem) -> Scroll(e.getPreciseWheelRotation, p))
 
+        e.getComponent.repaint
+      }
+      override def mousePressed(e: MouseEvent) = {
+        val componentBounds = e.getComponent.getBounds
+        val p = Point(e.getX, e.getY)
+        dragStart = mapPoint(p, componentBounds, paintableElem.bounds)
+      }
+      override def mouseDragged(e: MouseEvent) = {
+        val componentBounds = e.getComponent.getBounds
+        val p = mapPoint(Point(e.getX, e.getY), componentBounds, paintableElem.bounds)
+
+        paintableElem = elem(Some(paintableElem) -> Drag(dragStart, p))
+        dragStart = p
         e.getComponent.repaint
       }
     }
     frame.addMouseListener(listener)
     frame.addMouseWheelListener(listener)
+    frame.addMouseMotionListener(listener)
     frame.pack();
     frame.setSize(d);
     frame.setVisible(true);
