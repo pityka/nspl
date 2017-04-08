@@ -21,12 +21,14 @@ trait Tuples2 {
   [#def group[[#T1<:Renderable[T1]#]]([#m1b:Build[T1]#],layout:Layout) : Build[org.nspl.Elems1[[#T1#]]] = {
     case (None,BuildEvent) => group([#m1b.build#],layout)
     case (Some(old),e) =>
+      [# val old_m1_bounds = old.m1.bounds #
+      ]
       val oldbounds = old.bounds
-      [# val m1_bounds = old.m1.bounds #
+
+      [#val m1 = m1b(Some(old.m1) -> e.mapBounds(oldbounds, old_m1_bounds)) #
       ]
-      [#val m1 = m1b(Some(old.m1) -> e.mapBounds(m1_bounds,oldbounds)) #
-      ]
-      org.nspl.Elems1([#fitToBounds(m1,m1_bounds)#])
+      val n = layout(List([#m1#]).map(_.bounds))
+      org.nspl.Elems1([#fitToBounds(m1,n(0))#])
     case _ => throw new RuntimeException("should not happen")
   }#
   ]

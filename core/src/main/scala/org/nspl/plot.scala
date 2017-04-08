@@ -226,7 +226,7 @@ trait Plots {
     {
       case (old, e) =>
         val mappedEvent = mapEvent(old, e)(_.m2.m1.m2)
-        figure(plot.build, main, mainFontSize, mainDistance, xlab, xlabFontSize, xlabDistance, xlabAlignment, ylab, ylabFontSize, ylabDistance, ylabAlignment)
+        figure(plot(mappedEvent), main, mainFontSize, mainDistance, xlab, xlabFontSize, xlabDistance, xlabAlignment, ylab, ylabFontSize, ylabDistance, ylabAlignment)
     }
 
   /* Decorates with main, xlab and ylab labels. */

@@ -78,6 +78,23 @@ trait SimplePlots {
 
   // type XYPlot = Elems2[Figure[Build[XYPlotArea]], Legend]
 
+  // case class AElems2[T1 <: Renderable[T1], T2 <: Renderable[T2]](m1: T1, m2: T2) extends Renderable[AElems2[T1, T2]] {
+  //   def transform(tx: Bounds => AffineTransform) = AElems2(m1.transform(tx), m2.transform(tx))
+  //   def bounds = {
+  //     println("pp")
+  //     println(List(m1.bounds, m2.bounds) + " " + outline(List(m1.bounds, m2.bounds)))
+  //     outline(List(m1.bounds, m2.bounds))
+  //   }
+  // }
+  // object AElems2 {
+  //   implicit def compositeRenderer2[T1 <: Renderable[T1], T2 <: Renderable[T2], R <: RenderingContext](implicit r1: Renderer[T1, R], r2: Renderer[T2, R]) = new Renderer[AElems2[T1, T2], R] {
+  //     def render(ctx: R, elem: AElems2[T1, T2]): Unit = {
+  //       r1.render(ctx, elem.m1)
+  //       r2.render(ctx, elem.m2)
+  //     }
+  //   }
+  // }
+
   def xyplot[F: FC](data: (DataSource, List[DataRenderer], LegendConfig)*)(
     xlog: Boolean = false,
     ylog: Boolean = false,
@@ -163,7 +180,7 @@ trait SimplePlots {
         boundsData = data.map(_._1)
       )
 
-    val fig = figureBuild(
+    val fig: Build[Figure[XYPlotArea]] = figureBuild(
       plotArea,
       main = main,
       xlab = xlab,
@@ -173,11 +190,30 @@ trait SimplePlots {
       mainFontSize = mainFontSize
     )
 
+    // def agroup[T1 <: Renderable[T1], T2 <: Renderable[T2]](m1b: Build[T1], m2b: Build[T2], layout: Layout): Build[AElems2[T1, T2]] = {
+    //   case (None, BuildEvent) =>
+    //     println("xx" + m1b.build.bounds)
+    //     // println("xx" + m2b.build.bounds)
+    //     val t = group(m1b.build, m2b.build, layout)
+    //     AElems2(t.m1, t.m2)
+    //   case (Some(old), e) =>
+    //     val m1_bounds = old.m1.bounds
+    //     val m2_bounds = old.m2.bounds
+    //     val oldbounds = old.bounds
+    //     val m1 = m1b(Some(old.m1) -> e.mapBounds(oldbounds, m1_bounds))
+    //     val m2 = m2b(Some(old.m2) -> e.mapBounds(oldbounds, m2_bounds))
+    //     val n = layout(List(m1.bounds, m2.bounds))
+    //     val r = AElems2(fitToBounds(m1, n(0)), fitToBounds(m2, n(1)))
+    //     r
+    //   case _ => throw new RuntimeException("should not happen")
+    // }
+
     group(
-      plotArea,
+      fig,
       legend1,
       HorizontalStack(Center, 5d)
     )
+    // plotArea
 
   }
 

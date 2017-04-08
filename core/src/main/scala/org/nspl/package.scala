@@ -47,7 +47,8 @@ package object nspl
   }
 
   /* Calculates the total bounds of the members. */
-  def outline(members: Seq[Bounds]) = {
+  def outline(members1: Seq[Bounds]) = {
+    val members = members1.filter(t => t.w * t.h > 0)
     val x = members.map(_.x).min
     val y = members.map(_.y).min
     val maxX = members.map(_.maxX).max
@@ -118,13 +119,15 @@ package object nspl
   def sequence[T <: Renderable[T]](members: Seq[Build[T]], layout: Layout): Build[ElemList[T]] =
     {
       case (Some(old), e: Event) =>
-        val bounds = old.members.map(_.bounds)
+        val oldmemberbounds = old.members.map(_.bounds)
         val oldbounds = old.bounds
-        val members1 = (bounds zip members).zipWithIndex map {
+        val members1 = (oldmemberbounds zip members).zipWithIndex map {
           case ((to, build), idx) =>
-            build(Some(old.members(idx)), e.mapBounds(to, oldbounds))
+            build(Some(old.members(idx)), e.mapBounds(oldbounds, to))
         }
-        val transformed = bounds zip members1 map (x => fitToBounds(x._2, x._1))
+        val n = layout(members1.map(_.bounds))
+
+        val transformed = n zip members1 map (x => fitToBounds(x._2, x._1))
         ElemList(transformed.toList)
       case (None, BuildEvent) =>
         sequence(members.map(_.build), layout)
@@ -152,17 +155,17 @@ package object nspl
       case (Some(old), e: Event) =>
         val bounds = old.members.map(_.fold(_.bounds, _.bounds))
 
-        val oldbounds = old.bounds
+        val n = layout(bounds)
 
-        val members: Seq[Either[T1, T2]] = (bounds zip members1).zipWithIndex.map {
-          case ((to, build), idx) =>
+        val members: Seq[Either[T1, T2]] = (n zip bounds zip members1).zipWithIndex.map {
+          case (((from, to), build), idx) =>
             build match {
-              case scala.util.Left(x) => scala.util.Left(x(Some(old.members(idx).left.get) -> e.mapBounds(oldbounds, to)))
-              case scala.util.Right(x) => scala.util.Right(x(Some(old.members(idx).right.get) -> e.mapBounds(oldbounds, to)))
+              case scala.util.Left(x) => scala.util.Left(x(Some(old.members(idx).left.get) -> e.mapBounds(from, to)))
+              case scala.util.Right(x) => scala.util.Right(x(Some(old.members(idx).right.get) -> e.mapBounds(from, to)))
             }
         }
 
-        val transformed = bounds zip members map (x => x._2 match {
+        val transformed = n zip members map (x => x._2 match {
           case scala.util.Left(y) => scala.util.Left(fitToBounds(y, x._1))
           case scala.util.Right(y) => scala.util.Right(fitToBounds(y, x._1))
         })
