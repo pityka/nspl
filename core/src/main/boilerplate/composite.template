@@ -25,7 +25,7 @@ trait Tuples2 {
       ]
       val oldbounds = old.bounds
 
-      [#val m1 = m1b(Some(old.m1) -> e.mapBounds(oldbounds, old_m1_bounds)) #
+      [#val m1 = m1b(Some(old.m1) -> e) #
       ]
       val n = layout(List([#m1#]).map(_.bounds))
       org.nspl.Elems1([#fitToBounds(m1,n(0))#])

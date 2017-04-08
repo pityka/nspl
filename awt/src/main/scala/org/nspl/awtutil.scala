@@ -98,6 +98,7 @@ trait JavaAWTUtil {
     import java.awt.{ Graphics, RenderingHints }
     val frame = new JFrame("");
     var paintableElem = elem.build
+    var id = 0
     frame.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
     frame
       .getContentPane()
@@ -127,8 +128,8 @@ trait JavaAWTUtil {
       override def mouseWheelMoved(e: MouseWheelEvent) = {
         val componentBounds = e.getComponent.getBounds
         val p = Point(e.getX, e.getY)
-
-        paintableElem = elem(Some(paintableElem) -> Scroll(e.getPreciseWheelRotation, p).mapBounds(componentBounds, paintableElem.bounds))
+        id += 1
+        paintableElem = elem(Some(paintableElem) -> Scroll(e.getPreciseWheelRotation, p, id).mapBounds(componentBounds, paintableElem.bounds))
 
         e.getComponent.repaint
       }

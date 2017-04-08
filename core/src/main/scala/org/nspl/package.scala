@@ -42,7 +42,7 @@ package object nspl
     case (None, BuildEvent) => None -> BuildEvent
     case (Some(old), e) =>
       val b = f(old)
-      Some(b) -> e.mapBounds(old.bounds, b.bounds)
+      Some(b) -> e //.mapBounds(old.bounds, b.bounds)
     case _ => throw new RuntimeException("should not happen")
   }
 
@@ -123,7 +123,7 @@ package object nspl
         val oldbounds = old.bounds
         val members1 = (oldmemberbounds zip members).zipWithIndex map {
           case ((to, build), idx) =>
-            build(Some(old.members(idx)), e.mapBounds(oldbounds, to))
+            build(Some(old.members(idx)), e)
         }
         val n = layout(members1.map(_.bounds))
 
@@ -153,17 +153,18 @@ package object nspl
     {
       case (None, BuildEvent) => sequence2(members1.map(_.fold(x => scala.util.Left(x.build), x => scala.util.Right(x.build))), layout)
       case (Some(old), e: Event) =>
-        val bounds = old.members.map(_.fold(_.bounds, _.bounds))
+        val oldMemberBounds = old.members.map(_.fold(_.bounds, _.bounds))
+        val oldBounds = old.bounds
 
-        val n = layout(bounds)
-
-        val members: Seq[Either[T1, T2]] = (n zip bounds zip members1).zipWithIndex.map {
-          case (((from, to), build), idx) =>
+        val members: Seq[Either[T1, T2]] = (oldMemberBounds zip members1).zipWithIndex.map {
+          case ((to, build), idx) =>
             build match {
-              case scala.util.Left(x) => scala.util.Left(x(Some(old.members(idx).left.get) -> e.mapBounds(from, to)))
-              case scala.util.Right(x) => scala.util.Right(x(Some(old.members(idx).right.get) -> e.mapBounds(from, to)))
+              case scala.util.Left(x) => scala.util.Left(x(Some(old.members(idx).left.get) -> e))
+              case scala.util.Right(x) => scala.util.Right(x(Some(old.members(idx).right.get) -> e))
             }
         }
+
+        val n = layout(members.map(_.fold(_.bounds, _.bounds)))
 
         val transformed = n zip members map (x => x._2 match {
           case scala.util.Left(y) => scala.util.Left(fitToBounds(y, x._1))

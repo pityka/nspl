@@ -61,7 +61,8 @@ trait Plots {
     frame: Boolean = true,
     boundsData: Seq[DataSource] = Nil
   ) = Build(xyplotarea(data, xAxisSetting, yAxisSetting, origin, xlim, ylim, axisMargin, xCol, yCol, xgrid, ygrid, frame, boundsData)) {
-    case (Some(old), Scroll(v1, p)) if old.elem.m5.bounds.contains(p) =>
+    case (Some(old), Scroll(v1, p, id)) if old.elem.m5.bounds.contains(p) =>
+      println(id + " " + p + " " + old.elem.m5.bounds)
       import old._
       val v = if (v1 > 0) 1.1 else 0.9
       val xMid = xMin + (xMax - xMin) * 0.5
