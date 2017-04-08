@@ -190,31 +190,11 @@ trait SimplePlots {
       mainFontSize = mainFontSize
     )
 
-    // def agroup[T1 <: Renderable[T1], T2 <: Renderable[T2]](m1b: Build[T1], m2b: Build[T2], layout: Layout): Build[AElems2[T1, T2]] = {
-    //   case (None, BuildEvent) =>
-    //     println("xx" + m1b.build.bounds)
-    //     // println("xx" + m2b.build.bounds)
-    //     val t = group(m1b.build, m2b.build, layout)
-    //     AElems2(t.m1, t.m2)
-    //   case (Some(old), e) =>
-    //     val m1_bounds = old.m1.bounds
-    //     val m2_bounds = old.m2.bounds
-    //     val oldbounds = old.bounds
-    //     val m1 = m1b(Some(old.m1) -> e.mapBounds(oldbounds, m1_bounds))
-    //     val m2 = m2b(Some(old.m2) -> e.mapBounds(oldbounds, m2_bounds))
-    //     val n = layout(List(m1.bounds, m2.bounds))
-    //     val r = AElems2(fitToBounds(m1, n(0)), fitToBounds(m2, n(1)))
-    //     r
-    //   case _ => throw new RuntimeException("should not happen")
-    // }
-
     group(
       fig,
       legend1,
       HorizontalStack(Center, 5d)
     )
-    // plotArea
-
   }
 
   // def hist(data: Seq[Double], breaks: Int = 50,

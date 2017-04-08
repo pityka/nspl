@@ -42,20 +42,23 @@ package object nspl
     case (None, BuildEvent) => None -> BuildEvent
     case (Some(old), e) =>
       val b = f(old)
-      Some(b) -> e //.mapBounds(old.bounds, b.bounds)
+      Some(b) -> e
     case _ => throw new RuntimeException("should not happen")
   }
 
   /* Calculates the total bounds of the members. */
   def outline(members1: Seq[Bounds]) = {
     val members = members1.filter(t => t.w * t.h > 0)
-    val x = members.map(_.x).min
-    val y = members.map(_.y).min
-    val maxX = members.map(_.maxX).max
-    val maxY = members.map(_.maxY).max
-    val w = maxX - x
-    val h = maxY - y
-    Bounds(x, y, w, h)
+    if (members.isEmpty) Bounds(0, 0, 0, 0)
+    else {
+      val x = members.map(_.x).min
+      val y = members.map(_.y).min
+      val maxX = members.map(_.maxX).max
+      val maxY = members.map(_.maxY).max
+      val w = maxX - x
+      val h = maxY - y
+      Bounds(x, y, w, h)
+    }
   }
 
   def transform[T <: Renderable[T]](member: T, tx: Bounds => AffineTransform): T =
@@ -119,16 +122,11 @@ package object nspl
   def sequence[T <: Renderable[T]](members: Seq[Build[T]], layout: Layout): Build[ElemList[T]] =
     {
       case (Some(old), e: Event) =>
-        val oldmemberbounds = old.members.map(_.bounds)
-        val oldbounds = old.bounds
-        val members1 = (oldmemberbounds zip members).zipWithIndex map {
-          case ((to, build), idx) =>
-            build(Some(old.members(idx)), e)
+        val members1 = (old.members zip members) map {
+          case (old, build) =>
+            build(Some(old), e)
         }
-        val n = layout(members1.map(_.bounds))
-
-        val transformed = n zip members1 map (x => fitToBounds(x._2, x._1))
-        ElemList(transformed.toList)
+        sequence(members1, layout)
       case (None, BuildEvent) =>
         sequence(members.map(_.build), layout)
       case _ => throw new RuntimeException("should not happen")
@@ -153,24 +151,15 @@ package object nspl
     {
       case (None, BuildEvent) => sequence2(members1.map(_.fold(x => scala.util.Left(x.build), x => scala.util.Right(x.build))), layout)
       case (Some(old), e: Event) =>
-        val oldMemberBounds = old.members.map(_.fold(_.bounds, _.bounds))
-        val oldBounds = old.bounds
-
-        val members: Seq[Either[T1, T2]] = (oldMemberBounds zip members1).zipWithIndex.map {
-          case ((to, build), idx) =>
+        val members: Seq[Either[T1, T2]] = (old.members zip members1) map {
+          case (old, build) =>
             build match {
-              case scala.util.Left(x) => scala.util.Left(x(Some(old.members(idx).left.get) -> e))
-              case scala.util.Right(x) => scala.util.Right(x(Some(old.members(idx).right.get) -> e))
+              case scala.util.Left(x) => scala.util.Left(x(Some(old.left.get) -> e))
+              case scala.util.Right(x) => scala.util.Right(x(Some(old.right.get) -> e))
             }
         }
+        sequence2(members, layout)
 
-        val n = layout(members.map(_.fold(_.bounds, _.bounds)))
-
-        val transformed = n zip members map (x => x._2 match {
-          case scala.util.Left(y) => scala.util.Left(fitToBounds(y, x._1))
-          case scala.util.Right(y) => scala.util.Right(fitToBounds(y, x._1))
-        })
-        ElemList2(transformed)
       case _ => throw new RuntimeException("should not happen")
     }
 

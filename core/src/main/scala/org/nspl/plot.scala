@@ -61,8 +61,7 @@ trait Plots {
     frame: Boolean = true,
     boundsData: Seq[DataSource] = Nil
   ) = Build(xyplotarea(data, xAxisSetting, yAxisSetting, origin, xlim, ylim, axisMargin, xCol, yCol, xgrid, ygrid, frame, boundsData)) {
-    case (Some(old), Scroll(v1, p, id)) if old.elem.m5.bounds.contains(p) =>
-      println(id + " " + p + " " + old.elem.m5.bounds)
+    case (Some(old), Scroll(v1, p)) if old.elem.m5.bounds.contains(p) =>
       import old._
       val v = if (v1 > 0) 1.1 else 0.9
       val xMid = xMin + (xMax - xMin) * 0.5
@@ -224,10 +223,9 @@ trait Plots {
     ylabDistance: RelFontSize = 1.0 fts,
     ylabAlignment: Alignment = Center
   ): Build[Figure[T]] =
-    {
-      case (old, e) =>
-        val mappedEvent = mapEvent(old, e)(_.m2.m1.m2)
-        figure(plot(mappedEvent), main, mainFontSize, mainDistance, xlab, xlabFontSize, xlabDistance, xlabAlignment, ylab, ylabFontSize, ylabDistance, ylabAlignment)
+    { e =>
+      val mappedEvent = mapEvent(e)(_.m2.m1.m2)
+      figure(plot(mappedEvent), main, mainFontSize, mainDistance, xlab, xlabFontSize, xlabDistance, xlabAlignment, ylab, ylabFontSize, ylabDistance, ylabAlignment)
     }
 
   /* Decorates with main, xlab and ylab labels. */
