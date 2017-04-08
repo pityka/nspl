@@ -83,18 +83,8 @@ trait JavaAWTUtil {
         }
       }, java.awt.BorderLayout.CENTER);
 
-    val d = new java.awt.Dimension(elem.bounds.w.toInt, elem.bounds.h.toInt)
-    frame.addMouseListener(new MouseInputAdapter {
-      override def mouseClicked(e: MouseEvent) = {
-        val componentBounds = e.getComponent.getBounds
-        val componentX = e.getX
-        val componentY = e.getY
-        val scaleX = componentBounds.getWidth / elem.bounds.w
-        val scaleY = componentBounds.getHeight / elem.bounds.h
+    val d = new java.awt.Dimension((elem.bounds.w * 3).toInt, (elem.bounds.h * 3).toInt)
 
-        println((componentX / scaleX, componentY / scaleY))
-      }
-    })
     frame.pack();
     frame.setSize(d);
     frame.setVisible(true);
@@ -124,22 +114,21 @@ trait JavaAWTUtil {
         }
       }, java.awt.BorderLayout.CENTER);
 
-    val d = new java.awt.Dimension(paintableElem.bounds.w.toInt, paintableElem.bounds.h.toInt)
+    val d = new java.awt.Dimension((paintableElem.bounds.w * 3).toInt, (paintableElem.bounds.h * 3).toInt)
     val listener = new MouseAdapter {
       override def mouseClicked(e: MouseEvent) = {
         val componentBounds = e.getComponent.getBounds
-        val componentX = e.getX
-        val componentY = e.getY
-        val scaleX = componentBounds.getWidth / paintableElem.bounds.w
-        val scaleY = componentBounds.getHeight / paintableElem.bounds.h
 
-        val event = Click(Point(componentX / scaleX, componentY / scaleY))
+        val event = Click(Point(e.getX, e.getY)).mapBounds(componentBounds, paintableElem.bounds)
         paintableElem = elem(Some(paintableElem) -> event)
 
         e.getComponent.repaint
       }
       override def mouseWheelMoved(e: MouseWheelEvent) = {
-        paintableElem = elem(Some(paintableElem) -> Scroll(e.getPreciseWheelRotation))
+        val componentBounds = e.getComponent.getBounds
+        val p = Point(e.getX, e.getY)
+
+        paintableElem = elem(Some(paintableElem) -> Scroll(e.getPreciseWheelRotation, p).mapBounds(componentBounds, paintableElem.bounds))
 
         e.getComponent.repaint
       }

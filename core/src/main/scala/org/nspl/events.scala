@@ -20,7 +20,9 @@ trait Events {
   case class Click(point: Point) extends Event {
     override def mapBounds(from: Bounds, to: Bounds) = Click(mapPoint(point, from, to))
   }
-  case class Scroll(v: Double) extends Event
+  case class Scroll(v: Double, location: Point) extends Event {
+    override def mapBounds(from: Bounds, to: Bounds) = Scroll(v, mapPoint(location, from, to))
+  }
   case object BuildEvent extends Event
 
 }

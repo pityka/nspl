@@ -7,10 +7,14 @@ case class DataElem(
     xAxis: Axis,
     yAxis: Axis,
     renderers: Seq[DataRenderer],
-    bounds: Bounds,
+    originalBounds: Bounds,
     tx: AffineTransform = AffineTransform.identity
 ) extends Renderable[DataElem] {
-  def transform(tx: Bounds => AffineTransform) = this.copy(tx = tx(bounds).concat(this.tx))
+  def transform(tx: Bounds => AffineTransform) = {
+    val ntx = tx(bounds).concat(this.tx)
+    this.copy(tx = ntx)
+  }
+  def bounds = tx.transform(originalBounds)
 }
 
 object DataElem {
@@ -31,7 +35,8 @@ trait Plots {
   type XYPlotAreaType = Elems5[ElemList[ShapeElem], ElemList[ShapeElem], ElemList[DataElem], Elems2[AxisElem, AxisElem], ShapeElem]
 
   case class XYPlotArea(elem: XYPlotAreaType, xMin: Double, xMax: Double, yMin: Double, yMax: Double) extends Renderable[XYPlotArea] {
-    def transform(v: Bounds => AffineTransform) = this.copy(elem = elem.transform(v))
+    def transform(v: Bounds => AffineTransform) =
+      this.copy(elem = elem.transform(v))
     def bounds: Bounds = elem.bounds
   }
 
@@ -55,8 +60,8 @@ trait Plots {
     ygrid: Boolean = true,
     frame: Boolean = true,
     boundsData: Seq[DataSource] = Nil
-  ): Build[XYPlotArea] = Build(xyplotarea(data, xAxisSetting, yAxisSetting, origin, xlim, ylim, axisMargin, xCol, yCol, xgrid, ygrid, frame, boundsData)) {
-    case (Some(old), Scroll(v1)) =>
+  ) = Build(xyplotarea(data, xAxisSetting, yAxisSetting, origin, xlim, ylim, axisMargin, xCol, yCol, xgrid, ygrid, frame, boundsData)) {
+    case (Some(old), Scroll(v1, p)) if old.elem.m5.bounds.contains(p) =>
       import old._
       val v = if (v1 > 0) 1.1 else 0.9
       val xMid = xMin + (xMax - xMin) * 0.5
@@ -65,10 +70,7 @@ trait Plots {
       val xMax1 = xMid + (xMax - xMin) * 0.5 * v
       val yMin1 = yMid - (yMax - yMin) * 0.5 * v
       val yMax1 = yMid + (yMax - yMin) * 0.5 * v
-      println(xMin1, xMax1, yMin1, yMax1, v)
-      if (xMin1.isNaN || xMax1.isNaN || yMin1.isNaN || yMax1.isNaN) old
-      else
-        xyplotarea(data, xAxisSetting, yAxisSetting, origin, Some(xMin1 -> xMax1), Some(yMin1 -> yMax1), axisMargin, xCol, yCol, xgrid, ygrid, frame, boundsData)
+      xyplotarea(data, xAxisSetting, yAxisSetting, origin, Some(xMin1 -> xMax1), Some(yMin1 -> yMax1), axisMargin, xCol, yCol, xgrid, ygrid, frame, boundsData)
   }
 
   def xyplotarea[F: FC](
@@ -85,7 +87,7 @@ trait Plots {
     ygrid: Boolean = true,
     frame: Boolean = true,
     boundsData: Seq[DataSource] = Nil
-  ): XYPlotArea = {
+  ) = {
 
     val xMinMax =
       if (boundsData.isEmpty) data.map(_._1.columnMinMax(xCol))
@@ -221,8 +223,10 @@ trait Plots {
     ylabDistance: RelFontSize = 1.0 fts,
     ylabAlignment: Alignment = Center
   ): Build[Figure[T]] =
-    Build(figure(plot.build, main, mainFontSize, mainDistance, xlab, xlabFontSize, xlabDistance, xlabAlignment, ylab, ylabFontSize, ylabDistance, ylabAlignment)) {
-      case (Some(old), e) => old.copy(m2 = old.m2.copy(m1 = old.m2.m1.copy(m2 = plot(mapEvent(Some(old), e)(_.m2.m1.m2)))))
+    {
+      case (old, e) =>
+        val mappedEvent = mapEvent(old, e)(_.m2.m1.m2)
+        figure(plot.build, main, mainFontSize, mainDistance, xlab, xlabFontSize, xlabDistance, xlabAlignment, ylab, ylabFontSize, ylabDistance, ylabAlignment)
     }
 
   /* Decorates with main, xlab and ylab labels. */

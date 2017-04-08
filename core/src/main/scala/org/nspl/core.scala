@@ -5,6 +5,10 @@ case class Bounds(x: Double, y: Double, w: Double, h: Double) {
   def maxY = y + h
   def centerX = x + w * 0.5
   def centerY = y + h * 0.5
+  def contains(p: Point) =
+    p.x >= x && p.x <= x + w &&
+      p.y >= y && p.y <= y + h
+
 }
 
 sealed trait Cap

@@ -174,7 +174,7 @@ trait SimplePlots {
     )
 
     group(
-      fig,
+      plotArea,
       legend1,
       HorizontalStack(Center, 5d)
     )

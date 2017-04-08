@@ -12,7 +12,7 @@ package object nspl
     with ImplicitConversions
     with Events {
 
-  type Build[A] = ((Option[A], Event)) => A
+  type Build[A] = ((Option[A], Event)) => A // Option[A]
 
   implicit class defaultBuild[T](b: Build[T]) {
     def build: T = b(None -> BuildEvent)
@@ -119,12 +119,12 @@ package object nspl
     {
       case (Some(old), e: Event) =>
         val bounds = old.members.map(_.bounds)
-        val n = layout(bounds)
-        val members1 = (n zip bounds zip members).zipWithIndex map {
-          case (((to, from), build), idx) =>
-            build(Some(old.members(idx)), e.mapBounds(to, from))
+        val oldbounds = old.bounds
+        val members1 = (bounds zip members).zipWithIndex map {
+          case ((to, build), idx) =>
+            build(Some(old.members(idx)), e.mapBounds(to, oldbounds))
         }
-        val transformed = n zip members1 map (x => fitToBounds(x._2, x._1))
+        val transformed = bounds zip members1 map (x => fitToBounds(x._2, x._1))
         ElemList(transformed.toList)
       case (None, BuildEvent) =>
         sequence(members.map(_.build), layout)
@@ -152,17 +152,17 @@ package object nspl
       case (Some(old), e: Event) =>
         val bounds = old.members.map(_.fold(_.bounds, _.bounds))
 
-        val n = layout(bounds)
+        val oldbounds = old.bounds
 
-        val members: Seq[Either[T1, T2]] = (n zip bounds zip members1).zipWithIndex.map {
-          case (((from, to), build), idx) =>
+        val members: Seq[Either[T1, T2]] = (bounds zip members1).zipWithIndex.map {
+          case ((to, build), idx) =>
             build match {
-              case scala.util.Left(x) => scala.util.Left(x(Some(old.members(idx).left.get) -> e.mapBounds(from, to)))
-              case scala.util.Right(x) => scala.util.Right(x(Some(old.members(idx).right.get) -> e.mapBounds(from, to)))
+              case scala.util.Left(x) => scala.util.Left(x(Some(old.members(idx).left.get) -> e.mapBounds(oldbounds, to)))
+              case scala.util.Right(x) => scala.util.Right(x(Some(old.members(idx).right.get) -> e.mapBounds(oldbounds, to)))
             }
         }
 
-        val transformed = n zip members map (x => x._2 match {
+        val transformed = bounds zip members map (x => x._2 match {
           case scala.util.Left(y) => scala.util.Left(fitToBounds(y, x._1))
           case scala.util.Right(y) => scala.util.Right(fitToBounds(y, x._1))
         })
@@ -179,8 +179,8 @@ package object nspl
       val xF = to.w / from.w
       val yF = to.h / from.h
       Point(
-        (p.x - from.x) * xF + to.x,
-        (p.y - from.y) * yF + to.y
+        math.abs(p.x - from.x) * xF + to.x,
+        math.abs(p.y - from.y) * yF + to.y
       )
     }
 
