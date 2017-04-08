@@ -344,8 +344,8 @@ trait SimplePlots {
     val min = bxdata.iterator.map(_(4)).min
     val max = bxdata.iterator.map(_(5)).max
 
-    figure(
-      xyplotarea(
+    figureBuild(
+      xyplotareaBuild(
         List(bxdata -> List(boxwhisker(fill = boxColor))),
         AxisSettings(
           LinearAxisFactory,
@@ -522,8 +522,8 @@ trait SimplePlots {
     val zmax = zlim.map(_._2).getOrElse(minmaxz.max)
 
     group(
-      figure(
-        xyplotarea(
+      figureBuild(
+        xyplotareaBuild(
           List(data -> List(point(
             pointSizeIsInDataSpaceUnits = true,
             color = colormap.withRange(zmin, zmax),
