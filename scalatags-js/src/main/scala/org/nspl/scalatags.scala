@@ -5,16 +5,22 @@ import scalatags.JsDom.svgTags._
 import scalatags.JsDom.svgAttrs._
 import scalatags.JsDom.svgAttrs
 import scalatags.JsDom.svgTags
+import scalatags.jsdom.Frag
 import org.scalajs.dom
 import org.scalajs.dom.html
+import org.scalajs.dom.raw._
+import org.scalajs.dom.ext._
 
-case class ScalaTagRC(elems: scala.collection.mutable.ArrayBuffer[Modifier]) extends RenderingContext
+case class ScalaTagRC(elems: scala.collection.mutable.ArrayBuffer[Frag]) extends RenderingContext
 
 object scalatagrenderer {
 
   implicit val defaultGlyphMeasurer = CanvasGlyphMeasurer
 
   implicit val defaultAWTFont: FontConfiguration = importFont("Arial")
+
+  implicit def rec2bounds(r: ClientRect) =
+    Bounds(r.left, r.top, r.width, r.height)
 
   type SER[T] = Renderer[T, ScalaTagRC]
 
@@ -33,22 +39,83 @@ object scalatagrenderer {
   }
 
   def renderToScalaTag[K <: Renderable[K]](
-    elem: K,
+    elem: Build[K],
     width: Int = 1000
   )(
     implicit
     er: SER[K]
   ) = {
 
-    val ctx = ScalaTagRC(scala.collection.mutable.ArrayBuffer[Modifier]())
+    val ctx = ScalaTagRC(scala.collection.mutable.ArrayBuffer[Frag]())
 
-    val aspect = elem.bounds.h / elem.bounds.w
-    val height = (width * aspect).toInt
+    val rootElem = svg(
+      svgAttrs.width := width,
+      svgAttrs.xmlns := "http://www.w3.org/2000/svg"
+    ).render
 
-    fitToBounds(elem, Bounds(0, 0, width, height)).render(ctx)
+    var paintableElem = elem.build
+    var dragStart = Point(0, 0)
+    var mousedown = false
 
-    svg(svgAttrs.width := width, svgAttrs.height := height,
-      svgAttrs.xmlns := "http://www.w3.org/2000/svg")(ctx.elems: _*)
+    def paint = {
+      val aspect = paintableElem.bounds.h / paintableElem.bounds.w
+      val height = (width * aspect)
+      rootElem.setAttribute("height", height.toString)
+
+      fitToBounds(paintableElem, Bounds(0, 0, width, height)).render(ctx)
+      // rootElem.children.foreach(n => { println(n); rootElem.removeChild(n) })
+      while (rootElem.firstChild != null) {
+        rootElem.removeChild(rootElem.firstChild)
+      }
+      ctx.elems.foreach(n => rootElem.appendChild(n.render))
+      ctx.elems.clear
+    }
+
+    def getCanvasCoordinate(e: MouseEvent): Point = {
+      val rect = rootElem.getBoundingClientRect
+      val x = e.clientX - rect.left;
+      val y = e.clientY - rect.top;
+      Point(x, y)
+    }
+
+    def onmousedown(e: MouseEvent) = {
+      if (e.button == 0) {
+        val componentBounds: Bounds = rootElem.getBoundingClientRect
+        val p = getCanvasCoordinate(e)
+        dragStart = mapPoint(p, componentBounds, paintableElem.bounds)
+        mousedown = true
+      }
+    }
+
+    def makeEvent(e: MouseEvent, up: Boolean) = {
+      if (e.button == 0 && mousedown) {
+        val componentBounds: Bounds = rootElem.getBoundingClientRect
+        val p = mapPoint(getCanvasCoordinate(e), componentBounds, paintableElem.bounds)
+
+        val v = Point(dragStart.x - p.x, dragStart.y - p.y)
+        val l = math.sqrt(v.x * v.x + v.y * v.y)
+        if (l > 0) {
+          paintableElem = elem(Some(paintableElem) -> Drag(dragStart, p))
+          dragStart = p
+        } else {
+          if (up) {
+            paintableElem = elem(Some(paintableElem) -> Click(p))
+          }
+        }
+        if (up) {
+          mousedown = false
+        }
+        paint
+      }
+    }
+
+    rootElem.onmousedown = onmousedown _
+    rootElem.onmouseup = makeEvent((_: MouseEvent), true)
+    rootElem.onmousemove = makeEvent((_: MouseEvent), false)
+
+    paint
+
+    rootElem
 
   }
 

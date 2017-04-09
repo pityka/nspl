@@ -54,16 +54,16 @@ object TestSvg {
 
     val gallery = group(
       p1,
-      p2,
-      p3,
-      p4,
-      p5,
-      p6,
-      text,
+      // p2,
+      // p3,
+      // p4,
+      // p5,
+      // p6,
+      // text,
       ColumnLayout(3)
     )
 
-    n.appendChild(renderToScalaTag(gallery, 800).render)
+    n.appendChild(renderToScalaTag(gallery, 800))
 
     println("Bye")
   }

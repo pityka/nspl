@@ -12,8 +12,11 @@ object canvasrenderer {
 
   implicit val defaultAWTFont: FontConfiguration = importFont("Arial")
 
+  implicit def rec2bounds(r: ClientRect) =
+    Bounds(r.left, r.top, r.width, r.height)
+
   def render[K <: Renderable[K]](
-    elem: K,
+    elem: Build[K],
     canvas: html.Canvas,
     width: Int
   )(
@@ -25,13 +28,63 @@ object canvasrenderer {
       canvas.getContext("2d")
         .asInstanceOf[dom.CanvasRenderingContext2D]
 
-    val aspect = elem.bounds.h / elem.bounds.w
-    val height = (width * aspect).toInt
+    var paintableElem = elem.build
+    var dragStart = Point(0, 0)
+    var mousedown = false
 
-    canvas.height = height
-    canvas.width = width
+    def paint = {
+      val aspect = paintableElem.bounds.h / paintableElem.bounds.w
+      val height = (width * aspect)
 
-    fitToBounds(elem, Bounds(0, 0, width, height)).render(CanvasRC(ctx))
+      canvas.height = height.toInt
+      canvas.width = width
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      fitToBounds(paintableElem, Bounds(0, 0, width, height)).render(CanvasRC(ctx))
+    }
+
+    def getCanvasCoordinate(e: MouseEvent): Point = {
+      val rect = canvas.getBoundingClientRect
+      val x = e.clientX - rect.left;
+      val y = e.clientY - rect.top;
+      Point(x, y)
+    }
+
+    def onmousedown(e: MouseEvent) = {
+      if (e.button == 0) {
+        val componentBounds: Bounds = canvas.getBoundingClientRect
+        val p = getCanvasCoordinate(e)
+        dragStart = mapPoint(p, componentBounds, paintableElem.bounds)
+        mousedown = true
+      }
+    }
+
+    def makeEvent(e: MouseEvent, up: Boolean) = {
+      if (e.button == 0 && mousedown) {
+        val componentBounds: Bounds = canvas.getBoundingClientRect
+        val p = mapPoint(getCanvasCoordinate(e), componentBounds, paintableElem.bounds)
+
+        val v = Point(dragStart.x - p.x, dragStart.y - p.y)
+        val l = math.sqrt(v.x * v.x + v.y * v.y)
+        if (l > 0) {
+          paintableElem = elem(Some(paintableElem) -> Drag(dragStart, p))
+          dragStart = p
+        } else {
+          if (up) {
+            paintableElem = elem(Some(paintableElem) -> Click(p))
+          }
+        }
+        if (up) {
+          mousedown = false
+        }
+        paint
+      }
+    }
+
+    canvas.onmousedown = onmousedown _
+    canvas.onmouseup = makeEvent((_: MouseEvent), true)
+    canvas.onmousemove = makeEvent((_: MouseEvent), false)
+
+    paint
 
   }
 
@@ -145,13 +198,13 @@ object canvasrenderer {
 
   def savePaint[T](g: CRC)(fun: CRC => T) = {
     val save = g.fillStyle
-    try { fun(g) } finally { g.fillStyle = save }
+    try { fun(g) } finally { if (g.fillStyle != save) { g.fillStyle = save } }
   }
 
   def saveStroke[T](g: CRC)(fun: CRC => T) = {
     val save1 = g.lineWidth
     val save2 = g.strokeStyle
-    try { fun(g) } finally { g.lineWidth = save1; g.strokeStyle = save2 }
+    try { fun(g) } finally { if (g.lineWidth != save1) { g.lineWidth = save1 }; if (g.strokeStyle != save2) { g.strokeStyle = save2 } }
   }
 
   implicit class Pimp[K <: Renderable[K]](t: K) {

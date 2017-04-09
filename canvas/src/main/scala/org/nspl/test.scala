@@ -29,6 +29,7 @@ object Test {
     val idx = 0 until x.size map (_.toDouble)
 
     val p1 = xyplot(indexed(x))(ylab = "x", xlab = "index", main = "main")
+
     val p2 = xyplot(
       density(x) -> line()
     )(xlab = "x", ylab = "dens.")
@@ -56,13 +57,13 @@ object Test {
     ), 200)
 
     val gallery = group(
-      p1,
-      p2,
-      p3,
-      p4,
-      p5,
-      p6,
-      text,
+      p1, p2,
+      // p2,
+      // p3,
+      // p4,
+      // p5,
+      // p6,
+      // text,
       ColumnLayout(3)
     )
 

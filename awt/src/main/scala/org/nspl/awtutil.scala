@@ -59,36 +59,7 @@ trait JavaAWTUtil {
   implicit def tx2tx(tx: AffineTransform): java.awt.geom.AffineTransform =
     new java.awt.geom.AffineTransform(
       tx.m0, tx.m3, tx.m1, tx.m4, tx.m2, tx.m5
-    )
-
-  def show[K <: Renderable[K]](elem: K)(
-    implicit
-    er: Renderer[K, JavaRC]
-  ): Unit = {
-    import javax.swing._
-    import java.awt.{ Graphics, RenderingHints }
-    val frame = new JFrame("");
-    frame.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
-    frame
-      .getContentPane()
-      .add(new JComponent {
-        override def paintComponent(g: Graphics) = {
-          super.paintComponent(g)
-          val g2 = g.asInstanceOf[Graphics2D]
-          g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.
-            VALUE_ANTIALIAS_ON)
-          g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
-          val bounds = getBounds()
-          fitToBounds(elem, bounds).render(JavaRC(g2))
-        }
-      }, java.awt.BorderLayout.CENTER);
-
-    val d = new java.awt.Dimension((elem.bounds.w * 3).toInt, (elem.bounds.h * 3).toInt)
-
-    frame.pack();
-    frame.setSize(d);
-    frame.setVisible(true);
-  }
+    )  
 
   def show[K <: Renderable[K]](elem: Build[K])(
     implicit
