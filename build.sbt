@@ -7,7 +7,8 @@ lazy val commonSettings = Seq(
   javacOptions ++= Seq("-Xdoclint:none"),
   // scalacOptions ++= Seq("-Xlog-implicits"),
   licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
-)
+) ++ reformatOnCompileSettings
+
 
 lazy val core = project.in(file("core")).
 		settings(commonSettings).

@@ -57,11 +57,11 @@ case class HistogramData(
 object HistogramData {
 
   /**
-   * Merge maps with key collision
-   * @param fun Handles key collision
-   */
+    * Merge maps with key collision
+    * @param fun Handles key collision
+    */
   private def addMaps[K, V](a: Map[K, V], b: Map[K, V])(
-    fun: (V, V) => V
+      fun: (V, V) => V
   ): Map[K, V] = {
     a ++ b.map {
       case (key, bval) =>
@@ -75,7 +75,9 @@ object HistogramData {
   }
 
   def makeBoundaries(
-    step: Double, min: Double, max: Double
+      step: Double,
+      min: Double,
+      max: Double
   ): Seq[(Double, Double)] = {
     assert(max >= min, "max < min")
     assert(step > 0, "step < 0")
@@ -86,17 +88,17 @@ object HistogramData {
   }
 
   def makeBoundariesFromPercentiles(
-    data: Seq[Double],
-    qs: Seq[Double]
+      data: Seq[Double],
+      qs: Seq[Double]
   ): Seq[(Double, Double)] = {
     val ps = percentile(data, qs)
     (data.min +: ps.dropRight(1)) zip ps
   }
 
   def bin(
-    data: Seq[Double],
-    binning: Seq[Double],
-    boundaries: Seq[(Double, Double)]
+      data: Seq[Double],
+      binning: Seq[Double],
+      boundaries: Seq[(Double, Double)]
   ): Seq[(Double, Double, Seq[Double])] = {
     val zp = data zip binning
     boundaries.map { b =>
@@ -105,8 +107,8 @@ object HistogramData {
   }
 
   def apply(
-    data: Seq[Double],
-    binBoundaries: Seq[(Double, Double)]
+      data: Seq[Double],
+      binBoundaries: Seq[(Double, Double)]
   ): HistogramData = {
 
     val min = binBoundaries.minBy(_._1)._1
@@ -120,8 +122,8 @@ object HistogramData {
     val bins: Map[(Double, Double, Double), Double] = binBoundaries.map {
       case (x, y) =>
         (x, y, 0.0) -> (if (y == max)
-          data2.filter(z => z <= y && z >= x).size.toDouble
-        else data2.filter(z => z < y && z >= x).size.toDouble)
+                          data2.filter(z => z <= y && z >= x).size.toDouble
+                        else data2.filter(z => z < y && z >= x).size.toDouble)
     }.toMap
 
     val datasize = data2.size
@@ -132,10 +134,10 @@ object HistogramData {
   }
 
   def apply(
-    data: Seq[Double],
-    step: Double,
-    min: Double,
-    max: Double
+      data: Seq[Double],
+      step: Double,
+      min: Double,
+      max: Double
   ): HistogramData = {
 
     HistogramData(data, makeBoundaries(step, min, max))
@@ -168,9 +170,9 @@ object HistogramData {
   }
 
   def fromStratifiedData(
-    data: Seq[Seq[Double]],
-    step: Double,
-    relativePerBin: Boolean
+      data: Seq[Seq[Double]],
+      step: Double,
+      relativePerBin: Boolean
   ): Seq[HistogramData] = {
     val maxX = data.flatten.max
     val minX = data.flatten.min
@@ -203,12 +205,12 @@ object HistogramData {
           val updatedBin = binOfStratum.map {
             case ((x, y), dens) =>
               (x,
-                head.filter(_._1._1 == x).headOption.map(_._2).getOrElse(0.0) +
-                head
-                .filter(_._1._1 == x)
-                .headOption
-                .map(_._1._2)
-                .getOrElse(0.0)) -> dens
+               head.filter(_._1._1 == x).headOption.map(_._2).getOrElse(0.0) +
+                 head
+                   .filter(_._1._1 == x)
+                   .headOption
+                   .map(_._1._2)
+                   .getOrElse(0.0)) -> dens
           }.toMap
           updatedBin +: acc
         }
@@ -219,10 +221,12 @@ object HistogramData {
         .map(_.groupBy(_._1._1).map(x => x._1 -> x._2.map(_._2).sum))
         .reduce((x, y) => addMaps(x, y)(_ + _))
 
-      val newbins = bins.map(_.map(x =>
-        (x._1._1, x._1._2 / perBinMaxY(x._1._1)) -> x._2 / perBinMaxY(
-          x._1._1
-        )))
+      val newbins = bins.map(
+        _.map(
+          x =>
+            (x._1._1, x._1._2 / perBinMaxY(x._1._1)) -> x._2 / perBinMaxY(
+              x._1._1
+          )))
       newbins.map { bin =>
         HistogramData(
           bin.map { case (x, v) => (x._1, x._1 + step, x._2) -> v },

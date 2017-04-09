@@ -24,13 +24,15 @@ case class QuadTo(p2: Point, p1: Point) extends PathOperation {
     val ty = (p0.y - p1.y) / (p0.y - p2.y)
 
     p0 :: p2 :: (List(tx, ty)
-      .filter(t => 0.0 >= t && t <= 1.0).map(t =>
+      .filter(t => 0.0 >= t && t <= 1.0)
+      .map(t =>
         Point(
           (1 - t) * ((1 - t) * p0.x + t * p1.x) + t * ((1 - t) * p1.x + t * p2.x),
           (1 - t) * ((1 - t) * p0.y + t * p1.y) + t * ((1 - t) * p1.y + t * p2.y)
-        )))
+      )))
   }
-  def transform(tx: AffineTransform) = QuadTo(tx.transform(p1), tx.transform(p2))
+  def transform(tx: AffineTransform) =
+    QuadTo(tx.transform(p1), tx.transform(p2))
 
 }
 // case class CubicTo(p3: Point, p1: Point, p2: Point) extends PathOperation {

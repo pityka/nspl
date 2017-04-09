@@ -6,10 +6,10 @@ trait MinMax {
 }
 
 /**
- * Basic trait of all data sources.
- *
- * Represents an iterator of fixed size records (rows).
- */
+  * Basic trait of all data sources.
+  *
+  * Represents an iterator of fixed size records (rows).
+  */
 trait DataSource {
 
   def iterator: Iterator[Row]

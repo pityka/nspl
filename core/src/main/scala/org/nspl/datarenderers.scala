@@ -3,7 +3,13 @@ package org.nspl
 import data._
 
 trait DataRenderer {
-  def render[R <: RenderingContext](data: Row, xAxis: Axis, yAxis: Axis, ctx: R, tx: AffineTransform)(implicit re: Renderer[ShapeElem, R], rt: Renderer[TextBox, R]): Unit
+  def render[R <: RenderingContext](data: Row,
+                                    xAxis: Axis,
+                                    yAxis: Axis,
+                                    ctx: R,
+                                    tx: AffineTransform)(
+      implicit re: Renderer[ShapeElem, R],
+      rt: Renderer[TextBox, R]): Unit
   def asLegend: Option[LegendElem]
   def clear: Unit = ()
 }
@@ -11,35 +17,45 @@ trait DataRenderer {
 trait Renderers {
 
   def point[T: FC](
-    xCol: Int = 0,
-    yCol: Int = 1,
-    colorCol: Int = 2,
-    sizeCol: Int = 3,
-    shapeCol: Int = 4,
-    errorTopCol: Int = 5,
-    errorBottomCol: Int = 6,
-    size: Double = 3.0,
-    color: Colormap = DiscreteColors(14),
-    shapes: Vector[Shape] = shapeList,
-    pointSizeIsInDataSpaceUnits: Boolean = false,
-    valueText: Boolean = false,
-    labelText: Boolean = false,
-    labelFontSize: RelFontSize = 0.4 fts,
-    labelColor: Color = Color.black,
-    errorBarStroke: Stroke = Stroke(1d)
+      xCol: Int = 0,
+      yCol: Int = 1,
+      colorCol: Int = 2,
+      sizeCol: Int = 3,
+      shapeCol: Int = 4,
+      errorTopCol: Int = 5,
+      errorBottomCol: Int = 6,
+      size: Double = 3.0,
+      color: Colormap = DiscreteColors(14),
+      shapes: Vector[Shape] = shapeList,
+      pointSizeIsInDataSpaceUnits: Boolean = false,
+      valueText: Boolean = false,
+      labelText: Boolean = false,
+      labelFontSize: RelFontSize = 0.4 fts,
+      labelColor: Color = Color.black,
+      errorBarStroke: Stroke = Stroke(1d)
   ) = new DataRenderer {
 
     def asLegend = Some(PointLegend(shapes.head, color(0)))
 
-    def render[R <: RenderingContext](data: Row, xAxis: Axis, yAxis: Axis, ctx: R, tx: AffineTransform)(implicit re: Renderer[ShapeElem, R], rt: Renderer[TextBox, R]): Unit = {
+    def render[R <: RenderingContext](data: Row,
+                                      xAxis: Axis,
+                                      yAxis: Axis,
+                                      ctx: R,
+                                      tx: AffineTransform)(
+        implicit re: Renderer[ShapeElem, R],
+        rt: Renderer[TextBox, R]): Unit = {
 
       if (data.dimension > xCol && data.dimension > yCol) {
         val wX = data(xCol)
         val wY = data(yCol)
 
         if (wX >= xAxis.min && wX <= xAxis.max && wY >= yAxis.min && wY <= yAxis.max) {
-          val color1 = if (data.dimension > colorCol) color(data(colorCol)) else color(0d)
-          val shape = if (data.dimension > shapeCol) shapes(data(shapeCol).toInt % shapes.size) else shapes.head
+          val color1 =
+            if (data.dimension > colorCol) color(data(colorCol)) else color(0d)
+          val shape =
+            if (data.dimension > shapeCol)
+              shapes(data(shapeCol).toInt % shapes.size)
+            else shapes.head
           val size1 = if (data.dimension > sizeCol) data(sizeCol) else size
 
           val unitWidthX = if (pointSizeIsInDataSpaceUnits) {
@@ -57,10 +73,7 @@ trait Renderers {
           val shape1: ShapeElem = ShapeElem(
             shape,
             fill = color1
-          )
-            .scale(factorX, factorY)
-            .translate(vX, vY)
-            .transform(b => tx)
+          ).scale(factorX, factorY).translate(vX, vY).transform(b => tx)
 
           re.render(ctx, shape1)
 
@@ -69,9 +82,10 @@ trait Renderers {
               f"${data(colorCol)}%.2g",
               color = labelColor,
               fontSize = labelFontSize
-            )
-              .translate(vX, vY)
-              .transform(b => tx.concat(AffineTransform.translate(0, -1 * b.h)))
+            ).translate(vX, vY)
+              .transform(b =>
+                tx.concat(AffineTransform
+                  .translate(0, -1 * b.h - shape.bounds.h * factorY * 0.5)))
 
             rt.render(ctx, tb)
           }
@@ -81,9 +95,13 @@ trait Renderers {
               data.label,
               color = labelColor,
               fontSize = labelFontSize
-            )
-              .translate(vX, vY)
-              .transform(b => tx.concat(AffineTransform.translate(0, -1 * b.h)))
+            ).translate(vX, vY)
+              .transform(
+                b =>
+                  tx.concat(
+                    AffineTransform.translate(
+                      -0.2 * b.w,
+                      -1 * b.h - shape.bounds.h * factorY * 0.5)))
 
             rt.render(ctx, tb)
           }
@@ -91,7 +109,8 @@ trait Renderers {
           if (data.dimension > errorTopCol) {
             val errorTop = data(errorTopCol)
             val shape1: ShapeElem = ShapeElem(
-              Shape.line(Point(vX, vY), Point(vX, yAxis.worldToView(wY - errorTop))),
+              Shape.line(Point(vX, vY),
+                         Point(vX, yAxis.worldToView(wY - errorTop))),
               stroke = Some(errorBarStroke)
             ).transform(_ => tx)
             re.render(ctx, shape1)
@@ -99,24 +118,26 @@ trait Renderers {
           if (data.dimension > errorBottomCol) {
             val errorTop = data(errorBottomCol)
             val shape1: ShapeElem = ShapeElem(
-              Shape.line(Point(vX, vY), Point(vX, yAxis.worldToView(wY + errorTop))),
+              Shape.line(Point(vX, vY),
+                         Point(vX, yAxis.worldToView(wY + errorTop))),
               stroke = Some(errorBarStroke)
             ).transform(_ => tx)
             re.render(ctx, shape1)
           }
         }
-      } else throw new RuntimeException(
-        s"Record has no X or Y elements. size: ${data.dimension} vs idx $xCol $yCol"
-      )
+      } else
+        throw new RuntimeException(
+          s"Record has no X or Y elements. size: ${data.dimension} vs idx $xCol $yCol"
+        )
     }
   }
 
   def line(
-    xCol: Int = 0,
-    yCol: Int = 1,
-    colorCol: Int = 2,
-    stroke: Stroke = Stroke(1d),
-    color: Colormap = Color.black
+      xCol: Int = 0,
+      yCol: Int = 1,
+      colorCol: Int = 2,
+      stroke: Stroke = Stroke(1d),
+      color: Colormap = Color.black
   ) = new DataRenderer {
 
     var currentPoint: Option[Point] = None
@@ -124,11 +145,11 @@ trait Renderers {
     override def clear = currentPoint = None
 
     def render[R <: RenderingContext](
-      data: Row,
-      xAxis: Axis,
-      yAxis: Axis,
-      ctx: R,
-      tx: AffineTransform
+        data: Row,
+        xAxis: Axis,
+        yAxis: Axis,
+        ctx: R,
+        tx: AffineTransform
     )(implicit re: Renderer[ShapeElem, R], rt: Renderer[TextBox, R]): Unit = {
 
       val wX = data(xCol)
@@ -136,7 +157,8 @@ trait Renderers {
 
       if (wX >= xAxis.min && wX <= xAxis.max && wY >= yAxis.min && wY <= yAxis.max) {
 
-        val color1 = if (data.dimension > colorCol) color(data(colorCol)) else color(0d)
+        val color1 =
+          if (data.dimension > colorCol) color(data(colorCol)) else color(0d)
 
         val vX = xAxis.worldToView(wX)
         val vY = yAxis.worldToView(wY)
@@ -166,11 +188,11 @@ trait Renderers {
   /* Paints the area between the (x,y) and (x,0) or
    *  between (x,y) and (x,y2) if y2 is present */
   def area(
-    xCol: Int = 0,
-    yCol: Int = 1,
-    colorCol: Int = 2,
-    yCol2: Option[Int] = None,
-    color: Colormap = Color.black
+      xCol: Int = 0,
+      yCol: Int = 1,
+      colorCol: Int = 2,
+      yCol2: Option[Int] = None,
+      color: Colormap = Color.black
   ) = new DataRenderer {
     var currentPoint1: Option[Point] = None
     var currentPoint2: Option[Point] = None
@@ -182,11 +204,11 @@ trait Renderers {
     }
 
     def render[R <: RenderingContext](
-      data: Row,
-      xAxis: Axis,
-      yAxis: Axis,
-      ctx: R,
-      tx: AffineTransform
+        data: Row,
+        xAxis: Axis,
+        yAxis: Axis,
+        ctx: R,
+        tx: AffineTransform
     )(implicit re: Renderer[ShapeElem, R], rt: Renderer[TextBox, R]): Unit = {
 
       val wX = data(xCol)
@@ -194,7 +216,8 @@ trait Renderers {
 
       if (wX >= xAxis.min && wX <= xAxis.max && wY >= yAxis.min && wY <= yAxis.max) {
 
-        val color1 = if (data.dimension > colorCol) color(data(colorCol)) else color(0d)
+        val color1 =
+          if (data.dimension > colorCol) color(data(colorCol)) else color(0d)
 
         val wYBottom = yCol2.map { i =>
           val w = data(i)
@@ -207,8 +230,10 @@ trait Renderers {
         val vY = yAxis.worldToView(wY)
 
         val p1 = Point(vX, vY)
-        val p2 = Point(vX, wYBottom.map(w =>
-          yAxis.worldToView(w)).getOrElse(yAxis.worldToView(yAxis.min)))
+        val p2 = Point(vX,
+                       wYBottom
+                         .map(w => yAxis.worldToView(w))
+                         .getOrElse(yAxis.worldToView(yAxis.min)))
 
         if (currentPoint1.isEmpty) {
           currentPoint1 = Some(p1)
@@ -240,7 +265,7 @@ trait Renderers {
   }
 
   def polynom(
-    renderer: () => DataRenderer = () => line()
+      renderer: () => DataRenderer = () => line()
   ) = new DataRenderer {
     def asLegend = renderer().asLegend
 
@@ -255,11 +280,11 @@ trait Renderers {
     }
 
     def render[R <: RenderingContext](
-      data: Row,
-      xAxis: Axis,
-      yAxis: Axis,
-      ctx: R,
-      tx: AffineTransform
+        data: Row,
+        xAxis: Axis,
+        yAxis: Axis,
+        ctx: R,
+        tx: AffineTransform
     )(implicit re: Renderer[ShapeElem, R], rt: Renderer[TextBox, R]): Unit = {
 
       val r = renderer()
@@ -274,24 +299,24 @@ trait Renderers {
   }
 
   def bar(
-    xCol: Int = 0,
-    yCol: Int = 1,
-    fillCol: Int = 2,
-    horizontal: Boolean = false,
-    stroke: Stroke = Stroke(1d),
-    strokeColor: Color = Color.black,
-    fill: Colormap = Color.white,
-    width: Double = 1d,
-    yCol2: Option[Int] = None,
-    widthCol: Int = 3
+      xCol: Int = 0,
+      yCol: Int = 1,
+      fillCol: Int = 2,
+      horizontal: Boolean = false,
+      stroke: Stroke = Stroke(1d),
+      strokeColor: Color = Color.black,
+      fill: Colormap = Color.white,
+      width: Double = 1d,
+      yCol2: Option[Int] = None,
+      widthCol: Int = 3
   ) = new DataRenderer {
     def asLegend = Some(PointLegend(shapeList(1), fill(0)))
     def render[R <: RenderingContext](
-      data: Row,
-      xAxis: Axis,
-      yAxis: Axis,
-      ctx: R,
-      tx: AffineTransform
+        data: Row,
+        xAxis: Axis,
+        yAxis: Axis,
+        ctx: R,
+        tx: AffineTransform
     )(implicit re: Renderer[ShapeElem, R], rt: Renderer[TextBox, R]): Unit = {
 
       val wX = data(xCol)
@@ -299,7 +324,8 @@ trait Renderers {
 
       if (wX >= xAxis.min && wX <= xAxis.max && wY >= yAxis.min && wY <= yAxis.max) {
 
-        val color1 = if (data.dimension > fillCol) fill(data(fillCol)) else fill(0d)
+        val color1 =
+          if (data.dimension > fillCol) fill(data(fillCol)) else fill(0d)
         val width1 = if (data.dimension > widthCol) data(widthCol) else width
 
         if (!horizontal) {
@@ -309,14 +335,16 @@ trait Renderers {
             if (w > yAxis.max) yAxis.max
             else if (w < yAxis.min) yAxis.min
             else w
-          }.getOrElse(if (0d > yAxis.max) yAxis.max
-          else if (0d < yAxis.min) yAxis.min
-          else 0d)
+          }.getOrElse(
+            if (0d > yAxis.max) yAxis.max
+            else if (0d < yAxis.min) yAxis.min
+            else 0d)
 
           val vX = xAxis.worldToView(wX)
           val vXMin = xAxis.worldToView(xAxis.min)
           val vXMax = xAxis.worldToView(xAxis.max)
-          val vWidth1 = math.abs(xAxis.worldToView(0.0) - xAxis.worldToView(width1))
+          val vWidth1 =
+            math.abs(xAxis.worldToView(0.0) - xAxis.worldToView(width1))
 
           val outOfBoundsLeft = math.max(0d, vXMin - (vX - vWidth1 * 0.5))
           val outOfBoundsRight = math.max(0d, vX + vWidth1 * 0.5 - vXMax)
@@ -328,7 +356,17 @@ trait Renderers {
 
           val vHeight = math.abs(vY2 - vY)
 
-          val rectangle = if (vY2 > vY) Shape.rectangle(vX - vWidth1 * 0.5 + outOfBoundsLeft, vY, vWidth, vHeight) else Shape.rectangle(vX - vWidth1 * 0.5 + outOfBoundsLeft, vY2, vWidth, vHeight)
+          val rectangle =
+            if (vY2 > vY)
+              Shape.rectangle(vX - vWidth1 * 0.5 + outOfBoundsLeft,
+                              vY,
+                              vWidth,
+                              vHeight)
+            else
+              Shape.rectangle(vX - vWidth1 * 0.5 + outOfBoundsLeft,
+                              vY2,
+                              vWidth,
+                              vHeight)
 
           val shape1 = ShapeElem(
             rectangle,
@@ -346,15 +384,17 @@ trait Renderers {
             if (w > xAxis.max) xAxis.max
             else if (w < xAxis.min) xAxis.min
             else w
-          }.getOrElse(if (0d > xAxis.max) xAxis.max
-          else if (0d < xAxis.min) xAxis.min
-          else 0d)
+          }.getOrElse(
+            if (0d > xAxis.max) xAxis.max
+            else if (0d < xAxis.min) xAxis.min
+            else 0d)
 
           val vY = yAxis.worldToView(wY)
           val vYMin = yAxis.worldToView(yAxis.min)
           val vYMax = yAxis.worldToView(yAxis.max)
 
-          val vWidth1 = math.abs(yAxis.worldToView(0.0) - yAxis.worldToView(width))
+          val vWidth1 =
+            math.abs(yAxis.worldToView(0.0) - yAxis.worldToView(width))
 
           val outOfBoundsTop = math.max(0d, vYMax - (vY - vWidth1 * 0.5))
           val outOfBoundsBottom = math.max(0d, vY + vWidth1 * 0.5 - vYMin)
@@ -365,7 +405,17 @@ trait Renderers {
           val vX2 = xAxis.worldToView(wXBottom)
           val vHeight = math.abs(vX2 - vX)
 
-          val rectangle = if (wX > 0) Shape.rectangle(vX2, vY - vWidth1 * 0.5 + outOfBoundsTop, vHeight, vWidth) else Shape.rectangle(vX, vY - vWidth1 * 0.5 + outOfBoundsTop, vHeight, vWidth)
+          val rectangle =
+            if (wX > 0)
+              Shape.rectangle(vX2,
+                              vY - vWidth1 * 0.5 + outOfBoundsTop,
+                              vHeight,
+                              vWidth)
+            else
+              Shape.rectangle(vX,
+                              vY - vWidth1 * 0.5 + outOfBoundsTop,
+                              vHeight,
+                              vWidth)
 
           val shape1 = ShapeElem(
             rectangle,
@@ -383,34 +433,34 @@ trait Renderers {
   }
 
   def abline(
-    a: Double,
-    b: Double,
-    renderer: DataRenderer = line()
+      a: Double,
+      b: Double,
+      renderer: DataRenderer = line()
   ) =
     (dataSourceFromRows(Seq(a -> b)), List(renderer))
 
   def boxwhisker(
-    xCol: Int = 0,
-    medianCol: Int = 1,
-    q1Col: Int = 2,
-    q3Col: Int = 3,
-    minCol: Int = 4,
-    maxCol: Int = 5,
-    x2Col: Int = 6,
-    fillCol: Int = 7,
-    width: Double = 1,
-    stroke: Stroke = Stroke(1d),
-    strokeColor: Color = Color.black,
-    fill: Colormap = Color.white
+      xCol: Int = 0,
+      medianCol: Int = 1,
+      q1Col: Int = 2,
+      q3Col: Int = 3,
+      minCol: Int = 4,
+      maxCol: Int = 5,
+      x2Col: Int = 6,
+      fillCol: Int = 7,
+      width: Double = 1,
+      stroke: Stroke = Stroke(1d),
+      strokeColor: Color = Color.black,
+      fill: Colormap = Color.white
   ) = new DataRenderer {
     def asLegend = Some(PointLegend(shapeList(1), fill(0)))
 
     def render[R <: RenderingContext](
-      data: Row,
-      xAxis: Axis,
-      yAxis: Axis,
-      ctx: R,
-      tx: AffineTransform
+        data: Row,
+        xAxis: Axis,
+        yAxis: Axis,
+        ctx: R,
+        tx: AffineTransform
     )(implicit re: Renderer[ShapeElem, R], rt: Renderer[TextBox, R]): Unit = {
 
       val wX1 = data(xCol)
@@ -419,13 +469,15 @@ trait Renderers {
       val q3 = data(q3Col)
       val min = data(minCol)
       val max = data(maxCol)
-      val color1 = if (data.dimension > fillCol) fill(data(fillCol)) else fill(0d)
+      val color1 =
+        if (data.dimension > fillCol) fill(data(fillCol)) else fill(0d)
       val width1 = if (data.dimension > x2Col) data(x2Col) - wX1 else width
       val wX = wX1 + .5 * width1
 
       if (wX >= xAxis.min && wX <= xAxis.max) {
 
-        val vWidth = math.abs(xAxis.worldToView(0.0) - xAxis.worldToView(width1))
+        val vWidth =
+          math.abs(xAxis.worldToView(0.0) - xAxis.worldToView(width1))
         val vX = xAxis.worldToView(wX)
         val vQ1 = yAxis.worldToView(q1)
         val vQ2 = yAxis.worldToView(q2)
@@ -444,7 +496,8 @@ trait Renderers {
         re.render(ctx, shape1)
 
         val shape2 = ShapeElem(
-          Shape.line(Point(vX - vWidth * 0.5, vQ2), Point(vX + vWidth * 0.5, vQ2)),
+          Shape.line(Point(vX - vWidth * 0.5, vQ2),
+                     Point(vX + vWidth * 0.5, vQ2)),
           fill = color1,
           stroke = Some(stroke),
           strokeColor = strokeColor
@@ -475,23 +528,23 @@ trait Renderers {
   }
 
   def lineSegment(
-    xCol: Int = 0,
-    yCol: Int = 1,
-    x2Col: Int = 2,
-    y2Col: Int = 3,
-    colorCol: Int = 4,
-    stroke: Stroke = Stroke(1d),
-    color: Colormap = HeatMapColors(0, 1)
+      xCol: Int = 0,
+      yCol: Int = 1,
+      x2Col: Int = 2,
+      y2Col: Int = 3,
+      colorCol: Int = 4,
+      stroke: Stroke = Stroke(1d),
+      color: Colormap = HeatMapColors(0, 1)
   ) = new DataRenderer {
 
     def asLegend = Some(LineLegend(stroke, color(0)))
 
     def render[R <: RenderingContext](
-      data: Row,
-      xAxis: Axis,
-      yAxis: Axis,
-      ctx: R,
-      tx: AffineTransform
+        data: Row,
+        xAxis: Axis,
+        yAxis: Axis,
+        ctx: R,
+        tx: AffineTransform
     )(implicit re: Renderer[ShapeElem, R], rt: Renderer[TextBox, R]): Unit = {
 
       val wX = data(xCol)
@@ -501,7 +554,8 @@ trait Renderers {
 
       if (wX >= xAxis.min && wX <= xAxis.max && wY >= yAxis.min && wY <= yAxis.max) {
 
-        val color1 = if (data.dimension > colorCol) color(data(colorCol)) else color(0d)
+        val color1 =
+          if (data.dimension > colorCol) color(data(colorCol)) else color(0d)
 
         val vX = xAxis.worldToView(wX)
         val vY = yAxis.worldToView(wY)

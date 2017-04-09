@@ -1,9 +1,14 @@
 package org.nspl
 
 /**
- * 2D Affine Transformation Matrix in row major order
- */
-case class AffineTransform(m0: Double, m1: Double, m2: Double, m3: Double, m4: Double, m5: Double) {
+  * 2D Affine Transformation Matrix in row major order
+  */
+case class AffineTransform(m0: Double,
+                           m1: Double,
+                           m2: Double,
+                           m3: Double,
+                           m4: Double,
+                           m5: Double) {
 
   def inverse = {
     val a = m0
@@ -68,25 +73,25 @@ case class AffineTransform(m0: Double, m1: Double, m2: Double, m3: Double, m4: D
   }
 
   def concat(tx: AffineTransform) = AffineTransform(
-
     m0 * tx.m0 + m1 * tx.m3,
     m0 * tx.m1 + m1 * tx.m4,
     m0 * tx.m2 + m1 * tx.m5 + m2,
-
     m3 * tx.m0 + m4 * tx.m3,
     m3 * tx.m1 + m4 * tx.m4,
     m3 * tx.m2 + m4 * tx.m5 + m5
-
   )
 }
 
 object AffineTransform {
 
-  val reflectXCenter = (b: Bounds) => reflectX.concat(translate(0, b.h * (-1) - b.y))
+  val reflectXCenter = (b: Bounds) =>
+    reflectX.concat(translate(0, b.h * (-1) - b.y))
 
-  val reflectYCenter = (b: Bounds) => reflectY.concat(translate(b.w * (-1) - b.x, 0))
+  val reflectYCenter = (b: Bounds) =>
+    reflectY.concat(translate(b.w * (-1) - b.x, 0))
 
-  def rotateCenter(rad: Double) = (b: Bounds) => rotate(rad, b.centerX, b.centerY)
+  def rotateCenter(rad: Double) =
+    (b: Bounds) => rotate(rad, b.centerX, b.centerY)
 
   val identity = AffineTransform(1d, 0d, 0d, 0d, 1d, 0d)
 
@@ -104,25 +109,21 @@ object AffineTransform {
 
   def rotate(rad: Double) =
     AffineTransform(
-
       math.cos(rad),
       math.sin(rad),
       0,
       -1 * math.sin(rad),
       math.cos(rad),
       0
-
     )
 
   def rotate(rad: Double, x: Double, y: Double) =
     AffineTransform(
-
       math.cos(rad),
       math.sin(rad),
       x - math.cos(rad) * x - math.sin(rad) * y,
       -1 * math.sin(rad),
       math.cos(rad),
       y + math.sin(rad) * x - math.cos(rad) * y
-
     )
 }

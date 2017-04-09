@@ -39,11 +39,15 @@ case class ManualColor(map: Map[Double, Color]) extends Colormap {
   def withRange(min: Double, max: Double) = this
 }
 
-case class HeatMapColors(min: Double = 0.0, max: Double = 1.0) extends Colormap {
+case class HeatMapColors(min: Double = 0.0, max: Double = 1.0)
+    extends Colormap {
 
   def apply(value: Double): Color = {
 
-    val v = if (value > max) 1.0 else if (value < min) 0.0 else (value - min) / (max - min)
+    val v =
+      if (value > max) 1.0
+      else if (value < min) 0.0
+      else (value - min) / (max - min)
 
     def scaleHue(v: Double) = (2.0 / 3.0) - v * (2.0 / 3.0)
 
@@ -55,16 +59,23 @@ case class HeatMapColors(min: Double = 0.0, max: Double = 1.0) extends Colormap 
   def withRange(min: Double, max: Double) = HeatMapColors(min, max)
 }
 
-case class RedBlue(min: Double = 0.0, max: Double = 1.0, mid: Double = 0.5) extends Colormap {
+case class RedBlue(min: Double = 0.0, max: Double = 1.0, mid: Double = 0.5)
+    extends Colormap {
 
   def apply(value: Double): Color = {
 
     val (r, g, b) = if (value > mid) {
-      val v = if (value > max) 1.0 else if (value < min) 0.0 else (value - mid) / (max - mid)
+      val v =
+        if (value > max) 1.0
+        else if (value < min) 0.0
+        else (value - mid) / (max - mid)
       val v2 = 1 - v
       (1d, v2, v2)
     } else {
-      val v = if (value < min) 1.0 else if (value > max) 0.0 else (mid - value) / (mid - min)
+      val v =
+        if (value < min) 1.0
+        else if (value > max) 0.0
+        else (mid - value) / (mid - min)
       val v2 = 1 - v
       (v2, v2, 1d)
     }
@@ -75,14 +86,18 @@ case class RedBlue(min: Double = 0.0, max: Double = 1.0, mid: Double = 0.5) exte
   def withRange(min: Double, max: Double) = RedBlue(min, max, mid)
 }
 
-case class LogHeatMapColors(min: Double = 0.0, max: Double = 1.0) extends Colormap {
+case class LogHeatMapColors(min: Double = 0.0, max: Double = 1.0)
+    extends Colormap {
 
   val min1 = 1d
   val max1 = (max - min) + 1
 
   def apply(value: Double): Color = {
 
-    val v = if (value > max) 1.0 else if (value < min) 0d else math.log10(value - min + 1) / math.log10(max1)
+    val v =
+      if (value > max) 1.0
+      else if (value < min) 0d
+      else math.log10(value - min + 1) / math.log10(max1)
 
     def scaleHue(v: Double) = (2.0 / 3.0) - v * (2.0 / 3.0)
 
@@ -211,7 +226,13 @@ trait Colors {
     Color(224, 180, 0, 255),
     Color(196, 121, 0, 255),
     Color(0, 252, 164, 255),
-    Color(255, 172, 120, 255)
+    Color(255, 172, 120, 255),
+    Color(111, 178, 172, 255),
+    Color(96, 56, 40, 255),
+    Color(185, 86, 74, 255),
+    Color(129, 105, 185, 255),
+    Color(26, 25, 112, 255),
+    Color(0, 112, 99, 255)
   )
 
 }

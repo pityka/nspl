@@ -1,6 +1,7 @@
 package org.nspl.data;
 
-case class DataTable(rows: Array[Double], numCols: Int) extends DataSourceWithQuantiles {
+case class DataTable(rows: Array[Double], numCols: Int)
+    extends DataSourceWithQuantiles {
 
   def numRows = rows.length / numCols
 

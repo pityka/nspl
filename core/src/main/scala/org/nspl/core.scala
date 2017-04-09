@@ -48,7 +48,8 @@ trait Renderable[K] { self: K =>
   def reflectX = transform(_ => AffineTransform.reflectX)
   def reflectXCenter = transform(b => AffineTransform.reflectXCenter(b))
   def reflectYCenter = transform(b => AffineTransform.reflectYCenter(b))
-  def rotateCenter(rad: Double) = transform(b => AffineTransform.rotateCenter(rad)(b))
+  def rotateCenter(rad: Double) =
+    transform(b => AffineTransform.rotateCenter(rad)(b))
 
 }
 

@@ -4,7 +4,8 @@ import org.scalajs.dom
 import org.scalajs.dom.raw._
 import org.scalajs.dom.html
 
-case class CanvasRC(graphics: CanvasRenderingContext2D) extends RenderingContext
+case class CanvasRC(graphics: CanvasRenderingContext2D)
+    extends RenderingContext
 
 object canvasrenderer {
 
@@ -16,17 +17,15 @@ object canvasrenderer {
     Bounds(r.left, r.top, r.width, r.height)
 
   def render[K <: Renderable[K]](
-    elem: Build[K],
-    canvas: html.Canvas,
-    width: Int
+      elem: Build[K],
+      canvas: html.Canvas,
+      width: Int
   )(
-    implicit
-    er: Renderer[K, CanvasRC]
+      implicit er: Renderer[K, CanvasRC]
   ): Unit = {
 
     val ctx =
-      canvas.getContext("2d")
-        .asInstanceOf[dom.CanvasRenderingContext2D]
+      canvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
 
     var paintableElem = elem.build
     var dragStart = Point(0, 0)
@@ -39,7 +38,8 @@ object canvasrenderer {
       canvas.height = height.toInt
       canvas.width = width
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      fitToBounds(paintableElem, Bounds(0, 0, width, height)).render(CanvasRC(ctx))
+      fitToBounds(paintableElem, Bounds(0, 0, width, height))
+        .render(CanvasRC(ctx))
     }
 
     def getCanvasCoordinate(e: MouseEvent): Point = {
@@ -61,7 +61,9 @@ object canvasrenderer {
     def makeEvent(e: MouseEvent, up: Boolean) = {
       if (e.button == 0 && mousedown) {
         val componentBounds: Bounds = canvas.getBoundingClientRect
-        val p = mapPoint(getCanvasCoordinate(e), componentBounds, paintableElem.bounds)
+        val p = mapPoint(getCanvasCoordinate(e),
+                         componentBounds,
+                         paintableElem.bounds)
 
         val v = Point(dragStart.x - p.x, dragStart.y - p.y)
         val l = math.sqrt(v.x * v.x + v.y * v.y)
@@ -88,7 +90,11 @@ object canvasrenderer {
 
   }
 
-  def pathEllipse(x: Double, y: Double, width: Double, height: Double, ctx: CRC) = {
+  def pathEllipse(x: Double,
+                  y: Double,
+                  width: Double,
+                  height: Double,
+                  ctx: CRC) = {
 
     val centerX = x + .5 * width
     val centerY = y + .5 * height
@@ -96,8 +102,10 @@ object canvasrenderer {
     val radiusY = height * .5
     var i = 0.0
     while (i <= 2 * math.Pi) {
-      val xPos = centerX - (radiusX * math.sin(i)) * Math.sin(0.5 * math.Pi) + (radiusY * math.cos(i)) * Math.cos(0.5 * math.Pi);
-      val yPos = centerY + (radiusY * math.cos(i)) * math.sin(0.5 * math.Pi) + (radiusX * Math.sin(i)) * Math.cos(0.5 * math.Pi);
+      val xPos = centerX - (radiusX * math.sin(i)) * Math.sin(0.5 * math.Pi) + (radiusY * math
+          .cos(i)) * Math.cos(0.5 * math.Pi);
+      val yPos = centerY + (radiusY * math.cos(i)) * math.sin(0.5 * math.Pi) + (radiusX * Math
+          .sin(i)) * Math.cos(0.5 * math.Pi);
       if (i == 0) {
         ctx.moveTo(xPos, yPos);
       } else {
@@ -135,7 +143,8 @@ object canvasrenderer {
       ops foreach {
         case MoveTo(Point(x, y)) => ctx.moveTo(x, y)
         case LineTo(Point(x, y)) => ctx.lineTo(x, y)
-        case QuadTo(Point(x2, y2), Point(x1, y1)) => ctx.quadraticCurveTo(x1, y1, x2, y2)
+        case QuadTo(Point(x2, y2), Point(x1, y1)) =>
+          ctx.quadraticCurveTo(x1, y1, x2, y2)
         // case CubicTo(Point(x3, y3), Point(x1, y1), Point(x2, y2)) => path.curveTo(x1, y1, x2, y2, x3, y3)
       }
       ctx.fill()
@@ -175,7 +184,8 @@ object canvasrenderer {
       ops foreach {
         case MoveTo(Point(x, y)) => ctx.moveTo(x, y)
         case LineTo(Point(x, y)) => ctx.lineTo(x, y)
-        case QuadTo(Point(x2, y2), Point(x1, y1)) => ctx.quadraticCurveTo(x1, y1, x2, y2)
+        case QuadTo(Point(x2, y2), Point(x1, y1)) =>
+          ctx.quadraticCurveTo(x1, y1, x2, y2)
         // case CubicTo(Point(x3, y3), Point(x1, y1), Point(x2, y2)) => path.curveTo(x1, y1, x2, y2, x3, y3)
       }
       ctx.stroke()
@@ -204,7 +214,10 @@ object canvasrenderer {
   def saveStroke[T](g: CRC)(fun: CRC => T) = {
     val save1 = g.lineWidth
     val save2 = g.strokeStyle
-    try { fun(g) } finally { if (g.lineWidth != save1) { g.lineWidth = save1 }; if (g.strokeStyle != save2) { g.strokeStyle = save2 } }
+    try { fun(g) } finally {
+      if (g.lineWidth != save1) { g.lineWidth = save1 };
+      if (g.strokeStyle != save2) { g.strokeStyle = save2 }
+    }
   }
 
   implicit class Pimp[K <: Renderable[K]](t: K) {

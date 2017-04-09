@@ -22,9 +22,9 @@ object canvasFont {
 object CanvasGlyphMeasurer extends GlyphMeasurer[Font#F] {
   val canvas = dom.document.createElement("canvas").asInstanceOf[html.Canvas]
   val ctx =
-    canvas.getContext("2d")
-      .asInstanceOf[dom.CanvasRenderingContext2D]
-  val abc = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPRQRSTUVWXYZ0123456789%,./][()]"
+    canvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
+  val abc =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPRQRSTUVWXYZ0123456789%,./][()]"
   def advance(s: Char, f: Font#F): Double = {
     ctx.font = canvasFont(f)
     ctx.measureText(s.toString).width

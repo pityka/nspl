@@ -7,88 +7,114 @@ import org.saddle._
 object saddle {
 
   def barplotVertical[F: FC](
-    series: Series[String, Double],
-    main: String = "",
-    xlab: String = "",
-    ylab: String = "",
-    xLabFontSize: RelFontSize = 1 fts,
-    yLabFontSize: Option[RelFontSize] = None,
-    mainFontSize: RelFontSize = 1 fts,
-    color: Colormap = Color.white,
-    xWidth: RelFontSize = 20 fts,
-    yHeight: RelFontSize = 20 fts,
-    xLabelRotation: Double = 0d,
-    yLabelRotation: Double = 0d,
-    xlim: Option[(Double, Double)] = None,
-    ylim: Option[(Double, Double)] = None,
-    frame: Boolean = true
-  ) = xyplot(
-    series.toSeq.map(_._2).zipWithIndex.map(x => x._1 -> x._2.toDouble) -> bar(horizontal = true, fill = color, fillCol = 0)
-  )(
+      series: Series[String, Double],
+      main: String = "",
+      xlab: String = "",
+      ylab: String = "",
+      xLabFontSize: RelFontSize = 1 fts,
+      yLabFontSize: Option[RelFontSize] = None,
+      mainFontSize: RelFontSize = 1 fts,
+      color: Colormap = Color.white,
+      xWidth: RelFontSize = 20 fts,
+      yHeight: RelFontSize = 20 fts,
+      xLabelRotation: Double = 0d,
+      yLabelRotation: Double = 0d,
+      xlim: Option[(Double, Double)] = None,
+      ylim: Option[(Double, Double)] = None,
+      frame: Boolean = true
+  ) =
+    xyplot(
+      series.toSeq
+        .map(_._2)
+        .zipWithIndex
+        .map(x => x._1 -> x._2.toDouble) -> bar(horizontal = true,
+                                                fill = color,
+                                                fillCol = 0)
+    )(
       main = main,
       xlab = xlab,
       ylab = ylab,
       xLabFontSize = xLabFontSize,
-      yLabFontSize = yLabFontSize.getOrElse(math.min(2.0, yHeight.v / series.length) fts),
+      yLabFontSize =
+        yLabFontSize.getOrElse(math.min(2.0, yHeight.v / series.length) fts),
       mainFontSize = mainFontSize,
       xWidth = xWidth,
       yHeight = yHeight,
-      ynames = series.toSeq.map(_._1.toString).zipWithIndex.map(x => x._1 -> x._2.toDouble).map(_.swap),
+      ynames = series.toSeq
+        .map(_._1.toString)
+        .zipWithIndex
+        .map(x => x._1 -> x._2.toDouble)
+        .map(_.swap),
       yNumTicks = 0,
       xLabelRotation = xLabelRotation,
       yLabelRotation = yLabelRotation,
-      xlim = xlim, ylim = ylim, frame = frame
+      xlim = xlim,
+      ylim = ylim,
+      frame = frame
     )
 
   def barplotHorizontal[F: FC](
-    series: Series[String, Double],
-    main: String = "",
-    xlab: String = "",
-    ylab: String = "",
-    yLabFontSize: RelFontSize = 1 fts,
-    xLabFontSize: Option[RelFontSize] = None,
-    mainFontSize: RelFontSize = 1 fts,
-    color: Colormap = Color.white,
-    xWidth: RelFontSize = 20 fts,
-    yHeight: RelFontSize = 20 fts,
-    xLabelRotation: Double = 0d,
-    yLabelRotation: Double = 0d,
-    xlim: Option[(Double, Double)] = None,
-    ylim: Option[(Double, Double)] = None,
-    frame: Boolean = true
-  ) = xyplot(
-    series.toSeq.map(_._2).zipWithIndex.map(x => x._1 -> x._2.toDouble).map(_.swap) -> bar(horizontal = false, fill = color, fillCol = 1)
-  )(
+      series: Series[String, Double],
+      main: String = "",
+      xlab: String = "",
+      ylab: String = "",
+      yLabFontSize: RelFontSize = 1 fts,
+      xLabFontSize: Option[RelFontSize] = None,
+      mainFontSize: RelFontSize = 1 fts,
+      color: Colormap = Color.white,
+      xWidth: RelFontSize = 20 fts,
+      yHeight: RelFontSize = 20 fts,
+      xLabelRotation: Double = 0d,
+      yLabelRotation: Double = 0d,
+      xlim: Option[(Double, Double)] = None,
+      ylim: Option[(Double, Double)] = None,
+      frame: Boolean = true
+  ) =
+    xyplot(
+      series.toSeq
+        .map(_._2)
+        .zipWithIndex
+        .map(x => x._1 -> x._2.toDouble)
+        .map(_.swap) -> bar(horizontal = false, fill = color, fillCol = 1)
+    )(
       main = main,
       xlab = xlab,
       ylab = ylab,
       yLabFontSize = yLabFontSize,
-      xLabFontSize = xLabFontSize.getOrElse(math.min(2.0, yHeight.v / series.length) fts),
+      xLabFontSize =
+        xLabFontSize.getOrElse(math.min(2.0, yHeight.v / series.length) fts),
       mainFontSize = mainFontSize,
       xWidth = xWidth,
       yHeight = yHeight,
-      xnames = series.toSeq.map(_._1.toString).zipWithIndex.map(x => x._1 -> x._2.toDouble).map(_.swap),
+      xnames = series.toSeq
+        .map(_._1.toString)
+        .zipWithIndex
+        .map(x => x._1 -> x._2.toDouble)
+        .map(_.swap),
       xNumTicks = 0,
       xLabelRotation = xLabelRotation,
-      yLabelRotation = yLabelRotation, ylim = ylim, xlim = xlim, frame = frame
+      yLabelRotation = yLabelRotation,
+      ylim = ylim,
+      xlim = xlim,
+      frame = frame
     )
 
   def rasterplotFromFrame[RX, CX, F: FC](
-    dataFrame: Frame[RX, CX, Double],
-    main: String = "",
-    xlab: String = "",
-    ylab: String = "",
-    xLabFontSize: Option[RelFontSize] = None,
-    yLabFontSize: Option[RelFontSize] = None,
-    mainFontSize: RelFontSize = 1 fts,
-    colormap: Colormap = HeatMapColors(0, 1),
-    xWidth: RelFontSize = 20 fts,
-    yHeight: RelFontSize = 20 fts,
-    valueText: Boolean = false,
-    valueColor: Color = Color.black,
-    valueFontSize: RelFontSize = 0.4 fts,
-    tickLength: RelFontSize = 0.4 fts,
-    zlim: Option[(Double, Double)] = None
+      dataFrame: Frame[RX, CX, Double],
+      main: String = "",
+      xlab: String = "",
+      ylab: String = "",
+      xLabFontSize: Option[RelFontSize] = None,
+      yLabFontSize: Option[RelFontSize] = None,
+      mainFontSize: RelFontSize = 1 fts,
+      colormap: Colormap = HeatMapColors(0, 1),
+      xWidth: RelFontSize = 20 fts,
+      yHeight: RelFontSize = 20 fts,
+      valueText: Boolean = false,
+      valueColor: Color = Color.black,
+      valueFontSize: RelFontSize = 0.4 fts,
+      tickLength: RelFontSize = 0.4 fts,
+      zlim: Option[(Double, Double)] = None
   ) =
     rasterplot(
       asRaster(dataFrame.toMat),
@@ -99,8 +125,14 @@ object saddle {
       yLabFontSize.getOrElse(math.min(2.0, yHeight.v / dataFrame.numRows) fts),
       mainFontSize,
       colormap,
-      dataFrame.colIx.toSeq.map(_.toString).zipWithIndex.map(x => x._2.toDouble + 0.5 -> x._1),
-      dataFrame.rowIx.toSeq.map(_.toString).zipWithIndex.map(x => x._2.toDouble + 0.5 -> x._1),
+      dataFrame.colIx.toSeq
+        .map(_.toString)
+        .zipWithIndex
+        .map(x => x._2.toDouble + 0.5 -> x._1),
+      dataFrame.rowIx.toSeq
+        .map(_.toString)
+        .zipWithIndex
+        .map(x => x._2.toDouble + 0.5 -> x._1),
       xWidth = xWidth,
       yHeight = yHeight,
       valueText = valueText,
@@ -119,10 +151,12 @@ object saddle {
   implicit def dataSourceFrom1DVec(vec: Vec[Double]): DataSourceWithQuantiles =
     indexed(vec.toSeq)
 
-  implicit def dataSourceFromSeries[R](s: Series[R, Double]): DataSourceWithQuantiles =
+  implicit def dataSourceFromSeries[R](
+      s: Series[R, Double]): DataSourceWithQuantiles =
     new DataSourceWithQuantiles {
       def iterator =
-        s.toSeq.iterator.zipWithIndex.map(x => VectorRow(Vector(x._2, x._1._2), x._1._1.toString))
+        s.toSeq.iterator.zipWithIndex.map(x =>
+          VectorRow(Vector(x._2, x._1._2), x._1._1.toString))
       def dimension = 2
       def columnMinMax(i: Int) = i match {
         case 0 => MinMaxImpl(0, s.length - 1d)
@@ -141,22 +175,22 @@ object saddle {
     new DataTable(vec, numCols)
 
   implicit def dataSourceFromZippedVecs2(
-    vec1: (Vec[Double], Vec[Double])
+      vec1: (Vec[Double], Vec[Double])
   ): DataSourceWithQuantiles =
     dataSourceFromFrame(Frame(vec1._1, vec1._2))
 
   implicit def dataSourceFromZippedVecs3(
-    vec1: (Vec[Double], Vec[Double], Vec[Double])
+      vec1: (Vec[Double], Vec[Double], Vec[Double])
   ): DataSourceWithQuantiles =
     dataSourceFromFrame(Frame(vec1._1, vec1._2, vec1._3))
 
   implicit def dataSourceFromZippedVecs4(
-    vec1: (Vec[Double], Vec[Double], Vec[Double], Vec[Double])
+      vec1: (Vec[Double], Vec[Double], Vec[Double], Vec[Double])
   ): DataSourceWithQuantiles =
     dataSourceFromFrame(Frame(vec1._1, vec1._2, vec1._3, vec1._4))
 
   implicit def dataSourceFromFrame[RX, CX](
-    frame: Frame[RX, CX, Double]
+      frame: Frame[RX, CX, Double]
   ): DataSourceWithQuantiles =
     new DataSourceWithQuantiles {
 

@@ -1,5 +1,5 @@
 package org.nspl
-import java.awt.{ Font => JFont }
+import java.awt.{Font => JFont}
 
 object JavaFontConversion {
   implicit def font2font(myFont: Font): JFont = myFont match {
@@ -15,8 +15,10 @@ object AwtGlyphMeasurer extends GlyphMeasurer[Font#F] {
   val bimage = new BufferedImage(50, 50, BufferedImage.TYPE_BYTE_BINARY)
   val g2d = bimage.createGraphics();
   val frc = g2d.getFontRenderContext
-  val abc = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPRQRSTUVWXYZ0123456789%,./][()]"
-  def advance(s: Char, f: Font#F): Double = font2font(f).getStringBounds(s.toString, frc).getWidth
+  val abc =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPRQRSTUVWXYZ0123456789%,./][()]"
+  def advance(s: Char, f: Font#F): Double =
+    font2font(f).getStringBounds(s.toString, frc).getWidth
   def lineMetrics(f: Font#F): LineMetrics = {
     val lm = font2font(f).getLineMetrics(abc, frc)
     LineMetrics(lm.getAscent, lm.getDescent, lm.getLeading)

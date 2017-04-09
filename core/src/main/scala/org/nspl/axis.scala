@@ -22,14 +22,15 @@ object LinearAxisFactory extends AxisFactory {
         def min = min1
         def max = max1
         def horizontal = true
+      } else
+      new Axis {
+        def viewToWorld(v: Double) = (width1 - v) / width1 * (max1 - min1)
+        def worldToView(v: Double) =
+          width1 - (v - min1) / (max1 - min1) * width1
+        def min = min1
+        def max = max1
+        def horizontal = false
       }
-    else new Axis {
-      def viewToWorld(v: Double) = (width1 - v) / width1 * (max1 - min1)
-      def worldToView(v: Double) = width1 - (v - min1) / (max1 - min1) * width1
-      def min = min1
-      def max = max1
-      def horizontal = false
-    }
 }
 
 // object Log10AxisFactory extends AxisFactory {
@@ -63,13 +64,15 @@ case class AxisSettings(
     width: RelFontSize = 20 fts,
     fontSize: RelFontSize = 1 fts,
     tickAlignment: Double = -1.0,
-    lineWidth: Double = 1.0
+    lineWidth: Double = 1.0,
+    lineLengthFraction: Double = 1d,
+    lineStartFraction: Double = 0.0
 )(implicit fc: FontConfiguration) {
 
   def renderable(
-    axis: Axis,
-    disableTicksAt: List[Double] = Nil
-  ): (List[Double], AxisElem) = {
+      axis: Axis,
+      disableTicksAt: List[Double] = Nil
+  ): (List[Double], List[Double], AxisElem) = {
 
     import axis._
 
@@ -81,7 +84,8 @@ case class AxisSettings(
       math.abs(rounded * math.pow(10d, exponent))
     }
 
-    val numTicks1 = if (tickSpace.isEmpty) numTicks else (axis.max - axis.min) / tickSpace1
+    val numTicks1 =
+      if (tickSpace.isEmpty) numTicks else (axis.max - axis.min) / tickSpace1
 
     val baseTick1 = baseTick getOrElse {
       if (axis.min <= 0 && axis.max >= 0) 0d
@@ -97,7 +101,8 @@ case class AxisSettings(
       if (horizontal)
         group(
           ShapeElem(
-            Shape.line(Point(view, 0d), Point(view, tickAlignment * tickLength)),
+            Shape.line(Point(view, 0d),
+                       Point(view, tickAlignment * tickLength)),
             stroke = Some(Stroke(lineWidth))
           ),
           transform(
@@ -109,13 +114,17 @@ case class AxisSettings(
               ),
               (b: Bounds) => AffineTransform.translate(0, tickLabelDistance)
             ),
-            (b: Bounds) => AffineTransform.translate(if (labelRotation == 0.0) b.w * (-0.5) else 0, 0)
-          ), FreeLayout
+            (b: Bounds) =>
+              AffineTransform
+                .translate(if (labelRotation == 0.0) b.w * (-0.5) else 0, 0)
+          ),
+          FreeLayout
         )
       else
         group(
           ShapeElem(
-            Shape.line(Point(0d, view), Point(-1 * tickAlignment * tickLength, view)),
+            Shape.line(Point(0d, view),
+                       Point(-1 * tickAlignment * tickLength, view)),
             stroke = Some(Stroke(lineWidth))
           ),
           transform(
@@ -125,9 +134,12 @@ case class AxisSettings(
                 (b: Bounds) =>
                   AffineTransform.rotate(labelRotation, b.x + b.w, b.centerY)
               ),
-              (b: Bounds) => AffineTransform.translate(-1 * tickLabelDistance - b.w, 0)
+              (b: Bounds) =>
+                AffineTransform.translate(-1 * tickLabelDistance - b.w, 0)
             ),
-            (b: Bounds) => AffineTransform.translate(0, if (labelRotation == 0.0) b.h * (-0.5) else 0)
+            (b: Bounds) =>
+              AffineTransform
+                .translate(0, if (labelRotation == 0.0) b.h * (-0.5) else 0)
           ),
           FreeLayout
         )
@@ -137,62 +149,74 @@ case class AxisSettings(
       val view = worldToView(world)
       if (horizontal)
         ShapeElem(
-          Shape.line(Point(view, 0d), Point(view, tickLength * 0.5 * tickAlignment)),
+          Shape.line(Point(view, 0d),
+                     Point(view, tickLength * 0.5 * tickAlignment)),
           stroke = Some(Stroke(1d))
         )
       else
         ShapeElem(
-          Shape.line(Point(0d, view), Point(-1 * tickLength * 0.5 * tickAlignment, view)),
+          Shape.line(Point(0d, view),
+                     Point(-1 * tickLength * 0.5 * tickAlignment, view)),
           stroke = Some(Stroke(1d))
         )
     }
 
-    val line = if (horizontal)
-      ShapeElem(
-        Shape.line(Point(0d, 0d), Point(axis.width, 0d)),
-        stroke = Some(Stroke(lineWidth))
-      )
-    else ShapeElem(
-      Shape.line(Point(0d, 0d), Point(0d, axis.width)),
-      stroke = Some(Stroke(lineWidth))
-    )
+    val lineStart = lineStartFraction * axis.width
+    val lineEnd = lineStart + axis.width * lineLengthFraction
+
+    val line =
+      if (horizontal)
+        ShapeElem(
+          Shape.line(Point(lineStart, 0d), Point(lineEnd, 0d)),
+          stroke = Some(Stroke(lineWidth))
+        )
+      else
+        ShapeElem(
+          Shape.line(Point(0d, lineStart), Point(0d, lineEnd)),
+          stroke = Some(Stroke(lineWidth))
+        )
 
     val extra =
       customTicks
         .filter(i => i._1 >= axis.min && i._1 <= axis.max)
         .map(i => makeTick(i._1, i._2))
 
-    val majorTicks = if (numTicks1 == 0) Nil
-    else
-      ((0 to ((axis.max - baseTick1) / tickSpace1).toInt map (i =>
-        baseTick1 + i * tickSpace1)) ++
-        (1 to ((baseTick1 - axis.min) / tickSpace1).toInt map (i =>
-          baseTick1 - i * tickSpace1)))
-        .filterNot(x => customTicks.map(_._1).contains(x))
-        .filterNot(x => disableTicksAt.contains(x))
-        .toList
-        .map(w => math.max(math.min(w, axis.max), axis.min))
-        .distinct
+    val majorTicks =
+      if (numTicks1 == 0) Nil
+      else
+        ((0 to ((axis.max - baseTick1) / tickSpace1).toInt map (i =>
+                                                                  baseTick1 + i * tickSpace1)) ++
+          (1 to ((baseTick1 - axis.min) / tickSpace1).toInt map (i =>
+                                                                   baseTick1 - i * tickSpace1)))
+          .filterNot(x => customTicks.map(_._1).contains(x))
+          .filterNot(x => disableTicksAt.contains(x))
+          .toList
+          .map(w => math.max(math.min(w, axis.max), axis.min))
+          .distinct
 
-    val minorTicks = if (numTicks1 == 0 || numMinorTicksFactor <= 0) Nil
-    else
-      ((0 to ((axis.max - baseTick1) / (tickSpace1 / numMinorTicksFactor)).toInt map (i =>
-        baseTick1 + i * tickSpace1 / numMinorTicksFactor)) ++
-        (1 to ((baseTick1 - axis.min) / (tickSpace1 / numMinorTicksFactor)).toInt map (i =>
-          baseTick1 - i * tickSpace1 / numMinorTicksFactor)))
-        .filterNot(x => customTicks.map(_._1).contains(x))
-        .toList
-        .map(w => math.max(math.min(w, axis.max), axis.min))
-        .filterNot(majorTicks.contains)
-        .distinct
+    val minorTicks =
+      if (numTicks1 == 0 || numMinorTicksFactor <= 0) Nil
+      else
+        ((0 to ((axis.max - baseTick1) / (tickSpace1 / numMinorTicksFactor)).toInt map (i =>
+                                                                                          baseTick1 + i * tickSpace1 / numMinorTicksFactor)) ++
+          (1 to ((baseTick1 - axis.min) / (tickSpace1 / numMinorTicksFactor)).toInt map (i =>
+                                                                                           baseTick1 - i * tickSpace1 / numMinorTicksFactor)))
+          .filterNot(x => customTicks.map(_._1).contains(x))
+          .toList
+          .map(w => math.max(math.min(w, axis.max), axis.min))
+          .filterNot(majorTicks.contains)
+          .distinct
 
     val majorTickElems = sequence(
-      majorTicks.map(w => makeTick(w, if (w == 0.0) "0" else f"$w%.2g")) ++ extra
+      majorTicks
+        .map(w => makeTick(w, if (w == 0.0) "0" else f"$w%.2g")) ++ extra
     )
 
     val minorTickElems = sequence(minorTicks.map(makeMinorTick))
 
-    majorTicks -> group(line, majorTickElems, minorTickElems, FreeLayout)
+    (majorTicks,
+     customTicks.map(_._1).toList,
+     group(line, majorTickElems, minorTickElems, FreeLayout))
 
   }
 }

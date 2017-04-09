@@ -42,7 +42,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
       val scree = xyplot(
         indexed(eval.firstCol("x").toVec.toSeq.sorted.reverse) -> line()
       )(
-          axisMargin = 0,
+          xAxisMargin = 0,
           xlab = "Order",
           ylab = "Eval",
           main = "Scree"
@@ -120,7 +120,6 @@ class SaddlePlotSpec extends FunSpec with Matchers {
       )(xlab = "PC1", ylab = "dens.", main = "Loading distribution")
 
       val empty2 =
-        figure(
           xyplotarea(
             Nil,
             AxisSettings(LinearAxisFactory),
@@ -128,7 +127,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
             origin = Some(Point(0.0, 0.0)),
             xlim = Some(-1d -> 1d),
             ylim = Some(-1d -> 1d)
-          )
+          
         )
 
       val rs = (1 to 99 map (i => scala.util.Random.nextGaussian)).toSeq :+ 1E3

@@ -11,7 +11,8 @@ import org.scalajs.dom.html
 import org.scalajs.dom.raw._
 import org.scalajs.dom.ext._
 
-case class ScalaTagRC(elems: scala.collection.mutable.ArrayBuffer[Frag]) extends RenderingContext
+case class ScalaTagRC(elems: scala.collection.mutable.ArrayBuffer[Frag])
+    extends RenderingContext
 
 object scalatagrenderer {
 
@@ -39,11 +40,10 @@ object scalatagrenderer {
   }
 
   def renderToScalaTag[K <: Renderable[K]](
-    elem: Build[K],
-    width: Int = 1000
+      elem: Build[K],
+      width: Int = 1000
   )(
-    implicit
-    er: SER[K]
+      implicit er: SER[K]
   ) = {
 
     val ctx = ScalaTagRC(scala.collection.mutable.ArrayBuffer[Frag]())
@@ -90,7 +90,9 @@ object scalatagrenderer {
     def makeEvent(e: MouseEvent, up: Boolean) = {
       if (e.button == 0 && mousedown) {
         val componentBounds: Bounds = rootElem.getBoundingClientRect
-        val p = mapPoint(getCanvasCoordinate(e), componentBounds, paintableElem.bounds)
+        val p = mapPoint(getCanvasCoordinate(e),
+                         componentBounds,
+                         paintableElem.bounds)
 
         val v = Point(dragStart.x - p.x, dragStart.y - p.y)
         val l = math.sqrt(v.x * v.x + v.y * v.y)
@@ -124,14 +126,22 @@ object scalatagrenderer {
 
       val svgShape = elem.shape match {
         case Rectangle(x1, y1, w1, h1, tx) => {
-          rect(x := x1.toString, y := y1, svgAttrs.width := w1, svgAttrs.height := h1, svgAttrs.transform := tx.svg)
+          rect(x := x1.toString,
+               y := y1,
+               svgAttrs.width := w1,
+               svgAttrs.height := h1,
+               svgAttrs.transform := tx.svg)
         }
         case Ellipse(x, y, w, h, tx) => {
           val centerX = x + .5 * w
           val centerY = y + .5 * h
           val radiusX = w * .5
           val radiusY = h * .5
-          ellipse(cx := centerX, cy := centerY, rx := radiusX, ry := radiusY, svgAttrs.transform := tx.svg)
+          ellipse(cx := centerX,
+                  cy := centerY,
+                  rx := radiusX,
+                  ry := radiusY,
+                  svgAttrs.transform := tx.svg)
         }
         case Line(a, b, c, d) => {
           svgTags.line(x1 := a, y1 := b, x2 := c, y2 := d)
@@ -155,21 +165,23 @@ object scalatagrenderer {
         }
       }
 
-      val filled = if (elem.fill.a > 0.0)
-        svgShape(fill := elem.fill.css)
-      else svgShape(fill := "none")
+      val filled =
+        if (elem.fill.a > 0.0)
+          svgShape(fill := elem.fill.css)
+        else svgShape(fill := "none")
 
-      val stroked = if (elem.stroke.isDefined && elem.strokeColor.a > 0)
-        filled(
-          stroke := elem.strokeColor.css,
-          strokeWidth := elem.stroke.get.width,
-          strokeLinecap := (elem.stroke.get.cap match {
-            case CapRound => "round"
-            case CapButt => "butt"
-            case CapSquare => "square"
-          })
-        )
-      else filled
+      val stroked =
+        if (elem.stroke.isDefined && elem.strokeColor.a > 0)
+          filled(
+            stroke := elem.strokeColor.css,
+            strokeWidth := elem.stroke.get.width,
+            strokeLinecap := (elem.stroke.get.cap match {
+              case CapRound => "round"
+              case CapButt => "butt"
+              case CapSquare => "square"
+            })
+          )
+        else filled
 
       ctx.elems.append(stroked)
 

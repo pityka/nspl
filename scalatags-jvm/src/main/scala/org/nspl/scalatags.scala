@@ -6,7 +6,8 @@ import scalatags.Text.svgAttrs._
 import scalatags.Text.svgAttrs
 import scalatags.Text.svgTags
 
-case class ScalaTagRC(elems: scala.collection.mutable.ArrayBuffer[Modifier]) extends RenderingContext
+case class ScalaTagRC(elems: scala.collection.mutable.ArrayBuffer[Modifier])
+    extends RenderingContext
 
 object scalatagrenderer {
 
@@ -31,11 +32,10 @@ object scalatagrenderer {
   }
 
   def svgToFile[K <: Renderable[K]](
-    elem: K,
-    width: Int = 1000
+      elem: K,
+      width: Int = 1000
   )(
-    implicit
-    er: SER[K]
+      implicit er: SER[K]
   ): java.io.File = {
     import java.io._
     val f = File.createTempFile("nspl", ".svg")
@@ -44,17 +44,17 @@ object scalatagrenderer {
   }
 
   def svgToFile[K <: Renderable[K]](
-    f: java.io.File,
-    elem: K,
-    width: Int
+      f: java.io.File,
+      elem: K,
+      width: Int
   )(
-    implicit
-    er: SER[K]
+      implicit er: SER[K]
   ): java.io.File = {
     import java.io._
     val os = new FileOutputStream(f)
     val str: String = renderToScalaTag(elem, width).render
-    os.write("""<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+    os.write(
+      """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 """.getBytes)
     os.write(str.getBytes)
@@ -63,11 +63,10 @@ object scalatagrenderer {
   }
 
   def renderToScalaTag[K <: Renderable[K]](
-    elem: K,
-    width: Int = 1000
+      elem: K,
+      width: Int = 1000
   )(
-    implicit
-    er: SER[K]
+      implicit er: SER[K]
   ) = {
 
     val ctx = ScalaTagRC(scala.collection.mutable.ArrayBuffer[Modifier]())
@@ -77,8 +76,9 @@ object scalatagrenderer {
 
     fitToBounds(elem, Bounds(0, 0, width, height)).render(ctx)
 
-    svg(svgAttrs.width := width, svgAttrs.height := height,
-      svgAttrs.xmlns := "http://www.w3.org/2000/svg")(ctx.elems: _*)
+    svg(svgAttrs.width := width,
+        svgAttrs.height := height,
+        svgAttrs.xmlns := "http://www.w3.org/2000/svg")(ctx.elems: _*)
 
   }
 
@@ -87,14 +87,22 @@ object scalatagrenderer {
 
       val svgShape = elem.shape match {
         case Rectangle(x1, y1, w1, h1, tx) => {
-          rect(x := x1.toString, y := y1, svgAttrs.width := w1, svgAttrs.height := h1, svgAttrs.transform := tx.svg)
+          rect(x := x1.toString,
+               y := y1,
+               svgAttrs.width := w1,
+               svgAttrs.height := h1,
+               svgAttrs.transform := tx.svg)
         }
         case Ellipse(x, y, w, h, tx) => {
           val centerX = x + .5 * w
           val centerY = y + .5 * h
           val radiusX = w * .5
           val radiusY = h * .5
-          ellipse(cx := centerX, cy := centerY, rx := radiusX, ry := radiusY, svgAttrs.transform := tx.svg)
+          ellipse(cx := centerX,
+                  cy := centerY,
+                  rx := radiusX,
+                  ry := radiusY,
+                  svgAttrs.transform := tx.svg)
         }
         case Line(a, b, c, d) => {
           svgTags.line(x1 := a, y1 := b, x2 := c, y2 := d)
@@ -118,21 +126,23 @@ object scalatagrenderer {
         }
       }
 
-      val filled = if (elem.fill.a > 0.0)
-        svgShape(fill := elem.fill.css)
-      else svgShape(fill := "none")
+      val filled =
+        if (elem.fill.a > 0.0)
+          svgShape(fill := elem.fill.css)
+        else svgShape(fill := "none")
 
-      val stroked = if (elem.stroke.isDefined && elem.strokeColor.a > 0)
-        filled(
-          stroke := elem.strokeColor.css,
-          strokeWidth := elem.stroke.get.width,
-          strokeLinecap := (elem.stroke.get.cap match {
-            case CapRound => "round"
-            case CapButt => "butt"
-            case CapSquare => "square"
-          })
-        )
-      else filled
+      val stroked =
+        if (elem.stroke.isDefined && elem.strokeColor.a > 0)
+          filled(
+            stroke := elem.strokeColor.css,
+            strokeWidth := elem.stroke.get.width,
+            strokeLinecap := (elem.stroke.get.cap match {
+              case CapRound => "round"
+              case CapButt => "butt"
+              case CapSquare => "square"
+            })
+          )
+        else filled
 
       ctx.elems.append(stroked)
 

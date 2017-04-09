@@ -9,12 +9,12 @@ trait DataAdaptors extends DataTuples {
     new DataTable(vec.toArray, 1)
 
   implicit def zipped2(
-    vec1: (Seq[Double], Seq[Double])
+      vec1: (Seq[Double], Seq[Double])
   ): DataSourceWithQuantiles =
     dataSourceFromRows(vec1._1 zip vec1._2)
 
   implicit def zipped3(
-    vec1: (Seq[Double], Seq[Double], Seq[Double])
+      vec1: (Seq[Double], Seq[Double], Seq[Double])
   ): DataSourceWithQuantiles =
     dataSourceFromRows(
       vec1._1 zip vec1._2 zip vec1._3 map (x => (x._1._1, x._1._2, x._2))
@@ -25,10 +25,10 @@ trait DataAdaptors extends DataTuples {
   }
 
   def rasterFromStream(
-    s1: Iterator[Double],
-    numCols: Int,
-    numRows: Int,
-    minmax: MinMax
+      s1: Iterator[Double],
+      numCols: Int,
+      numRows: Int,
+      minmax: MinMax
   ): DataSource =
     new DataSource {
 
@@ -45,9 +45,9 @@ trait DataAdaptors extends DataTuples {
     }
 
   def rasterFromSeq(
-    s1: Seq[Double],
-    numCols: Int,
-    numRows: Int
+      s1: Seq[Double],
+      numCols: Int,
+      numRows: Int
   ): DataSource =
     new DataSource {
 
@@ -64,8 +64,7 @@ trait DataAdaptors extends DataTuples {
     }
 
   def dataSource[T](s1: Iterator[T], minmax: IndexedSeq[MinMax])(
-    implicit
-    f: T => Row
+      implicit f: T => Row
   ): DataSource =
     new DataSource {
 
@@ -75,13 +74,12 @@ trait DataAdaptors extends DataTuples {
     }
 
   /**
-   * Need to iterate twice on the data:
-   * once for the bounds to get the axis right,
-   * once for the plot
-   */
+    * Need to iterate twice on the data:
+    * once for the bounds to get the axis right,
+    * once for the plot
+    */
   def dataSource[T](s1: Iterator[T], s2: Iterator[T])(
-    implicit
-    f: T => Row
+      implicit f: T => Row
   ): DataSource =
     new DataSource {
 
@@ -113,7 +111,7 @@ trait DataAdaptors extends DataTuples {
     }
 
   implicit def dataSourceFromRows[T](
-    s: Seq[T]
+      s: Seq[T]
   )(implicit f: T => Row): DataSourceWithQuantiles =
     new DataSourceWithQuantiles {
       def iterator = s.iterator.map(f)
@@ -149,8 +147,13 @@ trait DataAdaptors extends DataTuples {
       val minmax = s.columnMinMax(i)
       val quantiles = s.quantilesOfColumn(i, Vector(0.25, 0.5, 0.75))
 
-      VectorRow(Vector(i.toDouble + .5, quantiles(1),
-        quantiles(0), quantiles(2), minmax.min, minmax.max), "")
+      VectorRow(Vector(i.toDouble + .5,
+                       quantiles(1),
+                       quantiles(0),
+                       quantiles(2),
+                       minmax.min,
+                       minmax.max),
+                "")
     }
     list
   }
@@ -162,55 +165,77 @@ trait DataAdaptors extends DataTuples {
         val minmax = s.columnMinMax(0)
         val quantiles = s.quantilesOfColumn(0, Vector(0.25, 0.5, 0.75))
 
-        VectorRow(Vector(i.toDouble + .5, quantiles(1),
-          quantiles(0), quantiles(2), minmax.min, minmax.max), label.toString)
+        VectorRow(Vector(i.toDouble + .5,
+                         quantiles(1),
+                         quantiles(0),
+                         quantiles(2),
+                         minmax.min,
+                         minmax.max),
+                  label.toString)
     }
     list
   }
 
   def boxplotData(
-    s: DataSourceWithQuantiles,
-    x: Vector[Double],
-    colors: Vector[Double],
-    labels: Vector[String]
+      s: DataSourceWithQuantiles,
+      x: Vector[Double],
+      colors: Vector[Double],
+      labels: Vector[String]
   ): DataSource = {
     val list = (0 until s.dimension).map { i =>
       val minmax = s.columnMinMax(i)
       val quantiles = s.quantilesOfColumn(i, Vector(0.25, 0.5, 0.75))
 
-      VectorRow(Vector(x(i), quantiles(1), quantiles(0),
-        quantiles(2), minmax.min, minmax.max, x(i) + 1, colors(i)), labels(i))
+      VectorRow(Vector(x(i),
+                       quantiles(1),
+                       quantiles(0),
+                       quantiles(2),
+                       minmax.min,
+                       minmax.max,
+                       x(i) + 1,
+                       colors(i)),
+                labels(i))
     }
     list
   }
 
   def boxplotData(
-    dim1: Seq[Double],
-    dim2: Seq[Double],
-    quantiles: Seq[Double],
-    colors: Vector[Double]
+      dim1: Seq[Double],
+      dim2: Seq[Double],
+      quantiles: Seq[Double],
+      colors: Vector[Double]
   ): DataSource = {
-    val boundaries = HistogramData.makeBoundariesFromPercentiles(dim2, quantiles)
+    val boundaries =
+      HistogramData.makeBoundariesFromPercentiles(dim2, quantiles)
     val binned = HistogramData.bin(dim1, dim2, boundaries)
     binned.zipWithIndex.filterNot(_._1._3.isEmpty).map {
       case ((a, b, group), i) =>
         val min = group.min
         val max = group.max
         val quantiles = percentile(group, Vector(0.25, 0.5, 0.75))
-        VectorRow(Vector(a, quantiles(1), quantiles(0), quantiles(2), min, max, b, colors(i)), "")
+        VectorRow(Vector(a,
+                         quantiles(1),
+                         quantiles(0),
+                         quantiles(2),
+                         min,
+                         max,
+                         b,
+                         colors(i)),
+                  "")
     }
   }
 
   def density(
-    data: IndexedSeq[Double],
-    bandwidth: Double = 0.0,
-    n: Int = 50
+      data: IndexedSeq[Double],
+      bandwidth: Double = 0.0,
+      n: Int = 50
   ): DataSourceWithQuantiles = {
     val min = data.min
     val max = data.max
     val w = (max - min) / n
     val h =
-      if (bandwidth <= 0.0) 1.06 * math.sqrt(sampleVariance(data)) * math.pow(n.toDouble, -0.2)
+      if (bandwidth <= 0.0)
+        1.06 * math.sqrt(sampleVariance(data)) * math.pow(n.toDouble, -0.2)
       else bandwidth
 
     0 to n map { i =>
@@ -220,12 +245,12 @@ trait DataAdaptors extends DataTuples {
   }
 
   def density2d(
-    data: IndexedSeq[(Double, Double)],
-    bandwidth: Double = 0.1,
-    n: Int = 50,
-    levels: Int = 10,
-    stroke: Stroke = Stroke(1d),
-    color: Colormap = HeatMapColors(0, 1)
+      data: IndexedSeq[(Double, Double)],
+      bandwidth: Double = 0.1,
+      n: Int = 50,
+      levels: Int = 10,
+      stroke: Stroke = Stroke(1d),
+      color: Colormap = HeatMapColors(0, 1)
   ) = {
     val min1 = data.map(_._1).min
     val max1 = data.map(_._1).max
@@ -235,22 +260,24 @@ trait DataAdaptors extends DataTuples {
     val w2 = (max2 - min2) / n
 
     linesegments(contour(
-      min1,
-      max1,
-      min2,
-      max2,
-      n,
-      levels
-    )((x, y) => KDE.density2d(data, (x, y), bandwidth)), stroke = stroke, color = color)
+                   min1,
+                   max1,
+                   min2,
+                   max2,
+                   n,
+                   levels
+                 )((x, y) => KDE.density2d(data, (x, y), bandwidth)),
+                 stroke = stroke,
+                 color = color)
 
   }
 
   def densityMatrix(
-    data: IndexedSeq[(Double, Double)],
-    bandwidth: Double = 0.1,
-    xlim: Option[(Double, Double)] = None,
-    ylim: Option[(Double, Double)] = None,
-    n: Int = 50
+      data: IndexedSeq[(Double, Double)],
+      bandwidth: Double = 0.1,
+      xlim: Option[(Double, Double)] = None,
+      ylim: Option[(Double, Double)] = None,
+      n: Int = 50
   ) = {
 
     val min1 = xlim.map(_._1) getOrElse data.map(_._1).min
@@ -269,9 +296,9 @@ trait DataAdaptors extends DataTuples {
   }
 
   def linesegments(
-    data: Seq[(Double, Seq[((Double, Double), (Double, Double))])],
-    stroke: Stroke = Stroke(1d),
-    color: Colormap = HeatMapColors(0, 1)
+      data: Seq[(Double, Seq[((Double, Double), (Double, Double))])],
+      stroke: Stroke = Stroke(1d),
+      color: Colormap = HeatMapColors(0, 1)
   ) = {
     val datasource: DataSourceWithQuantiles = data.flatMap {
       case (z, pairs) =>
@@ -282,6 +309,7 @@ trait DataAdaptors extends DataTuples {
     }
     val zmin = data.map(_._1).min
     val zmax = data.map(_._1).max
-    datasource -> org.nspl.lineSegment(stroke = stroke, color = color.withRange(zmin, zmax))
+    datasource -> org.nspl
+      .lineSegment(stroke = stroke, color = color.withRange(zmin, zmax))
   }
 }

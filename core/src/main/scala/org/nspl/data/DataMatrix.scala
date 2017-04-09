@@ -1,6 +1,7 @@
 package org.nspl.data;
 
-case class DataMatrix(rows: Array[Double], numCols: Int, numRows: Int) extends DataSource {
+case class DataMatrix(rows: Array[Double], numCols: Int, numRows: Int)
+    extends DataSource {
 
   val dimension = 3
   private val n = rows.size
@@ -41,12 +42,10 @@ case class DataMatrix(rows: Array[Double], numCols: Int, numRows: Int) extends D
       new MinMax {
         def min = 0.0
         def max = numCols - 1d
-      }
-    else if (i == 1) new MinMax {
+      } else if (i == 1) new MinMax {
       def min = 0.0
       def max = numRows - 1d
-    }
-    else {
+    } else {
 
       // var min = Double.MAX_VALUE;
       // var max = Double.MIN_VALUE;

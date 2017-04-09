@@ -1,7 +1,7 @@
 package org.nspl
 
 import java.awt.Graphics2D
-import java.awt.{ Font => JFont }
+import java.awt.{Font => JFont}
 import java.text.AttributedString
 import java.awt.font.LineBreakMeasurer
 
@@ -47,11 +47,11 @@ object awtrenderer extends JavaAWTUtil {
             val frc = graphics2.getFontRenderContext()
 
             def getOutline(text: String) =
-              new java.awt.font.TextLayout(text, font, frc).getOutline(new java.awt.geom.AffineTransform())
+              new java.awt.font.TextLayout(text, font, frc)
+                .getOutline(new java.awt.geom.AffineTransform())
 
             elem.layout.lines.foreach {
               case (line, lineTx) =>
-
                 val shape = getOutline(line)
 
                 val tx = elem.txLoc.concat(lineTx)

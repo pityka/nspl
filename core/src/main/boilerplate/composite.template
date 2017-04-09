@@ -28,6 +28,20 @@ trait Tuples2 {
   }#
   ]
 
+  [#def zgroup[[#T1<:Renderable[T1]#]]([#m1:(T1,Int)#],layout:Layout) =  {
+      val list = Vector([#m1#])
+      val listForLayout = list.zipWithIndex.sortBy(_._##1._##2)
+      val n : Seq[Bounds] = layout(listForLayout.map(_._##1._##1.bounds))
+      val nidx = listForLayout.map(_._##2)
+      org.nspl.Elems1([#{
+        val t = listForLayout(nidx(0))._##1
+        val bounds = n(nidx(0))
+        val fitted = fitToBounds(t._##1.asInstanceOf[T1],bounds)
+        fitted
+      }#])
+        }#
+  ]
+
   [#implicit def compositeRenderer1[[#T1<:Renderable[T1]#],R<:RenderingContext](implicit [#r1:Renderer[T1,R]#]) = new Renderer[org.nspl.Elems1[[#T1#]],R] {
     def render(ctx:R,elem:Elems1[[#T1#]]) : Unit ={
         [#r1.render(ctx,elem.m1)#

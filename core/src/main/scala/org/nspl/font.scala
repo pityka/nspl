@@ -2,7 +2,8 @@ package org.nspl
 
 sealed trait Font {
   type F >: this.type <: Font
-  def advance(c: Char, size: Int)(implicit fm: GlyphMeasurer[F]) = fm.advance(c, this)
+  def advance(c: Char, size: Int)(implicit fm: GlyphMeasurer[F]) =
+    fm.advance(c, this)
   def size: Int
 }
 
@@ -36,10 +37,14 @@ case class LineMetrics(ascent: Double, descent: Double, leading: Double)
 object FixGlyphMeasurer extends GlyphMeasurer[Font#F] {
   def advance(s: Char, f: Font#F) = f.size.toDouble * 0.6
   def lineMetrics(f: Font#F) =
-    LineMetrics(ascent = f.size.toDouble * 0.78, descent = f.size.toDouble * 0.22, leading = 0d)
+    LineMetrics(ascent = f.size.toDouble * 0.78,
+                descent = f.size.toDouble * 0.22,
+                leading = 0d)
 }
 
-case class GenericFontConfig[F <: Font](font: F)(implicit val measure: GlyphMeasurer[F#F]) extends FontConfiguration {
+case class GenericFontConfig[F <: Font](font: F)(
+    implicit val measure: GlyphMeasurer[F#F])
+    extends FontConfiguration {
   def advance(c: Char) = measure.advance(c, font)
   def lineMetrics = measure.lineMetrics(font)
 }
@@ -49,9 +54,9 @@ case class TextLayout(lines: Seq[(String, AffineTransform)], bounds: Bounds)
 object TextLayout {
 
   def apply(
-    maxWidth: Option[Double],
-    text: String,
-    fontSize: RelFontSize
+      maxWidth: Option[Double],
+      text: String,
+      fontSize: RelFontSize
   )(implicit fc: FontConfiguration): TextLayout =
     if (text.isEmpty)
       TextLayout(List("" -> AffineTransform.identity), Bounds(0, 0, 0, 0))
@@ -78,32 +83,37 @@ object TextLayout {
 
       if (maxWidth.isEmpty) {
         val bounds = measureLine(chars)
-        val tx = AffineTransform.scale(fontSizeFactor, fontSizeFactor).concat(AffineTransform.translate(bounds.x, bounds.y + ascent))
+        val tx = AffineTransform
+          .scale(fontSizeFactor, fontSizeFactor)
+          .concat(AffineTransform.translate(bounds.x, bounds.y + ascent))
 
         TextLayout(List(chars.mkString -> tx), scale.transform(bounds))
       } else {
-        val lines = chars.foldLeft(List[(List[Char], Bounds)]()) { (lines, char) =>
-          lines match {
-            case Nil =>
-              val line = (char :: Nil)
-              (line -> measureLine(line)) :: Nil
-            case (lc, lb) :: ls =>
-              val nb = advanceWithChar(lb, char)
-              if (nb.w > maxWidth.get) {
-                val newline = char :: Nil
-                val cb = measureLine(newline)
-                (newline -> cb.copy(y = cb.h + lb.y)) :: (lc, lb) :: ls
-              } else (char :: lc, nb) :: ls
+        val lines = chars
+          .foldLeft(List[(List[Char], Bounds)]()) { (lines, char) =>
+            lines match {
+              case Nil =>
+                val line = (char :: Nil)
+                (line -> measureLine(line)) :: Nil
+              case (lc, lb) :: ls =>
+                val nb = advanceWithChar(lb, char)
+                if (nb.w > maxWidth.get) {
+                  val newline = char :: Nil
+                  val cb = measureLine(newline)
+                  (newline -> cb.copy(y = cb.h + lb.y)) :: (lc, lb) :: ls
+                } else (char :: lc, nb) :: ls
 
+            }
           }
-        }.map(x => x._1.reverse.mkString -> x._2)
+          .map(x => x._1.reverse.mkString -> x._2)
           .reverse
 
         val outerBounds = outline(lines.map(_._2))
 
         val transformations = lines.map {
           case (text, bounds) =>
-            val tx = AffineTransform.translate(bounds.x, bounds.y + ascent)
+            val tx = AffineTransform
+              .translate(bounds.x, bounds.y + ascent)
               .concat(scale)
             (text, tx)
         }
