@@ -1,9 +1,12 @@
-scalaVersion := "2.11.8"
+scalaVersion := "2.11.11"
+
+crossScalaVersions := Seq("2.11.8","2.12.1")
 
 lazy val commonSettings = Seq(
   organization := "io.github.pityka",
-  version := "0.0.16",
-  scalaVersion := "2.11.8",
+  version := "0.0.17",
+  scalaVersion := "2.11.11",
+  crossScalaVersions := Seq("2.11.8","2.12.1"),
   javacOptions ++= Seq("-Xdoclint:none"),
   // scalacOptions ++= Seq("-Xlog-implicits"),
   licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
@@ -32,7 +35,7 @@ lazy val sharedJs = project.in(file("shared-js")).
 		settings(commonSettings).
 		settings(
 			name:="nspl-shared-js",
-      libraryDependencies +=  "org.scala-js" %%% "scalajs-dom" % "0.9.0"
+      libraryDependencies +=  "org.scala-js" %%% "scalajs-dom" % "0.9.1"
 		)
     .enablePlugins(ScalaJSPlugin)
     .dependsOn(coreJS)
@@ -41,7 +44,7 @@ lazy val canvas = project.in(file("canvas")).
 		settings(commonSettings).
 		settings(
 			name:="nspl-core-canvas-js",
-      libraryDependencies +=  "org.scala-js" %%% "scalajs-dom" % "0.9.0"
+      libraryDependencies +=  "org.scala-js" %%% "scalajs-dom" % "0.9.1"
 		)
     .enablePlugins(ScalaJSPlugin)
     .dependsOn(coreJS,sharedJs)
@@ -52,7 +55,7 @@ lazy val scalatagsJs = project.in(file("scalatags-js")).
 			name:="nspl-scalatags-js",
       libraryDependencies ++=  Seq(
         "org.scala-js" %%% "scalajs-dom" % "0.9.1",
-        "com.lihaoyi" %%% "scalatags" % "0.6.0")
+        "com.lihaoyi" %%% "scalatags" % "0.6.5")
 		)
     .enablePlugins(ScalaJSPlugin)
     .dependsOn(coreJS,sharedJs)
@@ -68,14 +71,14 @@ lazy val awt = project.in(file("awt")).
 		settings(
 			name:="nspl-awt",
       libraryDependencies ++= Seq("de.erichseifert.vectorgraphics2d" % "VectorGraphics2D" % "0.11",
-      "org.scalatest" %% "scalatest" % "2.1.5" % "test")
+      "org.scalatest" %% "scalatest" % "3.0.0" % "test")
 		).dependsOn(core,sharedJvm)
 
 lazy val scalatagsJvm = project.in(file("scalatags-jvm")).
     		settings(commonSettings).
     		settings(
     			name:="nspl-scalatags-jvm",
-          libraryDependencies +="com.lihaoyi" %% "scalatags" % "0.6.0"
+          libraryDependencies +="com.lihaoyi" %% "scalatags" % "0.6.5"
     		).dependsOn(core,sharedJvm)
 
 lazy val saddle = (project in file("saddle")).settings(commonSettings).
@@ -84,11 +87,14 @@ lazy val saddle = (project in file("saddle")).settings(commonSettings).
 		libraryDependencies++=Seq(
 			"org.scala-saddle" %% "saddle-core" % "1.3.4"  exclude("com.googlecode.efficient-java-matrix-library", "ejml"),
 			"com.googlecode.efficient-java-matrix-library" % "ejml" % "0.19" % "test",
-      "org.scalatest" %% "scalatest" % "2.1.5" % "test"
+      "org.scalatest" %% "scalatest" % "3.0.0" % "test"
 			)
 	).dependsOn(core,awt,scalatagsJvm)
 
 publishArtifact := false
+
+lazy val root = (project in file("."))
+  .aggregate(saddle,scalatagsJvm,awt,scalatagsJs,canvas )
 
 pomExtra in Global := {
   <url>https://pityka.github.io/nspl/</url>
