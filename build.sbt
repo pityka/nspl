@@ -2,7 +2,7 @@ scalaVersion := "2.11.11"
 
 lazy val commonSettings = Seq(
   organization := "io.github.pityka",
-  version := "0.0.17",
+  version := "0.0.18-SNAPSHOT",
   scalaVersion := "2.11.11",
   crossScalaVersions := Seq("2.11.11","2.12.2"),
   javacOptions ++= Seq("-Xdoclint:none"),
