@@ -1,12 +1,10 @@
 scalaVersion := "2.11.11"
 
-crossScalaVersions := Seq("2.11.8","2.12.1")
-
 lazy val commonSettings = Seq(
   organization := "io.github.pityka",
   version := "0.0.17",
   scalaVersion := "2.11.11",
-  crossScalaVersions := Seq("2.11.8","2.12.1"),
+  crossScalaVersions := Seq("2.11.11","2.12.2"),
   javacOptions ++= Seq("-Xdoclint:none"),
   // scalacOptions ++= Seq("-Xlog-implicits"),
   licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
@@ -43,7 +41,7 @@ lazy val sharedJs = project.in(file("shared-js")).
 lazy val canvas = project.in(file("canvas")).
 		settings(commonSettings).
 		settings(
-			name:="nspl-core-canvas-js",
+			name:="nspl-canvas-js",
       libraryDependencies +=  "org.scala-js" %%% "scalajs-dom" % "0.9.1"
 		)
     .enablePlugins(ScalaJSPlugin)
@@ -83,7 +81,8 @@ lazy val scalatagsJvm = project.in(file("scalatags-jvm")).
 
 lazy val saddle = (project in file("saddle")).settings(commonSettings).
 	settings(
-		name:="nspl-saddle",
+    crossScalaVersions := Seq("2.11.11"),
+		name :="nspl-saddle",
 		libraryDependencies++=Seq(
 			"org.scala-saddle" %% "saddle-core" % "1.3.4"  exclude("com.googlecode.efficient-java-matrix-library", "ejml"),
 			"com.googlecode.efficient-java-matrix-library" % "ejml" % "0.19" % "test",
@@ -93,7 +92,7 @@ lazy val saddle = (project in file("saddle")).settings(commonSettings).
 
 publishArtifact := false
 
-lazy val root = (project in file("."))
+lazy val root = (project in file(".")).settings(commonSettings:_*)
   .aggregate(saddle,scalatagsJvm,awt,scalatagsJs,canvas )
 
 pomExtra in Global := {
