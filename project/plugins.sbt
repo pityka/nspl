@@ -1,8 +1,8 @@
 addSbtPlugin("io.spray" % "sbt-boilerplate" % "0.6.0")
 
-addSbtPlugin("com.geirsson" % "sbt-scalafmt" % "0.4.8")
+addSbtPlugin("com.lucidchart" % "sbt-scalafmt" % "1.14")
 
-addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.15")
+addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.20")
 
 addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "1.1")
 
