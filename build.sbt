@@ -2,7 +2,7 @@ scalaVersion := "2.12.4"
 
 lazy val commonSettings = Seq(
     organization := "io.github.pityka",
-    version := "0.0.19-SNAPSHOT",
+    version := "0.0.19",
     scalaVersion := "2.12.4",
     crossScalaVersions := Seq("2.11.11", "2.12.4"),
     javacOptions ++= Seq("-Xdoclint:none"),
@@ -105,7 +105,7 @@ publishArtifact := false
 
 lazy val root = (project in file("."))
   .settings(commonSettings: _*)
-  .aggregate(saddle, scalatagsJvm, awt, scalatagsJs, canvas)
+  .aggregate(saddle, scalatagsJvm, awt, scalatagsJs, canvas,sharedJs,  sharedJvm, core,coreJS)
 
 pomExtra in Global := {
   <url>https://pityka.github.io/nspl/</url>
