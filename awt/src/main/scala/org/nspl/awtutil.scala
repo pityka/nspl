@@ -74,7 +74,7 @@ trait JavaAWTUtil {
 
   def show[K <: Renderable[K]](elem: Build[K])(
       implicit er: Renderer[K, JavaRC]
-  ): Unit = {
+  ) : javax.swing.JFrame= {
     import javax.swing._
     import java.awt.{Graphics, RenderingHints}
     val frame = new JFrame("");
@@ -143,6 +143,7 @@ trait JavaAWTUtil {
     frame.pack();
     frame.setSize(d);
     frame.setVisible(true);
+    frame
   }
 
   def savePaint[T](g: Graphics2D)(fun: Graphics2D => T) = {
