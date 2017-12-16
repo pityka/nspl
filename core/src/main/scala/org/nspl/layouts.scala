@@ -37,9 +37,9 @@ case class VerticalStack(alignment: Alignment = Left, gap: Double = 0.0)
       val minX = maxWidthElem.x
       def xpos(width: Double, x: Double) = {
         alignment match {
-          case Left => 0.0 + minX
-          case Right => maxWidth - width + minX
-          case Center => 0.5 * maxWidth - 0.5 * width + minX
+          case Left        => 0.0 + minX
+          case Right       => maxWidth - width + minX
+          case Center      => 0.5 * maxWidth - 0.5 * width + minX
           case NoAlignment => x
         }
       }
@@ -67,9 +67,9 @@ case class HorizontalStack(alignment: Alignment, gap: Double = 0.0)
       val minY = maxHeightElem.y
       def ypos(height: Double, y: Double) = {
         alignment match {
-          case Left => 0.0 + minY
-          case Right => maxHeight - height + minY
-          case Center => 0.5 * maxHeight - 0.5 * height + minY
+          case Left        => 0.0 + minY
+          case Right       => maxHeight - height + minY
+          case Center      => 0.5 * maxHeight - 0.5 * height + minY
           case NoAlignment => y
         }
       }
@@ -127,18 +127,18 @@ object AlignTo {
                                      reference: Bounds,
                                      alignment: Alignment): T =
     alignment match {
-      case Left => horizontalLeft(move, reference)
-      case Right => horizontalRight(move, reference)
-      case Center => horizontalCenter(move, reference)
+      case Left        => horizontalLeft(move, reference)
+      case Right       => horizontalRight(move, reference)
+      case Center      => horizontalCenter(move, reference)
       case NoAlignment => move
     }
 
   def vertical[T <: Renderable[T]](move: T,
                                    reference: Bounds,
                                    alignment: Alignment): T = alignment match {
-    case Left => verticalLeft(move, reference)
-    case Right => verticalRight(move, reference)
-    case Center => verticalCenter(move, reference)
+    case Left        => verticalLeft(move, reference)
+    case Right       => verticalRight(move, reference)
+    case Center      => verticalCenter(move, reference)
     case NoAlignment => move
   }
 

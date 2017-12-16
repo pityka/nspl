@@ -35,8 +35,7 @@ trait ImplicitConversions {
       implicit f: T => DataSource
   ): PlotData = (ds._1, List(ds._2), ds._3)
 
-  implicit def dsToTuple3b[T, F: FC](
-      ds: (T, List[DataRenderer], LegendConfig))(
+  implicit def dsToTuple3b[T, F: FC](ds: (T, List[DataRenderer], LegendConfig))(
       implicit f: T => DataSource
   ): PlotData = (ds._1, ds._2, ds._3)
 

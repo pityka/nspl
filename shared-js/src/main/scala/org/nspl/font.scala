@@ -6,7 +6,7 @@ import org.scalajs.dom.html
 
 object svgFont {
   def apply(f: Font) = f match {
-    case Monospace => s"font-family: monospace;font-size: ${Monospace.size}"
+    case Monospace             => s"font-family: monospace;font-size: ${Monospace.size}"
     case NamedFont(name, size) => s"font-family: ${name};font-size: ${size}"
   }
 }
@@ -14,7 +14,7 @@ object svgFont {
 /* Code duplication! */
 object canvasFont {
   def apply(f: Font) = f match {
-    case Monospace => s"${Monospace.size}pt monospace"
+    case Monospace             => s"${Monospace.size}pt monospace"
     case NamedFont(name, size) => s"${size}pt $name"
   }
 }

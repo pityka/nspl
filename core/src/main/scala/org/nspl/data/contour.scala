@@ -107,16 +107,20 @@ object contour {
               val v2 = cached(x2 -> y2)
               val intersection = segment(x, y, v, x2, y2, v2, z)
               if (intersection.isDefined) {
-                val intersection2 = segmentNeighbours(i, j, n, m).map {
-                  case (i, j, n, m) =>
-                    val x = min1 + i * w1
-                    val y = min2 + j * w2
-                    val v = cached(x -> y)
-                    val x2 = min1 + n * w1
-                    val y2 = min2 + m * w2
-                    val v2 = cached(x2 -> y2)
-                    segment(x, y, v, x2, y2, v2, z)
-                }.filter(_.isDefined).map(_.get).headOption
+                val intersection2 = segmentNeighbours(i, j, n, m)
+                  .map {
+                    case (i, j, n, m) =>
+                      val x = min1 + i * w1
+                      val y = min2 + j * w2
+                      val v = cached(x -> y)
+                      val x2 = min1 + n * w1
+                      val y2 = min2 + m * w2
+                      val v2 = cached(x2 -> y2)
+                      segment(x, y, v, x2, y2, v2, z)
+                  }
+                  .filter(_.isDefined)
+                  .map(_.get)
+                  .headOption
                 if (intersection2.isDefined)
                   (intersection.get -> intersection2.get) :: Nil
                 else Nil

@@ -185,9 +185,9 @@ case class AxisSettings(
       if (numTicks1 == 0) Nil
       else
         ((0 to ((axis.max - baseTick1) / tickSpace1).toInt map (i =>
-                                                                  baseTick1 + i * tickSpace1)) ++
+          baseTick1 + i * tickSpace1)) ++
           (1 to ((baseTick1 - axis.min) / tickSpace1).toInt map (i =>
-                                                                   baseTick1 - i * tickSpace1)))
+            baseTick1 - i * tickSpace1)))
           .filterNot(x => customTicks.map(_._1).contains(x))
           .filterNot(x => disableTicksAt.contains(x))
           .toList
@@ -197,10 +197,10 @@ case class AxisSettings(
     val minorTicks =
       if (numTicks1 == 0 || numMinorTicksFactor <= 0) Nil
       else
-        ((0 to ((axis.max - baseTick1) / (tickSpace1 / numMinorTicksFactor)).toInt map (i =>
-                                                                                          baseTick1 + i * tickSpace1 / numMinorTicksFactor)) ++
-          (1 to ((baseTick1 - axis.min) / (tickSpace1 / numMinorTicksFactor)).toInt map (i =>
-                                                                                           baseTick1 - i * tickSpace1 / numMinorTicksFactor)))
+        ((0 to ((axis.max - baseTick1) / (tickSpace1 / numMinorTicksFactor)).toInt map (
+            i => baseTick1 + i * tickSpace1 / numMinorTicksFactor)) ++
+          (1 to ((baseTick1 - axis.min) / (tickSpace1 / numMinorTicksFactor)).toInt map (
+              i => baseTick1 - i * tickSpace1 / numMinorTicksFactor)))
           .filterNot(x => customTicks.map(_._1).contains(x))
           .toList
           .map(w => math.max(math.min(w, axis.max), axis.min))

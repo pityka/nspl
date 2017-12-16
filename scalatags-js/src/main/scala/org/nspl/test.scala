@@ -62,7 +62,8 @@ object TestSvg {
           .translate(100, 30),
         FreeLayout
       ),
-      200)
+      200
+    )
 
     val gallery = group(
       p1,

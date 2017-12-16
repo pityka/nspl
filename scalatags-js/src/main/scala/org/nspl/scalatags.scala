@@ -148,16 +148,18 @@ object scalatagrenderer {
         }
         case SimplePath(ps) => {
           polyline(
-            points := ps.map { p =>
-              p.x + " " + p.y
-            }.mkString(" ")
+            points := ps
+              .map { p =>
+                p.x + " " + p.y
+              }
+              .mkString(" ")
           )
         }
         case Path(ops) => {
           path(
             d := ops map {
-              case MoveTo(Point(x, y)) => s"M$x,$y"
-              case LineTo(Point(x, y)) => s"L$x,$y"
+              case MoveTo(Point(x, y))                  => s"M$x,$y"
+              case LineTo(Point(x, y))                  => s"L$x,$y"
               case QuadTo(Point(x2, y2), Point(x1, y1)) => s"Q$x1,$y1,$x2,$y2"
               // case CubicTo(Point(x3, y3), Point(x1, y1), Point(x2, y2)) => path.curveTo(x1, y1, x2, y2, x3, y3)
             } mkString (" ")
@@ -176,8 +178,8 @@ object scalatagrenderer {
             stroke := elem.strokeColor.css,
             strokeWidth := elem.stroke.get.width,
             strokeLinecap := (elem.stroke.get.cap match {
-              case CapRound => "round"
-              case CapButt => "butt"
+              case CapRound  => "round"
+              case CapButt   => "butt"
               case CapSquare => "square"
             })
           )

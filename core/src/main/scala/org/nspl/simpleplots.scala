@@ -130,8 +130,8 @@ trait SimplePlots {
 
     val data1 =
       if (draw1Line)
-        (dataSourceFromRows(List(0.0 -> 1.0)), List(polynom())) +: data.map(
-          x => x._1 -> x._2)
+        (dataSourceFromRows(List(0.0 -> 1.0)), List(polynom())) +: data.map(x =>
+          x._1 -> x._2)
       else data.map(x => x._1 -> x._2)
 
     val legend1 =
@@ -244,21 +244,22 @@ trait SimplePlots {
       mainLabDistance: RelFontSize = 1.0 fts
   ) = {
     {
-      val data1: Seq[Seq[VectorRow]] = data.iterator.map { row =>
-        val x = row(xCol)
-        val sum = if (relative) legend.map(x => row(x._1)).sum else 1.0
+      val data1: Seq[Seq[VectorRow]] = data.iterator
+        .map { row =>
+          val x = row(xCol)
+          val sum = if (relative) legend.map(x => row(x._1)).sum else 1.0
 
-        val data = legend.map(x => row(x._1) / sum)
+          val data = legend.map(x => row(x._1) / sum)
 
-        val accum: Seq[Double] =
-          data.drop(1).scanLeft(data.head)((y, l) => y + l)
+          val accum: Seq[Double] =
+            data.drop(1).scanLeft(data.head)((y, l) => y + l)
 
-        accum zip (0.0 +: accum.dropRight(1)) map (y =>
-                                                     VectorRow(
-                                                       Vector(x, y._1, y._2),
-                                                       ""))
+          accum zip (0.0 +: accum.dropRight(1)) map (y =>
+            VectorRow(Vector(x, y._1, y._2), ""))
 
-      }.toVector.transpose
+        }
+        .toVector
+        .transpose
 
       val legend1 = legend.zipWithIndex.map(x => (x._2, x._1._2, x._1._3))
 
@@ -411,20 +412,22 @@ trait SimplePlots {
   ) = {
     val bxdata = boxplotData(data.toSeq)
 
-    boxplotImpl(bxdata,
-                main,
-                xlab,
-                ylab,
-                if (useLabels) bxdata.iterator.map(_.label).toList else Nil,
-                fontSize,
-                xgrid,
-                ygrid,
-                xWidth,
-                yHeight,
-                boxColor,
-                frame,
-                xLabelRotation,
-                yLabelRotation)
+    boxplotImpl(
+      bxdata,
+      main,
+      xlab,
+      ylab,
+      if (useLabels) bxdata.iterator.map(_.label).toList else Nil,
+      fontSize,
+      xgrid,
+      ygrid,
+      xWidth,
+      yHeight,
+      boxColor,
+      frame,
+      xLabelRotation,
+      yLabelRotation
+    )
   }
 
   def binnedboxplot[F: FC](
@@ -554,16 +557,15 @@ trait SimplePlots {
     group(
       xyplotareaBuild(
         List(
-          data -> List(
-            point(
-              pointSizeIsInDataSpaceUnits = true,
-              color = colormap.withRange(zmin, zmax),
-              shapes = Vector(Shape.rectangle(0.0, -1.0, 1.0, 1.0)),
-              size = 1d,
-              valueText = valueText,
-              labelColor = valueColor,
-              labelFontSize = valueFontSize
-            ))),
+          data -> List(point(
+            pointSizeIsInDataSpaceUnits = true,
+            color = colormap.withRange(zmin, zmax),
+            shapes = Vector(Shape.rectangle(0.0, -1.0, 1.0, 1.0)),
+            size = 1d,
+            valueText = valueText,
+            labelColor = valueColor,
+            labelFontSize = valueFontSize
+          ))),
         AxisSettings(
           LinearAxisFactory,
           customTicks = xnames,

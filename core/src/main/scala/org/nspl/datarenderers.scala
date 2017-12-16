@@ -330,15 +330,17 @@ trait Renderers {
 
         if (!horizontal) {
 
-          val wYBottom = yCol2.map { i =>
-            val w = data(i)
-            if (w > yAxis.max) yAxis.max
-            else if (w < yAxis.min) yAxis.min
-            else w
-          }.getOrElse(
-            if (0d > yAxis.max) yAxis.max
-            else if (0d < yAxis.min) yAxis.min
-            else 0d)
+          val wYBottom = yCol2
+            .map { i =>
+              val w = data(i)
+              if (w > yAxis.max) yAxis.max
+              else if (w < yAxis.min) yAxis.min
+              else w
+            }
+            .getOrElse(
+              if (0d > yAxis.max) yAxis.max
+              else if (0d < yAxis.min) yAxis.min
+              else 0d)
 
           val vX = xAxis.worldToView(wX)
           val vXMin = xAxis.worldToView(xAxis.min)
@@ -379,15 +381,17 @@ trait Renderers {
 
         } else {
 
-          val wXBottom = yCol2.map { i =>
-            val w = data(i)
-            if (w > xAxis.max) xAxis.max
-            else if (w < xAxis.min) xAxis.min
-            else w
-          }.getOrElse(
-            if (0d > xAxis.max) xAxis.max
-            else if (0d < xAxis.min) xAxis.min
-            else 0d)
+          val wXBottom = yCol2
+            .map { i =>
+              val w = data(i)
+              if (w > xAxis.max) xAxis.max
+              else if (w < xAxis.min) xAxis.min
+              else w
+            }
+            .getOrElse(
+              if (0d > xAxis.max) xAxis.max
+              else if (0d < xAxis.min) xAxis.min
+              else 0d)
 
           val vY = yAxis.worldToView(wY)
           val vYMin = yAxis.worldToView(yAxis.min)

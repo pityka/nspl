@@ -50,11 +50,15 @@ trait JavaAWTUtil {
     new java.awt.Color(c.r, c.g, c.b, c.a)
 
   implicit def str2str(s: Stroke) =
-    new java.awt.BasicStroke(s.width.toFloat, s.cap match {
-      case CapButt => java.awt.BasicStroke.CAP_BUTT
-      case CapSquare => java.awt.BasicStroke.CAP_SQUARE
-      case CapRound => java.awt.BasicStroke.CAP_ROUND
-    }, java.awt.BasicStroke.JOIN_MITER)
+    new java.awt.BasicStroke(
+      s.width.toFloat,
+      s.cap match {
+        case CapButt   => java.awt.BasicStroke.CAP_BUTT
+        case CapSquare => java.awt.BasicStroke.CAP_SQUARE
+        case CapRound  => java.awt.BasicStroke.CAP_ROUND
+      },
+      java.awt.BasicStroke.JOIN_MITER
+    )
 
   implicit def rec2bounds(r: java.awt.geom.Rectangle2D) =
     Bounds(r.getX, r.getY, r.getWidth, r.getHeight)
@@ -74,7 +78,7 @@ trait JavaAWTUtil {
 
   def show[K <: Renderable[K]](elem: Build[K])(
       implicit er: Renderer[K, JavaRC]
-  ) : javax.swing.JFrame= {
+  ): javax.swing.JFrame = {
     import javax.swing._
     import java.awt.{Graphics, RenderingHints}
     val frame = new JFrame("");
@@ -82,19 +86,22 @@ trait JavaAWTUtil {
     frame.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
     frame
       .getContentPane()
-      .add(new JComponent {
-        override def paintComponent(g: Graphics) = {
-          super.paintComponent(g)
-          val g2 = g.asInstanceOf[Graphics2D]
-          g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                              RenderingHints.VALUE_ANTIALIAS_ON)
-          g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-                              RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
-          val bounds = getBounds()
+      .add(
+        new JComponent {
+          override def paintComponent(g: Graphics) = {
+            super.paintComponent(g)
+            val g2 = g.asInstanceOf[Graphics2D]
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                                RenderingHints.VALUE_ANTIALIAS_ON)
+            g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                                RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
+            val bounds = getBounds()
 
-          fitToBounds(paintableElem, bounds).render(JavaRC(g2))
-        }
-      }, java.awt.BorderLayout.CENTER);
+            fitToBounds(paintableElem, bounds).render(JavaRC(g2))
+          }
+        },
+        java.awt.BorderLayout.CENTER
+      );
 
     val d = new java.awt.Dimension((paintableElem.bounds.w * 3).toInt,
                                    (paintableElem.bounds.h * 3).toInt)
@@ -113,9 +120,8 @@ trait JavaAWTUtil {
       }
       override def mouseWheelMoved(e: MouseWheelEvent) = {
         val componentBounds = e.getComponent.getBounds
-        val p = mapPoint(Point(e.getX, e.getY),
-                         componentBounds,
-                         paintableElem.bounds)
+        val p =
+          mapPoint(Point(e.getX, e.getY), componentBounds, paintableElem.bounds)
         paintableElem = elem(
           Some(paintableElem) -> Scroll(e.getPreciseWheelRotation, p))
 
@@ -128,9 +134,8 @@ trait JavaAWTUtil {
       }
       override def mouseDragged(e: MouseEvent) = {
         val componentBounds = e.getComponent.getBounds
-        val p = mapPoint(Point(e.getX, e.getY),
-                         componentBounds,
-                         paintableElem.bounds)
+        val p =
+          mapPoint(Point(e.getX, e.getY), componentBounds, paintableElem.bounds)
 
         paintableElem = elem(Some(paintableElem) -> Drag(dragStart, p))
         dragStart = p

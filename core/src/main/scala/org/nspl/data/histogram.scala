@@ -28,16 +28,20 @@ case class HistogramData(
           that.toString
       )
     else {
-      val newbins = bins.map { bin1 =>
-        val thisX = bin1._1._1
-        val thisXEnd = bin1._1._2
-        val thisY = bin1._1._3
-        val thisValue = bin1._2
-        val thatValue = that.bins.get(bin1._1)
-        thatValue.map { tv =>
-          (thisX, thisXEnd, thisY / tv) -> thisValue / tv
+      val newbins = bins
+        .map { bin1 =>
+          val thisX = bin1._1._1
+          val thisXEnd = bin1._1._2
+          val thisY = bin1._1._3
+          val thisValue = bin1._2
+          val thatValue = that.bins.get(bin1._1)
+          thatValue.map { tv =>
+            (thisX, thisXEnd, thisY / tv) -> thisValue / tv
+          }
         }
-      }.filter(_.isDefined).map(_.get).toMap
+        .filter(_.isDefined)
+        .map(_.get)
+        .toMap
       HistogramData(
         newbins,
         minX,
@@ -67,7 +71,7 @@ object HistogramData {
       case (key, bval) =>
         val aval = a.get(key)
         val cval = aval match {
-          case None => bval
+          case None    => bval
           case Some(a) => fun((a), (bval))
         }
         (key, cval)
@@ -188,33 +192,37 @@ object HistogramData {
       ((min + idx * step), 0.0) -> 0.0
     }).toMap
 
-    val bins: Seq[Map[(Double, Double), Double]] = data2.map { stratum =>
-      baseBins ++ stratum.zipWithIndex.map {
-        case (value, idx) =>
-          val i = ((value - min) / step).toInt
-          val bin = i * step + min
-          bin -> value
-      }.groupBy(_._1)
-        .map(x => (x._1, 0.0) -> x._2.map(_._2).size.toDouble)
-        .toMap
-    }.foldLeft(Seq[Map[(Double, Double), Double]]()) {
-      case (acc, binOfStratum) =>
-        if (acc.isEmpty) Seq(binOfStratum)
-        else {
-          val head = acc.head
-          val updatedBin = binOfStratum.map {
-            case ((x, y), dens) =>
-              (x,
-               head.filter(_._1._1 == x).headOption.map(_._2).getOrElse(0.0) +
-                 head
-                   .filter(_._1._1 == x)
-                   .headOption
-                   .map(_._1._2)
-                   .getOrElse(0.0)) -> dens
-          }.toMap
-          updatedBin +: acc
-        }
-    }
+    val bins: Seq[Map[(Double, Double), Double]] = data2
+      .map { stratum =>
+        baseBins ++ stratum.zipWithIndex
+          .map {
+            case (value, idx) =>
+              val i = ((value - min) / step).toInt
+              val bin = i * step + min
+              bin -> value
+          }
+          .groupBy(_._1)
+          .map(x => (x._1, 0.0) -> x._2.map(_._2).size.toDouble)
+          .toMap
+      }
+      .foldLeft(Seq[Map[(Double, Double), Double]]()) {
+        case (acc, binOfStratum) =>
+          if (acc.isEmpty) Seq(binOfStratum)
+          else {
+            val head = acc.head
+            val updatedBin = binOfStratum.map {
+              case ((x, y), dens) =>
+                (x,
+                 head.filter(_._1._1 == x).headOption.map(_._2).getOrElse(0.0) +
+                   head
+                     .filter(_._1._1 == x)
+                     .headOption
+                     .map(_._1._2)
+                     .getOrElse(0.0)) -> dens
+            }.toMap
+            updatedBin +: acc
+          }
+      }
 
     if (relativePerBin) {
       val perBinMaxY: Map[Double, Double] = bins

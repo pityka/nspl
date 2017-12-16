@@ -18,9 +18,8 @@ package object nspl
     def build: T = b(None -> BuildEvent)
   }
 
-  type AxisElem = Elems3[ShapeElem,
-                         ElemList[Elems2[ShapeElem, TextBox]],
-                         ElemList[ShapeElem]]
+  type AxisElem =
+    Elems3[ShapeElem, ElemList[Elems2[ShapeElem, TextBox]], ElemList[ShapeElem]]
 
   type FC[_] = FontConfiguration
 
@@ -43,8 +42,8 @@ package object nspl
   def importFont(name: String)(implicit gm: GlyphMeasurer[NamedFont#F]) =
     GenericFontConfig(NamedFont(name, 10))(gm)
 
-  def mapEvent[A <: Renderable[A], B <: Renderable[B]](
-      old: (Option[A], Event))(f: A => B): (Option[B], Event) = old match {
+  def mapEvent[A <: Renderable[A], B <: Renderable[B]](old: (Option[A], Event))(
+      f: A => B): (Option[B], Event) = old match {
     case (None, BuildEvent) => None -> BuildEvent
     case (Some(old), e) =>
       val b = f(old)
@@ -142,8 +141,7 @@ package object nspl
     case _ => throw new RuntimeException("should not happen")
   }
 
-  def sequence[T <: Renderable[T]](
-      members: Seq[Build[T]]): Build[ElemList[T]] =
+  def sequence[T <: Renderable[T]](members: Seq[Build[T]]): Build[ElemList[T]] =
     sequence(members, FreeLayout)
 
   def sequence2[T1 <: Renderable[T1], T2 <: Renderable[T2]](
@@ -154,14 +152,12 @@ package object nspl
     val n = layout(bounds)
 
     val transformed = n zip members map (x =>
-                                           x._2 match {
-                                           case scala.util.Left(y) =>
-                                             scala.util.Left(
-                                               fitToBounds(y, x._1))
-                                           case scala.util.Right(y) =>
-                                             scala.util.Right(
-                                               fitToBounds(y, x._1))
-                                         })
+      x._2 match {
+        case scala.util.Left(y) =>
+          scala.util.Left(fitToBounds(y, x._1))
+        case scala.util.Right(y) =>
+          scala.util.Right(fitToBounds(y, x._1))
+      })
     ElemList2(transformed)
   }
 

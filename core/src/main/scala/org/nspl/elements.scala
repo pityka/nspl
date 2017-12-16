@@ -10,8 +10,7 @@ case class ElemList[T <: Renderable[T]](members: Seq[T])
 }
 
 object ElemList {
-  implicit def compositeListRenderer[T <: Renderable[T],
-                                     R <: RenderingContext](
+  implicit def compositeListRenderer[T <: Renderable[T], R <: RenderingContext](
       implicit r: Renderer[T, R]) =
     new Renderer[ElemList[T], R] {
       def render(ctx: R, elem: ElemList[T]): Unit = {
@@ -25,7 +24,7 @@ case class ElemList2[T1 <: Renderable[T1], T2 <: Renderable[T2]](
     extends Renderable[ElemList2[T1, T2]] {
   def transform(tx: Bounds => AffineTransform) =
     ElemList2(members.map(_ match {
-      case scala.util.Left(x) => scala.util.Left(x.transform(tx))
+      case scala.util.Left(x)  => scala.util.Left(x.transform(tx))
       case scala.util.Right(x) => scala.util.Right(x.transform(tx))
     }))
   def bounds =
@@ -43,7 +42,7 @@ object ElemList2 {
       def render(ctx: R, elem: ElemList2[T, T2]): Unit = {
         elem.members.foreach(e =>
           (e match {
-            case scala.util.Left(e) => r1.render(ctx, e)
+            case scala.util.Left(e)  => r1.render(ctx, e)
             case scala.util.Right(e) => r2.render(ctx, e)
           }))
       }

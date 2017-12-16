@@ -4,8 +4,7 @@ import org.scalajs.dom
 import org.scalajs.dom.raw._
 import org.scalajs.dom.html
 
-case class CanvasRC(graphics: CanvasRenderingContext2D)
-    extends RenderingContext
+case class CanvasRC(graphics: CanvasRenderingContext2D) extends RenderingContext
 
 object canvasrenderer {
 
@@ -103,9 +102,9 @@ object canvasrenderer {
     var i = 0.0
     while (i <= 2 * math.Pi) {
       val xPos = centerX - (radiusX * math.sin(i)) * Math.sin(0.5 * math.Pi) + (radiusY * math
-          .cos(i)) * Math.cos(0.5 * math.Pi);
+        .cos(i)) * Math.cos(0.5 * math.Pi);
       val yPos = centerY + (radiusY * math.cos(i)) * math.sin(0.5 * math.Pi) + (radiusX * Math
-          .sin(i)) * Math.cos(0.5 * math.Pi);
+        .sin(i)) * Math.cos(0.5 * math.Pi);
       if (i == 0) {
         ctx.moveTo(xPos, yPos);
       } else {
