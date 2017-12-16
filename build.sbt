@@ -1,3 +1,4 @@
+
 scalaVersion := "2.12.4"
 
 lazy val commonSettings = Seq(
@@ -29,12 +30,42 @@ lazy val coreJS = project
   .enablePlugins(ScalaJSPlugin)
   .enablePlugins(spray.boilerplate.BoilerplatePlugin)
 
+lazy val coreNative = project
+  .in(file("core"))
+  .settings(commonSettings)
+  .settings(
+    scalaVersion := "2.11.11",
+    crossScalaVersions := Seq("2.11.11")
+  )
+  .settings(
+    name := "nspl-core-native",
+    target := file("core/targetNative"),
+    sourceManaged in Compile := (sourceManaged in Compile).value.getAbsoluteFile
+  )
+  .enablePlugins(ScalaNativePlugin)
+  .enablePlugins(spray.boilerplate.BoilerplatePlugin)
+
+lazy val nanovg = project
+  .in(file("nanovg"))
+  .settings(commonSettings)
+  .settings(
+    scalaVersion := "2.11.11",
+    crossScalaVersions := Seq("2.11.11"),
+    nativeLinkingOptions ++= Seq("-framework", "OpenGL")
+  )
+  .settings(
+    name := "nspl-nanovg-native"
+  )
+  .enablePlugins(ScalaNativePlugin)
+  .dependsOn(coreNative)
+
+
 lazy val sharedJs = project
   .in(file("shared-js"))
   .settings(commonSettings)
   .settings(
     name := "nspl-shared-js",
-    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.1"
+    libraryDependencies += toScalaJSGroupID("org.scala-js") %%% "scalajs-dom" % "0.9.1"
   )
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(coreJS)
@@ -44,7 +75,7 @@ lazy val canvas = project
   .settings(commonSettings)
   .settings(
     name := "nspl-canvas-js",
-    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.1"
+    libraryDependencies += toScalaJSGroupID("org.scala-js") %%% "scalajs-dom" % "0.9.1"
   )
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(coreJS, sharedJs)
@@ -54,8 +85,8 @@ lazy val scalatagsJs = project
   .settings(commonSettings)
   .settings(
     name := "nspl-scalatags-js",
-    libraryDependencies ++= Seq("org.scala-js" %%% "scalajs-dom" % "0.9.1",
-                                "com.lihaoyi" %%% "scalatags" % "0.6.5")
+    libraryDependencies ++= Seq(toScalaJSGroupID("org.scala-js") %%% "scalajs-dom" % "0.9.1",
+                                toScalaJSGroupID("com.lihaoyi") %%% "scalatags" % "0.6.5")
   )
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(coreJS, sharedJs)
