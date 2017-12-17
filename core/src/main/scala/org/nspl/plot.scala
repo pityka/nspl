@@ -82,7 +82,7 @@ trait Plots {
   ) = Build(xyplotarea(data, xAxisSetting, yAxisSetting, origin, xlim, ylim, xAxisMargin, yAxisMargin, xCol, yCol, xgrid, ygrid, frame, boundsData, xCustomGrid, yCustomGrid, main, mainFontSize, mainDistance, xlab, xlabFontSize, xlabDistance, xlabAlignment, ylab, ylabFontSize, ylabDistance, ylabAlignment, topPadding, bottomPadding, leftPadding, rightPadding)) {
     case (Some(old), Scroll(v1, p)) if old.frameElem.bounds.contains(p) =>
       import old._
-      val v = if (v1 > 0) 1.05 else 0.95
+      val v = if (v1 > 0) 1.05 else if (v1 < 0) 0.95 else 1.0
       val mappedPoint = mapPoint(p, old.frameElem.bounds, Bounds(xMin, yMin, xMax - xMin, yMax - yMin))
       val xMid = mappedPoint.x
       val yMid = mappedPoint.y

@@ -177,8 +177,9 @@ object nvg {
 //   [b d f]
 //   [0 0 1]
   @native.name("nvgCurrentTransform")
-  def currentTransform(ctx: native.Ptr[Context],
-                       mat: native.Ptr[native.CArray[native.CFloat, native.Nat._6]]): Unit =
+  def currentTransform(
+      ctx: native.Ptr[Context],
+      mat: native.Ptr[native.CArray[native.CFloat, native.Nat._6]]): Unit =
     native.extern
 
   @native.name("nvgTransformIdentity")
@@ -678,6 +679,47 @@ object glfw3 {
                        width: native.Ptr[native.CDouble],
                        height: native.Ptr[native.CDouble]): Unit = native.extern
 
+  @native.name("glfwSetCursorPosCallback")
+  def glfwSetCursorPosCallback(
+      window: native.Ptr[Window],
+      callback: native.CFunctionPtr3[native.Ptr[Window],
+                                     native.CDouble,
+                                     native.CDouble,
+                                     Unit]): Unit = native.extern
+
+  @native.name("glfwSetMouseButtonCallback")
+  def glfwSetMouseButtonCallback(
+      window: native.Ptr[Window],
+      callback: native.CFunctionPtr4[native.Ptr[Window],
+                                     native.CInt,
+                                     native.CInt,
+                                     native.CInt,
+                                     Unit]): Unit = native.extern
+
+  @native.name("glfwSetScrollCallback")
+  def glfwSetScrollCallback(window: native.Ptr[Window],
+                            callback: native.CFunctionPtr3[native.Ptr[Window],
+                                                           native.CDouble,
+                                                           native.CDouble,
+                                                           Unit]): Unit =
+    native.extern
+  @native.name("glfwGetMouseButton")
+  def glfwGetMouseButton(window: native.Ptr[Window],
+                         flag: native.CInt): native.CInt = native.extern
+
+  @native.name("glfwSetInputMode")
+  def glfwSetInputMode(window: native.Ptr[Window],
+                       mode: native.CInt,
+                       value: native.CInt): Unit = native.extern
+
+}
+
+object Glfw3Constants {
+  val GLFW_STICKY_MOUSE_BUTTONS = 0x00033003
+  val GLFW_MOUSE_BUTTON_1 = 0
+  val GLFW_MOUSE_BUTTON_2 = 1
+  val GLFW_RELEASE = 0
+  val GLFW_PRESS = 1
 }
 
 @native.extern
@@ -697,7 +739,6 @@ object GL {
 
   @native.name("glClear")
   def glClear(flag: native.CInt): Unit = native.extern
-
 
 }
 

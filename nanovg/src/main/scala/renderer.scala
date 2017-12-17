@@ -40,18 +40,18 @@ object nanovgrenderer {
       nvg.beginPath(ctx.ctx.ctx)
       pathEllipse(ctx, x, y, w, h)
 
-    case Line(x1, y1, x2, y2) => 
+    case Line(x1, y1, x2, y2) =>
       nvg.beginPath(ctx.ctx.ctx)
-        nvg.moveTo(ctx.ctx.ctx,x1.toFloat,y1.toFloat)
-        nvg.lineTo(ctx.ctx.ctx, x2.toFloat, y2.toFloat)
+      nvg.moveTo(ctx.ctx.ctx, x1.toFloat, y1.toFloat)
+      nvg.lineTo(ctx.ctx.ctx, x2.toFloat, y2.toFloat)
 
     case SimplePath(points) =>
       nvg.beginPath(ctx.ctx.ctx)
-      if (points.size >= 2){
-  nvg.moveTo(ctx.ctx.ctx,points.head.x.toFloat,points.head.x.toFloat)
-      points.drop(1).foreach { p =>
-        nvg.lineTo(ctx.ctx.ctx, p.x.toFloat, p.y.toFloat)
-      }
+      if (points.size >= 2) {
+        nvg.moveTo(ctx.ctx.ctx, points.head.x.toFloat, points.head.y.toFloat)
+        points.drop(1).foreach { p =>
+          nvg.lineTo(ctx.ctx.ctx, p.x.toFloat, p.y.toFloat)
+        }
       }
 
     case Path(ops) =>
@@ -73,7 +73,6 @@ object nanovgrenderer {
 
   implicit val shapeRenderer = new NER[ShapeElem] {
     def render(ctx: NanovgRC, elem: ShapeElem): Unit = {
-      AffineTransform.identity.applyTo(ctx)
       nvg.save(ctx.ctx.ctx)
       if (elem.fill.a > 0.0) {
         nvg.fillColor(ctx.ctx.ctx, elem.fill.makeNvg)
@@ -110,22 +109,22 @@ object nanovgrenderer {
     import scalanative.native._
     import scalanative.native
     def render(ctx: NanovgRC, elem: TextBox): Unit = {
-      nvg.save(ctx.ctx.ctx)     
-      
+      nvg.save(ctx.ctx.ctx)
+
       nvg.beginPath(ctx.ctx.ctx)
       if (elem.text.size > 0) {
-        
+
         nvg.fillColor(ctx.ctx.ctx, elem.color.makeNvg)
 
         elem.font match {
           case Monospace =>
             nvg.fontFace(ctx.ctx.ctx, c"Monospace")
             nvg.fontSize(ctx.ctx.ctx, Monospace.size)
-          case NamedFont(name, size) =>   
-            native.Zone { implicit z =>         
-              nvg.fontFace(ctx.ctx.ctx,native.toCString(name))
+          case NamedFont(name, size) =>
+            native.Zone { implicit z =>
+              nvg.fontFace(ctx.ctx.ctx, native.toCString(name))
             }
-            nvg.fontSize(ctx.ctx.ctx,size)
+            nvg.fontSize(ctx.ctx.ctx, size)
         }
 
         elem.layout.lines.foreach {
@@ -137,10 +136,10 @@ object nanovgrenderer {
             }
 
         }
-        
+
       }
       nvg.restore(ctx.ctx.ctx)
-      
+
     }
   }
 }
