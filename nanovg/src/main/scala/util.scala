@@ -2,15 +2,15 @@ package org.nspl
 
 object nanovgutil {
 
-  var mouseX = 0.0
-  var mouseY = 0.0
-  var dscroll = 0.0
-  var lastScroll = 0.0
+  private var mouseX = 0.0
+  private var mouseY = 0.0
+  private var dscroll = 0.0
+  private var lastScroll = 0.0
 
   // scala-native throws if local var is reassigned
-  var dragStart: Option[(Point, Bounds)] = None
-  var paintableElem_ : Renderable[_] = _
-  var lastMouse = Point(mouseX, mouseY)
+  private var dragStart: Option[(Point, Bounds)] = None
+  private var paintableElem_ : Renderable[_] = _
+  private var lastMouse = Point(mouseX, mouseY)
 
   import nanovgrenderer._
   def show[K <: Renderable[K]](elem: Build[K])(
