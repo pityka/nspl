@@ -8,8 +8,9 @@ object nanovgutil {
   var lastScroll = 0.0
 
   // scala-native throws if local var is reassigned
-  var dragStart: Option[Point] = None
+  var dragStart: Option[(Point, Bounds)] = None
   var paintableElem_ : Renderable[_] = _
+  var lastMouse = Point(mouseX, mouseY)
 
   import nanovgrenderer._
   def show[K <: Renderable[K]](elem: Build[K])(
@@ -79,24 +80,27 @@ object nanovgutil {
         GLConstants.DepthBufferBit | GLConstants.StencilBufferBit | GLConstants.ColorBufferBit);
 
       val bounds = Bounds(0, 0, !winWidth, !winHeight)
-
       // Mouse drag
       if (mouseButtonPressed && dragStart.isEmpty) {
         val p = Point(mouseX, mouseY)
-        dragStart = Some(mapPoint(p, bounds, paintableElem.bounds))
+        val mapped = mapPoint(p, bounds, paintableElem.bounds)
+        dragStart = Some(mapped -> paintableElem.bounds)
+        lastMouse = Point(mouseX, mouseY)
       } else if (mouseButtonPressed && dragStart.isDefined) {
+        if (lastMouse != Point(mouseX, mouseY)) {
+          val p2 =
+            mapPoint(Point(mouseX, mouseY), bounds, paintableElem.bounds)
+          val p1 =
+            mapPoint(dragStart.get._1, dragStart.get._2, paintableElem.bounds)
 
-        val p =
-          mapPoint(Point(mouseX, mouseY), bounds, paintableElem.bounds)
+          lastMouse = Point(mouseX, mouseY)
 
-        paintableElem_ = elem(Some(paintableElem) -> Drag(dragStart.get, p))
+          paintableElem_ = elem(Some(paintableElem) -> Drag(p1, p2))
+          dragStart = Some(p2 -> paintableElem.bounds)
+        }
       } else if (!mouseButtonPressed && dragStart.isDefined) {
         dragStart = None
-      }
-
-      // scroll
-      if (dscroll != 0.0) {
-
+      } else if (dscroll != 0.0) {
         val p =
           mapPoint(Point(mouseX, mouseY), bounds, paintableElem.bounds)
         paintableElem_ = elem(Some(paintableElem) -> Scroll(lastScroll, p))

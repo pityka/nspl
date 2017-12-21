@@ -105,7 +105,7 @@ trait JavaAWTUtil {
 
     val d = new java.awt.Dimension((paintableElem.bounds.w * 3).toInt,
                                    (paintableElem.bounds.h * 3).toInt)
-    var dragStart = Point(0, 0)
+    var dragStart = Point(0, 0) -> Bounds(0, 0, 0, 0)
     val listener = new MouseAdapter {
       override def mouseClicked(e: MouseEvent) = {
         val componentBounds = e.getComponent.getBounds
@@ -130,15 +130,17 @@ trait JavaAWTUtil {
       override def mousePressed(e: MouseEvent) = {
         val componentBounds = e.getComponent.getBounds
         val p = Point(e.getX, e.getY)
-        dragStart = mapPoint(p, componentBounds, paintableElem.bounds)
+        dragStart = mapPoint(p, componentBounds, paintableElem.bounds) -> paintableElem.bounds
       }
       override def mouseDragged(e: MouseEvent) = {
         val componentBounds = e.getComponent.getBounds
-        val p =
+        val p1 =
+          mapPoint(dragStart._1, dragStart._2, paintableElem.bounds)
+        val p2 =
           mapPoint(Point(e.getX, e.getY), componentBounds, paintableElem.bounds)
 
-        paintableElem = elem(Some(paintableElem) -> Drag(dragStart, p))
-        dragStart = p
+        paintableElem = elem(Some(paintableElem) -> Drag(p1, p2))
+        dragStart = p2 -> paintableElem.bounds
         e.getComponent.repaint
       }
     }
