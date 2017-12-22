@@ -740,10 +740,42 @@ object GL {
   @native.name("glClear")
   def glClear(flag: native.CInt): Unit = native.extern
 
+  @native.name("glReadPixels")
+  def glReadPixels(x: native.CInt,
+                   y: native.CInt,
+                   width: native.CInt,
+                   height: native.CInt,
+                   format: native.CInt,
+                   `type`: native.CInt,
+                   data: native.Ptr[Byte]): Unit = native.extern
+
+  @native.name("glReadBuffer")
+  def glReadBuffer(flag: native.CInt): Unit = native.extern
+
+  @native.name("glPixelStorei")
+  def glPixelStorei(flag: native.CInt, value: native.CInt): Unit = native.extern
+
 }
 
 object GLConstants {
   val DepthBufferBit = 0x00000100
   val StencilBufferBit = 0x00000400
   val ColorBufferBit = 0x00004000
+  val UnsignedByte = 0x1401
+  val RGB = 0x1907
+  val RGBA = 0x1908
+  val Back = 0x0405
+  val Front = 0x0404
+  val PackAlignment = 0x0D05
+}
+@native.extern
+@native.link("lodepng")
+object lodepng {
+
+  @native.name("lodepng_encode32_file")
+  def lodepng_encode32_file(file: native.CString,
+                            data: native.Ptr[Byte],
+                            w: native.CInt,
+                            h: native.CInt): native.CInt = native.extern
+
 }

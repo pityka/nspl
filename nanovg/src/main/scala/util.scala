@@ -11,9 +11,11 @@ object nanovgutil {
   private var dragStart: Option[(Point, Bounds)] = None
   private var paintableElem_ : Renderable[_] = _
   private var lastMouse = Point(mouseX, mouseY)
+  private var stopLoop = false
 
   import nanovgrenderer._
-  def show[K <: Renderable[K]](elem: Build[K])(
+  def show[K <: Renderable[K]](elem: Build[K],
+                               saveToFile: Option[java.io.File] = None)(
       implicit er: NER[K]
   ) = {
     def paintableElem = paintableElem_.asInstanceOf[K]
@@ -62,7 +64,7 @@ object nanovgutil {
 
     paintableElem_ = elem.build
 
-    while (glfw3.glfwWindowShouldClose(window) == 0) {
+    while (glfw3.glfwWindowShouldClose(window) == 0 && !stopLoop) {
 
       val mouseButtonPressed = glfw3.glfwGetMouseButton(
         window,
@@ -70,10 +72,10 @@ object nanovgutil {
 
       glfw3.glfwGetWindowSize(window, winWidth, winHeight);
       glfw3.glfwGetFramebufferSize(window, fbWidth, fbHeight);
-      // Calculate pixel ration for hi-dpi devices.
+
       val pxRatio = (!fbWidth).toFloat / (!winWidth).toFloat
       nvg.beginFrame(vg, !winWidth, !winHeight, pxRatio);
-      // Update and render
+
       GL.glViewport(0, 0, !fbWidth, !fbHeight);
       GL.glClearColor(1f, 1f, 1f, 1f);
       GL.glClear(
@@ -111,8 +113,50 @@ object nanovgutil {
       fitToBounds(paintableElem, bounds).render(renderingContext)
 
       nvg.endFrame(vg);
+      saveToFile.foreach { file =>
+        stopLoop = true
+
+        native.Zone { implicit z =>
+          val bsize = (!fbWidth) * (!fbHeight) * 4
+          val buffer = native.alloc[Byte](bsize)
+          GL.glReadBuffer(GLConstants.Back)
+          GL.glPixelStorei(GLConstants.PackAlignment, 1)
+          GL.glReadPixels(0,
+                          0,
+                          !fbWidth,
+                          !fbHeight,
+                          GLConstants.RGBA,
+                          GLConstants.UnsignedByte,
+                          buffer)
+
+          var i = 0
+          var j = (!fbHeight) - 1
+          var k = 0
+          val stride = (!fbWidth) * 4
+          while (i < j) {
+            val ri = buffer + i * stride
+            val rj = buffer + j * stride
+            k = 0
+            while (k < stride) {
+              val t = ri(k)
+              ri(k) = rj(k)
+              rj(k) = t
+              k += 1
+            }
+            i += 1
+            j -= 1
+          }
+
+          lodepng.lodepng_encode32_file(native.toCString(file.getAbsolutePath),
+                                        buffer,
+                                        !fbWidth,
+                                        !fbHeight)
+
+        }
+      }
       glfw3.glfwSwapBuffers(window)
       glfw3.glfwPollEvents()
+
     }
     nvg.deleteGL3(vg)
     glfw3.glfwTerminate()
