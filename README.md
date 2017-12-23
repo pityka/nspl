@@ -2,7 +2,7 @@
 
 [![Scala.js](https://www.scala-js.org/assets/badges/scalajs-0.6.8.svg)](https://www.scala-js.org)
 
-# 2d Plotting Library for Scala (including scala-js)
+# 2d Plotting Library for Scala (including scala-js and scala-native)
 
 Creates scatter, line, contour, raster, barplots and boxplots, histograms, density plots. Composite figure of multiple plots.
 
@@ -11,6 +11,7 @@ Renders to
 * PDF/SVG/EPS (via [VectorGraphics2D](https://github.com/eseifert/vectorgraphics2d))
 * SVG (via [ScalaTags](http://www.lihaoyi.com/scalatags/), both in browser or on jvm)
 * Html5 Canvas ([scala-js](http://www.scala-js.org))
+* OpenGL (via [NanoVG](https://github.com/memononen/nanovg))
 
 Minimal dependencies (VectorGraphics2D for PDF output).
 
@@ -37,3 +38,16 @@ See `saddle/src/test/scala/plots/plots.test.scala` for JVM examples.
 ## Alternatives
 
 See the excellent java graphing library: [GRAL](https://github.com/eseifert/gral), which inspired the design of this library.
+
+## Scala Native
+You will need lodepng, glfw3 and nanovg. For nanovg compile and install a file like this:
+```
+#define GLFW_INCLUDE_GLCOREARB
+#define GLFW_INCLUDE_GLEXT
+#include <GLFW/glfw3.h>
+#include "nanovg.h"
+#define NANOVG_GL3_IMPLEMENTATION
+#include "nanovg_gl.h"
+```
+
+In `cli/` there is an experimental command line interface.
