@@ -15,7 +15,8 @@ object nanovgutil {
 
   import nanovgrenderer._
   def show[K <: Renderable[K]](elem: Build[K],
-                               saveToFile: Option[java.io.File] = None)(
+                               saveToFile: Option[java.io.File] = None,
+                               `yield`: => Unit = ())(
       implicit er: NER[K]
   ) = {
     def paintableElem = paintableElem_.asInstanceOf[K]
@@ -65,7 +66,7 @@ object nanovgutil {
     paintableElem_ = elem.build
 
     while (glfw3.glfwWindowShouldClose(window) == 0 && !stopLoop) {
-
+      `yield`
       val mouseButtonPressed = glfw3.glfwGetMouseButton(
         window,
         Glfw3Constants.GLFW_MOUSE_BUTTON_1) == Glfw3Constants.GLFW_PRESS

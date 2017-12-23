@@ -1,15 +1,13 @@
-
 scalaVersion := "2.12.4"
 
 lazy val commonSettings = Seq(
-    organization := "io.github.pityka",
-    version := "0.0.20-SNAPSHOT",
-    scalaVersion := "2.12.4",
-    crossScalaVersions := Seq("2.11.11", "2.12.4"),
-    javacOptions ++= Seq("-Xdoclint:none"),
-    // scalacOptions ++= Seq("-Xlog-implicits"),
-    licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
-  ) 
+  organization := "io.github.pityka",
+  version := "0.0.20-SNAPSHOT",
+  scalaVersion := "2.12.4",
+  crossScalaVersions := Seq("2.11.11", "2.12.4"),
+  javacOptions ++= Seq("-Xdoclint:none"),
+  licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
+)
 
 lazy val core = project
   .in(file("core"))
@@ -59,6 +57,26 @@ lazy val nanovg = project
   .enablePlugins(ScalaNativePlugin)
   .dependsOn(coreNative)
 
+lazy val cli = project
+  .in(file("cli"))
+  .settings(commonSettings)
+  .settings(
+    scalaVersion := "2.11.11",
+    crossScalaVersions := Seq("2.11.11"),
+    nativeLinkingOptions ++= Seq("-framework", "OpenGL"),
+    nativeLinkStubs := true,
+    libraryDependencies ++= Seq(
+      toCrossGroupID("com.lihaoyi") %%% "fastparse" % "1.0.0",
+      toCrossGroupID("io.github.pityka") %%% "stringsplit" % "1.0.1",
+      toCrossGroupID("com.lihaoyi") %%% "utest" % "0.6.2" % "test"
+    ),
+    testFrameworks += new TestFramework("utest.runner.Framework")
+  )
+  .settings(
+    name := "nspl-nanovg-native-cli"
+  )
+  .enablePlugins(ScalaNativePlugin)
+  .dependsOn(nanovg)
 
 lazy val sharedJs = project
   .in(file("shared-js"))
@@ -85,8 +103,9 @@ lazy val scalatagsJs = project
   .settings(commonSettings)
   .settings(
     name := "nspl-scalatags-js",
-    libraryDependencies ++= Seq(toScalaJSGroupID("org.scala-js") %%% "scalajs-dom" % "0.9.1",
-                                toScalaJSGroupID("com.lihaoyi") %%% "scalatags" % "0.6.5")
+    libraryDependencies ++= Seq(
+      toScalaJSGroupID("org.scala-js") %%% "scalajs-dom" % "0.9.1",
+      toScalaJSGroupID("com.lihaoyi") %%% "scalatags" % "0.6.5")
   )
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(coreJS, sharedJs)
@@ -136,7 +155,15 @@ publishArtifact := false
 
 lazy val root = (project in file("."))
   .settings(commonSettings: _*)
-  .aggregate(saddle, scalatagsJvm, awt, scalatagsJs, canvas,sharedJs,  sharedJvm, core,coreJS)
+  .aggregate(saddle,
+             scalatagsJvm,
+             awt,
+             scalatagsJs,
+             canvas,
+             sharedJs,
+             sharedJvm,
+             core,
+             coreJS)
 
 pomExtra in Global := {
   <url>https://pityka.github.io/nspl/</url>
@@ -153,3 +180,5 @@ pomExtra in Global := {
     </developer>
   </developers>
 }
+
+scalafmtOnCompile in ThisBuild := true

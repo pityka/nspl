@@ -122,6 +122,7 @@ trait DataAdaptors extends DataTuples {
         val v = s.map(_.apply(i))
         percentile(v, qs).toVector
       }
+      override def toString = s"DataSourceFrom($s)"
     }
 
   implicit def indexed(s: Seq[Double]): DataSourceWithQuantiles =
