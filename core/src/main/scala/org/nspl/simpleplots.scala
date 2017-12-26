@@ -186,7 +186,6 @@ trait SimplePlots {
         xgrid = xgrid,
         ygrid = ygrid,
         frame = frame,
-        boundsData = data.map(_._1),
         xCustomGrid = xCustomGrid,
         yCustomGrid = yCustomGrid,
         main = main,

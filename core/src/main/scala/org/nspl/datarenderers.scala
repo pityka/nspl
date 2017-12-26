@@ -12,6 +12,8 @@ trait DataRenderer {
       rt: Renderer[TextBox, R]): Unit
   def asLegend: Option[LegendElem]
   def clear: Unit = ()
+  def xMinMax(ds: DataSource): Option[MinMax]
+  def yMinMax(ds: DataSource): Option[MinMax]
 }
 
 trait Renderers {
@@ -36,6 +38,9 @@ trait Renderers {
   ) = new DataRenderer {
 
     def asLegend = Some(PointLegend(shapes.head, color(0)))
+
+    def xMinMax(ds: DataSource) = Some(ds.columnMinMax(xCol))
+    def yMinMax(ds: DataSource) = Some(ds.columnMinMax(yCol))
 
     def render[R <: RenderingContext](data: Row,
                                       xAxis: Axis,
@@ -140,6 +145,9 @@ trait Renderers {
       color: Colormap = Color.black
   ) = new DataRenderer {
 
+    def xMinMax(ds: DataSource) = Some(ds.columnMinMax(xCol))
+    def yMinMax(ds: DataSource) = Some(ds.columnMinMax(yCol))
+
     var currentPoint: Option[Point] = None
     def asLegend = Some(LineLegend(stroke, color(0)))
     override def clear = currentPoint = None
@@ -185,8 +193,10 @@ trait Renderers {
     }
   }
 
-  /* Paints the area between the (x,y) and (x,0) or
-   *  between (x,y) and (x,y2) if y2 is present */
+  /**
+    *Paints the area between the (x,y) and (x,0) or
+    *  between (x,y) and (x,y2) if y2 is present
+    */
   def area(
       xCol: Int = 0,
       yCol: Int = 1,
@@ -201,6 +211,13 @@ trait Renderers {
     override def clear {
       currentPoint2 = None
       currentPoint1 = None
+    }
+
+    def xMinMax(ds: DataSource) = Some(ds.columnMinMax(xCol))
+    def yMinMax(ds: DataSource) = {
+      val max = ds.columnMinMax(yCol).max
+      val min = yCol2.map(y => ds.columnMinMax(y).min).getOrElse(0d)
+      Some(MinMaxImpl(min, max))
     }
 
     def render[R <: RenderingContext](
@@ -279,6 +296,9 @@ trait Renderers {
       p
     }
 
+    def xMinMax(ds: DataSource): Option[MinMax] = None
+    def yMinMax(ds: DataSource): Option[MinMax] = None
+
     def render[R <: RenderingContext](
         data: Row,
         xAxis: Axis,
@@ -310,6 +330,10 @@ trait Renderers {
       yCol2: Option[Int] = None,
       widthCol: Int = 3
   ) = new DataRenderer {
+
+    def xMinMax(ds: DataSource): Option[MinMax] = Some(ds.columnMinMax(xCol))
+    def yMinMax(ds: DataSource): Option[MinMax] = Some(ds.columnMinMax(yCol))
+
     def asLegend = Some(PointLegend(shapeList(1), fill(0)))
     def render[R <: RenderingContext](
         data: Row,
@@ -459,6 +483,13 @@ trait Renderers {
   ) = new DataRenderer {
     def asLegend = Some(PointLegend(shapeList(1), fill(0)))
 
+    def xMinMax(ds: DataSource): Option[MinMax] = Some(ds.columnMinMax(xCol))
+    def yMinMax(ds: DataSource): Option[MinMax] = {
+      val min = ds.columnMinMax(minCol).min
+      val max = ds.columnMinMax(maxCol).max
+      Some(MinMaxImpl(min, max))
+    }
+
     def render[R <: RenderingContext](
         data: Row,
         xAxis: Axis,
@@ -540,6 +571,18 @@ trait Renderers {
       stroke: Stroke = Stroke(1d),
       color: Colormap = HeatMapColors(0, 1)
   ) = new DataRenderer {
+
+    def xMinMax(ds: DataSource): Option[MinMax] = {
+      val m1 = ds.columnMinMax(xCol)
+      val m2 = ds.columnMinMax(x2Col)
+      Some(MinMaxImpl(math.min(m1.min, m2.min), math.max(m1.max, m2.max)))
+    }
+
+    def yMinMax(ds: DataSource): Option[MinMax] = {
+      val m1 = ds.columnMinMax(yCol)
+      val m2 = ds.columnMinMax(y2Col)
+      Some(MinMaxImpl(math.min(m1.min, m2.min), math.max(m1.max, m2.max)))
+    }
 
     def asLegend = Some(LineLegend(stroke, color(0)))
 

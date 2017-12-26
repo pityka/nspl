@@ -16,7 +16,9 @@ object nanovgutil {
   import nanovgrenderer._
   def show[K <: Renderable[K]](elem: Build[K],
                                saveToFile: Option[java.io.File] = None,
-                               `yield`: => Unit = ())(
+                               `yield`: => Unit = (),
+                               windowWidth: Int = 600,
+                               windowHeight: Int = 600)(
       implicit er: NER[K]
   ) = {
     def paintableElem = paintableElem_.asInstanceOf[K]
@@ -32,7 +34,8 @@ object nanovgutil {
     // msaa 4x:
     // glfw3.glfwWindowHint(0x0002100D, 4)
 
-    val window = glfw3.glfwCreateWindow(600, 600, c"boo", null, null)
+    val window =
+      glfw3.glfwCreateWindow(windowWidth, windowHeight, c"", null, null)
     glfw3.glfwMakeContextCurrent(window)
     val vg = nvg.createGL3(Constants.CreateFlags.StencilStrokes)
 
@@ -108,6 +111,8 @@ object nanovgutil {
           mapPoint(Point(mouseX, mouseY), bounds, paintableElem.bounds)
         paintableElem_ = elem(Some(paintableElem) -> Scroll(lastScroll, p))
         dscroll = 0.0
+      } else {
+        paintableElem_ = elem(Some(paintableElem) -> BuildEvent)
       }
 
       // Draw elem

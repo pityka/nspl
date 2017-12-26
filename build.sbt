@@ -73,7 +73,7 @@ lazy val cli = project
     testFrameworks += new TestFramework("utest.runner.Framework")
   )
   .settings(
-    name := "nspl-nanovg-native-cli"
+    name := "nsplcli"
   )
   .enablePlugins(ScalaNativePlugin)
   .dependsOn(nanovg)

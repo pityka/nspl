@@ -21,7 +21,9 @@ class EventsSpec extends FunSpec with Matchers {
       //   case (Some(old), Click(Point(x, y))) =>
       //     old.copy(m2 = ShapeElem(Shape.circle(5)).translate(x, y))
       // }
-      val x = group(xyplot(List(1d -> 2d, 3d -> 4d))(), xyplot(List(1d -> 2d, 3d -> 4d))(), TableLayout(2))
+      val x = group(xyplot(List(1d -> 2d, 3d -> 4d))(),
+                    xyplot(List(1d -> 2d, 3d -> 4d))(),
+                    TableLayout(2))
       // println(x.build.m1.bounds)
       // println(x.build.m1.bounds)
       show(x)

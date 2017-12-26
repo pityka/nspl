@@ -9,12 +9,17 @@ object Parser {
     def getFirstInOpt(field: String): Option[String]
     def getFirstIn(field: String): String
     def getFirstInOrDefault(field: String): String
-
+    def getFirstInOrDefaultOpt(field: String): Option[String]
+    def getObject(field: String): Option[Object]
+    def getBoolean(field: String): Option[Boolean]
   }
   case class Value(s: String) extends Node {
+    def getBoolean(field: String): Option[Boolean] = None
     def asString = s
     def asStringOpt = Some(s)
     def getFirstInOpt(field: String): Option[String] = None
+    def getFirstInOrDefaultOpt(field: String): Option[String] = None
+    def getObject(field: String): Option[Object] = None
     def getFirstIn(field: String) =
       throw new RuntimeException(s"expected object with $field, got value $s")
     def getFirstInOrDefault(field: String): String =
@@ -22,6 +27,17 @@ object Parser {
   }
   case class Object(name: String, arguments: Map[String, Seq[Node]])
       extends Node {
+    def getBoolean(field: String): Option[Boolean] =
+      arguments.get(field) match {
+        case None                       => None
+        case Some(Value("false") +: xs) => Some(false)
+        case Some(_)                    => Some(true)
+      }
+    def getObject(field: String): Option[Object] = arguments.get(field) match {
+      case None                      => None
+      case Some(Value(_) +: xs)      => None
+      case Some((obj: Object) +: xs) => Some(obj)
+    }
     def asStringOpt: Option[String] = None
     def asString = throw new RuntimeException("call asString on Object")
     def getFirstInOpt(field: String): Option[String] =
@@ -43,12 +59,20 @@ object Parser {
       }
     }
 
+    def getFirstInOrDefaultOpt(field: String): Option[String] = {
+      arguments.get(field).orElse(arguments.get("_default_")) match {
+        case Some(Value(s) +: xs) => Some(s)
+        case _ =>
+          None
+      }
+    }
+
   }
 
   def castToNode(v: AnyRef) = v match {
     case obj: Object => obj
     case str: String =>
-      Value(str)
+      Value(str.trim)
   }
 
   val whitespace: P[Unit] = P(CharIn(" \t\r\n").rep)
