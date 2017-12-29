@@ -79,9 +79,7 @@ case class AxisSettings(
     val horizontal = axis.horizontal
 
     val tickSpace1 = tickSpace.getOrElse {
-      val (mantissa, exponent) = scientific((axis.max - axis.min) / (numTicks))
-      val rounded = (mantissa * 10d).round / 10d
-      math.abs(rounded * math.pow(10d, exponent))
+      (axis.max - axis.min) / (numTicks)
     }
 
     val numTicks1 =
