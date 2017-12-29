@@ -117,7 +117,7 @@ trait SimplePlots {
       topPadding: Double = 0d,
       bottomPadding: Double = 0d,
       leftPadding: Double = 0d,
-      rightPadding: Double = 0d,
+      rightPadding: Double = 10d,
       xLabDistance: RelFontSize = 1.0 fts,
       yLabDistance: RelFontSize = 1.0 fts,
       mainLabDistance: RelFontSize = 1.0 fts
