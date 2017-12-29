@@ -453,8 +453,12 @@ trait Plots {
     val withHorizontalLabels = zgroup(
       (zgroup(
          (renderedPlot, 1),
-         (AlignTo.horizontalCenter(mainBox, frameElem.bounds), 0),
-         VerticalStack(NoAlignment, gap = mainDistance)
+         (AlignTo.verticalGapBeforeReference(
+            AlignTo.horizontalCenter(mainBox, frameElem.bounds),
+            frameElem.bounds,
+            mainDistance),
+          0),
+         FreeLayout
        ),
        0),
       (AlignTo.horizontal(xlabBox, frameElem.bounds, xlabAlignment), 1),
