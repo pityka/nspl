@@ -195,11 +195,11 @@ object XYPlotDescription {
                 xLabelRotation = obj
                   .getFirstInOpt("xLabelRotation")
                   .map(_.toDouble)
-                  .getOrElse(0.05),
+                  .getOrElse(0.00),
                 yLabelRotation = obj
                   .getFirstInOpt("yLabelRotation")
                   .map(_.toDouble)
-                  .getOrElse(0.05),
+                  .getOrElse(0.00),
                 origin = obj.getObject("origin").map(parseDoublePair)
               ))
           }
