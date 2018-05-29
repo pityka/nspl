@@ -18,7 +18,8 @@ object FileDescription {
           .map(_.toSet)
           .getOrElse(Set(' ', '\t', ',', ';'))
         val file = obj.getFirstInOrDefault("file")
-        FileDescription(file, min, max, name, label, sep)
+        val streaming = obj.getBoolean("streaming").getOrElse(false)
+        FileDescription(file, min, max, name, label, sep, streaming)
     }
 }
 case class FileDescription(file: String,
@@ -26,17 +27,47 @@ case class FileDescription(file: String,
                            max: Int,
                            name: String,
                            labelCol: Option[Int],
-                           sep: Set[Char]) {
+                           sep: Set[Char],
+                           streaming: Boolean) {
 
   override def toString =
     s"""$file min=$min max=$max name=$name ${labelCol
       .map(l => "label_column=" + l)
-      .getOrElse("")} sep='${sep.toSeq.mkString}'"""
+      .getOrElse("")} sep='${sep.toSeq.mkString}' streaming=$streaming"""
   def openToDataSource = {
 
-    def makeDataSource(iter: Iterator[String],
-                       min: Int,
-                       max: Int): (DataSource, Update) = {
+    def makeFixDataSource(iter: Iterator[String],
+                          min: Int,
+                          max: Int): (DataSource, Update) = {
+      val list = iter
+        .drop(min)
+        .take(max)
+        .map { line =>
+          val vecStr = line
+            .splitM(sep)
+            .toVector
+            .filterNot(_.isEmpty)
+
+          val vecDouble = vecStr.zipWithIndex
+            .filterNot(x => labelCol.contains(x._2))
+            .map(_._1.toDouble)
+          val label = labelCol.map(i => vecStr(i)).getOrElse("")
+          VectorRow(vecDouble, label)
+        }
+        .toVector
+
+      val dataSource = dataSourceFromRows(list)
+
+      val update = new Update {
+        def update = ()
+      }
+
+      (dataSource, update)
+    }
+
+    def makeStreamingDataSource(iter: Iterator[String],
+                                min: Int,
+                                max: Int): (DataSource, Update) = {
       val queue = scala.collection.mutable.Queue.empty[VectorRow]
       val dataSource = dataSourceFromRows(queue)
 
@@ -68,8 +99,9 @@ case class FileDescription(file: String,
     }
 
     val iter = io.Source.fromFile(file).getLines
-
-    (makeDataSource(iter, min = min, max = max), name)
+    if (streaming)
+      (makeStreamingDataSource(iter, min = min, max = max), name)
+    else makeFixDataSource(iter, min = min, max = max) -> name
 
   }
 }
