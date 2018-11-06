@@ -359,8 +359,8 @@ trait SimplePlots {
       yLabelRotation: Double = 0d
   ) = {
 
-    val min = bxdata.iterator.map(_(4)).min
-    val max = bxdata.iterator.map(_(5)).max
+    val min = bxdata.iterator.flatMap(_.allColumns.iterator.drop(1).take(5)).min
+    val max = bxdata.iterator.flatMap(_.allColumns.iterator.drop(1).take(5)).max
 
     xyplotareaBuild(
       List(bxdata -> List(boxwhisker(fill = boxColor))),

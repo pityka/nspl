@@ -307,16 +307,25 @@ trait Plots {
       dataXMin - xAxisMargin * (dataXMax - dataXMin)
     }, origin.map(_.x).getOrElse(Double.MaxValue))
 
-    val xMax = xLimMax.getOrElse {
-      dataXMax + xAxisMargin * (dataXMax - dataXMin)
+    val xMax = {
+      val xMax1 = xLimMax.getOrElse {
+        dataXMax + xAxisMargin * (dataXMax - dataXMin)
+      }
+      if (xMax1 == xMin) {
+        xMax1 + 1
+      } else xMax1
     }
 
     val yMin = math.min(yLimMin.getOrElse {
       dataYMin - yAxisMargin * (dataYMax - dataYMin)
     }, origin.map(_.y).getOrElse(Double.MaxValue))
 
-    val yMax = yLimMax.getOrElse {
-      dataYMax + yAxisMargin * (dataYMax - dataYMin)
+    val yMax = {
+      val yMax1 = yLimMax.getOrElse {
+        dataYMax + yAxisMargin * (dataYMax - dataYMin)
+      }
+      if (yMax1 == yMin) yMax1 + 1
+      else yMax1
     }
 
     val xAxis =
