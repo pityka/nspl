@@ -505,7 +505,8 @@ trait Plots {
   def legend[F: FC](
       entries: List[(String, LegendElem)],
       fontSize: RelFontSize = 1.0 fts,
-      width: RelFontSize = 30 fts
+      width: RelFontSize = 30 fts,
+      layout: Layout
   ): Legend = {
     sequence(
       entries.map {
@@ -530,7 +531,7 @@ trait Plots {
             HorizontalStack(Center, fontSize)
           )
       },
-      VerticalStack(Left)
+      layout
     )
   }
 

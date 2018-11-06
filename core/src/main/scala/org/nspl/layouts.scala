@@ -105,9 +105,12 @@ case class TableLayout(columns: Int,
 }
 
 /* A Layout which puts elements into columns.*/
-case class ColumnLayout(numRows: Int) extends Layout {
-  val horiz = HorizontalStack(Left, 10d)
-  val vertic = VerticalStack(Center, 10d)
+case class ColumnLayout(numRows: Int,
+                        horizontalGap: Double = 10d,
+                        verticalGap: Double = 10d)
+    extends Layout {
+  val horiz = HorizontalStack(Left, horizontalGap)
+  val vertic = VerticalStack(Center, verticalGap)
   def apply(s: Seq[Bounds]) = {
     val cols = s.grouped(numRows).toList.map(i => vertic.apply(i))
     val outlines = cols.map(s => outline(s))

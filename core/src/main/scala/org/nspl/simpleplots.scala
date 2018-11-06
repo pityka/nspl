@@ -107,7 +107,8 @@ trait SimplePlots {
       origin: Option[(Double, Double)] = None,
       xCustomGrid: Boolean = false,
       yCustomGrid: Boolean = false,
-      legendLayout: Layout = HorizontalStack(Center, 5d),
+      legendLayout: Layout =
+        ColumnLayout(numRows = 10, horizontalGap = 1d, verticalGap = 1d),
       xTickLength: RelFontSize = 0.4 fts,
       yTickLength: RelFontSize = 0.4 fts,
       xLineWidthFraction: Double = 1d,
@@ -150,7 +151,8 @@ trait SimplePlots {
           ).map(x => x._1 -> x._2.get) ++ extraLegend
         ).toList,
         fontSize = legendFontSize,
-        width = legendWidth
+        width = legendWidth,
+        legendLayout
       )
 
     val plotArea =
