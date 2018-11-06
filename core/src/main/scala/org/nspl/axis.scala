@@ -19,16 +19,16 @@ object LinearAxisFactory extends AxisFactory {
       new Axis {
         def viewToWorld(v: Double) = v / width1 * (max1 - min1)
         def worldToView(v: Double) = (v - min1) / (max1 - min1) * width1
-        def min = min1
-        def max = max1
+        def min = if (min1 == max1) max1 - 1d else min1
+        def max = if (min1 == max1) max1 + 1d else max1
         def horizontal = true
       } else
       new Axis {
         def viewToWorld(v: Double) = (width1 - v) / width1 * (max1 - min1)
         def worldToView(v: Double) =
           width1 - (v - min1) / (max1 - min1) * width1
-        def min = min1
-        def max = max1
+        def min = if (min1 == max1) max1 - 1d else min1
+        def max = if (min1 == max1) max1 + 1d else max1
         def horizontal = false
       }
 }
