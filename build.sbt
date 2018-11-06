@@ -1,10 +1,10 @@
-scalaVersion := "2.12.4"
+scalaVersion := "2.12.6"
 
 lazy val commonSettings = Seq(
   organization := "io.github.pityka",
   version := "0.0.20-SNAPSHOT",
-  scalaVersion := "2.12.4",
-  crossScalaVersions := Seq("2.11.11", "2.12.4"),
+  scalaVersion := "2.12.6",
+  crossScalaVersions := Seq("2.11.12", "2.12.6"),
   javacOptions ++= Seq("-Xdoclint:none"),
   licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 )
@@ -32,8 +32,8 @@ lazy val coreNative = project
   .in(file("core"))
   .settings(commonSettings)
   .settings(
-    scalaVersion := "2.11.11",
-    crossScalaVersions := Seq("2.11.11")
+    scalaVersion := "2.11.12",
+    crossScalaVersions := Seq("2.11.12")
   )
   .settings(
     name := "nspl-core-native",
@@ -47,8 +47,8 @@ lazy val nanovg = project
   .in(file("nanovg"))
   .settings(commonSettings)
   .settings(
-    scalaVersion := "2.11.11",
-    crossScalaVersions := Seq("2.11.11"),
+    scalaVersion := "2.11.12",
+    crossScalaVersions := Seq("2.11.12"),
     nativeLinkingOptions ++= Seq("-framework", "OpenGL")
   )
   .settings(
@@ -61,14 +61,14 @@ lazy val cli = project
   .in(file("cli"))
   .settings(commonSettings)
   .settings(
-    scalaVersion := "2.11.11",
-    crossScalaVersions := Seq("2.11.11"),
+    scalaVersion := "2.11.12",
+    crossScalaVersions := Seq("2.11.12"),
     nativeLinkingOptions ++= Seq("-framework", "OpenGL"),
     nativeLinkStubs := true,
     libraryDependencies ++= Seq(
-      toCrossGroupID("com.lihaoyi") %%% "fastparse" % "1.0.0",
-      toCrossGroupID("io.github.pityka") %%% "stringsplit" % "1.0.1",
-      toCrossGroupID("com.lihaoyi") %%% "utest" % "0.6.2" % "test"
+      ("com.lihaoyi") %%% "fastparse" % "1.0.0",
+      ("io.github.pityka") %%% "stringsplit" % "1.0.1",
+      ("com.lihaoyi") %%% "utest" % "0.6.2" % "test"
     ),
     testFrameworks += new TestFramework("utest.runner.Framework")
   )
@@ -141,7 +141,7 @@ lazy val scalatagsJvm = project
 lazy val saddle = (project in file("saddle"))
   .settings(commonSettings)
   .settings(
-    crossScalaVersions := Seq("2.11.11"),
+    crossScalaVersions := Seq("2.11.12"),
     name := "nspl-saddle",
     libraryDependencies ++= Seq(
       "io.github.pityka" %% "saddle-core-fork" % "1.3.4-fork1" exclude ("com.googlecode.efficient-java-matrix-library", "ejml"),
