@@ -85,15 +85,6 @@ case class AxisSettings(
     val numTicks1 =
       if (tickSpace.isEmpty) numTicks else (axis.max - axis.min) / tickSpace1
 
-    val baseTick1 = baseTick getOrElse {
-      if (axis.min <= 0 && axis.max >= 0) 0d
-      else {
-        val (maxM, maxE) = scientific(axis.max)
-        val minM = axis.min / math.pow(10d, maxE)
-        ((maxM - minM) * 0.5 + minM).floor * math.pow(10d, maxE)
-      }
-    }
-
     def makeTick(world: Double, text: String) = {
       val view = worldToView(world)
       if (horizontal)
@@ -179,29 +170,26 @@ case class AxisSettings(
         .filter(i => i._1 >= axis.min && i._1 <= axis.max)
         .map(i => makeTick(i._1, i._2))
 
+    val (majorTicks1, minorTicks1) =
+      Ticks.heckbert(axis.min, axis.max, numTicks1.toInt, numMinorTicksFactor)
+
     val majorTicks =
       if (numTicks1 == 0) Nil
       else
-        ((0 to ((axis.max - baseTick1) / tickSpace1).toInt map (i =>
-          baseTick1 + i * tickSpace1)) ++
-          (1 to ((baseTick1 - axis.min) / tickSpace1).toInt map (i =>
-            baseTick1 - i * tickSpace1)))
+        majorTicks1
           .filterNot(x => customTicks.map(_._1).contains(x))
           .filterNot(x => disableTicksAt.contains(x))
           .toList
-          .map(w => math.max(math.min(w, axis.max), axis.min))
+          .filter(w => w <= axis.max && w >= axis.min)
           .distinct
 
     val minorTicks =
       if (numTicks1 == 0 || numMinorTicksFactor <= 0) Nil
       else
-        ((0 to ((axis.max - baseTick1) / (tickSpace1 / numMinorTicksFactor)).toInt map (
-            i => baseTick1 + i * tickSpace1 / numMinorTicksFactor)) ++
-          (1 to ((baseTick1 - axis.min) / (tickSpace1 / numMinorTicksFactor)).toInt map (
-              i => baseTick1 - i * tickSpace1 / numMinorTicksFactor)))
+        minorTicks1
           .filterNot(x => customTicks.map(_._1).contains(x))
           .toList
-          .map(w => math.max(math.min(w, axis.max), axis.min))
+          .filter(w => w <= axis.max && w >= axis.min)
           .filterNot(majorTicks.contains)
           .distinct
 
