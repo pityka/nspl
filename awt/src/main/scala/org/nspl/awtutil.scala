@@ -218,7 +218,7 @@ trait JavaAWTUtil {
     import java.awt.{Graphics, RenderingHints}
 
     val aspect = elem.bounds.h / elem.bounds.w
-    val height = (width * aspect).toInt
+    val height = math.max((width * aspect).toInt, 1)
 
     val bimage = new BufferedImage(
       width,
