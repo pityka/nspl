@@ -547,7 +547,8 @@ trait SimplePlots {
       xNumTicks: Int = 4,
       yNumTicks: Int = 4,
       xTickSpace: Option[Double] = None,
-      yTickSpace: Option[Double] = None
+      yTickSpace: Option[Double] = None,
+      transparentPixels: Option[Double] = None
   ) = {
     val minmaxx = data.columnMinMax(xCol)
     val minmaxy = data.columnMinMax(yCol)
@@ -573,7 +574,8 @@ trait SimplePlots {
             size = 1d,
             valueText = valueText,
             labelColor = valueColor,
-            labelFontSize = valueFontSize
+            labelFontSize = valueFontSize,
+            transparent = transparentPixels
           ))),
         AxisSettings(
           LinearAxisFactory,

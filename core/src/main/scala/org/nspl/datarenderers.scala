@@ -34,7 +34,8 @@ trait Renderers {
       labelText: Boolean = false,
       labelFontSize: RelFontSize = 0.4 fts,
       labelColor: Color = Color.black,
-      errorBarStroke: Stroke = Stroke(1d)
+      errorBarStroke: Stroke = Stroke(1d),
+      transparent: Option[Double] = None
   ) = new DataRenderer {
 
     def asLegend = Some(PointLegend(shapes.head, color(0)))
@@ -57,6 +58,8 @@ trait Renderers {
         if (wX >= xAxis.min && wX <= xAxis.max && wY >= yAxis.min && wY <= yAxis.max) {
           val dataColorValue =
             if (data.dimension > colorCol) data(colorCol) else 0d
+
+          val skip = (transparent.isDefined && transparent.get == dataColorValue)
 
           val color1 = color(dataColorValue)
           val shape =
@@ -81,8 +84,8 @@ trait Renderers {
             shape,
             fill = color1
           ).scale(factorX, factorY).translate(vX, vY).transform(b => tx)
-          
-          if (!dataColorValue.isNaN) {
+
+          if (!skip) {
             re.render(ctx, shape1)
           }
 
