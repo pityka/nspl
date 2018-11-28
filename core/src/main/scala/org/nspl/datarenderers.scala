@@ -55,8 +55,10 @@ trait Renderers {
         val wY = data(yCol)
 
         if (wX >= xAxis.min && wX <= xAxis.max && wY >= yAxis.min && wY <= yAxis.max) {
-          val color1 =
-            if (data.dimension > colorCol) color(data(colorCol)) else color(0d)
+          val dataColorValue =
+            if (data.dimension > colorCol) data(colorCol) else 0d
+
+          val color1 = color(dataColorValue)
           val shape =
             if (data.dimension > shapeCol)
               shapes(data(shapeCol).toInt % shapes.size)
@@ -79,8 +81,10 @@ trait Renderers {
             shape,
             fill = color1
           ).scale(factorX, factorY).translate(vX, vY).transform(b => tx)
-
-          re.render(ctx, shape1)
+          
+          if (!dataColorValue.isNaN) {
+            re.render(ctx, shape1)
+          }
 
           if (valueText) {
             val tb = TextBox(
