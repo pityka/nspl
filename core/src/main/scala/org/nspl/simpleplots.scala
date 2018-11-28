@@ -553,7 +553,11 @@ trait SimplePlots {
     val ymin = minmaxy.min
     val ymax = minmaxy.max
     val zmin = zlim.map(_._1).getOrElse(minmaxz.min)
-    val zmax = zlim.map(_._2).getOrElse(minmaxz.max)
+    val zmax = {
+      val v = zlim.map(_._2).getOrElse(minmaxz.max)
+      if (v == zmin) zmin + 1
+      else v
+    }
 
     group(
       xyplotareaBuild(
