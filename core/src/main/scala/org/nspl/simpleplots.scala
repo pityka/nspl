@@ -543,7 +543,11 @@ trait SimplePlots {
       zlim: Option[(Double, Double)] = None,
       frame: Boolean = true,
       xLabelRotation: Double = -.5 * math.Pi,
-      yLabelRotation: Double = 0d
+      yLabelRotation: Double = 0d,
+      xNumTicks: Int = 4,
+      yNumTicks: Int = 4,
+      xTickSpace: Option[Double] = None,
+      yTickSpace: Option[Double] = None
   ) = {
     val minmaxx = data.columnMinMax(xCol)
     val minmaxy = data.columnMinMax(yCol)
@@ -575,8 +579,8 @@ trait SimplePlots {
           LinearAxisFactory,
           customTicks = xnames,
           fontSize = xFontSize,
-          numTicks = (if (xnames.isEmpty) (xmax - xmin).toInt else 0),
-          tickSpace = (if (!xnames.isEmpty) None else Some(1d)),
+          numTicks = xNumTicks,
+          tickSpace = xTickSpace,
           numMinorTicksFactor = 0,
           tickLength = tickLength,
           labelRotation = xLabelRotation,
@@ -586,8 +590,8 @@ trait SimplePlots {
           LinearAxisFactory,
           customTicks = ynames,
           fontSize = yFontSize,
-          numTicks = (if (ynames.isEmpty) (ymax - ymin).toInt else 0),
-          tickSpace = (if (!ynames.isEmpty) None else Some(1d)),
+          numTicks = yNumTicks,
+          tickSpace = yTickSpace,
           numMinorTicksFactor = 0,
           tickLength = tickLength,
           labelRotation = yLabelRotation,
