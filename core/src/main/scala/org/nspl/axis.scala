@@ -140,13 +140,13 @@ case class AxisSettings(
         ShapeElem(
           Shape.line(Point(view, 0d),
                      Point(view, tickLength * 0.5 * tickAlignment)),
-          stroke = Some(Stroke(1d))
+          stroke = Some(Stroke(lineWidth))
         )
       else
         ShapeElem(
           Shape.line(Point(0d, view),
                      Point(-1 * tickLength * 0.5 * tickAlignment, view)),
-          stroke = Some(Stroke(1d))
+          stroke = Some(Stroke(lineWidth))
         )
     }
 

@@ -396,12 +396,12 @@ trait Plots {
       val v = xAxis.worldToView(w)
       ShapeElem(
         Shape.line(Point(v, yAxisViewMin), Point(v, yAxisViewMax)),
-        stroke = if (xgrid) Some(Stroke(1d)) else None,
+        stroke = if (xgrid) Some(Stroke(lineWidth)) else None,
         strokeColor = Color.gray5
       )
     })
 
-    val frameStroke = if (frame) Some(Stroke(1d)) else None
+    val frameStroke = if (frame) Some(Stroke(lineWidth)) else None
     val frameElem =
       ShapeElem(
         Shape.rectangle(xMinV, yMaxV, xMaxV - xMinV, math.abs(yMinV - yMaxV)),
@@ -416,7 +416,7 @@ trait Plots {
           Point(xAxisViewMin, v),
           Point(xAxisViewMax, v)
         ),
-        stroke = if (ygrid) Some(Stroke(1d)) else None,
+        stroke = if (ygrid) Some(Stroke(lineWidth)) else None,
         strokeColor = Color.gray5
       )
     })

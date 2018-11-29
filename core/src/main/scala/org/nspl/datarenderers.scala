@@ -34,7 +34,7 @@ trait Renderers {
       labelText: Boolean = false,
       labelFontSize: RelFontSize = 0.4 fts,
       labelColor: Color = Color.black,
-      errorBarStroke: Stroke = Stroke(1d),
+      errorBarStroke: Stroke = Stroke(lineWidth),
       transparent: Option[Double] = None
   ) = new DataRenderer {
 
@@ -148,7 +148,7 @@ trait Renderers {
       xCol: Int = 0,
       yCol: Int = 1,
       colorCol: Int = 2,
-      stroke: Stroke = Stroke(1d),
+      stroke: Stroke = Stroke(lineWidth),
       color: Colormap = Color.black
   ) = new DataRenderer {
 
@@ -330,7 +330,7 @@ trait Renderers {
       yCol: Int = 1,
       fillCol: Int = 2,
       horizontal: Boolean = false,
-      stroke: Stroke = Stroke(1d),
+      stroke: Stroke = Stroke(lineWidth),
       strokeColor: Color = Color.black,
       fill: Colormap = Color.white,
       width: Double = 1d,
@@ -484,7 +484,7 @@ trait Renderers {
       x2Col: Int = 6,
       fillCol: Int = 7,
       width: Double = 1,
-      stroke: Stroke = Stroke(1d),
+      stroke: Stroke = Stroke(lineWidth),
       strokeColor: Color = Color.black,
       fill: Colormap = Color.white
   ) = new DataRenderer {
@@ -575,7 +575,7 @@ trait Renderers {
       x2Col: Int = 2,
       y2Col: Int = 3,
       colorCol: Int = 4,
-      stroke: Stroke = Stroke(1d),
+      stroke: Stroke = Stroke(lineWidth),
       color: Colormap = HeatMapColors(0, 1)
   ) = new DataRenderer {
 
