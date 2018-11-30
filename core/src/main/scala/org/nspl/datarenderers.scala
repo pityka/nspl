@@ -330,7 +330,7 @@ trait Renderers {
       yCol: Int = 1,
       fillCol: Int = 2,
       horizontal: Boolean = false,
-      stroke: Stroke = Stroke(lineWidth),
+      stroke: Stroke = Stroke(lineWidth * 0.5),
       strokeColor: Color = Color.black,
       fill: Colormap = Color.white,
       width: Double = 1d,
@@ -484,7 +484,7 @@ trait Renderers {
       x2Col: Int = 6,
       fillCol: Int = 7,
       width: Double = 1,
-      stroke: Stroke = Stroke(lineWidth),
+      stroke: Stroke = Stroke(lineWidth * 0.5),
       strokeColor: Color = Color.black,
       fill: Colormap = Color.white
   ) = new DataRenderer {
