@@ -237,6 +237,12 @@ class SaddlePlotSpec extends FunSpec with Matchers {
         fig3,
         fig4,
         barplot2,
+        group(
+          barplot2,
+          TextBox(
+            "aabcd fafafafabcd fafafafabcd faafafafabcd fafafafabcafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd ffafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafbcd fafafaf"),
+          TableLayout(2)
+        ),
         TableLayout(3)
       )
 
@@ -261,11 +267,12 @@ class SaddlePlotSpec extends FunSpec with Matchers {
       {
         import awtrenderer._
 
-        show(text)
+        // show(text)
 // show(bar1)
         show(gallery)
-        // println(pngToFile(gallery))
-        // println(pdfToFile(gallery))
+        // println(pngToFile(gallery.build))
+        println(pdfToFile(gallery.build))
+        // println(pdfToFile(text))
         // println(renderToFile(gallery, 1000, "image/svg"))
       }
       {
