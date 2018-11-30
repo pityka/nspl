@@ -172,18 +172,27 @@ trait JavaAWTUtil {
       implicit er: Renderer[K, JavaRC]
   ) = {
     import de.erichseifert.vectorgraphics2d._
+    import de.erichseifert.vectorgraphics2d.pdf._
+    import de.erichseifert.vectorgraphics2d.svg._
+    import de.erichseifert.vectorgraphics2d.eps._
     import util._
 
     val aspect = elem.bounds.h / elem.bounds.w
     val height = (width * aspect).toInt
-    val g2d = format match {
-      case "pdf" => new PDFGraphics2D(0, 0, width, height)
-      case "svg" => new SVGGraphics2D(0, 0, width, height)
-      case "eps" => new EPSGraphics2D(0, 0, width, height)
-    }
+    val g2d = new VectorGraphics2D()
+
+    val processor =
+      format match {
+        case "pdf" => new PDFProcessor(false)
+        case "svg" => new SVGProcessor()
+        case "eps" => new EPSProcessor()
+      }
     val bounds = Bounds(0, 0, width, height)
     fitToBounds(elem, bounds).render(JavaRC(g2d))
-    g2d.writeTo(os)
+
+    val document =
+      processor.getDocument(g2d.getCommands, new PageSize(width, height))
+    document.writeTo(os)
 
   }
 

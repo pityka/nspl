@@ -124,7 +124,7 @@ lazy val awt = project
   .settings(
     name := "nspl-awt",
     libraryDependencies ++= Seq(
-      "de.erichseifert.vectorgraphics2d" % "VectorGraphics2D" % "0.11",
+      "de.erichseifert.vectorgraphics2d" % "VectorGraphics2D" % "0.13",
       "org.scalatest" %% "scalatest" % "3.0.0" % "test")
   )
   .dependsOn(core, sharedJvm)

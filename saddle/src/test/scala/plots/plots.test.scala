@@ -267,11 +267,11 @@ class SaddlePlotSpec extends FunSpec with Matchers {
       {
         import awtrenderer._
 
-        // show(text)
+        show(text)
 // show(bar1)
         show(gallery)
         // println(pngToFile(gallery.build))
-        println(pdfToFile(gallery.build))
+        // println(pdfToFile(gallery.build))
         // println(pdfToFile(text))
         // println(renderToFile(gallery, 1000, "image/svg"))
       }
