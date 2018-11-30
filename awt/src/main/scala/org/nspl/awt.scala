@@ -41,7 +41,7 @@ object awtrenderer extends JavaAWTUtil {
   implicit val textRenderer = new AER[TextBox] {
 
     def render(ctx: JavaRC, elem: TextBox): Unit = {
-      if (elem.text.size > 0) {
+      if (!elem.layout.isEmpty) {
         savePaint(ctx.graphics) { graphics =>
           saveStroke(graphics) { graphics2 =>
             // graphics2.draw(elem.bounds)

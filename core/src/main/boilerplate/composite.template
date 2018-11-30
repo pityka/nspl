@@ -4,7 +4,7 @@ trait Tuples1 {
 
   [#case class Elems1[[#T1<:Renderable[T1]#]]([#m1:T1#]) extends Renderable[Elems1[[#T1#]]] {
     def transform(tx:Bounds => AffineTransform) = Elems1([#m1.transform(tx)#])
-    def bounds = outline(List([#m1.bounds#]))
+    def bounds = outline(Iterator([#m1.bounds#]))
   }#
   ]
 

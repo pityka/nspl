@@ -249,7 +249,7 @@ object canvasrenderer {
     def render(ctx: CanvasRC, elem: TextBox): Unit = {
       AffineTransform.identity.applyTo(ctx.graphics)
       // ctx.graphics.strokeRect(elem.bounds.x, elem.bounds.y, elem.bounds.w, elem.bounds.h)
-      if (elem.text.size > 0) {
+      if (!elem.layout.isEmpty) {
         savePaint(ctx.graphics) { graphics =>
           saveStroke(graphics) { graphics2 =>
             graphics2.fillStyle = elem.color.css

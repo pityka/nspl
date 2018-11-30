@@ -5,7 +5,7 @@ case class ElemList[T <: Renderable[T]](members: Seq[T])
   def transform(tx: Bounds => AffineTransform) =
     ElemList(members.map(_.transform(tx)))
   def bounds =
-    if (members.size > 0) outline(members.map(_.bounds))
+    if (members.size > 0) outline(members.iterator.map(_.bounds))
     else Bounds(0, 0, 0, 0)
 }
 
@@ -28,7 +28,7 @@ case class ElemList2[T1 <: Renderable[T1], T2 <: Renderable[T2]](
       case scala.util.Right(x) => scala.util.Right(x.transform(tx))
     }))
   def bounds =
-    if (members.size > 0) outline(members.map(_.merge.bounds))
+    if (members.size > 0) outline(members.iterator.map(_.merge.bounds))
     else Bounds(0, 0, 0, 0)
 }
 object ElemList2 {
@@ -84,25 +84,31 @@ case class ShapeElem(
 }
 
 case class TextBox(
-    text: String,
-    loc: Point = Point(0d, 0d),
-    width: Option[Double] = None,
-    fontSize: RelFontSize = 1 fts,
-    color: Color = Color.black,
-    tx: AffineTransform = AffineTransform.identity
+    layout: TextLayout,
+    loc: Point,
+    color: Color,
+    tx: AffineTransform
 )(implicit fc: FontConfiguration)
     extends Renderable[TextBox] {
-
-  val layout: TextLayout = TextLayout(width, text, fontSize)
 
   val font = fc.font
 
   val txLoc = tx.concat(AffineTransform.translate(loc.x, loc.y))
 
-  def bounds =
-    if (text.isEmpty) Bounds(0, 0, 0, 0)
+  val bounds =
+    if (layout.isEmpty) Bounds(0, 0, 0, 0)
     else txLoc.transform(layout.bounds)
 
   def transform(tx: Bounds => AffineTransform) =
     this.copy(tx = tx(bounds).concat(this.tx))
+}
+
+object TextBox {
+  def apply(text: String,
+            loc: Point = Point(0d, 0d),
+            width: Option[Double] = None,
+            fontSize: RelFontSize = 1 fts,
+            color: Color = Color.black,
+            tx: AffineTransform = AffineTransform.identity): TextBox =
+    TextBox(TextLayout(width, text, fontSize), loc, color, tx)
 }

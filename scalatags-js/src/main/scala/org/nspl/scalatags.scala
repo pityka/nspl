@@ -192,7 +192,7 @@ object scalatagrenderer {
 
   implicit val textRenderer = new SER[TextBox] {
     def render(ctx: ScalaTagRC, elem: TextBox): Unit = {
-      if (elem.text.size > 0) {
+      if (!elem.layout.isEmpty) {
         elem.layout.lines.foreach {
           case (line, lineTx) =>
             val tx = elem.txLoc.concat(lineTx)

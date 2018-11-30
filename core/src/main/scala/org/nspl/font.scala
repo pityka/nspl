@@ -49,7 +49,9 @@ case class GenericFontConfig[F <: Font](font: F)(
   def lineMetrics = measure.lineMetrics(font)
 }
 
-case class TextLayout(lines: Seq[(String, AffineTransform)], bounds: Bounds)
+case class TextLayout(lines: Seq[(String, AffineTransform)], bounds: Bounds) {
+  def isEmpty = lines.isEmpty || lines.forall(_._1.isEmpty)
+}
 
 object TextLayout {
 
@@ -108,7 +110,7 @@ object TextLayout {
           .map(x => x._1.reverse.mkString -> x._2)
           .reverse
 
-        val outerBounds = outline(lines.map(_._2))
+        val outerBounds = outline(lines.iterator.map(_._2))
 
         val transformations = lines.map {
           case (text, bounds) =>

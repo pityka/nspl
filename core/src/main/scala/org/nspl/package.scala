@@ -52,17 +52,37 @@ package object nspl
   }
 
   /* Calculates the total bounds of the members. */
-  def outline(members1: Seq[Bounds]) = {
-    val members = members1.filter(t => t.w * t.h > 0)
-    if (members.isEmpty) Bounds(0, 0, 0, 0)
+  def outline(members1: Iterator[Bounds]) = {
+    var empty = true
+    var minX = Double.MaxValue
+    var minY = Double.MaxValue
+    var maxX = Double.MinValue
+    var maxY = Double.MinValue
+
+    members1.foreach { t =>
+      if (t.w * t.h > 0) {
+        empty = false
+        if (t.x < minX) {
+          minX = t.x
+        }
+        if (t.maxX > maxX) {
+          maxX = t.maxX
+        }
+        if (t.y < minY) {
+          minY = t.y
+        }
+        if (t.maxY > maxY) {
+          maxY = t.maxY
+        }
+      }
+    }
+
+    if (empty) Bounds(0, 0, 0, 0)
     else {
-      val x = members.map(_.x).min
-      val y = members.map(_.y).min
-      val maxX = members.map(_.maxX).max
-      val maxY = members.map(_.maxY).max
-      val w = maxX - x
-      val h = maxY - y
-      Bounds(x, y, w, h)
+
+      val w = maxX - minX
+      val h = maxY - minY
+      Bounds(minX, minY, w, h)
     }
   }
 

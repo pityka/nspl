@@ -176,21 +176,21 @@ case class AxisSettings(
     val majorTicks =
       if (numTicks1 == 0) Nil
       else
-        majorTicks1
+        majorTicks1.iterator
           .filterNot(x => customTicks.map(_._1).contains(x))
           .filterNot(x => disableTicksAt.contains(x))
-          .toList
           .filter(w => w <= axis.max && w >= axis.min)
+          .toList
           .distinct
 
     val minorTicks =
       if (numTicks1 == 0 || numMinorTicksFactor <= 0) Nil
       else
-        minorTicks1
+        minorTicks1.iterator
           .filterNot(x => customTicks.map(_._1).contains(x))
-          .toList
           .filter(w => w <= axis.max && w >= axis.min)
           .filterNot(majorTicks.contains)
+          .toList
           .distinct
 
     val majorTickElems = sequence(

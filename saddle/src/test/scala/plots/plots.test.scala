@@ -272,6 +272,9 @@ class SaddlePlotSpec extends FunSpec with Matchers {
         show(gallery)
         // println(pngToFile(gallery.build))
         println(pdfToFile(gallery.build))
+        while (false) {
+          gallery.build
+        }
         // println(pdfToFile(text))
         // println(renderToFile(gallery, 1000, "image/svg"))
       }

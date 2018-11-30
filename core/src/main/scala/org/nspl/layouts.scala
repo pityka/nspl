@@ -93,7 +93,7 @@ case class TableLayout(columns: Int,
   val vertic = VerticalStack(Center, verticalGap)
   def apply(s: Seq[Bounds]) = {
     val rows = s.grouped(columns).toList.map(i => horiz.apply(i))
-    val outlines = rows.map(s => outline(s))
+    val outlines = rows.map(s => outline(s.iterator))
     val page = vertic.apply(outlines)
     rows zip page flatMap {
       case (row, rowbound) =>
@@ -113,7 +113,7 @@ case class ColumnLayout(numRows: Int,
   val vertic = VerticalStack(Center, verticalGap)
   def apply(s: Seq[Bounds]) = {
     val cols = s.grouped(numRows).toList.map(i => vertic.apply(i))
-    val outlines = cols.map(s => outline(s))
+    val outlines = cols.map(s => outline(s.iterator))
     val page = horiz.apply(outlines)
     cols zip page flatMap {
       case (col, colbound) =>
