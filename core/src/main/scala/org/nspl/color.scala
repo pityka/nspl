@@ -59,6 +59,25 @@ case class HeatMapColors(min: Double = 0.0, max: Double = 1.0)
   def withRange(min: Double, max: Double) = HeatMapColors(min, max)
 }
 
+case class GrayScale(min: Double = 0.0, max: Double = 1.0, white: Int = 255)
+    extends Colormap {
+
+  def apply(value: Double): Color = {
+
+    val v =
+      if (value > max) 1.0
+      else if (value < min) 0.0
+      else (value - min) / (max - min)
+
+    Color(white - (v * white).toInt,
+          white - (v * white).toInt,
+          white - (v * white).toInt,
+          255)
+  }
+
+  def withRange(min: Double, max: Double) = GrayScale(min, max, white)
+}
+
 case class RedBlue(min: Double = 0.0, max: Double = 1.0, mid: Double = 0.5)
     extends Colormap {
 
