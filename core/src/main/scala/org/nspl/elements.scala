@@ -54,11 +54,22 @@ case class ShapeElem(
     shape: Shape,
     fill: Color = Color.black,
     strokeColor: Color = Color.black,
-    stroke: Option[Stroke] = None
+    stroke: Option[Stroke] = None,
+    scaleStroke: Boolean = true
 ) extends Renderable[ShapeElem] {
 
   def transform(tx: Bounds => AffineTransform) =
-    this.copy(shape = shape.transform(tx))
+    this.copy(
+      shape = shape.transform(tx),
+      stroke = stroke.map { stroke =>
+        if (scaleStroke) {
+          val oldWidth = stroke.width
+          val tx1 = tx(bounds)
+          val fx = math.min(tx1.m0, tx1.m4)
+          Stroke(oldWidth * fx)
+        } else stroke
+      }
+    )
 
   def bounds = {
     val b = shape.bounds

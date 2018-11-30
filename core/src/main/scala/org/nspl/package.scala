@@ -199,6 +199,6 @@ package object nspl
       )
     }
 
-  val lineWidth = 0.075 fts
+  val lineWidth = 0.175 fts
 
 }

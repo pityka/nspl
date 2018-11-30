@@ -573,7 +573,7 @@ trait Plots {
         val view = axis.worldToView(world)
         ShapeElem(
           Shape.line(Point(1d, view), Point(height, view)),
-          stroke = Some(Stroke(2d)),
+          stroke = Some(Stroke(lineWidth)),
           strokeColor = color1(world)
         )
       })
