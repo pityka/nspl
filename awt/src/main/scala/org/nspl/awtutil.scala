@@ -183,7 +183,7 @@ trait JavaAWTUtil {
 
     val processor =
       format match {
-        case "pdf" => new PDFProcessor(false)
+        case "pdf" => new PDFProcessor()
         case "svg" => new SVGProcessor()
         case "eps" => new EPSProcessor()
       }

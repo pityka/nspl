@@ -24,7 +24,12 @@ object awtrenderer extends JavaAWTUtil {
             graphics2.fill(elem.shape)
           }
           if (elem.stroke.isDefined && elem.strokeColor.a > 0) {
-            graphics2.setStroke(elem.stroke.get)
+            val stroke = ctx.graphics match {
+              case _: de.erichseifert.vectorgraphics2d.VectorGraphics2D =>
+                elem.stroke.map(s => Stroke(s.width * 0.4)).get
+              case _ => elem.stroke.get
+            }
+            graphics2.setStroke(stroke)
             graphics2.setPaint(elem.strokeColor)
             graphics2.draw(elem.shape)
           }
