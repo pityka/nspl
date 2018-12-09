@@ -91,10 +91,6 @@ trait JavaAWTUtil {
           override def paintComponent(g: Graphics) = {
             super.paintComponent(g)
             val g2 = g.asInstanceOf[Graphics2D]
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                                RenderingHints.VALUE_ANTIALIAS_ON)
-            g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-                                RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
             val bounds = getBounds()
 
             fitToBounds(paintableElem, bounds).render(JavaRC(g2))
