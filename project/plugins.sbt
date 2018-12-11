@@ -1,6 +1,6 @@
 addSbtPlugin("io.spray" % "sbt-boilerplate" % "0.6.1")
 
-addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.24")
+addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.26")
 
 addSbtPlugin("org.scala-native" % "sbt-scala-native" % "0.3.8")
 

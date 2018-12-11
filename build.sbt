@@ -6,7 +6,8 @@ lazy val commonSettings = Seq(
   scalaVersion := "2.12.6",
   crossScalaVersions := Seq("2.11.12", "2.12.6"),
   javacOptions ++= Seq("-Xdoclint:none"),
-  licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
+  licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
+  publishTo := sonatypePublishTo.value
 )
 
 lazy val core = project
@@ -83,7 +84,7 @@ lazy val sharedJs = project
   .settings(commonSettings)
   .settings(
     name := "nspl-shared-js",
-    libraryDependencies += toScalaJSGroupID("org.scala-js") %%% "scalajs-dom" % "0.9.1"
+    libraryDependencies += toScalaJSGroupID("org.scala-js") %%% "scalajs-dom" % "0.9.2"
   )
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(coreJS)
@@ -93,7 +94,7 @@ lazy val canvas = project
   .settings(commonSettings)
   .settings(
     name := "nspl-canvas-js",
-    libraryDependencies += toScalaJSGroupID("org.scala-js") %%% "scalajs-dom" % "0.9.1"
+    libraryDependencies += toScalaJSGroupID("org.scala-js") %%% "scalajs-dom" % "0.9.2"
   )
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(coreJS, sharedJs)
@@ -104,8 +105,8 @@ lazy val scalatagsJs = project
   .settings(
     name := "nspl-scalatags-js",
     libraryDependencies ++= Seq(
-      toScalaJSGroupID("org.scala-js") %%% "scalajs-dom" % "0.9.1",
-      toScalaJSGroupID("com.lihaoyi") %%% "scalatags" % "0.6.5")
+      toScalaJSGroupID("org.scala-js") %%% "scalajs-dom" % "0.9.2",
+      toScalaJSGroupID("com.lihaoyi") %%% "scalatags" % "0.6.7")
   )
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(coreJS, sharedJs)
@@ -134,7 +135,7 @@ lazy val scalatagsJvm = project
   .settings(commonSettings)
   .settings(
     name := "nspl-scalatags-jvm",
-    libraryDependencies += "com.lihaoyi" %% "scalatags" % "0.6.5"
+    libraryDependencies += "com.lihaoyi" %% "scalatags" % "0.6.7"
   )
   .dependsOn(core, sharedJvm)
 
