@@ -353,4 +353,25 @@ trait DataAdaptors extends DataTuples {
     )
     (binning, renderer)
   }
+
+  def hexbin(
+      data: DataSource,
+      size: Double,
+      color: Colormap
+  ) = {
+    val xMinMax = data.columnMinMax(0)
+    val yMinMax = data.columnMinMax(1)
+    val binning = HexBin.apply(data.iterator.map { row =>
+      row(0) -> row(1)
+    }, (xMinMax.min, xMinMax.max), (yMinMax.min, yMinMax.max), size)
+    val renderer = point(
+      colorCol = 2,
+      color = color,
+      size = size * math.sqrt(3),
+      shapes = Vector(Shape.hexagon(1)),
+      pointSizeIsInDataSpaceUnits = true,
+      keepPointShapeAspectRatio = true
+    )
+    (binning, renderer)
+  }
 }
