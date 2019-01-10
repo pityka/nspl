@@ -30,6 +30,7 @@ trait Renderers {
       color: Colormap = DiscreteColors(14),
       shapes: Vector[Shape] = shapeList,
       pointSizeIsInDataSpaceUnits: Boolean = false,
+      keepPointShapeAspectRatio: Boolean = false,
       valueText: Boolean = false,
       labelText: Boolean = false,
       labelFontSize: RelFontSize = 0.4 fts,
@@ -75,8 +76,11 @@ trait Renderers {
             math.abs(yAxis.worldToView(0) - yAxis.worldToView(1))
           } else 1d
 
+          val shapeAspectRatio =
+            if (keepPointShapeAspectRatio) shape.bounds.h / shape.bounds.w
+            else 1d
           val factorX = unitWidthX * size1 / shape.bounds.w
-          val factorY = unitWidthY * size1 / shape.bounds.h
+          val factorY = unitWidthY * size1 * shapeAspectRatio / shape.bounds.h
 
           val vX = xAxis.worldToView(wX)
           val vY = yAxis.worldToView(wY)

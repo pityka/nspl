@@ -70,4 +70,18 @@ object Shape {
   def ellipse(x: Double, y: Double, w: Double, h: Double) = Ellipse(x, y, w, h)
   def circle(r: Double) = Ellipse(-1.0 * r / 2.0, -1.0 * r / 2.0, r, r)
   def square(r: Double) = Rectangle(-1.0 * r / 2.0, -1.0 * r / 2.0, r, r)
+  def hexagon(size: Double) = {
+    val x = 0d
+    val y = 0d
+    val w = math.sqrt(3d) * size
+    val h = 2 * size
+    SimplePath(
+      List(Point(x, y + h * 0.5),
+           Point(x + w * 0.5, y + h * 0.25),
+           Point(x + w * 0.5, y - h * 0.25),
+           Point(x, y - h * 0.5),
+           Point(x - w * 0.5, y - h * 0.25),
+           Point(x - w * 0.5, y + h * 0.25))
+    )
+  }
 }

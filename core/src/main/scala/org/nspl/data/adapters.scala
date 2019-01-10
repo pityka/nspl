@@ -313,4 +313,44 @@ trait DataAdaptors extends DataTuples {
     datasource -> org.nspl
       .lineSegment(stroke = stroke, color = color.withRange(zmin, zmax))
   }
+
+  def hexbin(
+      data: Iterator[(Double, Double)],
+      xlim: (Double, Double),
+      ylim: (Double, Double),
+      size: Double,
+      color: Colormap
+  ) = {
+    val binning = HexBin.apply(data, xlim, ylim, size)
+    val renderer = point(
+      colorCol = 2,
+      color = color,
+      size = size * math.sqrt(3),
+      shapes = Vector(Shape.hexagon(1)),
+      pointSizeIsInDataSpaceUnits = true,
+      keepPointShapeAspectRatio = true
+    )
+    (binning, renderer)
+  }
+
+  def hexbin(
+      data: Seq[(Double, Double)],
+      size: Double,
+      color: Colormap
+  ) = {
+    val xmin = data.map(_._1).min
+    val xmax = data.map(_._1).max
+    val ymin = data.map(_._2).min
+    val ymax = data.map(_._2).max
+    val binning = HexBin.apply(data.iterator, (xmin, xmax), (ymin, ymax), size)
+    val renderer = point(
+      colorCol = 2,
+      color = color,
+      size = size * math.sqrt(3),
+      shapes = Vector(Shape.hexagon(1)),
+      pointSizeIsInDataSpaceUnits = true,
+      keepPointShapeAspectRatio = true
+    )
+    (binning, renderer)
+  }
 }

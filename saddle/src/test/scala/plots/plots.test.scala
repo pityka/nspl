@@ -217,6 +217,29 @@ class SaddlePlotSpec extends FunSpec with Matchers {
                                                            DiscreteColors(60),
                                                          colorCol = 1))()
 
+      val hexbinTest = {
+        val binning =
+          hexbin(rotated.firstCol("PC1").toVec.toSeq zip rotated
+                   .firstCol("PC2")
+                   .toVec
+                   .toSeq,
+                 size = 0.2,
+                 color = GrayScale(0, 30))
+        xyplot(
+          binning,
+          Frame((rotated.col("PC1", "PC2").toColSeq :+ ("spec" -> spec)): _*) -> point(
+            size = 1)
+        )(
+          extraLegend = spec2Num.toSeq.map(
+            x =>
+              x._1 -> PointLegend(shape = Shape.rectangle(0, 0, 1, 1),
+                                  color = DiscreteColors(spec2Num.size)(x._2))),
+          xlab = "PC1",
+          ylab = "PC2",
+          main = "PC1 vs PC2"
+        )
+      }
+
       val gallery = group(
         bar1,
         bar2,
@@ -232,6 +255,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
         density1,
         fig0,
         fig1,
+        hexbinTest,
         densmap,
         fig2,
         fig3,
