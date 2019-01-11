@@ -8,23 +8,25 @@ case class DataTable(rows: Array[Double], numCols: Int)
   def dimension = numCols
 
   def iterator =
-    new Iterator[Row] {
-      var j = 0;
-      var n = rows.length / numCols;
-      def hasNext = j < n
-      def next = {
-        val row = new Row {
-          val off = j;
-          def apply(i: Int) = rows(off * numCols + i)
-          def allColumns = rows.slice(off * numCols, off * numCols + numCols)
-          def dimension = numCols
-          def label = allColumns.mkString("(", ",", ")")
-          override def toString = label
+    if (rows.isEmpty || numCols == 0) Iterator.empty
+    else
+      new Iterator[Row] {
+        var j = 0;
+        var n = rows.length / numCols;
+        def hasNext = j < n
+        def next = {
+          val row = new Row {
+            val off = j;
+            def apply(i: Int) = rows(off * numCols + i)
+            def allColumns = rows.slice(off * numCols, off * numCols + numCols)
+            def dimension = numCols
+            def label = allColumns.mkString("(", ",", ")")
+            override def toString = label
+          }
+          j += 1
+          row;
         }
-        j += 1
-        row;
       }
-    }
 
   def columnMinMax(i: Int) = {
     var j = i;
