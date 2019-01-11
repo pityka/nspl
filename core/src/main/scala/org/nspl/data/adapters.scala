@@ -338,10 +338,10 @@ trait DataAdaptors extends DataTuples {
       size: Double,
       color: Colormap
   ) = {
-    val xmin = data.map(_._1).min
-    val xmax = data.map(_._1).max
-    val ymin = data.map(_._2).min
-    val ymax = data.map(_._2).max
+    val xmin = data.map(_._1).min + size * math.sqrt(3) * 0.5
+    val xmax = data.map(_._1).max - size * math.sqrt(3) * 0.5
+    val ymin = data.map(_._2).min + size
+    val ymax = data.map(_._2).max - size
     val binning = HexBin.apply(data.iterator, (xmin, xmax), (ymin, ymax), size)
     val renderer = point(
       colorCol = 2,
@@ -362,8 +362,12 @@ trait DataAdaptors extends DataTuples {
     val xMinMax = data.columnMinMax(0)
     val yMinMax = data.columnMinMax(1)
     val binning = HexBin.apply(data.iterator.map { row =>
-      row(0) -> row(1)
-    }, (xMinMax.min, xMinMax.max), (yMinMax.min, yMinMax.max), size)
+                                 row(0) -> row(1)
+                               },
+                               (xMinMax.min + size * math.sqrt(3) * 0.5,
+                                xMinMax.max - size * math.sqrt(3) * 0.5),
+                               (yMinMax.min + size, yMinMax.max - size),
+                               size)
     val renderer = point(
       colorCol = 2,
       color = color,
