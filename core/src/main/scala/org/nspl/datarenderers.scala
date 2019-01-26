@@ -1,6 +1,7 @@
 package org.nspl
 
 import data._
+import scala.util.Try
 
 trait DataRenderer {
   def render[R <: RenderingContext](data: Row,
@@ -41,8 +42,8 @@ trait Renderers {
 
     def asLegend = Some(PointLegend(shapes.head, color(0)))
 
-    def xMinMax(ds: DataSource) = Some(ds.columnMinMax(xCol))
-    def yMinMax(ds: DataSource) = Some(ds.columnMinMax(yCol))
+    def xMinMax(ds: DataSource) = Try(ds.columnMinMax(xCol)).toOption
+    def yMinMax(ds: DataSource) = Try(ds.columnMinMax(yCol)).toOption
 
     def render[R <: RenderingContext](data: Row,
                                       xAxis: Axis,
