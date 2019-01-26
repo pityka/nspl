@@ -319,9 +319,10 @@ trait DataAdaptors extends DataTuples {
       xlim: (Double, Double),
       ylim: (Double, Double),
       size: Double,
-      color: Colormap
+      color: Colormap,
+      logCounts: Boolean
   ) = {
-    val binning = HexBin.apply(data, xlim, ylim, size)
+    val binning = HexBin.apply(data, xlim, ylim, size, logCounts)
     val renderer = point(
       colorCol = 2,
       color = color,
@@ -336,13 +337,15 @@ trait DataAdaptors extends DataTuples {
   def hexbin(
       data: Seq[(Double, Double)],
       size: Double,
-      color: Colormap
+      color: Colormap,
+      logCounts: Boolean
   ) = {
     val xmin = data.map(_._1).min + size * math.sqrt(3) * 0.5
     val xmax = data.map(_._1).max - size * math.sqrt(3) * 0.5
     val ymin = data.map(_._2).min + size
     val ymax = data.map(_._2).max - size
-    val binning = HexBin.apply(data.iterator, (xmin, xmax), (ymin, ymax), size)
+    val binning =
+      HexBin.apply(data.iterator, (xmin, xmax), (ymin, ymax), size, logCounts)
     val renderer = point(
       colorCol = 2,
       color = color,
@@ -357,17 +360,21 @@ trait DataAdaptors extends DataTuples {
   def hexbin(
       data: DataSource,
       size: Double,
-      color: Colormap
+      color: Colormap,
+      logCounts: Boolean
   ) = {
     val xMinMax = data.columnMinMax(0)
     val yMinMax = data.columnMinMax(1)
-    val binning = HexBin.apply(data.iterator.map { row =>
-                                 row(0) -> row(1)
-                               },
-                               (xMinMax.min + size * math.sqrt(3) * 0.5,
-                                xMinMax.max - size * math.sqrt(3) * 0.5),
-                               (yMinMax.min + size, yMinMax.max - size),
-                               size)
+    val binning = HexBin.apply(
+      data.iterator.map { row =>
+        row(0) -> row(1)
+      },
+      (xMinMax.min + size * math.sqrt(3) * 0.5,
+       xMinMax.max - size * math.sqrt(3) * 0.5),
+      (yMinMax.min + size, yMinMax.max - size),
+      size,
+      logCounts
+    )
     val renderer = point(
       colorCol = 2,
       color = color,
