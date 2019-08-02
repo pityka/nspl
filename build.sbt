@@ -1,9 +1,9 @@
-scalaVersion := "2.12.6"
+scalaVersion := "2.12.8"
 
 lazy val commonSettings = Seq(
   organization := "io.github.pityka",
   version := "0.0.21-SNAPSHOT",
-  scalaVersion := "2.12.6",
+  scalaVersion := "2.12.8",
   crossScalaVersions := Seq("2.11.12", "2.12.6"),
   javacOptions ++= Seq("-Xdoclint:none"),
   licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
