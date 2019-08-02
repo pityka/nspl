@@ -338,7 +338,7 @@ trait DataAdaptors extends DataTuples {
       data: Seq[(Double, Double)],
       size: Double,
       color: Colormap,
-      logCounts: Boolean
+      logCounts: Boolean = false
   ) = {
     val xmin = data.map(_._1).min + size * math.sqrt(3) * 0.5
     val xmax = data.map(_._1).max - size * math.sqrt(3) * 0.5
