@@ -125,7 +125,7 @@ object scalatagrenderer {
     def render(ctx: ScalaTagRC, elem: ShapeElem): Unit = {
 
       val svgShape = elem.shape match {
-        case Rectangle(x1, y1, w1, h1, tx,_) => {
+        case Rectangle(x1, y1, w1, h1, tx, _) => {
           rect(x := x1.toString,
                y := y1,
                svgAttrs.width := w1,

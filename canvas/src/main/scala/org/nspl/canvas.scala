@@ -117,7 +117,7 @@ object canvasrenderer {
   }
 
   def fill(sh: Shape, ctx: CRC) = sh match {
-    case Rectangle(x, y, w, h, tx) => {
+    case Rectangle(x, y, w, h, tx, _) => {
       tx.applyTo(ctx)
       ctx.fillRect(x, y, w, h)
     }
@@ -152,7 +152,7 @@ object canvasrenderer {
   }
 
   def draw(sh: Shape, ctx: CRC) = sh match {
-    case Rectangle(x, y, w, h, tx) => {
+    case Rectangle(x, y, w, h, tx, _) => {
       tx.applyTo(ctx)
       ctx.strokeRect(x, y, w, h)
     }
