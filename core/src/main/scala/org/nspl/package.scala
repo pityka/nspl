@@ -52,7 +52,7 @@ package object nspl
   }
 
   /* Calculates the total bounds of the members. */
-  def outline(members1: Iterator[Bounds]) = {
+  def outline(members1: Iterator[Bounds], anchor: Option[Point]) = {
     var empty = true
     var minX = Double.MaxValue
     var minY = Double.MaxValue
@@ -77,12 +77,12 @@ package object nspl
       }
     }
 
-    if (empty) Bounds(0, 0, 0, 0)
+    if (empty) Bounds(0, 0, 0, 0, anchor)
     else {
 
       val w = maxX - minX
       val h = maxY - minY
-      Bounds(minX, minY, w, h)
+      Bounds(minX, minY, w, h, anchor)
     }
   }
 
@@ -221,4 +221,36 @@ package object nspl
 
   val lineWidth = 0.175 fts
 
+  val defaultTickFormatter: Seq[Double] => Seq[String] =
+    (worldCoordinates: Seq[Double]) => {
+      if (worldCoordinates.isEmpty) Nil
+      else {
+        val range = worldCoordinates.max - worldCoordinates.min
+        val precision = 4
+        val r = worldCoordinates.map { w =>
+          if ((math.abs(w) <= 1E-4 || math.abs(w) >= 1E4) && w != 0.0) {
+            {
+              val raw = (new java.util.Formatter)
+                .format("%." + precision + "e", new java.lang.Double(w))
+                .toString
+              val sep = raw.split("e")
+              sep(0).reverse
+                .dropWhile(_ == '0')
+                .dropWhile(_ == '.')
+                .reverse + "e" + sep(1)
+            }
+
+          } else
+            (new java.util.Formatter)
+              .format("%." + precision + "f", new java.lang.Double(w))
+              .toString
+              .reverse
+              .dropWhile(_ == '0')
+              .dropWhile(_ == '.')
+              .reverse
+        }
+        r
+      }
+    }
+// if (w == 0.0) "0" else f"$w%.2g")
 }

@@ -16,7 +16,7 @@ trait JavaAWTUtil {
   type AER[T] = Renderer[T, JavaRC]
 
   implicit def shape2awt(s: Shape): java.awt.Shape = s match {
-    case Rectangle(x, y, w, h, tx) =>
+    case Rectangle(x, y, w, h, tx, _) =>
       tx.createTransformedShape(
         new java.awt.geom.Rectangle2D.Double(x, y, w, h))
     case Ellipse(x, y, w, h, tx) =>

@@ -5,7 +5,7 @@ case class ElemList[T <: Renderable[T]](members: Seq[T])
   def transform(tx: Bounds => AffineTransform) =
     ElemList(members.map(_.transform(tx)))
   def bounds =
-    if (members.size > 0) outline(members.iterator.map(_.bounds))
+    if (members.size > 0) outline(members.iterator.map(_.bounds), anchor = None)
     else Bounds(0, 0, 0, 0)
 }
 
@@ -28,7 +28,8 @@ case class ElemList2[T1 <: Renderable[T1], T2 <: Renderable[T2]](
       case scala.util.Right(x) => scala.util.Right(x.transform(tx))
     }))
   def bounds =
-    if (members.size > 0) outline(members.iterator.map(_.merge.bounds))
+    if (members.size > 0)
+      outline(members.iterator.map(_.merge.bounds), anchor = None)
     else Bounds(0, 0, 0, 0)
 }
 object ElemList2 {
@@ -55,7 +56,7 @@ case class ShapeElem(
     fill: Color = Color.black,
     strokeColor: Color = Color.black,
     stroke: Option[Stroke] = None,
-    scaleStroke: Boolean = true
+    scaleStroke: Boolean = true,
 ) extends Renderable[ShapeElem] {
 
   def transform(tx: Bounds => AffineTransform) =
@@ -78,7 +79,8 @@ case class ShapeElem(
         Bounds(b.x - 0.5 * stroke.width,
                b.y - 0.5 * stroke.width,
                b.w + 0.5 * stroke.width,
-               b.h + 0.5 * stroke.width)) getOrElse (b)
+               b.h + 0.5 * stroke.width,
+               b.anchor)) getOrElse b
   }
 
 }

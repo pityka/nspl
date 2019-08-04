@@ -76,16 +76,16 @@ trait Plots {
       mainDistance: RelFontSize = 1.2 fts,
       xlab: String = "",
       xlabFontSize: RelFontSize = 1.0 fts,
-      xlabDistance: RelFontSize = 1.0 fts,
+      xlabDistance: RelFontSize = 0.5 fts,
       xlabAlignment: Alignment = Center,
       ylab: String = "",
       ylabFontSize: RelFontSize = 1.0 fts,
-      ylabDistance: RelFontSize = 1.0 fts,
+      ylabDistance: RelFontSize = 0.5 fts,
       ylabAlignment: Alignment = Center,
-      topPadding: Double = 2d,
+      topPadding: Double = 0.2 fts,
       bottomPadding: Double = 0d,
       leftPadding: Double = 0d,
-      rightPadding: Double = 2d
+      rightPadding: Double = 0.2 fts
   ) =
     Build(
       xyplotarea(
@@ -266,16 +266,16 @@ trait Plots {
       mainDistance: RelFontSize = 1.2 fts,
       xlab: String = "",
       xlabFontSize: RelFontSize = 1.0 fts,
-      xlabDistance: RelFontSize = 1.0 fts,
+      xlabDistance: RelFontSize = 0.5 fts,
       xlabAlignment: Alignment = Center,
       ylab: String = "",
       ylabFontSize: RelFontSize = 1.0 fts,
-      ylabDistance: RelFontSize = 1.0 fts,
+      ylabDistance: RelFontSize = 0.5 fts,
       ylabAlignment: Alignment = Center,
-      topPadding: Double = 2d,
+      topPadding: Double = 0.2 fts,
       bottomPadding: Double = 0d,
       leftPadding: Double = 0d,
-      rightPadding: Double = 2d
+      rightPadding: Double = 0.2 fts
   ) = {
 
     val xMinMax = data.flatMap {
@@ -303,29 +303,60 @@ trait Plots {
     val dataYMin = if (yLimMin.isDefined) 0.0 else yMinMax.map(_.min).min
     val dataYMax = if (yLimMax.isDefined) 0.0 else yMinMax.map(_.max).max
 
-    val xMin = math.min(xLimMin.getOrElse {
-      dataXMin - xAxisMargin * (dataXMax - dataXMin)
-    }, origin.map(_.x).getOrElse(Double.MaxValue))
-
-    val xMax = {
-      val xMax1 = xLimMax.getOrElse {
-        dataXMax + xAxisMargin * (dataXMax - dataXMin)
-      }
-      if (xMax1 == xMin) {
-        xMax1 + 1
-      } else xMax1
+    val xMin = xAxisSetting.axisFactory match {
+      case LinearAxisFactory =>
+        math.min(xLimMin.getOrElse {
+          dataXMin - xAxisMargin * (dataXMax - dataXMin)
+        }, origin.map(_.x).getOrElse(Double.MaxValue))
+      case Log10AxisFactory =>
+        math.min(xLimMin.getOrElse(math.pow(10d, math.log10(dataXMin).floor)),
+                 origin.map(_.x).getOrElse(Double.MaxValue))
     }
 
-    val yMin = math.min(yLimMin.getOrElse {
-      dataYMin - yAxisMargin * (dataYMax - dataYMin)
-    }, origin.map(_.y).getOrElse(Double.MaxValue))
-
-    val yMax = {
-      val yMax1 = yLimMax.getOrElse {
-        dataYMax + yAxisMargin * (dataYMax - dataYMin)
+    val xMax = xAxisSetting.axisFactory match {
+      case LinearAxisFactory => {
+        val xMax1 = xLimMax.getOrElse {
+          dataXMax + xAxisMargin * (dataXMax - dataXMin)
+        }
+        if (xMax1 == xMin) {
+          xMax1 + 1
+        } else xMax1
       }
-      if (yMax1 == yMin) yMax1 + 1
-      else yMax1
+      case Log10AxisFactory =>
+        val xMax1 = xLimMax.getOrElse {
+          math.pow(10d, math.log10(dataYMax).ceil)
+        }
+        if (xMax1 == xMin) {
+          xMax1 + 1
+        } else xMax1
+
+    }
+
+    val yMin = yAxisSetting.axisFactory match {
+      case LinearAxisFactory =>
+        math.min(yLimMin.getOrElse {
+          dataYMin - yAxisMargin * (dataYMax - dataYMin)
+        }, origin.map(_.y).getOrElse(Double.MaxValue))
+      case Log10AxisFactory =>
+        math.min(yLimMin.getOrElse(math.pow(10d, math.log10(dataYMin).floor)),
+                 origin.map(_.y).getOrElse(Double.MaxValue))
+    }
+
+    val yMax = yAxisSetting.axisFactory match {
+      case LinearAxisFactory => {
+        val yMax1 = yLimMax.getOrElse {
+          dataYMax + yAxisMargin * (dataYMax - dataYMin)
+        }
+        if (yMax1 == yMin) yMax1 + 1
+        else yMax1
+      }
+      case Log10AxisFactory =>
+        val yMax1 = yLimMax.getOrElse {
+          math.pow(10d, math.log10(dataYMax).ceil)
+        }
+        if (yMax1 == yMin) {
+          yMax1 + 1
+        } else yMax1
     }
 
     val xAxis =
@@ -404,7 +435,11 @@ trait Plots {
     val frameStroke = if (frame) Some(Stroke(lineWidth)) else None
     val frameElem =
       ShapeElem(
-        Shape.rectangle(xMinV, yMaxV, xMaxV - xMinV, math.abs(yMinV - yMaxV)),
+        Shape.rectangle(xMinV,
+                        yMaxV,
+                        xMaxV - xMinV,
+                        math.abs(yMinV - yMaxV),
+                        anchor = Some(Point(xMinV, yMaxV))),
         stroke = frameStroke,
         fill = Color.transparent
       )

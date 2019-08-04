@@ -110,7 +110,7 @@ object TextLayout {
           .map(x => x._1.reverse.mkString -> x._2)
           .reverse
 
-        val outerBounds = outline(lines.iterator.map(_._2))
+        val outerBounds = outline(lines.iterator.map(_._2), anchor = None)
 
         val transformations = lines.map {
           case (text, bounds) =>

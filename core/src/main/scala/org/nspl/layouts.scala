@@ -5,6 +5,7 @@ case object Right extends Alignment
 case object Center extends Alignment
 case object Left extends Alignment
 case object NoAlignment extends Alignment
+case object Anchor extends Alignment
 
 /* A Layout which does nothing. */
 object FreeLayout extends Layout {
@@ -17,7 +18,11 @@ case class RelativeToFirst(x: Double, y: Double) extends Layout {
     else {
       val first = s.head
       first +: s.drop(1).map { b =>
-        Bounds(first.x + x, first.y + y, b.w, b.h)
+        Bounds(first.x + x,
+               first.y + y,
+               b.w,
+               b.h,
+               b.anchor.map(_.translate(b.x - first.x - x, b.y - first.y - y)))
       }
     }
   }
@@ -35,18 +40,31 @@ case class VerticalStack(alignment: Alignment = Left, gap: Double = 0.0)
       val maxWidthElem = s.maxBy(_.w)
       val maxWidth = maxWidthElem.w
       val minX = maxWidthElem.x
-      def xpos(width: Double, x: Double) = {
+      val referenceAnchorX =
+        if (s.forall(_.anchor.isDefined)) maxWidthElem.anchor.get.x
+        else minX
+      def xpos(width: Double, x: Double, anchor: Option[Point]) = {
         alignment match {
           case Left        => 0.0 + minX
           case Right       => maxWidth - width + minX
           case Center      => 0.5 * maxWidth - 0.5 * width + minX
           case NoAlignment => x
+          case Anchor =>
+            val a = anchor.map(_.x).getOrElse(x)
+            val shift = a - x
+            referenceAnchorX - shift
         }
       }
       s.foldLeft(s.map(_.y).min -> Seq[Bounds]()) {
           case ((y, seq), bounds) =>
+            val xp = xpos(bounds.w, bounds.x, bounds.anchor)
             (y + bounds.h + gap,
-             seq :+ Bounds(xpos(bounds.w, bounds.x), y, bounds.w, bounds.h))
+             seq :+ Bounds(
+               xp,
+               y,
+               bounds.w,
+               bounds.h,
+               bounds.anchor.map(_.translate(xp - bounds.x, y - bounds.y))))
         }
         ._2
     }
@@ -65,18 +83,30 @@ case class HorizontalStack(alignment: Alignment, gap: Double = 0.0)
       val maxHeightElem = s.maxBy(_.h)
       val maxHeight = maxHeightElem.h
       val minY = maxHeightElem.y
-      def ypos(height: Double, y: Double) = {
+      val referenceAnchorY =
+        if (s.forall(_.anchor.isDefined)) maxHeightElem.anchor.get.y else minY
+      def ypos(height: Double, y: Double, anchor: Option[Point]) = {
         alignment match {
           case Left        => 0.0 + minY
           case Right       => maxHeight - height + minY
           case Center      => 0.5 * maxHeight - 0.5 * height + minY
           case NoAlignment => y
+          case Anchor =>
+            val a = anchor.map(_.y).getOrElse(y)
+            val shift = a - y
+            referenceAnchorY - shift
         }
       }
       s.foldLeft(s.map(_.x).min -> List[Bounds]()) {
           case ((x, seq), elem) =>
+            val yp = ypos(elem.h, elem.y, elem.anchor)
             (x + elem.w + gap,
-             Bounds(x, ypos(elem.h, elem.y), elem.w, elem.h) :: seq)
+             Bounds(
+               x,
+               yp,
+               elem.w,
+               elem.h,
+               elem.anchor.map(_.translate(x - elem.x, yp - elem.y))) :: seq)
         }
         ._2
         .reverse
@@ -84,43 +114,112 @@ case class HorizontalStack(alignment: Alignment, gap: Double = 0.0)
   }
 }
 
-/* A Layout which puts elements into rows.*/
-case class TableLayout(columns: Int,
-                       horizontalGap: Double = 10d,
-                       verticalGap: Double = 10d)
-    extends Layout {
-  val horiz = HorizontalStack(Left, horizontalGap)
-  val vertic = VerticalStack(Center, verticalGap)
-  def apply(s: Seq[Bounds]) = {
-    val rows = s.grouped(columns).toList.map(i => horiz.apply(i))
-    val outlines = rows.map(s => outline(s.iterator))
-    val page = vertic.apply(outlines)
-    rows zip page flatMap {
-      case (row, rowbound) =>
+object LayoutHelper {
+
+  def transpose[A](a: Seq[Seq[A]]) = {
+    if (a.isEmpty) a
+    else {
+      val max = a.map(_.size).max
+      val uniform =
+        a.map { aa =>
+          aa ++ List.fill(max - aa.size)(null.asInstanceOf[A])
+        }
+      uniform.transpose.map(_.filterNot(_ == null))
+    }
+  }
+
+  def alignRowsToAnchors(table: Seq[Seq[Bounds]],
+                         horizontalGap: Double,
+                         verticalGap: Double) = {
+
+    val horiz = HorizontalStack(Anchor, horizontalGap)
+    val vertic = VerticalStack(Anchor, verticalGap)
+    val rows = table.map(i => horiz.apply(i))
+    val rowOutlines = rows.map(s => outline(s.iterator, anchor = None))
+    val rowOutlines_moved = vertic.apply(rowOutlines)
+    val yCoordinates = rows zip rowOutlines_moved zip rowOutlines flatMap {
+      case ((row, rowbound), rowOutline) =>
+        val diff = rowbound.y - rowOutline.y
         row.map { r =>
-          Bounds(r.x, rowbound.y, r.w, r.h)
+          r.y + diff
         }
     }
+
+    val cols = transpose(table).map(i => vertic.apply(i))
+    val columnOutlines = cols.map(s => outline(s.iterator, anchor = None))
+    val columnOutlines_moved = horiz.apply(columnOutlines)
+    val xCoordinates = cols zip columnOutlines_moved zip columnOutlines map {
+      case ((col, colbound), colOutline) =>
+        val diff = colbound.x - colOutline.x
+        col.map { c =>
+          c.x + diff
+        }
+    }
+    (transpose(xCoordinates).flatten zip yCoordinates zip table.flatten).map {
+      case ((c, r), b) =>
+        Bounds(c, r, b.w, b.h, b.anchor)
+    }
+  }
+  def alignColumnsToAnchors(table: Seq[Seq[Bounds]],
+                            horizontalGap: Double,
+                            verticalGap: Double) = {
+
+    val horiz = HorizontalStack(Anchor, horizontalGap)
+    val vertic = VerticalStack(Anchor, verticalGap)
+    val cols = table.map(i => vertic.apply(i))
+    val colOutlines = cols.map(s => outline(s.iterator, anchor = None))
+    val colOutlines_moved = horiz.apply(colOutlines)
+    val xCoordinates = cols zip colOutlines_moved zip colOutlines flatMap {
+      case ((col, colbound), colOutline) =>
+        val diff = colbound.x - colOutline.x
+        col.map { c =>
+          c.x + diff
+        }
+    }
+
+    val rows = transpose(table).map(i => horiz.apply(i))
+    val rowOutlines = rows.map(s => outline(s.iterator, anchor = None))
+    val rowOutlines_moved = vertic.apply(rowOutlines)
+    val yCoordinates = rows zip rowOutlines_moved zip rowOutlines map {
+      case ((row, rowbound), rowOutline) =>
+        val diff = rowbound.y - rowOutline.y
+        row.map { r =>
+          r.y + diff
+        }
+    }
+    (transpose(yCoordinates).flatten zip xCoordinates zip table.flatten).map {
+      case ((r, c), b) =>
+        Bounds(c, r, b.w, b.h, b.anchor)
+    }
+  }
+}
+
+/* A Layout which puts elements into rows.*/
+case class TableLayout(columns: Int,
+                       horizontalGap: Double = 2.5 fts,
+                       verticalGap: Double = 2.5 fts)
+    extends Layout {
+
+  def apply(s: Seq[Bounds]) = {
+    if (s.isEmpty) s
+    else
+      LayoutHelper.alignRowsToAnchors(s.grouped(columns).toList,
+                                      horizontalGap,
+                                      verticalGap)
   }
 }
 
 /* A Layout which puts elements into columns.*/
 case class ColumnLayout(numRows: Int,
-                        horizontalGap: Double = 10d,
-                        verticalGap: Double = 10d)
+                        horizontalGap: Double = 2.5 fts,
+                        verticalGap: Double = 2.5 fts)
     extends Layout {
-  val horiz = HorizontalStack(Left, horizontalGap)
-  val vertic = VerticalStack(Center, verticalGap)
   def apply(s: Seq[Bounds]) = {
-    val cols = s.grouped(numRows).toList.map(i => vertic.apply(i))
-    val outlines = cols.map(s => outline(s.iterator))
-    val page = horiz.apply(outlines)
-    cols zip page flatMap {
-      case (col, colbound) =>
-        col.map { r =>
-          Bounds(colbound.x, r.y, r.w, r.h)
-        }
-    }
+    if (s.isEmpty) s
+    else
+      LayoutHelper.alignColumnsToAnchors(s.grouped(numRows).toList,
+                                         horizontalGap,
+                                         verticalGap)
   }
 }
 
@@ -134,6 +233,7 @@ object AlignTo {
       case Right       => horizontalRight(move, reference)
       case Center      => horizontalCenter(move, reference)
       case NoAlignment => move
+      case Anchor      => horizontalAnchor(move, reference)
     }
 
   def vertical[T <: Renderable[T]](move: T,
@@ -143,6 +243,7 @@ object AlignTo {
     case Right       => verticalRight(move, reference)
     case Center      => verticalCenter(move, reference)
     case NoAlignment => move
+    case Anchor      => verticalAnchor(move, reference)
   }
 
   def horizontalRight[T <: Renderable[T]](move: T, reference: Bounds): T =
@@ -161,6 +262,20 @@ object AlignTo {
                        move.bounds.y,
                        move.bounds.w,
                        move.bounds.h))
+  def horizontalAnchor[T <: Renderable[T]](move: T, reference: Bounds): T =
+    fitToBounds(
+      move,
+      Bounds(
+        reference.anchor
+          .map(_.x)
+          .getOrElse(reference.x) + (move.bounds.x - move.bounds.anchor
+          .map(_.x)
+          .getOrElse(move.bounds.x)),
+        move.bounds.y,
+        move.bounds.w,
+        move.bounds.h
+      )
+    )
 
   def verticalRight[T <: Renderable[T]](move: T, reference: Bounds): T =
     fitToBounds(move,
@@ -168,6 +283,21 @@ object AlignTo {
                        reference.y + reference.h - move.bounds.h,
                        move.bounds.w,
                        move.bounds.h))
+
+  def verticalAnchor[T <: Renderable[T]](move: T, reference: Bounds): T =
+    fitToBounds(
+      move,
+      Bounds(
+        move.bounds.x,
+        reference.anchor
+          .map(_.y)
+          .getOrElse(reference.y) + (move.bounds.y - move.bounds.anchor
+          .map(_.y)
+          .getOrElse(move.bounds.y)),
+        move.bounds.w,
+        move.bounds.h
+      )
+    )
 
   def verticalGapAfterReference[T <: Renderable[T]](move: T,
                                                     reference: Bounds,

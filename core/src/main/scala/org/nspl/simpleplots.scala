@@ -107,8 +107,10 @@ trait SimplePlots {
       origin: Option[(Double, Double)] = None,
       xCustomGrid: Boolean = false,
       yCustomGrid: Boolean = false,
-      legendLayout: Layout =
-        ColumnLayout(numRows = 10, horizontalGap = 1d, verticalGap = 1d),
+      legendLayout: Layout = ColumnLayout(numRows = 10,
+                                          horizontalGap = 0.75 fts,
+                                          verticalGap = 0.4 fts),
+      legendDistance: Double = 0.5 fts,
       xTickLength: RelFontSize = 0.4 fts,
       yTickLength: RelFontSize = 0.4 fts,
       xLineWidthFraction: Double = 1d,
@@ -118,13 +120,13 @@ trait SimplePlots {
       topPadding: Double = 0d,
       bottomPadding: Double = 0d,
       leftPadding: Double = 0d,
-      rightPadding: Double = 10d,
-      xLabDistance: RelFontSize = 1.0 fts,
-      yLabDistance: RelFontSize = 1.0 fts,
-      mainLabDistance: RelFontSize = 1.0 fts
+      rightPadding: Double = 0d,
+      xLabDistance: RelFontSize = 0.5 fts,
+      yLabDistance: RelFontSize = 0.5 fts,
+      mainLabDistance: RelFontSize = 0.75 fts
   ) = {
-    val xFac = LinearAxisFactory //if (xlog) Log10AxisFactory else LinearAxisFactory
-    val yFac = LinearAxisFactory //if (ylog) Log10AxisFactory else LinearAxisFactory
+    val xFac = if (xlog) Log10AxisFactory else LinearAxisFactory
+    val yFac = if (ylog) Log10AxisFactory else LinearAxisFactory
 
     val originX = if (xlog) 1.0 else 0.0
     val originY = if (ylog) 1.0 else 0.0
@@ -208,7 +210,7 @@ trait SimplePlots {
     group(
       plotArea,
       legend1,
-      HorizontalStack(Center, 5d)
+      HorizontalStack(Anchor, legendDistance)
     )
   }
 
@@ -240,9 +242,9 @@ trait SimplePlots {
       frame: Boolean = true,
       xLabelRotation: Double = 0d,
       yLabelRotation: Double = 0d,
-      xLabDistance: RelFontSize = 1.0 fts,
-      yLabDistance: RelFontSize = 1.0 fts,
-      mainLabDistance: RelFontSize = 1.0 fts
+      xLabDistance: RelFontSize = 0.5 fts,
+      yLabDistance: RelFontSize = 0.5 fts,
+      mainLabDistance: RelFontSize = 0.75 fts
   ) = {
     {
       val data1: Seq[Seq[VectorRow]] = data.iterator

@@ -1,15 +1,15 @@
 package org.nspl
 
 trait Axis {
-  def viewToWorld(v: Double): Double
   def worldToView(v: Double): Double
   def min: Double
   def max: Double
   def width = math.abs(worldToView(max) - worldToView(min))
   def horizontal: Boolean
+  def log: Boolean
 }
 
-trait AxisFactory {
+sealed trait AxisFactory {
   def make(min: Double, max: Double, width: Double, horizontal: Boolean): Axis
 }
 
@@ -17,39 +17,49 @@ object LinearAxisFactory extends AxisFactory {
   def make(min1: Double, max1: Double, width1: Double, horizontal: Boolean) =
     if (horizontal)
       new Axis {
-        def viewToWorld(v: Double) = v / width1 * (max1 - min1)
         def worldToView(v: Double) = (v - min1) / (max1 - min1) * width1
         def min = if (min1 == max1) max1 - 1d else min1
         def max = if (min1 == max1) max1 + 1d else max1
         def horizontal = true
+        def log = false
       } else
       new Axis {
-        def viewToWorld(v: Double) = (width1 - v) / width1 * (max1 - min1)
         def worldToView(v: Double) =
           width1 - (v - min1) / (max1 - min1) * width1
         def min = if (min1 == max1) max1 - 1d else min1
         def max = if (min1 == max1) max1 + 1d else max1
         def horizontal = false
+        def log = false
       }
 }
 
-// object Log10AxisFactory extends AxisFactory {
-//   def make(min1: Double, max1: Double, width1: Double) = new Axis {
-//     val min2 = math.log10(min1)
-//     val max2 = math.log10(max1)
-//     def viewToWorld(v: Double) = {
-//       val lin = v / width1 * (max2 - min2)
-//       math.pow(10d, lin)
-//
-//     }
-//     def worldToView(v1: Double) = {
-//       val v = math.log10(v1)
-//       (v - min2) / (max2 - min2) * width1
-//     }
-//     def min = min1
-//     def max = max1
-//   }
-// }
+object Log10AxisFactory extends AxisFactory {
+  def make(min1: Double, max1: Double, width1: Double, horizontal: Boolean) = {
+    val lMin1 = math.log10(min1)
+    val lMax1 = math.log10(max1)
+    if (horizontal)
+      new Axis {
+        def worldToView(v: Double) = {
+          if (v <= 0d) throw new RuntimeException("<0")
+          (math.log10(v) - lMin1) / (lMax1 - lMin1) * width1
+        }
+        def min = if (min1 == max1) max1 - 1d else min1
+        def max = if (min1 == max1) max1 + 1d else max1
+        def horizontal = true
+        def log = true
+      } else
+      new Axis {
+        def worldToView(v: Double) = {
+          if (v <= 0d) throw new RuntimeException("<0")
+          width1 - (math.log10(v) - lMin1) / (lMax1 - lMin1) * width1
+        }
+        def min = if (min1 == max1) max1 - 1d else min1
+        def max = if (min1 == max1) max1 + 1d else max1
+        def horizontal = false
+        def log = true
+      }
+  }
+}
 
 case class AxisSettings(
     axisFactory: AxisFactory,
@@ -58,15 +68,16 @@ case class AxisSettings(
     baseTick: Option[Double] = None,
     numMinorTicksFactor: Int = 5,
     tickLength: RelFontSize = .35 fts,
-    tickLabelDistance: RelFontSize = 1 fts,
+    tickLabelDistance: RelFontSize = 0.5 fts,
     customTicks: Seq[(Double, String)] = Nil,
     labelRotation: Double = 0,
     width: RelFontSize = 20 fts,
     fontSize: RelFontSize = 1 fts,
     tickAlignment: Double = -1.0,
-    lineWidth: Double = 1.0,
+    lineWidth: Double = lineWidth,
     lineLengthFraction: Double = 1d,
-    lineStartFraction: Double = 0.0
+    lineStartFraction: Double = 0.0,
+    tickFormatter: Seq[Double] => Seq[String] = defaultTickFormatter
 )(implicit fc: FontConfiguration) {
 
   def renderable(
@@ -170,7 +181,32 @@ case class AxisSettings(
         .filter(i => i._1 >= axis.min && i._1 <= axis.max)
         .map(i => makeTick(i._1, i._2))
 
-    val (majorTicks1, minorTicks1) =
+    val (majorTicks1, minorTicks1) = if (axis.log) {
+      val lmaj1 =
+        (math
+          .log10(axis.min)
+          .ceil
+          .toInt until math
+          .log10(axis.max)
+          .toInt)
+          .map(_.toDouble)
+          .filter { i =>
+            val e = math.pow(10d, i)
+            e >= axis.min - 1E-3 && e <= axis.max + 1E-3
+          }
+      val majorTicksExp = axis.min +: (lmaj1.map(i => math.pow(10d, i)) :+ axis.max)
+      val minorTicksExp = majorTicksExp
+        .sliding(2)
+        .flatMap { group =>
+          val m1 = group(0)
+          val m2 = group(1)
+          val space = (m2 - m1) / numMinorTicksFactor
+          (0 to numMinorTicksFactor.toInt).map(i => m1 + i * space)
+        }
+        .filterNot(majorTicksExp.contains)
+        .toList
+      (majorTicksExp, minorTicksExp)
+    } else
       Ticks.heckbert(axis.min, axis.max, numTicks1.toInt, numMinorTicksFactor)
 
     val majorTicks =
@@ -193,9 +229,11 @@ case class AxisSettings(
           .toList
           .distinct
 
+    val majorTickLabels = tickFormatter(majorTicks)
+
     val majorTickElems = sequence(
-      majorTicks
-        .map(w => makeTick(w, if (w == 0.0) "0" else f"$w%.2g")) ++ extra
+      (majorTicks zip majorTickLabels)
+        .map { case (world, text) => makeTick(world, text) } ++ extra
     )
 
     val minorTickElems = sequence(minorTicks.map(makeMinorTick))

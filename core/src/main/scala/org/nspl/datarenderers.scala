@@ -27,7 +27,7 @@ trait Renderers {
       shapeCol: Int = 4,
       errorTopCol: Int = 5,
       errorBottomCol: Int = 6,
-      size: Double = 3.0,
+      size: Double = 0.4 fts,
       color: Colormap = DiscreteColors(14),
       shapes: Vector[Shape] = shapeList,
       pointSizeIsInDataSpaceUnits: Boolean = false,
@@ -153,7 +153,7 @@ trait Renderers {
       xCol: Int = 0,
       yCol: Int = 1,
       colorCol: Int = 2,
-      stroke: Stroke = Stroke(lineWidth),
+      stroke: Stroke = Stroke(lineWidth * 2),
       color: Colormap = Color.black
   ) = new DataRenderer {
 
@@ -335,10 +335,10 @@ trait Renderers {
       yCol: Int = 1,
       fillCol: Int = 2,
       horizontal: Boolean = false,
-      stroke: Stroke = Stroke(lineWidth * 0.5),
+      stroke: Stroke = Stroke(lineWidth),
       strokeColor: Color = Color.black,
       fill: Colormap = Color.white,
-      width: Double = 1d,
+      width: Double = 1,
       yCol2: Option[Int] = None,
       widthCol: Int = 3
   ) = new DataRenderer {
@@ -489,7 +489,7 @@ trait Renderers {
       x2Col: Int = 6,
       fillCol: Int = 7,
       width: Double = 1,
-      stroke: Stroke = Stroke(lineWidth * 0.5),
+      stroke: Stroke = Stroke(lineWidth),
       strokeColor: Color = Color.black,
       fill: Colormap = Color.white
   ) = new DataRenderer {

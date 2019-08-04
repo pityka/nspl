@@ -2,9 +2,12 @@ package org.nspl
 
 trait Tuples1 {
 
-  [#case class Elems1[[#T1<:Renderable[T1]#]]([#m1:T1#]) extends Renderable[Elems1[[#T1#]]] {
-    def transform(tx:Bounds => AffineTransform) = Elems1([#m1.transform(tx)#])
-    def bounds = outline(Iterator([#m1.bounds#]))
+  [#case class Elems1[[#T1<:Renderable[T1]#]]([#m1:T1#], anchor: Option[Point] = None) extends Renderable[Elems1[[#T1#]]] {
+    private def effectiveAnchor = anchor.orElse{ 
+      Iterator([#m1.bounds#]).map(_.anchor).find(_.isDefined).map(_.get)
+    }
+    def transform(tx:Bounds => AffineTransform) = Elems1([#m1.transform(tx)#], anchor.map(_.transform(tx)))
+    def bounds = outline(Iterator([#m1.bounds#]), effectiveAnchor)
   }#
   ]
 

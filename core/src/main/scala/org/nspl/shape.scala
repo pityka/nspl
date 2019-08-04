@@ -10,9 +10,10 @@ case class Rectangle(
     y: Double,
     w: Double,
     h: Double,
-    tx: AffineTransform = AffineTransform.identity
+    tx: AffineTransform = AffineTransform.identity,
+    anchor: Option[Point] = None
 ) extends Shape {
-  def bounds = tx.transform(Bounds(x, y, w, h))
+  def bounds = tx.transform(Bounds(x, y, w, h, anchor))
   def transform(tx: Bounds => AffineTransform) =
     this.copy(tx = tx(bounds).concat(this.tx))
 }
@@ -65,8 +66,12 @@ case class SimplePath(ps: Seq[Point]) extends Shape {
 
 object Shape {
   def line(p1: Point, p2: Point) = Line(p1.x, p1.y, p2.x, p2.y)
-  def rectangle(x: Double, y: Double, w: Double, h: Double) =
-    Rectangle(x, y, w, h)
+  def rectangle(x: Double,
+                y: Double,
+                w: Double,
+                h: Double,
+                anchor: Option[Point] = None) =
+    Rectangle(x, y, w, h, anchor = anchor)
   def ellipse(x: Double, y: Double, w: Double, h: Double) = Ellipse(x, y, w, h)
   def circle(r: Double) = Ellipse(-1.0 * r / 2.0, -1.0 * r / 2.0, r, r)
   def square(r: Double) = Rectangle(-1.0 * r / 2.0, -1.0 * r / 2.0, r, r)

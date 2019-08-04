@@ -1,6 +1,10 @@
 package org.nspl
 
-case class Bounds(x: Double, y: Double, w: Double, h: Double) {
+case class Bounds(x: Double,
+                  y: Double,
+                  w: Double,
+                  h: Double,
+                  anchor: Option[Point] = None) {
   def maxX = x + w
   def maxY = y + h
   def centerX = x + w * 0.5
@@ -19,6 +23,10 @@ case object CapRound extends Cap
 case class Stroke(width: Double, cap: Cap = CapSquare)
 
 case class Point(x: Double, y: Double) {
+  def translate(dx: Double, dy: Double) = Point(x + dx, y + dy)
+  def transform(tx: AffineTransform) = tx.transform(this)
+  def transform(tx: Bounds => AffineTransform) =
+    tx(Bounds(x, y, 0, 0)).transform(this)
   def distance(p: Point) = {
     val a = math.abs(x - p.x)
     val b = math.abs(y - p.y)

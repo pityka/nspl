@@ -45,6 +45,7 @@ case class AffineTransform(m0: Double,
     val topRight = transform(Point(b.x + b.w, b.y))
     val bottomRight = transform(Point(b.x + b.w, b.y + b.h))
     val bottomLeft = transform(Point(b.x, b.y + b.h))
+    val transformedAnchor = b.anchor.map(p => transform(p))
 
     val pointsX = Array(topLeft.x, topRight.x, bottomRight.x, bottomLeft.x)
     val pointsY = Array(topLeft.y, topRight.y, bottomRight.y, bottomLeft.y)
@@ -69,7 +70,7 @@ case class AffineTransform(m0: Double,
 
     val width = math.abs(nx2 - nx)
     val height = math.abs(ny2 - ny)
-    Bounds(nx, ny, width, height)
+    Bounds(nx, ny, width, height, transformedAnchor)
   }
 
   def concat(tx: AffineTransform) = AffineTransform(

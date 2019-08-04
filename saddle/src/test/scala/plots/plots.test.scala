@@ -216,6 +216,52 @@ class SaddlePlotSpec extends FunSpec with Matchers {
         indexed(1 to 60 map (_.toDouble) toSeq) -> point(color =
                                                            DiscreteColors(60),
                                                          colorCol = 1))()
+      val ticktest = xyplot(
+        indexed(Seq(0.001, 0.01, 0.0, -1.2, 1.1, 100.0, 100.001, 100.1, 1000d,
+          10000d)) -> point())()
+
+      val ticktest2 =
+        xyplot(indexed(Seq(100.0, 100.001, 100.1, 100.101234)) -> point())()
+      val ticktest3 = xyplot(
+        indexed(Seq(1E-5, 0.00003, 0.00002, 0.00001, 2.313E-6)) -> point())()
+      val ticktest4 = xyplot(indexed(
+        Seq(1E-5, 0.00003, 0.00002, 0.00001, 2.313E-6, 1E6)) -> point())()
+      val ticktest5 = xyplot(indexed(Seq(1E6, 1.02E6, 2.567E7)) -> point())()
+      val ticktest6 =
+        xyplot(indexed(Seq(100.0, 100.001, 100.0015, 100.0016)) -> point())()
+
+      val logaxistest =
+        xyplot(
+          Seq(1E-6 -> 1E-6,
+              1E-5 -> 1E-5,
+              1E-4 -> 1E-4,
+              1E-3 -> 1E-3,
+              1E-2 -> 1E-2,
+              1E-1 -> 1E-1,
+              1d -> 1d,
+              10d -> 10d,
+              1E2 -> 100d,
+              1E3 -> 1000d,
+              1E4 -> 10000d,
+              1E5 -> 1E5,
+              1E6 -> 1E6,
+              1E7 -> 1E7) -> point())(ylog = true, xlog = true)
+      val logaxistest2 =
+        xyplot(
+          Seq(1.123E-6 -> 1E-6, 1E-5 -> 1E-5, 1E-4 -> 3.132E-4) -> point())(
+          ylog = true,
+          xlog = true)
+      val logaxistest3 =
+        xyplot(
+          Seq(0.92 -> 1d, 10d -> 10d, 1E2 -> 100d, 1E3 -> 1324d) -> point())(
+          ylog = true,
+          xlog = true)
+      val logaxistest4 =
+        xyplot(
+          Seq(0.92 -> 1d, 10d -> 10d, 1E2 -> 100d, 1E3 -> 1324d) -> point())(
+          ylog = true,
+          xlog = true,
+          xlim = Some(0.5 -> 1500d))
 
       val hexbinTest = {
         val binning =
@@ -241,6 +287,19 @@ class SaddlePlotSpec extends FunSpec with Matchers {
       }
 
       val gallery = group(
+        group(
+          ticktest,
+          ticktest2,
+          ticktest3,
+          ticktest4,
+          ticktest5,
+          ticktest6,
+          logaxistest,
+          logaxistest2,
+          logaxistest3,
+          logaxistest4,
+          TableLayout(3)
+        ),
         bar1,
         bar2,
         boxpl2,
@@ -267,7 +326,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
             "aabcd fafafafabcd fafafafabcd faafafafabcd fafafafabcafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd ffafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafbcd fafafaf"),
           TableLayout(2)
         ),
-        TableLayout(3)
+        ColumnLayout(4)
       )
 
       val text = fitToWidth(
@@ -291,9 +350,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
       {
         import awtrenderer._
 
-        show(text)
-// show(bar1)
-        show(gallery)
+        // show(gallery)
         // println(pngToFile(gallery.build))
         println(pdfToFile(gallery.build))
         while (false) {
