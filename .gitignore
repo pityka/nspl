@@ -1,7 +1,6 @@
 target
 targetJS
 targetNative
-data
 *png
 *log
 .bloop
