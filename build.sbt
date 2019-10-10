@@ -2,12 +2,13 @@ scalaVersion := "2.12.8"
 
 lazy val commonSettings = Seq(
   organization := "io.github.pityka",
-  version := "0.0.21",
+  version := "0.0.22-SNAPSHOT",
   scalaVersion := "2.12.8",
   crossScalaVersions := Seq("2.11.12", "2.12.6"),
   javacOptions ++= Seq("-Xdoclint:none"),
   licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
-  publishTo := sonatypePublishTo.value
+  publishTo := sonatypePublishTo.value,
+  resolvers += "bintray/denisrosset" at "https://dl.bintray.com/denisrosset/maven"
 )
 
 lazy val core = project
@@ -106,7 +107,8 @@ lazy val scalatagsJs = project
     name := "nspl-scalatags-js",
     libraryDependencies ++= Seq(
       toScalaJSGroupID("org.scala-js") %%% "scalajs-dom" % "0.9.2",
-      toScalaJSGroupID("com.lihaoyi") %%% "scalatags" % "0.6.7")
+      toScalaJSGroupID("com.lihaoyi") %%% "scalatags" % "0.6.7"
+    )
   )
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(coreJS, sharedJs)
@@ -126,7 +128,8 @@ lazy val awt = project
     name := "nspl-awt",
     libraryDependencies ++= Seq(
       "de.erichseifert.vectorgraphics2d" % "VectorGraphics2D" % "0.13",
-      "org.scalatest" %% "scalatest" % "3.0.0" % "test")
+      "org.scalatest" %% "scalatest" % "3.0.0" % "test"
+    )
   )
   .dependsOn(core, sharedJvm)
 
@@ -145,8 +148,7 @@ lazy val saddle = (project in file("saddle"))
     crossScalaVersions := Seq("2.11.12"),
     name := "nspl-saddle",
     libraryDependencies ++= Seq(
-      "io.github.pityka" %% "saddle-core-fork" % "1.3.4-fork1" exclude ("com.googlecode.efficient-java-matrix-library", "ejml"),
-      "com.googlecode.efficient-java-matrix-library" % "ejml" % "0.19" % "test",
+      "io.github.pityka" %% "saddle-core" % "1.3.4+75-a2882183-SNAPSHOT",
       "org.scalatest" %% "scalatest" % "3.0.0" % "test"
     )
   )
@@ -156,15 +158,17 @@ publishArtifact := false
 
 lazy val root = (project in file("."))
   .settings(commonSettings: _*)
-  .aggregate(saddle,
-             scalatagsJvm,
-             awt,
-             scalatagsJs,
-             canvas,
-             sharedJs,
-             sharedJvm,
-             core,
-             coreJS)
+  .aggregate(
+    saddle,
+    scalatagsJvm,
+    awt,
+    scalatagsJs,
+    canvas,
+    sharedJs,
+    sharedJvm,
+    core,
+    coreJS
+  )
 
 pomExtra in Global := {
   <url>https://pityka.github.io/nspl/</url>

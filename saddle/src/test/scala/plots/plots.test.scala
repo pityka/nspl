@@ -15,18 +15,13 @@ class SaddlePlotSpec extends FunSpec with Matchers {
 
   def readFrameFromClasspath(s: String) =
     CsvParser
-      .parse(new CsvSource {
-        val is = scala.io.Source
+      .parse(
+        scala.io.Source
           .fromInputStream(
             getClass.getResourceAsStream(s)
           )
           .getLines
-        def readLine = {
-          if (is.hasNext) is.next
-          else null
-        }
-
-      })
+      )
       .withColIndex(0)
 
   describe("plots") {
@@ -35,7 +30,8 @@ class SaddlePlotSpec extends FunSpec with Matchers {
       val evec =
         readFrameFromClasspath("/evec.csv").mapValues(CsvParser.parseDouble _)
       val rotated = readFrameFromClasspath("/rotated.csv").mapValues(
-        CsvParser.parseDouble _)
+        CsvParser.parseDouble _
+      )
       val data = readFrameFromClasspath("/data.csv")
         .colAt(Array(0, 1, 2, 3))
         .mapValues(CsvParser.parseDouble _)
@@ -61,20 +57,25 @@ class SaddlePlotSpec extends FunSpec with Matchers {
 
       val hist1 = xyplot(
         HistogramData(rotated.firstCol("PC1").toVec.toSeq, 10) -> bar()
-      )(xlab = "PC1",
+      )(
+        xlab = "PC1",
         ylab = "freq.",
         main = "Loading distribution",
-        ylim = Some(0d, Double.NaN))
+        ylim = Some(0d, Double.NaN)
+      )
 
       val bar1 = barplotVertical(
         Series("a" -> (-2d), "b" -> (-1d), "c" -> 0d, "d" -> 1d, "e" -> 2d),
-        color = RedBlue(-2, 2))
+        color = RedBlue(-2, 2)
+      )
       val bar2 = barplotHorizontal(
-        Series("a" -> (-2d), "b" -> (-1d), "c" -> 0d, "d" -> 1d, "e" -> 2d))
+        Series("a" -> (-2d), "b" -> (-1d), "c" -> 0d, "d" -> 1d, "e" -> 2d)
+      )
 
       val density1 = xyplot(
         density(rotated.firstCol("PC1").toVec.toSeq) -> line(
-          stroke = Stroke(3d))
+          stroke = Stroke(3d)
+        )
       )(xlab = "PC1", ylab = "dens.", main = "Loading distribution")
 
       val r1 = rasterplotFromFrame(rotated, yLabFontSize = Some(0.1 fts))
@@ -84,8 +85,11 @@ class SaddlePlotSpec extends FunSpec with Matchers {
       )(
         extraLegend = spec2Num.toSeq.map(
           x =>
-            x._1 -> PointLegend(shape = Shape.rectangle(0, 0, 1, 1),
-                                color = DiscreteColors(spec2Num.size)(x._2))),
+            x._1 -> PointLegend(
+              shape = Shape.rectangle(0, 0, 1, 1),
+              color = DiscreteColors(spec2Num.size)(x._2)
+          )
+        ),
         xlab = "Sepal.Length",
         ylab = "Sepal.Width",
         main = "Iris data"
@@ -97,12 +101,16 @@ class SaddlePlotSpec extends FunSpec with Matchers {
           rotated.firstCol("PC1").toVec.toSeq zip rotated
             .firstCol("PC2")
             .toVec
-            .toSeq)
+            .toSeq
+        )
       )(
         extraLegend = spec2Num.toSeq.map(
           x =>
-            x._1 -> PointLegend(shape = Shape.rectangle(0, 0, 1, 1),
-                                color = DiscreteColors(spec2Num.size)(x._2))),
+            x._1 -> PointLegend(
+              shape = Shape.rectangle(0, 0, 1, 1),
+              color = DiscreteColors(spec2Num.size)(x._2)
+          )
+        ),
         xlab = "PC1",
         ylab = "PC2",
         main = "PC1 vs PC2"
@@ -113,7 +121,8 @@ class SaddlePlotSpec extends FunSpec with Matchers {
           rotated.firstCol("PC1").toVec.toSeq zip rotated
             .firstCol("PC2")
             .toVec
-            .toSeq)
+            .toSeq
+        )
       )
 
       val fig2 = xyplot(
@@ -121,8 +130,11 @@ class SaddlePlotSpec extends FunSpec with Matchers {
       )(
         extraLegend = spec2Num.toSeq.map(
           x =>
-            x._1 -> PointLegend(shape = Shape.rectangle(0, 0, 1, 1),
-                                color = DiscreteColors(spec2Num.size)(x._2))),
+            x._1 -> PointLegend(
+              shape = Shape.rectangle(0, 0, 1, 1),
+              color = DiscreteColors(spec2Num.size)(x._2)
+          )
+        ),
         xlab = "PC2",
         ylab = "PC3",
         main = "PC2 vs PC3"
@@ -168,7 +180,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
           ylim = Some(-1d -> 1d)
         )
 
-      val rs = (1 to 99 map (i => scala.util.Random.nextGaussian)).toSeq :+ 1E3
+      val rs = (1 to 99 map (i => scala.util.Random.nextGaussian)).toSeq :+ 1e3
 
       val p6 = rasterplot(
         rasterFromSeq(rs, 10, 10),
@@ -199,87 +211,106 @@ class SaddlePlotSpec extends FunSpec with Matchers {
 
       val barplot2 = {
         val dataraw
-          : IndexedSeq[(Double, Double, Double, Double)] = 1 to 100 map (i =>
-          (i.toDouble,
-           scala.util.Random.nextInt(i).toDouble,
-           scala.util.Random.nextInt(101 - i).toDouble,
-           scala.util.Random.nextInt(50).toDouble))
+          : IndexedSeq[(Double, Double, Double, Double)] = 1 to 100 map (
+            i =>
+              (
+                i.toDouble,
+                scala.util.Random.nextInt(i).toDouble,
+                scala.util.Random.nextInt(101 - i).toDouble,
+                scala.util.Random.nextInt(50).toDouble
+              )
+        )
 
-        stackedBarPlot(dataraw,
-                       List((1, "red", Color.red),
-                            (2, "blue", Color.blue),
-                            (3, "green", Color.green)),
-                       relative = true)
+        stackedBarPlot(
+          dataraw,
+          List(
+            (1, "red", Color.red),
+            (2, "blue", Color.blue),
+            (3, "green", Color.green)
+          ),
+          relative = true
+        )
       }
 
       val colortest = xyplot(
-        indexed(1 to 60 map (_.toDouble) toSeq) -> point(color =
-                                                           DiscreteColors(60),
-                                                         colorCol = 1))()
+        indexed(1 to 60 map (_.toDouble) toSeq) -> point(
+          color = DiscreteColors(60),
+          colorCol = 1
+        )
+      )()
       val ticktest = xyplot(
-        indexed(Seq(0.001, 0.01, 0.0, -1.2, 1.1, 100.0, 100.001, 100.1, 1000d,
-          10000d)) -> point())()
+        indexed(
+          Seq(0.001, 0.01, 0.0, -1.2, 1.1, 100.0, 100.001, 100.1, 1000d, 10000d)
+        ) -> point()
+      )()
 
       val ticktest2 =
         xyplot(indexed(Seq(100.0, 100.001, 100.1, 100.101234)) -> point())()
       val ticktest3 = xyplot(
-        indexed(Seq(1E-5, 0.00003, 0.00002, 0.00001, 2.313E-6)) -> point())()
-      val ticktest4 = xyplot(indexed(
-        Seq(1E-5, 0.00003, 0.00002, 0.00001, 2.313E-6, 1E6)) -> point())()
-      val ticktest5 = xyplot(indexed(Seq(1E6, 1.02E6, 2.567E7)) -> point())()
+        indexed(Seq(1e-5, 0.00003, 0.00002, 0.00001, 2.313e-6)) -> point()
+      )()
+      val ticktest4 = xyplot(
+        indexed(Seq(1e-5, 0.00003, 0.00002, 0.00001, 2.313e-6, 1e6)) -> point()
+      )()
+      val ticktest5 = xyplot(indexed(Seq(1e6, 1.02e6, 2.567e7)) -> point())()
       val ticktest6 =
         xyplot(indexed(Seq(100.0, 100.001, 100.0015, 100.0016)) -> point())()
 
       val logaxistest =
         xyplot(
-          Seq(1E-6 -> 1E-6,
-              1E-5 -> 1E-5,
-              1E-4 -> 1E-4,
-              1E-3 -> 1E-3,
-              1E-2 -> 1E-2,
-              1E-1 -> 1E-1,
-              1d -> 1d,
-              10d -> 10d,
-              1E2 -> 100d,
-              1E3 -> 1000d,
-              1E4 -> 10000d,
-              1E5 -> 1E5,
-              1E6 -> 1E6,
-              1E7 -> 1E7) -> point())(ylog = true, xlog = true)
+          Seq(
+            1e-6 -> 1e-6,
+            1e-5 -> 1e-5,
+            1e-4 -> 1e-4,
+            1e-3 -> 1e-3,
+            1e-2 -> 1e-2,
+            1e-1 -> 1e-1,
+            1d -> 1d,
+            10d -> 10d,
+            1e2 -> 100d,
+            1e3 -> 1000d,
+            1e4 -> 10000d,
+            1e5 -> 1e5,
+            1e6 -> 1e6,
+            1e7 -> 1e7
+          ) -> point()
+        )(ylog = true, xlog = true)
       val logaxistest2 =
         xyplot(
-          Seq(1.123E-6 -> 1E-6, 1E-5 -> 1E-5, 1E-4 -> 3.132E-4) -> point())(
-          ylog = true,
-          xlog = true)
+          Seq(1.123e-6 -> 1e-6, 1e-5 -> 1e-5, 1e-4 -> 3.132e-4) -> point()
+        )(ylog = true, xlog = true)
       val logaxistest3 =
         xyplot(
-          Seq(0.92 -> 1d, 10d -> 10d, 1E2 -> 100d, 1E3 -> 1324d) -> point())(
-          ylog = true,
-          xlog = true)
+          Seq(0.92 -> 1d, 10d -> 10d, 1e2 -> 100d, 1e3 -> 1324d) -> point()
+        )(ylog = true, xlog = true)
       val logaxistest4 =
         xyplot(
-          Seq(0.92 -> 1d, 10d -> 10d, 1E2 -> 100d, 1E3 -> 1324d) -> point())(
-          ylog = true,
-          xlog = true,
-          xlim = Some(0.5 -> 1500d))
+          Seq(0.92 -> 1d, 10d -> 10d, 1e2 -> 100d, 1e3 -> 1324d) -> point()
+        )(ylog = true, xlog = true, xlim = Some(0.5 -> 1500d))
 
       val hexbinTest = {
         val binning =
-          hexbin(rotated.firstCol("PC1").toVec.toSeq zip rotated
-                   .firstCol("PC2")
-                   .toVec
-                   .toSeq,
-                 size = 0.2,
-                 color = GrayScale(0, 30))
+          hexbin(
+            rotated.firstCol("PC1").toVec.toSeq zip rotated
+              .firstCol("PC2")
+              .toVec
+              .toSeq,
+            size = 0.2,
+            color = GrayScale(0, 30)
+          )
         xyplot(
           binning,
           Frame((rotated.col("PC1", "PC2").toColSeq :+ ("spec" -> spec)): _*) -> point(
-            size = 1)
+            size = 1
+          )
         )(
           extraLegend = spec2Num.toSeq.map(
             x =>
-              x._1 -> PointLegend(shape = Shape.rectangle(0, 0, 1, 1),
-                                  color = DiscreteColors(spec2Num.size)(x._2))),
+              x._1 -> PointLegend(
+                shape = Shape.rectangle(0, 0, 1, 1),
+                color = DiscreteColors(spec2Num.size)(x._2)
+            )
+          ),
           xlab = "PC1",
           ylab = "PC2",
           main = "PC1 vs PC2"
@@ -323,7 +354,8 @@ class SaddlePlotSpec extends FunSpec with Matchers {
         group(
           barplot2,
           TextBox(
-            "aabcd fafafafabcd fafafafabcd faafafafabcd fafafafabcafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd ffafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafbcd fafafaf"),
+            "aabcd fafafafabcd fafafafabcd faafafafabcd fafafafabcafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd ffafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafbcd fafafaf"
+          ),
           TableLayout(2)
         ),
         ColumnLayout(4)

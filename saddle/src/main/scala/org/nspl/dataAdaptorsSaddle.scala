@@ -27,9 +27,11 @@ object saddle {
       series.toSeq
         .map(_._2)
         .zipWithIndex
-        .map(x => x._1 -> x._2.toDouble) -> bar(horizontal = true,
-                                                fill = color,
-                                                fillCol = 0)
+        .map(x => x._1 -> x._2.toDouble) -> bar(
+        horizontal = true,
+        fill = color,
+        fillCol = 0
+      )
     )(
       main = main,
       xlab = xlab,
@@ -152,11 +154,12 @@ object saddle {
     indexed(vec.toSeq)
 
   implicit def dataSourceFromSeries[R](
-      s: Series[R, Double]): DataSourceWithQuantiles =
+      s: Series[R, Double]
+  ): DataSourceWithQuantiles =
     new DataSourceWithQuantiles {
       def iterator =
-        s.toSeq.iterator.zipWithIndex.map(x =>
-          VectorRow(Vector(x._2, x._1._2), x._1._1.toString))
+        s.toSeq.iterator.zipWithIndex
+          .map(x => VectorRow(Vector(x._2, x._1._2), x._1._1.toString))
       def dimension = 2
       def columnMinMax(i: Int) = i match {
         case 0 => MinMaxImpl(0, s.length - 1d)
@@ -172,7 +175,7 @@ object saddle {
     }
 
   def dataSourceFromRowMajorVec(vec: Vec[Double], numCols: Int): DataTable =
-    new DataTable(vec, numCols)
+    new DataTable(vec.contents, numCols)
 
   implicit def dataSourceFromZippedVecs2(
       vec1: (Vec[Double], Vec[Double])
