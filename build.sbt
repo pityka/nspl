@@ -148,7 +148,7 @@ lazy val saddle = (project in file("saddle"))
     crossScalaVersions := Seq("2.11.12"),
     name := "nspl-saddle",
     libraryDependencies ++= Seq(
-      "io.github.pityka" %% "saddle-core" % "1.3.4+75-a2882183-SNAPSHOT",
+      "io.github.pityka" %% "saddle-core" % "2.0.0-M3",
       "org.scalatest" %% "scalatest" % "3.0.0" % "test"
     )
   )

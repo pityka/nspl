@@ -7,7 +7,7 @@ import org.nspl.data._
 import org.nspl.awtrenderer._
 import org.saddle._
 
-import org.saddle.io._
+import org.saddle.csv._
 
 class SaddlePlotSpec extends FunSpec with Matchers {
 
