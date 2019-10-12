@@ -7,8 +7,7 @@ lazy val commonSettings = Seq(
   crossScalaVersions := Seq("2.11.12", "2.12.6"),
   javacOptions ++= Seq("-Xdoclint:none"),
   licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
-  publishTo := sonatypePublishTo.value,
-  resolvers += "bintray/denisrosset" at "https://dl.bintray.com/denisrosset/maven"
+  publishTo := sonatypePublishTo.value
 )
 
 lazy val core = project
