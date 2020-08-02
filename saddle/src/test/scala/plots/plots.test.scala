@@ -6,8 +6,11 @@ import org.nspl.saddle._
 import org.nspl.data._
 import org.nspl.awtrenderer._
 import org.saddle._
+import org.saddle.order._
 
 import org.saddle.csv._
+import org.saddle.scalar.ScalarTagDouble
+import org.saddle.index.InnerJoin
 
 class SaddlePlotSpec extends FunSpec with Matchers {
 
@@ -15,36 +18,42 @@ class SaddlePlotSpec extends FunSpec with Matchers {
 
   def readFrameFromClasspath(s: String) =
     CsvParser
-      .parse(
+      .parseSourceWithHeader[String](
         scala.io.Source
           .fromInputStream(
             getClass.getResourceAsStream(s)
-          )
-          .getLines
+          ),
+        recordSeparator = "\n"
       )
-      .withColIndex(0)
+      .right
+      .get
 
   describe("plots") {
 
     it("plot gallery") {
       val evec =
-        readFrameFromClasspath("/evec.csv").mapValues(CsvParser.parseDouble _)
-      val rotated = readFrameFromClasspath("/rotated.csv").mapValues(
-        CsvParser.parseDouble _
-      )
+        readFrameFromClasspath("/evec.csv")
+          .mapValues(ScalarTagDouble.parse)
+      val rotated =
+        readFrameFromClasspath("/rotated.csv").mapValues(ScalarTagDouble.parse)
       val data = readFrameFromClasspath("/data.csv")
+        .mapValues(ScalarTagDouble.parse)
         .colAt(Array(0, 1, 2, 3))
-        .mapValues(CsvParser.parseDouble _)
+      println(evec)
+      println(data)
+
       val species = readFrameFromClasspath("/data.csv").colAt(4)
       val spec2Num = species.toVec.toSeq.distinct.sorted.zipWithIndex.toMap
       val spec: Series[Int, Double] =
         species.mapValues(spec2Num).mapValues(_.toDouble)
 
       val eval = readFrameFromClasspath("/sqrteigen.csv")
-        .mapValues(CsvParser.parseDouble _)
+        .mapValues(ScalarTagDouble.parse)
         .mapValues(x => x * x)
 
-      val data2 = data.joinSPreserveColIx(spec, newColIx = "spec")
+      println(data)
+
+      val data2 = data.addCol(spec, "spec", InnerJoin)
 
       val scree = xyplot(
         indexed(eval.firstCol("x").toVec.toSeq.sorted.reverse) -> line()
@@ -88,7 +97,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
             x._1 -> PointLegend(
               shape = Shape.rectangle(0, 0, 1, 1),
               color = DiscreteColors(spec2Num.size)(x._2)
-          )
+            )
         ),
         xlab = "Sepal.Length",
         ylab = "Sepal.Width",
@@ -109,7 +118,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
             x._1 -> PointLegend(
               shape = Shape.rectangle(0, 0, 1, 1),
               color = DiscreteColors(spec2Num.size)(x._2)
-          )
+            )
         ),
         xlab = "PC1",
         ylab = "PC2",
@@ -133,7 +142,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
             x._1 -> PointLegend(
               shape = Shape.rectangle(0, 0, 1, 1),
               color = DiscreteColors(spec2Num.size)(x._2)
-          )
+            )
         ),
         xlab = "PC2",
         ylab = "PC3",
@@ -211,7 +220,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
 
       val barplot2 = {
         val dataraw
-          : IndexedSeq[(Double, Double, Double, Double)] = 1 to 100 map (
+            : IndexedSeq[(Double, Double, Double, Double)] = 1 to 100 map (
             i =>
               (
                 i.toDouble,
@@ -219,7 +228,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
                 scala.util.Random.nextInt(101 - i).toDouble,
                 scala.util.Random.nextInt(50).toDouble
               )
-        )
+          )
 
         stackedBarPlot(
           dataraw,
@@ -309,7 +318,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
               x._1 -> PointLegend(
                 shape = Shape.rectangle(0, 0, 1, 1),
                 color = DiscreteColors(spec2Num.size)(x._2)
-            )
+              )
           ),
           xlab = "PC1",
           ylab = "PC2",

@@ -7,9 +7,9 @@ import org.scalajs.dom
 import org.scalajs.dom.html
 
 import scala.scalajs.js
-import js.annotation.JSExport
+import js.annotation._
 
-@JSExport
+@JSExportTopLevel("Test")
 object Test {
   @JSExport
   def bind(n: Node): Unit = {
@@ -41,7 +41,8 @@ object Test {
       (x zip y zip z map (x => (x._1._1, x._1._2, x._2, x._2 * 10))) -> point(
         color = HeatMapColors(0.0, 1.0),
         shapeCol = 3,
-        sizeCol = 5)
+        sizeCol = 5
+      )
     )()
 
     val p5 = binnedboxplot(x, y, xlab = "PC2", ylab = "PC3")
@@ -49,7 +50,8 @@ object Test {
     val p6 = rasterplot(
       rasterFromStream(z3.iterator, 30, 30, MinMaxImpl(0.0, 1.0)),
       xFontSize = 0.5 fts,
-      yFontSize = 0.5 fts)
+      yFontSize = 0.5 fts
+    )
 
     val text = fitToWidth(
       group(

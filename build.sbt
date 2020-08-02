@@ -1,9 +1,9 @@
-scalaVersion := "2.12.8"
+scalaVersion := "2.12.12"
 
 lazy val commonSettings = Seq(
   organization := "io.github.pityka",
   version := "0.0.22-SNAPSHOT",
-  scalaVersion := "2.12.8",
+  scalaVersion := "2.12.12",
   crossScalaVersions := Seq("2.11.12", "2.12.6"),
   javacOptions ++= Seq("-Xdoclint:none"),
   licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
@@ -84,7 +84,7 @@ lazy val sharedJs = project
   .settings(commonSettings)
   .settings(
     name := "nspl-shared-js",
-    libraryDependencies += toScalaJSGroupID("org.scala-js") %%% "scalajs-dom" % "0.9.2"
+    libraryDependencies += ("org.scala-js") %%% "scalajs-dom" % "0.9.8"
   )
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(coreJS)
@@ -93,8 +93,7 @@ lazy val canvas = project
   .in(file("canvas"))
   .settings(commonSettings)
   .settings(
-    name := "nspl-canvas-js",
-    libraryDependencies += toScalaJSGroupID("org.scala-js") %%% "scalajs-dom" % "0.9.2"
+    name := "nspl-canvas-js"
   )
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(coreJS, sharedJs)
@@ -147,7 +146,7 @@ lazy val saddle = (project in file("saddle"))
     crossScalaVersions := Seq("2.11.12"),
     name := "nspl-saddle",
     libraryDependencies ++= Seq(
-      "io.github.pityka" %% "saddle-core" % "2.0.0-M3",
+      "io.github.pityka" %% "saddle-core" % "2.0.0-M26",
       "org.scalatest" %% "scalatest" % "3.0.0" % "test"
     )
   )
@@ -161,7 +160,6 @@ lazy val root = (project in file("."))
     saddle,
     scalatagsJvm,
     awt,
-    scalatagsJs,
     canvas,
     sharedJs,
     sharedJvm,
