@@ -104,8 +104,8 @@ lazy val scalatagsJs = project
   .settings(
     name := "nspl-scalatags-js",
     libraryDependencies ++= Seq(
-      toScalaJSGroupID("org.scala-js") %%% "scalajs-dom" % "0.9.2",
-      toScalaJSGroupID("com.lihaoyi") %%% "scalatags" % "0.6.7"
+      ("org.scala-js") %%% "scalajs-dom" % "1.0.0",
+      ("com.lihaoyi") %%% "scalatags" % "0.9.1"
     )
   )
   .enablePlugins(ScalaJSPlugin)
