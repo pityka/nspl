@@ -4,15 +4,18 @@ import data._
 import scala.util.Try
 
 trait DataRenderer {
-  def render[R <: RenderingContext](data: Row,
-                                    xAxis: Axis,
-                                    yAxis: Axis,
-                                    ctx: R,
-                                    tx: AffineTransform)(
-      implicit re: Renderer[ShapeElem, R],
-      rt: Renderer[TextBox, R]): Unit
+  def render[R <: RenderingContext](
+      data: Row,
+      xAxis: Axis,
+      yAxis: Axis,
+      ctx: R,
+      tx: AffineTransform
+  )(implicit re: Renderer[ShapeElem, R], rt: Renderer[TextBox, R]): Unit
   def asLegend: Option[LegendElem]
-  def clear: Unit = ()
+  def clear[R <: RenderingContext](ctx: R)(
+      implicit re: Renderer[ShapeElem, R],
+      rt: Renderer[TextBox, R]
+  ): Unit = ()
   def xMinMax(ds: DataSource): Option[MinMax]
   def yMinMax(ds: DataSource): Option[MinMax]
 }
@@ -45,13 +48,49 @@ trait Renderers {
     def xMinMax(ds: DataSource) = Try(ds.columnMinMax(xCol)).toOption
     def yMinMax(ds: DataSource) = Try(ds.columnMinMax(yCol)).toOption
 
-    def render[R <: RenderingContext](data: Row,
-                                      xAxis: Axis,
-                                      yAxis: Axis,
-                                      ctx: R,
-                                      tx: AffineTransform)(
+    val shapesAndTextLabels =
+      scala.collection.mutable
+        .ArrayBuffer[(ShapeElem, TextBox, AffineTransform)]()
+
+    override def clear[R <: RenderingContext](ctx: R)(
         implicit re: Renderer[ShapeElem, R],
-        rt: Renderer[TextBox, R]): Unit = {
+        rt: Renderer[TextBox, R]
+    ) = {
+      val labelLayout =
+        LabelLayout
+          .many(shapesAndTextLabels.map(v => (v._1.bounds, v._2.bounds)))
+      labelLayout.zip(shapesAndTextLabels).foreach {
+        case ((updatedBound, connectionLine), (_, label, tx)) =>
+          val labelUpdated = label
+            .translate(
+              updatedBound.x - label.bounds.x,
+              updatedBound.y - label.bounds.y
+            )
+            .transform(_ => tx)
+
+          rt.render(ctx, labelUpdated)
+          connectionLine match {
+            case None                                   =>
+            case Some((p1, p2)) if p1.distance(p2) <= 0 =>
+            case Some((p1, p2)) =>
+              val lineElem = ShapeElem(
+                Shape.line(p1, p2),
+                strokeColor = labelColor,
+                stroke = Some(Stroke(lineWidth * 0.3))
+              ).transform(_ => tx)
+              re.render(ctx, lineElem)
+          }
+
+      }
+    }
+
+    def render[R <: RenderingContext](
+        data: Row,
+        xAxis: Axis,
+        yAxis: Axis,
+        ctx: R,
+        tx: AffineTransform
+    )(implicit re: Renderer[ShapeElem, R], rt: Renderer[TextBox, R]): Unit = {
 
       if (data.dimension > xCol && data.dimension > yCol) {
         val wX = data(xCol)
@@ -85,49 +124,58 @@ trait Renderers {
 
           val vX = xAxis.worldToView(wX)
           val vY = yAxis.worldToView(wY)
-          val shape1: ShapeElem = ShapeElem(
+          val shape1PreTransform: ShapeElem = ShapeElem(
             shape,
             fill = color1
-          ).scale(factorX, factorY).translate(vX, vY).transform(b => tx)
+          ).scale(factorX, factorY).translate(vX, vY)
+
+          val shape1 = shape1PreTransform.transform(b => tx)
 
           if (!skip) {
             re.render(ctx, shape1)
           }
 
           if (valueText) {
-            val tb = TextBox(
+            val tbPreTransform = TextBox(
               f"${data(colorCol)}%.2g",
               color = labelColor,
               fontSize = labelFontSize
             ).translate(vX, vY)
-              .transform(b =>
-                tx.concat(AffineTransform
-                  .translate(0, -1 * b.h - shape.bounds.h * factorY * 0.5)))
+              .transform(
+                b =>
+                  AffineTransform
+                    .translate(0, -1 * b.h - shape.bounds.h * factorY * 0.5)
+              )
 
-            rt.render(ctx, tb)
+            shapesAndTextLabels += ((shape1PreTransform, tbPreTransform, tx))
+
           }
 
           if (labelText) {
-            val tb = TextBox(
+            val tbPreTransform = TextBox(
               data.label,
               color = labelColor,
               fontSize = labelFontSize
             ).translate(vX, vY)
               .transform(
                 b =>
-                  tx.concat(
-                    AffineTransform.translate(
-                      -0.2 * b.w,
-                      -1 * b.h - shape.bounds.h * factorY * 0.5)))
+                  AffineTransform.translate(
+                    -0.2 * b.w,
+                    -1 * b.h - shape.bounds.h * factorY * 0.5
+                )
+              )
 
-            rt.render(ctx, tb)
+            shapesAndTextLabels += ((shape1PreTransform, tbPreTransform, tx))
+
           }
 
           if (data.dimension > errorTopCol) {
             val errorTop = data(errorTopCol)
             val shape1: ShapeElem = ShapeElem(
-              Shape.line(Point(vX, vY),
-                         Point(vX, yAxis.worldToView(wY - errorTop))),
+              Shape.line(
+                Point(vX, vY),
+                Point(vX, yAxis.worldToView(wY - errorTop))
+              ),
               stroke = Some(errorBarStroke)
             ).transform(_ => tx)
             re.render(ctx, shape1)
@@ -135,8 +183,10 @@ trait Renderers {
           if (data.dimension > errorBottomCol) {
             val errorTop = data(errorBottomCol)
             val shape1: ShapeElem = ShapeElem(
-              Shape.line(Point(vX, vY),
-                         Point(vX, yAxis.worldToView(wY + errorTop))),
+              Shape.line(
+                Point(vX, vY),
+                Point(vX, yAxis.worldToView(wY + errorTop))
+              ),
               stroke = Some(errorBarStroke)
             ).transform(_ => tx)
             re.render(ctx, shape1)
@@ -162,7 +212,13 @@ trait Renderers {
 
     var currentPoint: Option[Point] = None
     def asLegend = Some(LineLegend(stroke, color(0)))
-    override def clear = currentPoint = None
+
+    override def clear[R <: RenderingContext](ctx: R)(
+        implicit re: Renderer[ShapeElem, R],
+        rt: Renderer[TextBox, R]
+    ): Unit = {
+      currentPoint = None
+    }
 
     def render[R <: RenderingContext](
         data: Row,
@@ -220,7 +276,10 @@ trait Renderers {
     var currentPoint2: Option[Point] = None
     def asLegend = Some(PointLegend(shapeList(1), color(0)))
 
-    override def clear {
+    override def clear[R <: RenderingContext](ctx: R)(
+        implicit re: Renderer[ShapeElem, R],
+        rt: Renderer[TextBox, R]
+    ): Unit = {
       currentPoint2 = None
       currentPoint1 = None
     }
@@ -259,10 +318,12 @@ trait Renderers {
         val vY = yAxis.worldToView(wY)
 
         val p1 = Point(vX, vY)
-        val p2 = Point(vX,
-                       wYBottom
-                         .map(w => yAxis.worldToView(w))
-                         .getOrElse(yAxis.worldToView(yAxis.min)))
+        val p2 = Point(
+          vX,
+          wYBottom
+            .map(w => yAxis.worldToView(w))
+            .getOrElse(yAxis.worldToView(yAxis.min))
+        )
 
         if (currentPoint1.isEmpty) {
           currentPoint1 = Some(p1)
@@ -376,7 +437,8 @@ trait Renderers {
             .getOrElse(
               if (0d > yAxis.max) yAxis.max
               else if (0d < yAxis.min) yAxis.min
-              else 0d)
+              else 0d
+            )
 
           val vX = xAxis.worldToView(wX)
           val vXMin = xAxis.worldToView(xAxis.min)
@@ -396,15 +458,19 @@ trait Renderers {
 
           val rectangle =
             if (vY2 > vY)
-              Shape.rectangle(vX - vWidth1 * 0.5 + outOfBoundsLeft,
-                              vY,
-                              vWidth,
-                              vHeight)
+              Shape.rectangle(
+                vX - vWidth1 * 0.5 + outOfBoundsLeft,
+                vY,
+                vWidth,
+                vHeight
+              )
             else
-              Shape.rectangle(vX - vWidth1 * 0.5 + outOfBoundsLeft,
-                              vY2,
-                              vWidth,
-                              vHeight)
+              Shape.rectangle(
+                vX - vWidth1 * 0.5 + outOfBoundsLeft,
+                vY2,
+                vWidth,
+                vHeight
+              )
 
           val shape1 = ShapeElem(
             rectangle,
@@ -427,7 +493,8 @@ trait Renderers {
             .getOrElse(
               if (0d > xAxis.max) xAxis.max
               else if (0d < xAxis.min) xAxis.min
-              else 0d)
+              else 0d
+            )
 
           val vY = yAxis.worldToView(wY)
           val vYMin = yAxis.worldToView(yAxis.min)
@@ -447,15 +514,19 @@ trait Renderers {
 
           val rectangle =
             if (wX > 0)
-              Shape.rectangle(vX2,
-                              vY - vWidth1 * 0.5 + outOfBoundsTop,
-                              vHeight,
-                              vWidth)
+              Shape.rectangle(
+                vX2,
+                vY - vWidth1 * 0.5 + outOfBoundsTop,
+                vHeight,
+                vWidth
+              )
             else
-              Shape.rectangle(vX,
-                              vY - vWidth1 * 0.5 + outOfBoundsTop,
-                              vHeight,
-                              vWidth)
+              Shape.rectangle(
+                vX,
+                vY - vWidth1 * 0.5 + outOfBoundsTop,
+                vHeight,
+                vWidth
+              )
 
           val shape1 = ShapeElem(
             rectangle,
@@ -543,8 +614,8 @@ trait Renderers {
         re.render(ctx, shape1)
 
         val shape2 = ShapeElem(
-          Shape.line(Point(vX - vWidth * 0.5, vQ2),
-                     Point(vX + vWidth * 0.5, vQ2)),
+          Shape
+            .line(Point(vX - vWidth * 0.5, vQ2), Point(vX + vWidth * 0.5, vQ2)),
           fill = color1,
           stroke = Some(stroke),
           strokeColor = strokeColor

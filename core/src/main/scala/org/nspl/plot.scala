@@ -20,14 +20,15 @@ case class DataElem(
 object DataElem {
   implicit def dataElemRenderer[RC <: RenderingContext](
       implicit re: Renderer[ShapeElem, RC],
-      rt: Renderer[TextBox, RC]) = new Renderer[DataElem, RC] {
+      rt: Renderer[TextBox, RC]
+  ) = new Renderer[DataElem, RC] {
     def render(r: RC, e: DataElem): Unit = {
       e.data.iterator.foreach { row =>
         e.renderers.foreach { dr =>
           dr.render(row, e.xAxis, e.yAxis, r, e.tx)
         }
       }
-      e.renderers.foreach(_.clear)
+      e.renderers.foreach(_.clear(r))
     }
   }
 }
@@ -36,12 +37,13 @@ trait Plots {
   // format: off
   type XYPlotAreaType = Elems3[ShapeElem, Elems3[ShapeElem, Elems2[Elems2[Elems2[Elems5[ElemList[ShapeElem], ElemList[ShapeElem], ElemList[DataElem], Elems2[AxisElem, AxisElem], ShapeElem], TextBox], TextBox], TextBox], ShapeElem], ShapeElem]
   // format: on
-  case class XYPlotArea(elem: XYPlotAreaType,
-                        xMin: Double,
-                        xMax: Double,
-                        yMin: Double,
-                        yMax: Double)
-      extends Renderable[XYPlotArea] {
+  case class XYPlotArea(
+      elem: XYPlotAreaType,
+      xMin: Double,
+      xMax: Double,
+      yMin: Double,
+      yMax: Double
+  ) extends Renderable[XYPlotArea] {
     def transform(v: Bounds => AffineTransform) =
       this.copy(elem = elem.transform(v))
     def bounds: Bounds = elem.bounds
@@ -51,7 +53,8 @@ trait Plots {
   object XYPlotArea {
     implicit def renderer[RC <: RenderingContext](
         implicit re: Renderer[ShapeElem, RC],
-        rt: Renderer[TextBox, RC]) = new Renderer[XYPlotArea, RC] {
+        rt: Renderer[TextBox, RC]
+    ) = new Renderer[XYPlotArea, RC] {
       def render(r: RC, e: XYPlotArea): Unit =
         implicitly[Renderer[XYPlotAreaType, RC]].render(r, e.elem)
     }
@@ -117,7 +120,8 @@ trait Plots {
         bottomPadding,
         leftPadding,
         rightPadding
-      )) {
+      )
+    ) {
       case (Some(old), BuildEvent) =>
         import old._
         xyplotarea(
@@ -153,9 +157,11 @@ trait Plots {
       case (Some(old), Scroll(v1, p)) if old.frameElem.bounds.contains(p) =>
         import old._
         val v = if (v1 > 0) 1.05 else if (v1 < 0) 0.95 else 1.0
-        val mappedPoint = mapPoint(p,
-                                   old.frameElem.bounds,
-                                   Bounds(xMin, yMin, xMax - xMin, yMax - yMin))
+        val mappedPoint = mapPoint(
+          p,
+          old.frameElem.bounds,
+          Bounds(xMin, yMin, xMax - xMin, yMax - yMin)
+        )
         val xMid = mappedPoint.x
         val yMid = mappedPoint.y
         val xF = (xMid - xMin) / (xMax - xMin)
@@ -199,14 +205,20 @@ trait Plots {
           if old.frameElem.bounds.contains(dragStart) =>
         import old._
         val dragStartWorld =
-          mapPoint(dragStart,
-                   old.frameElem.bounds,
-                   Bounds(xMin, yMin, xMax - xMin, yMax - yMin))
-        val dragToWorld = mapPoint(dragTo,
-                                   old.frameElem.bounds,
-                                   Bounds(xMin, yMin, xMax - xMin, yMax - yMin))
-        val dragDirection = Point(dragStartWorld.x - dragToWorld.x,
-                                  dragStartWorld.y - dragToWorld.y)
+          mapPoint(
+            dragStart,
+            old.frameElem.bounds,
+            Bounds(xMin, yMin, xMax - xMin, yMax - yMin)
+          )
+        val dragToWorld = mapPoint(
+          dragTo,
+          old.frameElem.bounds,
+          Bounds(xMin, yMin, xMax - xMin, yMax - yMin)
+        )
+        val dragDirection = Point(
+          dragStartWorld.x - dragToWorld.x,
+          dragStartWorld.y - dragToWorld.y
+        )
 
         val xT = dragDirection.x
         val yT = dragDirection.y
@@ -309,8 +321,10 @@ trait Plots {
           dataXMin - xAxisMargin * (dataXMax - dataXMin)
         }, origin.map(_.x).getOrElse(Double.MaxValue))
       case Log10AxisFactory =>
-        math.min(xLimMin.getOrElse(math.pow(10d, math.log10(dataXMin).floor)),
-                 origin.map(_.x).getOrElse(Double.MaxValue))
+        math.min(
+          xLimMin.getOrElse(math.pow(10d, math.log10(dataXMin).floor)),
+          origin.map(_.x).getOrElse(Double.MaxValue)
+        )
     }
 
     val xMax = xAxisSetting.axisFactory match {
@@ -338,8 +352,10 @@ trait Plots {
           dataYMin - yAxisMargin * (dataYMax - dataYMin)
         }, origin.map(_.y).getOrElse(Double.MaxValue))
       case Log10AxisFactory =>
-        math.min(yLimMin.getOrElse(math.pow(10d, math.log10(dataYMin).floor)),
-                 origin.map(_.y).getOrElse(Double.MaxValue))
+        math.min(
+          yLimMin.getOrElse(math.pow(10d, math.log10(dataYMin).floor)),
+          origin.map(_.y).getOrElse(Double.MaxValue)
+        )
     }
 
     val yMax = yAxisSetting.axisFactory match {
@@ -435,11 +451,13 @@ trait Plots {
     val frameStroke = if (frame) Some(Stroke(lineWidth)) else None
     val frameElem =
       ShapeElem(
-        Shape.rectangle(xMinV,
-                        yMaxV,
-                        xMaxV - xMinV,
-                        math.abs(yMinV - yMaxV),
-                        anchor = Some(Point(xMinV, yMaxV))),
+        Shape.rectangle(
+          xMinV,
+          yMaxV,
+          xMaxV - xMinV,
+          math.abs(yMinV - yMaxV),
+          anchor = Some(Point(xMinV, yMaxV))
+        ),
         stroke = frameStroke,
         fill = Color.transparent
       )
@@ -495,16 +513,21 @@ trait Plots {
     )
 
     val withHorizontalLabels = zgroup(
-      (zgroup(
-         (renderedPlot, 1),
-         (AlignTo.verticalGapBeforeReference(
-            AlignTo.horizontalCenter(mainBox, frameElem.bounds),
-            frameElem.bounds,
-            mainDistance),
-          0),
-         FreeLayout
-       ),
-       0),
+      (
+        zgroup(
+          (renderedPlot, 1),
+          (
+            AlignTo.verticalGapBeforeReference(
+              AlignTo.horizontalCenter(mainBox, frameElem.bounds),
+              frameElem.bounds,
+              mainDistance
+            ),
+            0
+          ),
+          FreeLayout
+        ),
+        0
+      ),
       (AlignTo.horizontal(xlabBox, frameElem.bounds, xlabAlignment), 1),
       VerticalStack(NoAlignment, xlabDistance)
     )
@@ -514,10 +537,14 @@ trait Plots {
     val plotWithAxisLabels =
       zgroup(
         (withHorizontalLabels, 1),
-        (AlignTo.vertical(rotate(ylabBox, 0.5 * math.Pi),
-                          movedFrame.bounds,
-                          ylabAlignment),
-         0),
+        (
+          AlignTo.vertical(
+            rotate(ylabBox, 0.5 * math.Pi),
+            movedFrame.bounds,
+            ylabAlignment
+          ),
+          0
+        ),
         HorizontalStack(NoAlignment, ylabDistance)
       )
 
@@ -525,7 +552,8 @@ trait Plots {
       padTop,
       group(padLeft, plotWithAxisLabels, padRight, HorizontalStack(Center, 0d)),
       padBottom,
-      VerticalStack(Center, 0d))
+      VerticalStack(Center, 0d)
+    )
 
     XYPlotArea(elem, xMin, xMax, yMin, yMax)
 
@@ -548,8 +576,10 @@ trait Plots {
         case (text, elem) =>
           val elem1 = elem match {
             case PointLegend(s, c) =>
-              fitToBounds(ShapeElem(s, fill = c),
-                          Bounds(0, 0, fontSize, fontSize))
+              fitToBounds(
+                ShapeElem(s, fill = c),
+                Bounds(0, 0, fontSize, fontSize)
+              )
             case LineLegend(s, c) =>
               fitToBounds(
                 ShapeElem(
@@ -572,7 +602,9 @@ trait Plots {
 
   type HeatmapLegend = Elems2[ElemList[ShapeElem],
                               Elems3[ShapeElem,
-                                     ElemList[Elems2[ShapeElem, TextBox]],
+                                     ElemList[
+                                       Elems2[ShapeElem, TextBox]
+                                     ],
                                      ElemList[ShapeElem]]]
 
   def heatmapLegend[F: FC](

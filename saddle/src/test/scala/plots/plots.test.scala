@@ -97,7 +97,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
             x._1 -> PointLegend(
               shape = Shape.rectangle(0, 0, 1, 1),
               color = DiscreteColors(spec2Num.size)(x._2)
-            )
+          )
         ),
         xlab = "Sepal.Length",
         ylab = "Sepal.Width",
@@ -105,7 +105,9 @@ class SaddlePlotSpec extends FunSpec with Matchers {
       )
 
       val fig1 = xyplot(
-        Frame((rotated.col("PC1", "PC2").toColSeq :+ ("spec" -> spec)): _*),
+        Frame((rotated.col("PC1", "PC2").toColSeq :+ ("spec" -> spec)): _*) -> point(
+          valueText = true
+        ),
         density2d(
           rotated.firstCol("PC1").toVec.toSeq zip rotated
             .firstCol("PC2")
@@ -118,13 +120,15 @@ class SaddlePlotSpec extends FunSpec with Matchers {
             x._1 -> PointLegend(
               shape = Shape.rectangle(0, 0, 1, 1),
               color = DiscreteColors(spec2Num.size)(x._2)
-            )
+          )
         ),
         xlab = "PC1",
         ylab = "PC2",
         main = "PC1 vs PC2"
       )
 
+      // println(pdfToFile(fig1.build))
+      // ???
       val densmap = rasterplot(
         densityMatrix(
           rotated.firstCol("PC1").toVec.toSeq zip rotated
@@ -142,7 +146,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
             x._1 -> PointLegend(
               shape = Shape.rectangle(0, 0, 1, 1),
               color = DiscreteColors(spec2Num.size)(x._2)
-            )
+          )
         ),
         xlab = "PC2",
         ylab = "PC3",
@@ -220,7 +224,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
 
       val barplot2 = {
         val dataraw
-            : IndexedSeq[(Double, Double, Double, Double)] = 1 to 100 map (
+          : IndexedSeq[(Double, Double, Double, Double)] = 1 to 100 map (
             i =>
               (
                 i.toDouble,
@@ -228,7 +232,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
                 scala.util.Random.nextInt(101 - i).toDouble,
                 scala.util.Random.nextInt(50).toDouble
               )
-          )
+        )
 
         stackedBarPlot(
           dataraw,
@@ -318,7 +322,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
               x._1 -> PointLegend(
                 shape = Shape.rectangle(0, 0, 1, 1),
                 color = DiscreteColors(spec2Num.size)(x._2)
-              )
+            )
           ),
           xlab = "PC1",
           ylab = "PC2",
