@@ -5,3 +5,4 @@ targetNative
 *log
 .bloop
 .metals
+metals.sbt
