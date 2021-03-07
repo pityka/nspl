@@ -30,7 +30,7 @@ trait Renderers {
       shapeCol: Int = 4,
       errorTopCol: Int = 5,
       errorBottomCol: Int = 6,
-      size: Double = 0.4 fts,
+      size: Double = 3d,
       color: Colormap = DiscreteColors(14),
       shapes: Vector[Shape] = shapeList,
       pointSizeIsInDataSpaceUnits: Boolean = false,
@@ -39,7 +39,7 @@ trait Renderers {
       labelText: Boolean = false,
       labelFontSize: RelFontSize = 0.4 fts,
       labelColor: Color = Color.black,
-      errorBarStroke: Stroke = Stroke(lineWidth),
+      errorBarStroke: StrokeConf = StrokeConf(lineWidth),
       transparent: Option[Double] = None
   ) = new DataRenderer {
 
@@ -76,7 +76,7 @@ trait Renderers {
               val lineElem = ShapeElem(
                 Shape.line(p1, p2),
                 strokeColor = labelColor,
-                stroke = Some(Stroke(lineWidth * 0.3))
+                stroke = Some(Stroke(lineWidth.value * 0.3))
               ).transform(_ => tx)
               re.render(ctx, lineElem)
           }
@@ -116,18 +116,25 @@ trait Renderers {
             math.abs(yAxis.worldToView(0) - yAxis.worldToView(1))
           } else 1d
 
+          val shapeBounds = shape.bounds
+
           val shapeAspectRatio =
-            if (keepPointShapeAspectRatio) shape.bounds.h / shape.bounds.w
+            if (keepPointShapeAspectRatio) shapeBounds.h / shapeBounds.w
             else 1d
-          val factorX = unitWidthX * size1 / shape.bounds.w
-          val factorY = unitWidthY * size1 * shapeAspectRatio / shape.bounds.h
+          val factorX = unitWidthX * size1 / shapeBounds.w
+          val factorY = unitWidthY * size1 * shapeAspectRatio / shapeBounds.h
 
           val vX = xAxis.worldToView(wX)
           val vY = yAxis.worldToView(wY)
           val shape1PreTransform: ShapeElem = ShapeElem(
-            shape,
+            shape.transform(
+              _ =>
+                AffineTransform
+                  .translate(vX, vY)
+                  .concatScale(factorX, factorY)
+            ),
             fill = color1
-          ).scale(factorX, factorY).translate(vX, vY)
+          )
 
           val shape1 = shape1PreTransform.transform(b => tx)
 
@@ -162,7 +169,7 @@ trait Renderers {
                   AffineTransform.translate(
                     -0.2 * b.w,
                     -1 * b.h - shape.bounds.h * factorY * 0.5
-                )
+                  )
               )
 
             shapesAndTextLabels += ((shape1PreTransform, tbPreTransform, tx))
@@ -176,7 +183,7 @@ trait Renderers {
                 Point(vX, vY),
                 Point(vX, yAxis.worldToView(wY - errorTop))
               ),
-              stroke = Some(errorBarStroke)
+              stroke = Some(errorBarStroke.value)
             ).transform(_ => tx)
             re.render(ctx, shape1)
           }
@@ -187,7 +194,7 @@ trait Renderers {
                 Point(vX, vY),
                 Point(vX, yAxis.worldToView(wY + errorTop))
               ),
-              stroke = Some(errorBarStroke)
+              stroke = Some(errorBarStroke.value)
             ).transform(_ => tx)
             re.render(ctx, shape1)
           }
@@ -199,11 +206,11 @@ trait Renderers {
     }
   }
 
-  def line(
+  def line[F: FC](
       xCol: Int = 0,
       yCol: Int = 1,
       colorCol: Int = 2,
-      stroke: Stroke = Stroke(lineWidth * 2),
+      stroke: StrokeConf = StrokeConf(lineWidth),
       color: Colormap = Color.black
   ) = new DataRenderer {
 
@@ -211,7 +218,7 @@ trait Renderers {
     def yMinMax(ds: DataSource) = Some(ds.columnMinMax(yCol))
 
     var currentPoint: Option[Point] = None
-    def asLegend = Some(LineLegend(stroke, color(0)))
+    def asLegend = Some(LineLegend(stroke.value, color(0)))
 
     override def clear[R <: RenderingContext](ctx: R)(
         implicit re: Renderer[ShapeElem, R],
@@ -249,7 +256,7 @@ trait Renderers {
             Shape.line(currentPoint.get, p),
             fill = Color.transparent,
             strokeColor = color1,
-            stroke = Some(stroke.copy(cap = CapRound))
+            stroke = Some(stroke.value.copy(cap = CapRound))
           ).transform(_ => tx)
 
           re.render(ctx, shape1)
@@ -355,7 +362,7 @@ trait Renderers {
   }
 
   def polynom(
-      renderer: () => DataRenderer = () => line()
+      renderer: () => DataRenderer
   ) = new DataRenderer {
     def asLegend = renderer().asLegend
 
@@ -391,12 +398,12 @@ trait Renderers {
     }
   }
 
-  def bar(
+  def bar[F: FC](
       xCol: Int = 0,
       yCol: Int = 1,
       fillCol: Int = 2,
       horizontal: Boolean = false,
-      stroke: Stroke = Stroke(lineWidth),
+      stroke: StrokeConf = StrokeConf(lineWidth),
       strokeColor: Color = Color.black,
       fill: Colormap = Color.white,
       width: Double = 1,
@@ -475,7 +482,7 @@ trait Renderers {
           val shape1 = ShapeElem(
             rectangle,
             fill = color1,
-            stroke = Some(stroke),
+            stroke = Some(stroke.value),
             strokeColor = strokeColor
           ).transform(_ => tx)
 
@@ -531,7 +538,7 @@ trait Renderers {
           val shape1 = ShapeElem(
             rectangle,
             fill = color1,
-            stroke = Some(stroke),
+            stroke = Some(stroke.value),
             strokeColor = strokeColor
           ).transform(_ => tx)
 
@@ -546,11 +553,11 @@ trait Renderers {
   def abline(
       a: Double,
       b: Double,
-      renderer: DataRenderer = line()
+      renderer: DataRenderer
   ) =
     (dataSourceFromRows(Seq(a -> b)), List(renderer))
 
-  def boxwhisker(
+  def boxwhisker[F: FC](
       xCol: Int = 0,
       medianCol: Int = 1,
       q1Col: Int = 2,
@@ -560,7 +567,7 @@ trait Renderers {
       x2Col: Int = 6,
       fillCol: Int = 7,
       width: Double = 1,
-      stroke: Stroke = Stroke(lineWidth),
+      stroke: StrokeConf = StrokeConf(lineWidth),
       strokeColor: Color = Color.black,
       fill: Colormap = Color.white
   ) = new DataRenderer {
@@ -607,7 +614,7 @@ trait Renderers {
         val shape1 = ShapeElem(
           Shape.rectangle(vX - vWidth * 0.5, vQ3, vWidth, vHeight),
           fill = color1,
-          stroke = Some(stroke),
+          stroke = Some(stroke.value),
           strokeColor = strokeColor
         ).transform(_ => tx)
 
@@ -617,7 +624,7 @@ trait Renderers {
           Shape
             .line(Point(vX - vWidth * 0.5, vQ2), Point(vX + vWidth * 0.5, vQ2)),
           fill = color1,
-          stroke = Some(stroke),
+          stroke = Some(stroke.value),
           strokeColor = strokeColor
         ).transform(_ => tx)
 
@@ -626,7 +633,7 @@ trait Renderers {
         val shape3 = ShapeElem(
           Shape.line(Point(vX, vQ1), Point(vX, vMin)),
           fill = color1,
-          stroke = Some(stroke),
+          stroke = Some(stroke.value),
           strokeColor = strokeColor
         ).transform(_ => tx)
 
@@ -635,7 +642,7 @@ trait Renderers {
         val shape4 = ShapeElem(
           Shape.line(Point(vX, vQ3), Point(vX, vMax)),
           fill = color1,
-          stroke = Some(stroke),
+          stroke = Some(stroke.value),
           strokeColor = strokeColor
         ).transform(_ => tx)
 
@@ -645,13 +652,13 @@ trait Renderers {
     }
   }
 
-  def lineSegment(
+  def lineSegment[F: FC](
       xCol: Int = 0,
       yCol: Int = 1,
       x2Col: Int = 2,
       y2Col: Int = 3,
       colorCol: Int = 4,
-      stroke: Stroke = Stroke(lineWidth),
+      stroke: StrokeConf = StrokeConf(lineWidth, CapRound),
       color: Colormap = HeatMapColors(0, 1)
   ) = new DataRenderer {
 
@@ -667,7 +674,7 @@ trait Renderers {
       Some(MinMaxImpl(math.min(m1.min, m2.min), math.max(m1.max, m2.max)))
     }
 
-    def asLegend = Some(LineLegend(stroke, color(0)))
+    def asLegend = Some(LineLegend(stroke.value, color(0)))
 
     def render[R <: RenderingContext](
         data: Row,
@@ -699,7 +706,7 @@ trait Renderers {
         val shape1 = ShapeElem(
           Shape.line(p, p2),
           strokeColor = color1,
-          stroke = Some(stroke.copy(cap = CapRound))
+          stroke = Some(stroke.value)
         ).transform(_ => tx)
 
         re.render(ctx, shape1)

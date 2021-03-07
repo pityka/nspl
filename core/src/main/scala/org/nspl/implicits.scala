@@ -4,9 +4,15 @@ import org.nspl.data._
 /* Provided various implicit conversions to PlotData */
 trait ImplicitConversions {
   type PlotData = (DataSource, List[DataRenderer], LegendConfig)
-  implicit def dsToTuple1[T, F: FC](ds: T)(
-      implicit f: T => DataSource): PlotData =
+  type PlotData3D = (DataSource, List[DataRenderer3D], LegendConfig)
+  implicit def dsToTuple1[T, F: FC](
+      ds: T
+  )(implicit f: T => DataSource): PlotData =
     (ds, List(point()), NotInLegend)
+  // implicit def ds3DToTuple1[T, F: FC](
+  //     ds: T
+  // )(implicit f: T => DataSource): PlotData3D =
+  //   (ds, List(point3D()), NotInLegend)
 
   implicit def dsToTuple2a[T, F: FC](ds: (T, LegendConfig))(
       implicit f: T => DataSource
@@ -23,7 +29,8 @@ trait ImplicitConversions {
   ): PlotData = (ds._1._1, List(ds._1._2), ds._2)
 
   implicit def dsToTuple3d[T, F: FC](
-      ds: ((T, List[DataRenderer]), LegendConfig))(
+      ds: ((T, List[DataRenderer]), LegendConfig)
+  )(
       implicit f: T => DataSource
   ): PlotData = (ds._1._1, ds._1._2, ds._2)
 
@@ -45,7 +52,8 @@ trait ImplicitConversions {
     ds.map(x => (f(x._1), x._2, NotInLegend))
 
   implicit def listConv2[T, F: FC](
-      ds: Seq[(T, List[DataRenderer], LegendConfig)])(
+      ds: Seq[(T, List[DataRenderer], LegendConfig)]
+  )(
       implicit f: T => DataSource
   ): Seq[PlotData] =
     ds.map(x => (f(x._1), x._2, x._3))

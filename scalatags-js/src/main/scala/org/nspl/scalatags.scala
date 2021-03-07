@@ -25,9 +25,7 @@ object scalatagrenderer {
 
   type SER[T] = Renderer[T, ScalaTagRC]
 
-  implicit class PimpedColor(c: Color) {
-    def css = f"#${c.r}%02x${c.g}%02x${c.b}%02x"
-  }
+  def cssColor(c: org.nspl.Color) = f"#${c.r}%02x${c.g}%02x${c.b}%02x"
 
   implicit class Pimp[K <: Renderable[K]](t: K) {
     def render(ctx: ScalaTagRC)(implicit r: SER[K]) = r.render(ctx, t)
@@ -68,52 +66,15 @@ object scalatagrenderer {
         rootElem.removeChild(rootElem.firstChild)
       }
       ctx.elems.foreach(n => rootElem.appendChild(n.render))
-      ctx.elems.clear
+      ctx.elems.clear()
     }
 
     def getCanvasCoordinate(e: MouseEvent): Point = {
-      val rect = rootElem.getBoundingClientRect
+      val rect = rootElem.getBoundingClientRect()
       val x = e.clientX - rect.left;
       val y = e.clientY - rect.top;
       Point(x, y)
     }
-
-    def onmousedown(e: MouseEvent) = {
-      if (e.button == 0) {
-        val componentBounds: Bounds = rootElem.getBoundingClientRect
-        val p = getCanvasCoordinate(e)
-        dragStart = mapPoint(p, componentBounds, paintableElem.bounds)
-        mousedown = true
-      }
-    }
-
-    def makeEvent(e: MouseEvent, up: Boolean) = {
-      if (e.button == 0 && mousedown) {
-        val componentBounds: Bounds = rootElem.getBoundingClientRect
-        val p = mapPoint(getCanvasCoordinate(e),
-                         componentBounds,
-                         paintableElem.bounds)
-
-        val v = Point(dragStart.x - p.x, dragStart.y - p.y)
-        val l = math.sqrt(v.x * v.x + v.y * v.y)
-        if (l > 0) {
-          paintableElem = elem(Some(paintableElem) -> Drag(dragStart, p))
-          dragStart = p
-        } else {
-          if (up) {
-            paintableElem = elem(Some(paintableElem) -> Click(p))
-          }
-        }
-        if (up) {
-          mousedown = false
-        }
-        paint
-      }
-    }
-
-    rootElem.onmousedown = onmousedown _
-    rootElem.onmouseup = makeEvent((_: MouseEvent), true)
-    rootElem.onmousemove = makeEvent((_: MouseEvent), false)
 
     paint
 
@@ -123,69 +84,75 @@ object scalatagrenderer {
 
   implicit val shapeRenderer = new SER[ShapeElem] {
     def render(ctx: ScalaTagRC, elem: ShapeElem): Unit = {
+      if (elem.fill.a > 0d || (elem.stroke.isDefined && elem.strokeColor.a > 0)) {
+        val svgShape = elem.shape match {
+          case Rectangle(x1, y1, w1, h1, tx, _) => {
+            rect(
+              x := x1.toString,
+              y := y1,
+              svgAttrs.width := w1,
+              svgAttrs.height := h1,
+              svgAttrs.transform := tx.svg
+            )
+          }
+          case Ellipse(x, y, w, h, tx) => {
+            val centerX = x + .5 * w
+            val centerY = y + .5 * h
+            val radiusX = w * .5
+            val radiusY = h * .5
+            ellipse(
+              cx := centerX,
+              cy := centerY,
+              rx := radiusX,
+              ry := radiusY,
+              svgAttrs.transform := tx.svg
+            )
+          }
+          case Line(a, b, c, d) => {
+            svgTags.line(x1 := a, y1 := b, x2 := c, y2 := d)
+          }
+          case SimplePath(ps) => {
+            polyline(
+              points := ps
+                .map { p =>
+                  p.x.toString + " " + p.y.toString
+                }
+                .mkString(" ")
+            )
+          }
+          case Path(ops) => {
+            path(
+              d := ops map {
+                case MoveTo(Point(x, y))                  => s"M$x,$y"
+                case LineTo(Point(x, y))                  => s"L$x,$y"
+                case QuadTo(Point(x2, y2), Point(x1, y1)) => s"Q$x1,$y1,$x2,$y2"
+                case _                                    => ???
+                // case CubicTo(Point(x3, y3), Point(x1, y1), Point(x2, y2)) => path.curveTo(x1, y1, x2, y2, x3, y3)
+              } mkString (" ")
+            )
+          }
+        }
 
-      val svgShape = elem.shape match {
-        case Rectangle(x1, y1, w1, h1, tx, _) => {
-          rect(x := x1.toString,
-               y := y1,
-               svgAttrs.width := w1,
-               svgAttrs.height := h1,
-               svgAttrs.transform := tx.svg)
-        }
-        case Ellipse(x, y, w, h, tx) => {
-          val centerX = x + .5 * w
-          val centerY = y + .5 * h
-          val radiusX = w * .5
-          val radiusY = h * .5
-          ellipse(cx := centerX,
-                  cy := centerY,
-                  rx := radiusX,
-                  ry := radiusY,
-                  svgAttrs.transform := tx.svg)
-        }
-        case Line(a, b, c, d) => {
-          svgTags.line(x1 := a, y1 := b, x2 := c, y2 := d)
-        }
-        case SimplePath(ps) => {
-          polyline(
-            points := ps
-              .map { p =>
-                p.x + " " + p.y
-              }
-              .mkString(" ")
-          )
-        }
-        case Path(ops) => {
-          path(
-            d := ops map {
-              case MoveTo(Point(x, y))                  => s"M$x,$y"
-              case LineTo(Point(x, y))                  => s"L$x,$y"
-              case QuadTo(Point(x2, y2), Point(x1, y1)) => s"Q$x1,$y1,$x2,$y2"
-              // case CubicTo(Point(x3, y3), Point(x1, y1), Point(x2, y2)) => path.curveTo(x1, y1, x2, y2, x3, y3)
-            } mkString (" ")
-          )
-        }
+        val filled =
+          if (elem.fill.a > 0.0)
+            svgShape(fill := cssColor(elem.fill))
+          else svgShape(fill := "none")
+
+        val stroked =
+          if (elem.stroke.isDefined && elem.strokeColor.a > 0)
+            filled(
+              stroke := cssColor(elem.strokeColor),
+              strokeWidth := elem.stroke.get.width,
+              strokeLinecap := (elem.stroke.get.cap match {
+                case CapRound  => "round"
+                case CapButt   => "butt"
+                case CapSquare => "square"
+              })
+            )
+          else filled
+
+        ctx.elems.append(stroked)
       }
-
-      val filled =
-        if (elem.fill.a > 0.0)
-          svgShape(fill := elem.fill.css)
-        else svgShape(fill := "none")
-
-      val stroked =
-        if (elem.stroke.isDefined && elem.strokeColor.a > 0)
-          filled(
-            stroke := elem.strokeColor.css,
-            strokeWidth := elem.stroke.get.width,
-            strokeLinecap := (elem.stroke.get.cap match {
-              case CapRound  => "round"
-              case CapButt   => "butt"
-              case CapSquare => "square"
-            })
-          )
-        else filled
-
-      ctx.elems.append(stroked)
 
     }
   }

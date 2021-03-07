@@ -14,12 +14,9 @@ object Test {
   @JSExport
   def bind(n: Node): Unit = {
     println("Hi")
-    val canvas = dom.document.createElement("canvas").asInstanceOf[html.Canvas]
 
-    n.appendChild(canvas)
-
-    def random = 1 to 1000 map (i => scala.util.Random.nextDouble)
-    def random2 = 1 to 1000 map (i => scala.util.Random.nextGaussian)
+    def random = 1 to 1000 map (i => scala.util.Random.nextDouble())
+    def random2 = 1 to 1000 map (i => scala.util.Random.nextGaussian())
 
     val x = random
     val y = random
@@ -28,7 +25,11 @@ object Test {
     val z3 = random2
     val idx = 0 until x.size map (_.toDouble)
 
-    val p1 = xyplot(indexed(x))(ylab = "x", xlab = "index", main = "main")
+    val p1 = xyplot(indexed(x) -> point(shapes = Vector(shapeList(0))))(
+      ylab = "x",
+      xlab = "index",
+      main = "main"
+    )
 
     val p2 = xyplot(
       density(x) -> line()
@@ -71,19 +72,65 @@ object Test {
       200
     )
 
+    val cubeVertex: DataSource = List(
+      (0d, 0d, 0d),
+      (100d, 0d, 0d),
+      (100d, 100d, 0d),
+      (100d, 100d, 0d),
+      (100d, 0d, 100d)
+    )
+
+    val cube: DataSource =
+      List(
+        (0d, 0d, 0d),
+        (100d, 0d, 0d),
+        (100d, 0d, 0d),
+        (100d, 100d, 0d),
+        (100d, 100d, 0d),
+        (0d, 100d, 0d),
+        (0d, 100d, 0d),
+        (0d, 0d, 0d),
+        (0d, 0d, 100d),
+        (100d, 0d, 100d),
+        (100d, 0d, 100d),
+        (100d, 100d, 100d),
+        (100d, 100d, 100d),
+        (0d, 100d, 100d),
+        (0d, 100d, 100d),
+        (0d, 0d, 100d),
+        (0d, 0d, 0d),
+        (0d, 0d, 100d),
+        (100d, 0d, 0d),
+        (100d, 0d, 100d),
+        (100d, 100d, 0d),
+        (100d, 100d, 100d),
+        (0d, 100d, 0d),
+        (0d, 100d, 100d)
+      ).grouped(2)
+        .toList
+        .map(v => (v(0)._1, v(0)._2, v(0)._3, v(1)._1, v(1)._2, v(1)._3))
+
+    val xyzp = xyzplot(
+      (cube, List(lineSegment3D()), NotInLegend),
+      (cubeVertex, List(point3D()), NotInLegend)
+    )()
+
     val gallery = group(
+      xyzp,
       p1,
-      p2,
+      // p2,
       // p2,
       // p3,
       // p4,
       // p5,
       // p6,
       // text,
-      ColumnLayout(3)
+      VerticalStack()
     )
 
-    render(gallery, canvas, 800)
+    val (canvas, update) = render(gallery, 800, 800, println)
+
+    n.appendChild(canvas)
 
     println("Bye")
   }

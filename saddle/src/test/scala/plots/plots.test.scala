@@ -1,6 +1,6 @@
 package org.nspl
-import org.scalatest.FunSpec
-import org.scalatest.Matchers
+import org.scalatest.funspec.{AnyFunSpec => FunSpec}
+import org.scalatest.matchers.should.Matchers
 
 import org.nspl.saddle._
 import org.nspl.data._
@@ -25,7 +25,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
           ),
         recordSeparator = "\n"
       )
-      .right
+      .toOption
       .get
 
   describe("plots") {
@@ -83,7 +83,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
 
       val density1 = xyplot(
         density(rotated.firstCol("PC1").toVec.toSeq) -> line(
-          stroke = Stroke(3d)
+          stroke = StrokeConf(1 fts)
         )
       )(xlab = "PC1", ylab = "dens.", main = "Loading distribution")
 
@@ -97,7 +97,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
             x._1 -> PointLegend(
               shape = Shape.rectangle(0, 0, 1, 1),
               color = DiscreteColors(spec2Num.size)(x._2)
-          )
+            )
         ),
         xlab = "Sepal.Length",
         ylab = "Sepal.Width",
@@ -120,7 +120,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
             x._1 -> PointLegend(
               shape = Shape.rectangle(0, 0, 1, 1),
               color = DiscreteColors(spec2Num.size)(x._2)
-          )
+            )
         ),
         xlab = "PC1",
         ylab = "PC2",
@@ -146,7 +146,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
             x._1 -> PointLegend(
               shape = Shape.rectangle(0, 0, 1, 1),
               color = DiscreteColors(spec2Num.size)(x._2)
-          )
+            )
         ),
         xlab = "PC2",
         ylab = "PC3",
@@ -185,6 +185,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
 
       val empty2 =
         xyplotarea(
+          id = "sffasfsdfdf",
           Nil,
           AxisSettings(LinearAxisFactory),
           AxisSettings(LinearAxisFactory),
@@ -193,7 +194,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
           ylim = Some(-1d -> 1d)
         )
 
-      val rs = (1 to 99 map (i => scala.util.Random.nextGaussian)).toSeq :+ 1e3
+      val rs = (1 to 99 map (i => scala.util.Random.nextGaussian())).toSeq :+ 1e3
 
       val p6 = rasterplot(
         rasterFromSeq(rs, 10, 10),
@@ -224,7 +225,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
 
       val barplot2 = {
         val dataraw
-          : IndexedSeq[(Double, Double, Double, Double)] = 1 to 100 map (
+            : IndexedSeq[(Double, Double, Double, Double)] = 1 to 100 map (
             i =>
               (
                 i.toDouble,
@@ -232,7 +233,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
                 scala.util.Random.nextInt(101 - i).toDouble,
                 scala.util.Random.nextInt(50).toDouble
               )
-        )
+          )
 
         stackedBarPlot(
           dataraw,
@@ -322,7 +323,7 @@ class SaddlePlotSpec extends FunSpec with Matchers {
               x._1 -> PointLegend(
                 shape = Shape.rectangle(0, 0, 1, 1),
                 color = DiscreteColors(spec2Num.size)(x._2)
-            )
+              )
           ),
           xlab = "PC1",
           ylab = "PC2",

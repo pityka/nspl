@@ -8,15 +8,16 @@ import org.scalajs.dom.html
 
 import scala.scalajs.js
 import js.annotation.JSExport
+import scala.scalajs.js.annotation.JSExportTopLevel
 
-@JSExport
+@JSExportTopLevel("TestSvg")
 object TestSvg {
   @JSExport
   def bind(n: Node): Unit = {
     println("Hi")
 
-    def random = 1 to 1000 map (i => scala.util.Random.nextDouble)
-    def random2 = 1 to 1000 map (i => scala.util.Random.nextGaussian)
+    def random = 1 to 1000 map (i => scala.util.Random.nextDouble())
+    def random2 = 1 to 1000 map (i => scala.util.Random.nextGaussian())
 
     val x = random
     val y = random
@@ -37,7 +38,8 @@ object TestSvg {
       (x zip y zip z map (x => (x._1._1, x._1._2, x._2, x._2 * 10))) -> point(
         color = HeatMapColors(0.0, 1.0),
         shapeCol = 3,
-        sizeCol = 5)
+        sizeCol = 5
+      )
     )()
 
     val p5 = binnedboxplot(x, y, xlab = "PC2", ylab = "PC3")
@@ -45,7 +47,8 @@ object TestSvg {
     val p6 = rasterplot(
       rasterFromStream(z3.iterator, 30, 30, MinMaxImpl(0.0, 1.0)),
       xFontSize = 0.5 fts,
-      yFontSize = 0.5 fts)
+      yFontSize = 0.5 fts
+    )
 
     val text = fitToWidth(
       group(

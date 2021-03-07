@@ -9,20 +9,22 @@ case object Anchor extends Alignment
 
 /* A Layout which does nothing. */
 object FreeLayout extends Layout {
-  def apply(s: Seq[Bounds]) = s
+  def apply[F: FC](s: Seq[Bounds]) = s
 }
 
 case class RelativeToFirst(x: Double, y: Double) extends Layout {
-  def apply(s: Seq[Bounds]) = {
+  def apply[F: FC](s: Seq[Bounds]) = {
     if (s.isEmpty) Nil
     else {
       val first = s.head
       first +: s.drop(1).map { b =>
-        Bounds(first.x + x,
-               first.y + y,
-               b.w,
-               b.h,
-               b.anchor.map(_.translate(b.x - first.x - x, b.y - first.y - y)))
+        Bounds(
+          first.x + x,
+          first.y + y,
+          b.w,
+          b.h,
+          b.anchor.map(_.translate(b.x - first.x - x, b.y - first.y - y))
+        )
       }
     }
   }
@@ -32,9 +34,11 @@ case class RelativeToFirst(x: Double, y: Double) extends Layout {
   * A Layout which stacks elements on top of each other
   *  and aligns the horizontal axis.
   */
-case class VerticalStack(alignment: Alignment = Left, gap: Double = 0.0)
-    extends Layout {
-  def apply(s: Seq[Bounds]) = {
+case class VerticalStack(
+    alignment: Alignment = Left,
+    gap: RelFontSize = 0.0 fts
+) extends Layout {
+  def apply[F: FC](s: Seq[Bounds]) = {
     if (s.isEmpty) Nil
     else {
       val maxWidthElem = s.maxBy(_.w)
@@ -58,13 +62,16 @@ case class VerticalStack(alignment: Alignment = Left, gap: Double = 0.0)
       s.foldLeft(s.map(_.y).min -> Seq[Bounds]()) {
           case ((y, seq), bounds) =>
             val xp = xpos(bounds.w, bounds.x, bounds.anchor)
-            (y + bounds.h + gap,
-             seq :+ Bounds(
-               xp,
-               y,
-               bounds.w,
-               bounds.h,
-               bounds.anchor.map(_.translate(xp - bounds.x, y - bounds.y))))
+            (
+              y + bounds.h + gap.value,
+              seq :+ Bounds(
+                xp,
+                y,
+                bounds.w,
+                bounds.h,
+                bounds.anchor.map(_.translate(xp - bounds.x, y - bounds.y))
+              )
+            )
         }
         ._2
     }
@@ -75,9 +82,9 @@ case class VerticalStack(alignment: Alignment = Left, gap: Double = 0.0)
   * A Layout which stacks elements beside each other
   *  and aligns the vertical axis.
   */
-case class HorizontalStack(alignment: Alignment, gap: Double = 0.0)
+case class HorizontalStack(alignment: Alignment, gap: RelFontSize = 0.0 fts)
     extends Layout {
-  def apply(s: Seq[Bounds]) = {
+  def apply[F: FC](s: Seq[Bounds]) = {
     if (s.isEmpty) Nil
     else {
       val maxHeightElem = s.maxBy(_.h)
@@ -100,13 +107,16 @@ case class HorizontalStack(alignment: Alignment, gap: Double = 0.0)
       s.foldLeft(s.map(_.x).min -> List[Bounds]()) {
           case ((x, seq), elem) =>
             val yp = ypos(elem.h, elem.y, elem.anchor)
-            (x + elem.w + gap,
-             Bounds(
-               x,
-               yp,
-               elem.w,
-               elem.h,
-               elem.anchor.map(_.translate(x - elem.x, yp - elem.y))) :: seq)
+            (
+              x + elem.w + gap.value,
+              Bounds(
+                x,
+                yp,
+                elem.w,
+                elem.h,
+                elem.anchor.map(_.translate(x - elem.x, yp - elem.y))
+              ) :: seq
+            )
         }
         ._2
         .reverse
@@ -128,9 +138,11 @@ object LayoutHelper {
     }
   }
 
-  def alignRowsToAnchors(table: Seq[Seq[Bounds]],
-                         horizontalGap: Double,
-                         verticalGap: Double) = {
+  def alignRowsToAnchors[F: FC](
+      table: Seq[Seq[Bounds]],
+      horizontalGap: RelFontSize,
+      verticalGap: RelFontSize
+  ) = {
 
     val horiz = HorizontalStack(Anchor, horizontalGap)
     val vertic = VerticalStack(Anchor, verticalGap)
@@ -160,9 +172,11 @@ object LayoutHelper {
         Bounds(c, r, b.w, b.h, b.anchor)
     }
   }
-  def alignColumnsToAnchors(table: Seq[Seq[Bounds]],
-                            horizontalGap: Double,
-                            verticalGap: Double) = {
+  def alignColumnsToAnchors[F: FC](
+      table: Seq[Seq[Bounds]],
+      horizontalGap: RelFontSize,
+      verticalGap: RelFontSize
+  ) = {
 
     val horiz = HorizontalStack(Anchor, horizontalGap)
     val vertic = VerticalStack(Anchor, verticalGap)
@@ -195,39 +209,47 @@ object LayoutHelper {
 }
 
 /* A Layout which puts elements into rows.*/
-case class TableLayout(columns: Int,
-                       horizontalGap: Double = 2.5 fts,
-                       verticalGap: Double = 2.5 fts)
-    extends Layout {
+case class TableLayout(
+    columns: Int,
+    horizontalGap: RelFontSize = 0.5 fts,
+    verticalGap: RelFontSize = 0.5 fts
+) extends Layout {
 
-  def apply(s: Seq[Bounds]) = {
+  def apply[F: FC](s: Seq[Bounds]) = {
     if (s.isEmpty) s
     else
-      LayoutHelper.alignRowsToAnchors(s.grouped(columns).toList,
-                                      horizontalGap,
-                                      verticalGap)
+      LayoutHelper.alignRowsToAnchors(
+        s.grouped(columns).toList,
+        horizontalGap,
+        verticalGap
+      )
   }
 }
 
 /* A Layout which puts elements into columns.*/
-case class ColumnLayout(numRows: Int,
-                        horizontalGap: Double = 2.5 fts,
-                        verticalGap: Double = 2.5 fts)
-    extends Layout {
-  def apply(s: Seq[Bounds]) = {
+case class ColumnLayout(
+    numRows: Int,
+    horizontalGap: RelFontSize = 0.5 fts,
+    verticalGap: RelFontSize = 0.5 fts
+) extends Layout {
+  def apply[F: FC](s: Seq[Bounds]) = {
     if (s.isEmpty) s
     else
-      LayoutHelper.alignColumnsToAnchors(s.grouped(numRows).toList,
-                                         horizontalGap,
-                                         verticalGap)
+      LayoutHelper.alignColumnsToAnchors(
+        s.grouped(numRows).toList,
+        horizontalGap,
+        verticalGap
+      )
   }
 }
 
 object AlignTo {
 
-  def horizontal[T <: Renderable[T]](move: T,
-                                     reference: Bounds,
-                                     alignment: Alignment): T =
+  def horizontal[T <: Renderable[T]](
+      move: T,
+      reference: Bounds,
+      alignment: Alignment
+  ): T =
     alignment match {
       case Left        => horizontalLeft(move, reference)
       case Right       => horizontalRight(move, reference)
@@ -236,9 +258,11 @@ object AlignTo {
       case Anchor      => horizontalAnchor(move, reference)
     }
 
-  def vertical[T <: Renderable[T]](move: T,
-                                   reference: Bounds,
-                                   alignment: Alignment): T = alignment match {
+  def vertical[T <: Renderable[T]](
+      move: T,
+      reference: Bounds,
+      alignment: Alignment
+  ): T = alignment match {
     case Left        => verticalLeft(move, reference)
     case Right       => verticalRight(move, reference)
     case Center      => verticalCenter(move, reference)
@@ -247,21 +271,30 @@ object AlignTo {
   }
 
   def horizontalRight[T <: Renderable[T]](move: T, reference: Bounds): T =
-    fitToBounds(move,
-                Bounds(reference.x + reference.w - move.bounds.w,
-                       move.bounds.y,
-                       move.bounds.w,
-                       move.bounds.h))
+    fitToBounds(
+      move,
+      Bounds(
+        reference.x + reference.w - move.bounds.w,
+        move.bounds.y,
+        move.bounds.w,
+        move.bounds.h
+      )
+    )
   def horizontalLeft[T <: Renderable[T]](move: T, reference: Bounds): T =
     fitToBounds(
       move,
-      Bounds(reference.x, move.bounds.y, move.bounds.w, move.bounds.h))
+      Bounds(reference.x, move.bounds.y, move.bounds.w, move.bounds.h)
+    )
   def horizontalCenter[T <: Renderable[T]](move: T, reference: Bounds): T =
-    fitToBounds(move,
-                Bounds(reference.x + (reference.w - move.bounds.w) * 0.5,
-                       move.bounds.y,
-                       move.bounds.w,
-                       move.bounds.h))
+    fitToBounds(
+      move,
+      Bounds(
+        reference.x + (reference.w - move.bounds.w) * 0.5,
+        move.bounds.y,
+        move.bounds.w,
+        move.bounds.h
+      )
+    )
   def horizontalAnchor[T <: Renderable[T]](move: T, reference: Bounds): T =
     fitToBounds(
       move,
@@ -278,11 +311,15 @@ object AlignTo {
     )
 
   def verticalRight[T <: Renderable[T]](move: T, reference: Bounds): T =
-    fitToBounds(move,
-                Bounds(move.bounds.x,
-                       reference.y + reference.h - move.bounds.h,
-                       move.bounds.w,
-                       move.bounds.h))
+    fitToBounds(
+      move,
+      Bounds(
+        move.bounds.x,
+        reference.y + reference.h - move.bounds.h,
+        move.bounds.w,
+        move.bounds.h
+      )
+    )
 
   def verticalAnchor[T <: Renderable[T]](move: T, reference: Bounds): T =
     fitToBounds(
@@ -299,40 +336,61 @@ object AlignTo {
       )
     )
 
-  def verticalGapAfterReference[T <: Renderable[T]](move: T,
-                                                    reference: Bounds,
-                                                    gap: Double): T =
-    fitToBounds(move,
-                Bounds(move.bounds.x,
-                       reference.y + reference.h + gap,
-                       move.bounds.w,
-                       move.bounds.h))
+  def verticalGapAfterReference[T <: Renderable[T]](
+      move: T,
+      reference: Bounds,
+      gap: Double
+  ): T =
+    fitToBounds(
+      move,
+      Bounds(
+        move.bounds.x,
+        reference.y + reference.h + gap,
+        move.bounds.w,
+        move.bounds.h
+      )
+    )
 
-  def verticalGapBeforeReference[T <: Renderable[T]](move: T,
-                                                     reference: Bounds,
-                                                     gap: Double): T =
-    fitToBounds(move,
-                Bounds(move.bounds.x,
-                       reference.y - gap - move.bounds.h,
-                       move.bounds.w,
-                       move.bounds.h))
+  def verticalGapBeforeReference[T <: Renderable[T]](
+      move: T,
+      reference: Bounds,
+      gap: Double
+  ): T =
+    fitToBounds(
+      move,
+      Bounds(
+        move.bounds.x,
+        reference.y - gap - move.bounds.h,
+        move.bounds.w,
+        move.bounds.h
+      )
+    )
   def verticalLeft[T <: Renderable[T]](move: T, reference: Bounds): T =
     fitToBounds(
       move,
-      Bounds(move.bounds.x, reference.y, move.bounds.w, move.bounds.h))
+      Bounds(move.bounds.x, reference.y, move.bounds.w, move.bounds.h)
+    )
   def verticalCenter[T <: Renderable[T]](move: T, reference: Bounds): T =
-    fitToBounds(move,
-                Bounds(move.bounds.x,
-                       reference.y + (reference.h - move.bounds.h) * 0.5,
-                       move.bounds.w,
-                       move.bounds.h))
+    fitToBounds(
+      move,
+      Bounds(
+        move.bounds.x,
+        reference.y + (reference.h - move.bounds.h) * 0.5,
+        move.bounds.w,
+        move.bounds.h
+      )
+    )
 
   def center[T <: Renderable[T]](move: T, reference: Bounds): T =
-    fitToBounds(move,
-                Bounds(reference.x + (reference.w - move.bounds.w) * 0.5,
-                       reference.y + (reference.h - move.bounds.h) * 0.5,
-                       move.bounds.w,
-                       move.bounds.h))
+    fitToBounds(
+      move,
+      Bounds(
+        reference.x + (reference.w - move.bounds.w) * 0.5,
+        reference.y + (reference.h - move.bounds.h) * 0.5,
+        move.bounds.w,
+        move.bounds.h
+      )
+    )
 
   def topLeftCorner[T <: Renderable[T]](move: T, reference: Bounds): T =
     verticalLeft(horizontalLeft(move, reference), reference)

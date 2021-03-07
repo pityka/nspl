@@ -3,12 +3,14 @@ package org.nspl
 /**
   * 2D Affine Transformation Matrix in row major order
   */
-case class AffineTransform(m0: Double,
-                           m1: Double,
-                           m2: Double,
-                           m3: Double,
-                           m4: Double,
-                           m5: Double) {
+case class AffineTransform(
+    m0: Double,
+    m1: Double,
+    m2: Double,
+    m3: Double,
+    m4: Double,
+    m5: Double
+) {
 
   def inverse = {
     val a = m0
@@ -23,6 +25,18 @@ case class AffineTransform(m0: Double,
     val idx = -1 * (ia * m2 + ib * m5)
     val idy = -1 * (ic * m2 + id * m5)
     AffineTransform(ia, ib, idx, ic, id, idy)
+  }
+
+  def transform(x: Double, y: Double): Point = {
+    val bx = m2
+    val by = m5
+    val a00 = m0
+    val a01 = m1
+    val a10 = m3
+    val a11 = m4
+    val nx = bx + a00 * x + a01 * y
+    val ny = by + a10 * x + a11 * y
+    Point(nx, ny)
   }
 
   // 0  1  2  3  4  5  6  7  8
@@ -41,32 +55,28 @@ case class AffineTransform(m0: Double,
     Point(nx, ny)
   }
   def transform(b: Bounds): Bounds = {
-    val topLeft = transform(Point(b.x, b.y))
-    val topRight = transform(Point(b.x + b.w, b.y))
-    val bottomRight = transform(Point(b.x + b.w, b.y + b.h))
-    val bottomLeft = transform(Point(b.x, b.y + b.h))
+    val topLeft = transform(b.x, b.y)
+    val topRight = transform(b.x + b.w, b.y)
+    val bottomRight = transform(b.x + b.w, b.y + b.h)
+    val bottomLeft = transform(b.x, b.y + b.h)
     val transformedAnchor = b.anchor.map(p => transform(p))
 
-    val pointsX = Array(topLeft.x, topRight.x, bottomRight.x, bottomLeft.x)
-    val pointsY = Array(topLeft.y, topRight.y, bottomRight.y, bottomLeft.y)
-
-    var nx = Double.MaxValue
-    var nx2 = Double.MinValue
-    var ny = Double.MaxValue
-    var ny2 = Double.MinValue
-
-    var i = 0
-    while (i < 4) {
-      val x = pointsX(i)
-      val y = pointsY(i)
-
-      if (x < nx) { nx = x }
-      if (x > nx2) { nx2 = x }
-      if (y < ny) { ny = y }
-      if (y > ny2) { ny2 = y }
-
-      i += 1
-    }
+    val nx = math.min(
+      topLeft.x,
+      math.min(topRight.x, math.min(bottomRight.x, bottomLeft.x))
+    )
+    val nx2 = math.max(
+      topLeft.x,
+      math.max(topRight.x, math.max(bottomRight.x, bottomLeft.x))
+    )
+    val ny = math.min(
+      topLeft.y,
+      math.min(topRight.y, math.min(bottomRight.y, bottomLeft.y))
+    )
+    val ny2 = math.max(
+      topLeft.y,
+      math.max(topRight.y, math.max(bottomRight.y, bottomLeft.y))
+    )
 
     val width = math.abs(nx2 - nx)
     val height = math.abs(ny2 - ny)
@@ -81,6 +91,25 @@ case class AffineTransform(m0: Double,
     m3 * tx.m1 + m4 * tx.m4,
     m3 * tx.m2 + m4 * tx.m5 + m5
   )
+
+  def concatTranslate(x: Double, y: Double) = AffineTransform(
+    m0,
+    m1,
+    m0 * x + m1 * y + m2,
+    m3,
+    m4,
+    m3 * x + m4 * y + m5
+  )
+
+  def concatScale(x: Double, y: Double) =
+    AffineTransform(
+      m0 * x,
+      m1 * y,
+      m2,
+      m3 * x,
+      m4 * y,
+      m5
+    )
 }
 
 object AffineTransform {

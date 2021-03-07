@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-  </head>
+</head>
 
 <body style="padding: 0px; margin: 0px">
 
-<div id="plot"></div>
+  <div id="plot"></div>
 
-<script type="text/javascript" src="target/scala-2.11/nspl-core-canvas-js-fastopt.js"></script>
-<script>
-    org.nspl.Test().bind(document.getElementById("plot"));
-</script>
+  <script type="text/javascript" src="target/scala-2.13/nspl-canvas-js-fastopt.js"></script>
+  <script>
+    Test.bind(document.getElementById("plot"));
+  </script>
 </body>
+
 </html>

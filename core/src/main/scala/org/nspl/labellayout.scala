@@ -92,7 +92,7 @@ object LabelLayout {
 
   }
 
-  def many(points: Seq[(Bounds, Bounds)]) = {
+  def many(points: scala.collection.Seq[(Bounds, Bounds)]) = {
     var state = points
     var i = 1
     val n = 100
@@ -105,7 +105,11 @@ object LabelLayout {
     }
     state.map { case (point, rec) => (rec, LabelLayout.line(point, rec)) }
   }
-  def one(point: Bounds, rectangle: Bounds, others: Seq[Bounds]) = {
+  def one(
+      point: Bounds,
+      rectangle: Bounds,
+      others: scala.collection.Seq[Bounds]
+  ) = {
 
     def force(r: Bounds) = {
       var x = 0d

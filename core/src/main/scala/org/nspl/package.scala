@@ -10,6 +10,8 @@ package object nspl
     with Plots
     with SimplePlots
     with ImplicitConversions
+    with Plots3D
+    with Renderers3D
     with Events {
 
   type Build[A] = ((Option[A], Event)) => A // Option[A]
@@ -26,9 +28,6 @@ package object nspl
   implicit def baseFont(implicit fc: FontConfiguration): BaseFontSize =
     BaseFontSize(fc.font.size)
 
-  implicit def rel2ft(v: RelFontSize)(implicit s: FontConfiguration): Double =
-    v.v * s.font.size
-
   implicit class ConvD(v: Double) {
     def fts = RelFontSize(v)
   }
@@ -36,14 +35,15 @@ package object nspl
     def fts = RelFontSize(v.toDouble)
   }
   implicit class ConvRFS(v: RelFontSize) {
-    def value(implicit bs: FontConfiguration) = rel2ft(v)(bs)
+    def value(implicit bs: FontConfiguration) = v.value
   }
 
   def importFont(name: String)(implicit gm: GlyphMeasurer[NamedFont#F]) =
     GenericFontConfig(NamedFont(name, 10))(gm)
 
-  def mapEvent[A <: Renderable[A], B <: Renderable[B]](old: (Option[A], Event))(
-      f: A => B): (Option[B], Event) = old match {
+  def mapEvent[A <: Renderable[A], B <: Renderable[B]](
+      old: (Option[A], Event)
+  )(f: A => B): (Option[B], Event) = old match {
     case (None, BuildEvent) => None -> BuildEvent
     case (Some(old), e) =>
       val b = f(old)
@@ -60,7 +60,7 @@ package object nspl
     var maxY = Double.MinValue
 
     members1.foreach { t =>
-      if (t.w * t.h > 0) {
+      if (t.w > 0 || t.h > 0) {
         empty = false
         if (t.x < minX) {
           minX = t.x
@@ -86,8 +86,10 @@ package object nspl
     }
   }
 
-  def transform[T <: Renderable[T]](member: T,
-                                    tx: Bounds => AffineTransform): T =
+  def transform[T <: Renderable[T]](
+      member: T,
+      tx: Bounds => AffineTransform
+  ): T =
     member.transform(tx)
 
   def translate[T <: Renderable[T]](member: T, x: Double, y: Double): T =
@@ -136,20 +138,30 @@ package object nspl
     val bounds = Bounds(0, 0, width, height)
     fitToBounds(elem, bounds)
   }
+  def fitToHeight[T <: Renderable[T]](elem: T, height: Double) = {
+    val aspect = elem.bounds.w / elem.bounds.h
+    val width = (height * aspect).toInt
+    val bounds = Bounds(0, 0, width, height)
+    fitToBounds(elem, bounds)
+  }
 
-  def sequence[T <: Renderable[T]](members: Seq[T],
-                                   layout: Layout): ElemList[T] = {
+  def sequence[T <: Renderable[T], F: FC](
+      members: Seq[T],
+      layout: Layout
+  ): ElemList[T] = {
     val orig = members.map(_.bounds)
     val n = layout(orig)
     val transformed = n zip members map (x => fitToBounds(x._2, x._1))
     ElemList(transformed.toList)
   }
 
-  def sequence[T <: Renderable[T]](members: Seq[T]): ElemList[T] =
+  def sequence[T <: Renderable[T], F: FC](members: Seq[T]): ElemList[T] =
     sequence(members, FreeLayout)
 
-  def sequence[T <: Renderable[T]](members: Seq[Build[T]],
-                                   layout: Layout): Build[ElemList[T]] = {
+  def sequence[T <: Renderable[T], F: FC](
+      members: Seq[Build[T]],
+      layout: Layout
+  ): Build[ElemList[T]] = {
     case (Some(old), e: Event) =>
       val members1 = (old.members zip members) map {
         case (old, build) =>
@@ -161,42 +173,50 @@ package object nspl
     case _ => throw new RuntimeException("should not happen")
   }
 
-  def sequence[T <: Renderable[T]](members: Seq[Build[T]]): Build[ElemList[T]] =
+  def sequence[T <: Renderable[T], F: FC](
+      members: Seq[Build[T]]
+  ): Build[ElemList[T]] =
     sequence(members, FreeLayout)
 
-  def sequence2[T1 <: Renderable[T1], T2 <: Renderable[T2]](
+  def sequence2[T1 <: Renderable[T1], T2 <: Renderable[T2], F: FC](
       members: Seq[Either[T1, T2]],
-      layout: Layout): ElemList2[T1, T2] = {
+      layout: Layout
+  ): ElemList2[T1, T2] = {
     val bounds = members.map(_.fold(_.bounds, _.bounds))
 
     val n = layout(bounds)
 
-    val transformed = n zip members map (x =>
-      x._2 match {
-        case scala.util.Left(y) =>
-          scala.util.Left(fitToBounds(y, x._1))
-        case scala.util.Right(y) =>
-          scala.util.Right(fitToBounds(y, x._1))
-      })
+    val transformed = n zip members map (
+        x =>
+          x._2 match {
+            case scala.util.Left(y) =>
+              scala.util.Left(fitToBounds(y, x._1))
+            case scala.util.Right(y) =>
+              scala.util.Right(fitToBounds(y, x._1))
+          }
+      )
     ElemList2(transformed)
   }
 
-  def sequence2[T1 <: Renderable[T1], T2 <: Renderable[T2]](
+  def sequence2[T1 <: Renderable[T1], T2 <: Renderable[T2], F: FC](
       members1: Seq[Either[Build[T1], Build[T2]]],
-      layout: Layout): Build[ElemList2[T1, T2]] = {
+      layout: Layout
+  ): Build[ElemList2[T1, T2]] = {
     case (None, BuildEvent) =>
-      sequence2(members1.map(
-                  _.fold(x => scala.util.Left(x.build),
-                         x => scala.util.Right(x.build))),
-                layout)
+      sequence2(
+        members1.map(
+          _.fold(x => scala.util.Left(x.build), x => scala.util.Right(x.build))
+        ),
+        layout
+      )
     case (Some(old), e: Event) =>
       val members: Seq[Either[T1, T2]] = (old.members zip members1) map {
         case (old, build) =>
           build match {
             case scala.util.Left(x) =>
-              scala.util.Left(x(Some(old.left.get) -> e))
+              scala.util.Left(x(Some(old.left.toOption.get) -> e))
             case scala.util.Right(x) =>
-              scala.util.Right(x(Some(old.right.get) -> e))
+              scala.util.Right(x(Some(old.toOption.get) -> e))
           }
       }
       sequence2(members, layout)
@@ -206,16 +226,20 @@ package object nspl
 
   /* Normalized scientific notation. */
   def scientific(x: Double) =
-    x / math.pow(10d, math.log10(x).round) -> math.log10(x).round
+    x / math.pow(10d, math.log10(x).round.toDouble) -> math
+      .log10(x)
+      .round
+      .toDouble
 
-  def mapPoint(p: Point, from: Bounds, to: Bounds): Point =
+  def mapPoint(p: Point, from: Bounds, to: Bounds, invertY: Boolean): Point =
     if (from.w == 0 || from.h == 0) Point(0d, 0d)
     else {
       val xF = to.w / from.w
       val yF = to.h / from.h
       Point(
         math.abs(p.x - from.x) * xF + to.x,
-        math.abs(p.y - from.y) * yF + to.y
+        if (!invertY) math.abs(p.y - from.y) * yF + to.y
+        else math.abs(p.y - from.maxY) * yF + to.y
       )
     }
 
@@ -228,7 +252,7 @@ package object nspl
         val range = worldCoordinates.max - worldCoordinates.min
         val precision = 4
         val r = worldCoordinates.map { w =>
-          if ((math.abs(w) <= 1E-4 || math.abs(w) >= 1E4) && w != 0.0) {
+          if ((math.abs(w) <= 1e-4 || math.abs(w) >= 1e4) && w != 0.0) {
             {
               val raw = (new java.util.Formatter)
                 .format("%." + precision + "e", new java.lang.Double(w))

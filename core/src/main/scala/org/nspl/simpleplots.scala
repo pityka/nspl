@@ -107,20 +107,22 @@ trait SimplePlots {
       origin: Option[(Double, Double)] = None,
       xCustomGrid: Boolean = false,
       yCustomGrid: Boolean = false,
-      legendLayout: Layout = ColumnLayout(numRows = 10,
-                                          horizontalGap = 0.75 fts,
-                                          verticalGap = 0.4 fts),
-      legendDistance: Double = 0.5 fts,
+      legendLayout: Layout = ColumnLayout(
+        numRows = 10,
+        horizontalGap = 0.75 fts,
+        verticalGap = 0.4 fts
+      ),
+      legendDistance: RelFontSize = 0.5 fts,
       xTickLength: RelFontSize = 0.4 fts,
       yTickLength: RelFontSize = 0.4 fts,
       xLineWidthFraction: Double = 1d,
       yLineWidthFraction: Double = 1d,
       xLineStartFraction: Double = 0d,
       yLineStartFraction: Double = 0d,
-      topPadding: Double = 0d,
-      bottomPadding: Double = 0d,
-      leftPadding: Double = 0d,
-      rightPadding: Double = 0d,
+      topPadding: RelFontSize = 0d fts,
+      bottomPadding: RelFontSize = 0d fts,
+      leftPadding: RelFontSize = 0d fts,
+      rightPadding: RelFontSize = 0d fts,
       xLabDistance: RelFontSize = 0.5 fts,
       yLabDistance: RelFontSize = 0.5 fts,
       mainLabDistance: RelFontSize = 0.75 fts
@@ -133,8 +135,10 @@ trait SimplePlots {
 
     val data1 =
       if (draw1Line)
-        (dataSourceFromRows(List(0.0 -> 1.0)), List(polynom())) +: data.map(x =>
-          x._1 -> x._2)
+        (dataSourceFromRows(List(0.0 -> 1.0)), List(polynom(() => line()))) +: data
+          .map(
+            x => x._1 -> x._2
+          )
       else data.map(x => x._1 -> x._2)
 
     val legend1 =
@@ -147,11 +151,12 @@ trait SimplePlots {
                   case NotInLegend => None
                   case InLegend(name) =>
                     Some(
-                      name -> render.map(_.asLegend).find(_.isDefined).flatten)
+                      name -> render.map(_.asLegend).find(_.isDefined).flatten
+                    )
                 }
             }).filter(x => x.isDefined && x.get._2.isDefined).map(_.get)
           ).map(x => x._1 -> x._2.get) ++ extraLegend
-        ).toList,
+        ).toList.distinct,
         fontSize = legendFontSize,
         width = legendWidth,
         legendLayout
@@ -213,8 +218,82 @@ trait SimplePlots {
       HorizontalStack(Anchor, legendDistance)
     )
   }
+  def xyzplot[F: FC](data: (DataSource, List[DataRenderer3D], LegendConfig)*)(
+      aspect: Double = 1d,
+      zNear: Double = 1d,
+      zFar: Double = 2000d,
+      fieldOfViewAngles: Double = 60,
+      cameraPosition: Math3D.Vec3 = Math3D.Vec3(50f, 50f, 300f),
+      cameraTarget: Math3D.Vec3 = Math3D.Vec3(0f, 0f, 0f),
+      xWidth: RelFontSize = 809 fts,
+      yHeight: RelFontSize = 890 fts,
+      // main: String = "",
+      // mainFontSize: RelFontSize = 1 fts,
+      extraLegend: Seq[(String, LegendElem)] = Nil,
+      legendFontSize: RelFontSize = 1 fts,
+      legendWidth: RelFontSize = 30 fts,
+      legendLayout: Layout = ColumnLayout(
+        numRows = 10,
+        horizontalGap = 0.75 fts,
+        verticalGap = 0.4 fts
+      ),
+      legendDistance: RelFontSize = 0.5 fts,
+      topPadding: RelFontSize = 0d fts,
+      bottomPadding: RelFontSize = 0d fts,
+      leftPadding: RelFontSize = 0d fts,
+      rightPadding: RelFontSize = 0d fts
+      // mainLabDistance: RelFontSize = 0.75 fts
+  ) = {
 
-  def stackedBarPlot(
+    val data1 =
+      data.map(x => x._1 -> x._2)
+
+    val legend1 =
+      legend(
+        entries = (
+          (
+            (data map {
+              case (ds, render, conf) =>
+                conf match {
+                  case NotInLegend => None
+                  case InLegend(name) =>
+                    Some(
+                      name -> render.map(_.asLegend).find(_.isDefined).flatten
+                    )
+                }
+            }).filter(x => x.isDefined && x.get._2.isDefined).map(_.get)
+          ).map(x => x._1 -> x._2.get) ++ extraLegend
+        ).toList.distinct,
+        fontSize = legendFontSize,
+        width = legendWidth,
+        legendLayout
+      )
+
+    val plotArea =
+      xyzplotareaBuild(
+        data1,
+        aspect,
+        zNear,
+        zFar,
+        fieldOfViewAngles,
+        cameraPosition,
+        cameraTarget,
+        topPadding,
+        bottomPadding,
+        leftPadding,
+        rightPadding,
+        xWidth,
+        yHeight
+      )
+
+    group(
+      plotArea,
+      legend1,
+      HorizontalStack(Anchor, legendDistance)
+    )
+  }
+
+  def stackedBarPlot[F: FC](
       data: DataSource,
       legend: Seq[(Int, String, Colormap)],
       xCol: Int = 0,
@@ -257,8 +336,9 @@ trait SimplePlots {
           val accum: Seq[Double] =
             data.drop(1).scanLeft(data.head)((y, l) => y + l)
 
-          accum zip (0.0 +: accum.dropRight(1)) map (y =>
-            VectorRow(Vector(x, y._1, y._2), ""))
+          accum zip (0.0 +: accum.dropRight(1)) map (
+              y => VectorRow(Vector(x, y._1, y._2), "")
+          )
 
         }
         .toVector
@@ -269,14 +349,19 @@ trait SimplePlots {
       val renderers = legend1.zip(data1).map {
         case ((idx, label, color), data) =>
           val ds: DataSource = data
-          (ds,
-           List(
-             bar(fill = color,
-                 fillCol = ds.dimension + 1,
-                 widthCol = ds.dimension + 2,
-                 yCol = 1,
-                 yCol2 = Some(2))),
-           InLegend(label))
+          (
+            ds,
+            List(
+              bar(
+                fill = color,
+                fillCol = ds.dimension + 1,
+                widthCol = ds.dimension + 2,
+                yCol = 1,
+                yCol2 = Some(2)
+              )
+            ),
+            InLegend(label)
+          )
       }
 
       xyplot(renderers: _*)(
@@ -330,20 +415,22 @@ trait SimplePlots {
 
     val bxdata = boxplotData(data)
 
-    boxplotImpl(bxdata,
-                main,
-                xlab,
-                ylab,
-                xnames,
-                fontSize,
-                xgrid,
-                ygrid,
-                xWidth,
-                yHeight,
-                boxColor,
-                frame,
-                xLabelRotation,
-                yLabelRotation)
+    boxplotImpl(
+      bxdata,
+      main,
+      xlab,
+      ylab,
+      xnames,
+      fontSize,
+      xgrid,
+      ygrid,
+      xWidth,
+      yHeight,
+      boxColor,
+      frame,
+      xLabelRotation,
+      yLabelRotation
+    )
   }
 
   def boxplotImpl[F: FC](
@@ -569,16 +656,19 @@ trait SimplePlots {
     group(
       xyplotareaBuild(
         List(
-          data -> List(point(
-            pointSizeIsInDataSpaceUnits = true,
-            color = colormap.withRange(zmin, zmax),
-            shapes = Vector(Shape.rectangle(0.0, -1.0, 1.0, 1.0)),
-            size = 1d,
-            valueText = valueText,
-            labelColor = valueColor,
-            labelFontSize = valueFontSize,
-            transparent = transparentPixels
-          ))),
+          data -> List(
+            point(
+              pointSizeIsInDataSpaceUnits = true,
+              color = colormap.withRange(zmin, zmax),
+              shapes = Vector(Shape.rectangle(0.0, -1.0, 1.0, 1.0)),
+              size = 1d,
+              valueText = valueText,
+              labelColor = valueColor,
+              labelFontSize = valueFontSize,
+              transparent = transparentPixels
+            )
+          )
+        ),
         AxisSettings(
           LinearAxisFactory,
           customTicks = xnames,
@@ -614,7 +704,7 @@ trait SimplePlots {
         mainFontSize = mainFontSize
       ),
       heatmapLegend(zmin, zmax, colormap),
-      HorizontalStack(Center, 5d)
+      HorizontalStack(Center, 1d fts)
     )
 
   }

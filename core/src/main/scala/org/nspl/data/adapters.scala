@@ -148,13 +148,17 @@ trait DataAdaptors extends DataTuples {
       val minmax = s.columnMinMax(i)
       val quantiles = s.quantilesOfColumn(i, Vector(0.25, 0.5, 0.75))
 
-      VectorRow(Vector(i.toDouble + .5,
-                       quantiles(1),
-                       quantiles(0),
-                       quantiles(2),
-                       minmax.min,
-                       minmax.max),
-                "")
+      VectorRow(
+        Vector(
+          i.toDouble + .5,
+          quantiles(1),
+          quantiles(0),
+          quantiles(2),
+          minmax.min,
+          minmax.max
+        ),
+        ""
+      )
     }
     list
   }
@@ -166,13 +170,17 @@ trait DataAdaptors extends DataTuples {
         val minmax = s.columnMinMax(0)
         val quantiles = s.quantilesOfColumn(0, Vector(0.25, 0.5, 0.75))
 
-        VectorRow(Vector(i.toDouble + .5,
-                         quantiles(1),
-                         quantiles(0),
-                         quantiles(2),
-                         minmax.min,
-                         minmax.max),
-                  label.toString)
+        VectorRow(
+          Vector(
+            i.toDouble + .5,
+            quantiles(1),
+            quantiles(0),
+            quantiles(2),
+            minmax.min,
+            minmax.max
+          ),
+          label.toString
+        )
     }
     list
   }
@@ -187,15 +195,19 @@ trait DataAdaptors extends DataTuples {
       val minmax = s.columnMinMax(i)
       val quantiles = s.quantilesOfColumn(i, Vector(0.25, 0.5, 0.75))
 
-      VectorRow(Vector(x(i),
-                       quantiles(1),
-                       quantiles(0),
-                       quantiles(2),
-                       minmax.min,
-                       minmax.max,
-                       x(i) + 1,
-                       colors(i)),
-                labels(i))
+      VectorRow(
+        Vector(
+          x(i),
+          quantiles(1),
+          quantiles(0),
+          quantiles(2),
+          minmax.min,
+          minmax.max,
+          x(i) + 1,
+          colors(i)
+        ),
+        labels(i)
+      )
     }
     list
   }
@@ -214,15 +226,19 @@ trait DataAdaptors extends DataTuples {
         val min = group.min
         val max = group.max
         val quantiles = percentile(group, Vector(0.25, 0.5, 0.75))
-        VectorRow(Vector(a,
-                         quantiles(1),
-                         quantiles(0),
-                         quantiles(2),
-                         min,
-                         max,
-                         b,
-                         colors(i)),
-                  "")
+        VectorRow(
+          Vector(
+            a,
+            quantiles(1),
+            quantiles(0),
+            quantiles(2),
+            min,
+            max,
+            b,
+            colors(i)
+          ),
+          ""
+        )
     }
   }
 
@@ -245,12 +261,12 @@ trait DataAdaptors extends DataTuples {
     }
   }
 
-  def density2d(
+  def density2d[F: FC](
       data: IndexedSeq[(Double, Double)],
       bandwidth: Double = 0.1,
       n: Int = 50,
       levels: Int = 10,
-      stroke: Stroke = Stroke(1d),
+      stroke: StrokeConf = StrokeConf(lineWidth),
       color: Colormap = HeatMapColors(0, 1)
   ) = {
     val min1 = data.map(_._1).min
@@ -260,16 +276,18 @@ trait DataAdaptors extends DataTuples {
     val w1 = (max1 - min1) / n
     val w2 = (max2 - min2) / n
 
-    linesegments(contour(
-                   min1,
-                   max1,
-                   min2,
-                   max2,
-                   n,
-                   levels
-                 )((x, y) => KDE.density2d(data, (x, y), bandwidth)),
-                 stroke = stroke,
-                 color = color)
+    linesegments(
+      contour(
+        min1,
+        max1,
+        min2,
+        max2,
+        n,
+        levels
+      )((x, y) => KDE.density2d(data, (x, y), bandwidth)),
+      stroke = stroke,
+      color = color
+    )
 
   }
 
@@ -296,9 +314,9 @@ trait DataAdaptors extends DataTuples {
 
   }
 
-  def linesegments(
+  def linesegments[F: FC](
       data: Seq[(Double, Seq[((Double, Double), (Double, Double))])],
-      stroke: Stroke = Stroke(1d),
+      stroke: StrokeConf = StrokeConf(lineWidth),
       color: Colormap = HeatMapColors(0, 1)
   ) = {
     val datasource: DataSourceWithQuantiles = data.flatMap {
@@ -314,7 +332,7 @@ trait DataAdaptors extends DataTuples {
       .lineSegment(stroke = stroke, color = color.withRange(zmin, zmax))
   }
 
-  def hexbin(
+  def hexbin[F: FC](
       data: Iterator[(Double, Double)],
       xlim: (Double, Double),
       ylim: (Double, Double),
@@ -334,7 +352,7 @@ trait DataAdaptors extends DataTuples {
     (binning, renderer)
   }
 
-  def hexbin(
+  def hexbin[F: FC](
       data: Seq[(Double, Double)],
       size: Double,
       color: Colormap,
@@ -357,7 +375,7 @@ trait DataAdaptors extends DataTuples {
     (binning, renderer)
   }
 
-  def hexbin(
+  def hexbin[F: FC](
       data: DataSource,
       size: Double,
       color: Colormap,
@@ -369,8 +387,10 @@ trait DataAdaptors extends DataTuples {
       data.iterator.map { row =>
         row(0) -> row(1)
       },
-      (xMinMax.min + size * math.sqrt(3) * 0.5,
-       xMinMax.max - size * math.sqrt(3) * 0.5),
+      (
+        xMinMax.min + size * math.sqrt(3) * 0.5,
+        xMinMax.max - size * math.sqrt(3) * 0.5
+      ),
       (yMinMax.min + size, yMinMax.max - size),
       size,
       logCounts

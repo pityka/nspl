@@ -2,7 +2,7 @@ package org.nspl
 
 object Build {
   def apply[A](f: A)(pf: PartialFunction[(Option[A], Event), A]): Build[A] = {
-    case x => pf.applyOrElse(x, (x: (Option[A], Event)) => f)
+    case x => pf.applyOrElse(x, (x: (Option[A], Event)) => x._1.getOrElse(f))
   }
 
   def const[A](f: => A): Build[A] = {
@@ -18,9 +18,10 @@ object Build {
 trait Events {
 
   trait Event
-  case class Click(point: Point) extends Event
-  case class Scroll(v: Double, location: Point) extends Event
-  case class Drag(start: Point, current: Point) extends Event
+  case class Scroll(v: Double, location: Point, plotArea: PlotAreaIdentifier)
+      extends Event
+  case class Drag(start: Point, current: Point, plotArea: PlotAreaIdentifier)
+      extends Event
   case object BuildEvent extends Event
 
 }

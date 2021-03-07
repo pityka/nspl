@@ -1,5 +1,7 @@
 package org.nspl
 
+import scala.language.existentials
+
 trait Colormap { self =>
   def apply(v: Double): Color
   def withRange(min: Double, max: Double): Colormap
@@ -59,11 +61,12 @@ case class HeatMapColors(min: Double = 0.0, max: Double = 1.0)
   def withRange(min: Double, max: Double) = HeatMapColors(min, max)
 }
 
-case class GrayScale(min: Double = 0.0,
-                     max: Double = 1.0,
-                     white: Int = 255,
-                     transparentBelowBounds: Boolean = false)
-    extends Colormap {
+case class GrayScale(
+    min: Double = 0.0,
+    max: Double = 1.0,
+    white: Int = 255,
+    transparentBelowBounds: Boolean = false
+) extends Colormap {
 
   def apply(value: Double): Color = {
 
@@ -75,10 +78,12 @@ case class GrayScale(min: Double = 0.0,
     val alpha =
       if (transparentBelowBounds && value < min) 0 else 255
 
-    Color(white - (v * white).toInt,
-          white - (v * white).toInt,
-          white - (v * white).toInt,
-          alpha)
+    Color(
+      white - (v * white).toInt,
+      white - (v * white).toInt,
+      white - (v * white).toInt,
+      alpha
+    )
   }
 
   def withRange(min: Double, max: Double) = GrayScale(min, max, white)
@@ -216,7 +221,7 @@ trait Colors {
       (hueP, hueQ, b1, color)
     }
 
-    def loop(p: Int, q: Int, b: Int): Stream[Color] = {
+    def loop(p: Int, q: Int, b: Int): LazyList[Color] = {
       val (p1, q1, b1, c) = next(p, q, b)
       c #:: loop(p1, q1, b1)
     }
@@ -232,7 +237,7 @@ trait Colors {
       val (r, g, b) = hsl2rgb2(hue, saturation, brightness)
       Color((r * 255).toInt, (g * 255).toInt, (b * 255).toInt, 255)
     }
-    def loop: Stream[Color] = newRandomColor #:: loop
+    def loop: LazyList[Color] = newRandomColor #:: loop
     loop
   }
 

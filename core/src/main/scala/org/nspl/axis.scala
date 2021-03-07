@@ -17,19 +17,23 @@ object LinearAxisFactory extends AxisFactory {
   def make(min1: Double, max1: Double, width1: Double, horizontal: Boolean) =
     if (horizontal)
       new Axis {
-        def worldToView(v: Double) = (v - min1) / (max1 - min1) * width1
-        def min = if (min1 == max1) max1 - 1d else min1
-        def max = if (min1 == max1) max1 + 1d else max1
-        def horizontal = true
-        def log = false
+        val tmp = width1 / (max1 - min1)
+        def worldToView(v: Double) = (v - min1) * tmp
+        val min = if (min1 == max1) max1 - 1d else min1
+        val max = if (min1 == max1) max1 + 1d else max1
+        val horizontal = true
+        val log = false
       } else
       new Axis {
+
+        val tmp = width1 / (max1 - min1)
+
         def worldToView(v: Double) =
-          width1 - (v - min1) / (max1 - min1) * width1
-        def min = if (min1 == max1) max1 - 1d else min1
-        def max = if (min1 == max1) max1 + 1d else max1
-        def horizontal = false
-        def log = false
+          width1 - (v - min1) * tmp
+        val min = if (min1 == max1) max1 - 1d else min1
+        val max = if (min1 == max1) max1 + 1d else max1
+        val horizontal = false
+        val log = false
       }
 }
 
@@ -43,20 +47,20 @@ object Log10AxisFactory extends AxisFactory {
           if (v <= 0d) throw new RuntimeException("<0")
           (math.log10(v) - lMin1) / (lMax1 - lMin1) * width1
         }
-        def min = if (min1 == max1) max1 - 1d else min1
-        def max = if (min1 == max1) max1 + 1d else max1
-        def horizontal = true
-        def log = true
+        val min = if (min1 == max1) max1 - 1d else min1
+        val max = if (min1 == max1) max1 + 1d else max1
+        val horizontal = true
+        val log = true
       } else
       new Axis {
         def worldToView(v: Double) = {
           if (v <= 0d) throw new RuntimeException("<0")
           width1 - (math.log10(v) - lMin1) / (lMax1 - lMin1) * width1
         }
-        def min = if (min1 == max1) max1 - 1d else min1
-        def max = if (min1 == max1) max1 + 1d else max1
-        def horizontal = false
-        def log = true
+        val min = if (min1 == max1) max1 - 1d else min1
+        val max = if (min1 == max1) max1 + 1d else max1
+        val horizontal = false
+        val log = true
       }
   }
 }
@@ -74,7 +78,7 @@ case class AxisSettings(
     width: RelFontSize = 20 fts,
     fontSize: RelFontSize = 1 fts,
     tickAlignment: Double = -1.0,
-    lineWidth: Double = lineWidth,
+    lineWidth: RelFontSize = lineWidth,
     lineLengthFraction: Double = 1d,
     lineStartFraction: Double = 0.0,
     tickFormatter: Seq[Double] => Seq[String] = defaultTickFormatter
@@ -101,9 +105,12 @@ case class AxisSettings(
       if (horizontal)
         group(
           ShapeElem(
-            Shape.line(Point(view, 0d),
-                       Point(view, tickAlignment * tickLength)),
-            stroke = Some(Stroke(lineWidth))
+            Shape
+              .line(
+                Point(view, 0d),
+                Point(view, tickAlignment * tickLength.value)
+              ),
+            stroke = Some(Stroke(lineWidth.value))
           ),
           transform(
             transform(
@@ -112,7 +119,8 @@ case class AxisSettings(
                 (b: Bounds) =>
                   AffineTransform.rotate(labelRotation, b.x, b.centerY)
               ),
-              (b: Bounds) => AffineTransform.translate(0, tickLabelDistance)
+              (b: Bounds) =>
+                AffineTransform.translate(0, tickLabelDistance.value)
             ),
             (b: Bounds) =>
               AffineTransform
@@ -123,9 +131,11 @@ case class AxisSettings(
       else
         group(
           ShapeElem(
-            Shape.line(Point(0d, view),
-                       Point(-1 * tickAlignment * tickLength, view)),
-            stroke = Some(Stroke(lineWidth))
+            Shape.line(
+              Point(0d, view),
+              Point(-1 * tickAlignment * tickLength.value, view)
+            ),
+            stroke = Some(Stroke(lineWidth.value))
           ),
           transform(
             transform(
@@ -135,7 +145,7 @@ case class AxisSettings(
                   AffineTransform.rotate(labelRotation, b.x + b.w, b.centerY)
               ),
               (b: Bounds) =>
-                AffineTransform.translate(-1 * tickLabelDistance - b.w, 0)
+                AffineTransform.translate(-1 * tickLabelDistance.value - b.w, 0)
             ),
             (b: Bounds) =>
               AffineTransform
@@ -149,15 +159,19 @@ case class AxisSettings(
       val view = worldToView(world)
       if (horizontal)
         ShapeElem(
-          Shape.line(Point(view, 0d),
-                     Point(view, tickLength * 0.5 * tickAlignment)),
-          stroke = Some(Stroke(lineWidth))
+          Shape.line(
+            Point(view, 0d),
+            Point(view, tickLength.value * 0.5 * tickAlignment)
+          ),
+          stroke = Some(Stroke(lineWidth.value))
         )
       else
         ShapeElem(
-          Shape.line(Point(0d, view),
-                     Point(-1 * tickLength * 0.5 * tickAlignment, view)),
-          stroke = Some(Stroke(lineWidth))
+          Shape.line(
+            Point(0d, view),
+            Point(-1 * tickLength.value * 0.5 * tickAlignment, view)
+          ),
+          stroke = Some(Stroke(lineWidth.value))
         )
     }
 
@@ -168,12 +182,12 @@ case class AxisSettings(
       if (horizontal)
         ShapeElem(
           Shape.line(Point(lineStart, 0d), Point(lineEnd, 0d)),
-          stroke = Some(Stroke(lineWidth))
+          stroke = Some(Stroke(lineWidth.value))
         )
       else
         ShapeElem(
           Shape.line(Point(0d, lineStart), Point(0d, lineEnd)),
-          stroke = Some(Stroke(lineWidth))
+          stroke = Some(Stroke(lineWidth.value))
         )
 
     val extra =
@@ -192,7 +206,7 @@ case class AxisSettings(
           .map(_.toDouble)
           .filter { i =>
             val e = math.pow(10d, i)
-            e >= axis.min - 1E-3 && e <= axis.max + 1E-3
+            e >= axis.min - 1e-3 && e <= axis.max + 1e-3
           }
       val majorTicksExp = axis.min +: (lmaj1.map(i => math.pow(10d, i)) :+ axis.max)
       val minorTicksExp = majorTicksExp
@@ -238,9 +252,11 @@ case class AxisSettings(
 
     val minorTickElems = sequence(minorTicks.map(makeMinorTick))
 
-    (majorTicks,
-     customTicks.map(_._1).toList,
-     group(line, majorTickElems, minorTickElems, FreeLayout))
+    (
+      majorTicks,
+      customTicks.map(_._1).toList,
+      group(line, majorTickElems, minorTickElems, FreeLayout)
+    )
 
   }
 }

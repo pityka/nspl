@@ -18,7 +18,8 @@ trait JavaAWTUtil {
   implicit def shape2awt(s: Shape): java.awt.Shape = s match {
     case Rectangle(x, y, w, h, tx, _) =>
       tx.createTransformedShape(
-        new java.awt.geom.Rectangle2D.Double(x, y, w, h))
+        new java.awt.geom.Rectangle2D.Double(x, y, w, h)
+      )
     case Ellipse(x, y, w, h, tx) =>
       tx.createTransformedShape(new java.awt.geom.Ellipse2D.Double(x, y, w, h))
     case Line(x1, y1, x2, y2) =>
@@ -39,6 +40,7 @@ trait JavaAWTUtil {
         case LineTo(Point(x, y)) => path.lineTo(x, y)
         case QuadTo(Point(x2, y2), Point(x1, y1)) =>
           path.quadTo(x1, y1, x2, y2)
+        case _ => ???
         // case CubicTo(Point(x3, y3), Point(x1, y1), Point(x2, y2)) => path.curveTo(x1, y1, x2, y2, x3, y3)
       }
       path.closePath
@@ -78,11 +80,19 @@ trait JavaAWTUtil {
 
   def show[K <: Renderable[K]](elem: Build[K])(
       implicit er: Renderer[K, JavaRC]
-  ): javax.swing.JFrame = {
+  ) = {
     import javax.swing._
     import java.awt.{Graphics, RenderingHints}
     val frame = new JFrame("");
     var paintableElem = elem.build
+
+    val update = (build: Build[K]) => {
+      synchronized {
+        paintableElem = build.build
+      }
+      frame.repaint()
+    }
+
     frame.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
     frame
       .getContentPane()
@@ -99,64 +109,33 @@ trait JavaAWTUtil {
         java.awt.BorderLayout.CENTER
       );
 
-    val d = new java.awt.Dimension((paintableElem.bounds.w * 3).toInt,
-                                   (paintableElem.bounds.h * 3).toInt)
+    val d = new java.awt.Dimension(
+      (paintableElem.bounds.w * 3).toInt,
+      (paintableElem.bounds.h * 3).toInt
+    )
     var dragStart = Point(0, 0) -> Bounds(0, 0, 0, 0)
-    val listener = new MouseAdapter {
-      override def mouseClicked(e: MouseEvent) = {
-        val componentBounds = e.getComponent.getBounds
 
-        val event = Click(
-          mapPoint(Point(e.getX, e.getY),
-                   componentBounds,
-                   paintableElem.bounds))
-        paintableElem = elem(Some(paintableElem) -> event)
-
-        e.getComponent.repaint
-      }
-      override def mouseWheelMoved(e: MouseWheelEvent) = {
-        val componentBounds = e.getComponent.getBounds
-        val p =
-          mapPoint(Point(e.getX, e.getY), componentBounds, paintableElem.bounds)
-        paintableElem = elem(
-          Some(paintableElem) -> Scroll(e.getPreciseWheelRotation, p))
-
-        e.getComponent.repaint
-      }
-      override def mousePressed(e: MouseEvent) = {
-        val componentBounds = e.getComponent.getBounds
-        val p = Point(e.getX, e.getY)
-        dragStart = mapPoint(p, componentBounds, paintableElem.bounds) -> paintableElem.bounds
-      }
-      override def mouseDragged(e: MouseEvent) = {
-        val componentBounds = e.getComponent.getBounds
-        val p1 =
-          mapPoint(dragStart._1, dragStart._2, paintableElem.bounds)
-        val p2 =
-          mapPoint(Point(e.getX, e.getY), componentBounds, paintableElem.bounds)
-
-        paintableElem = elem(Some(paintableElem) -> Drag(p1, p2))
-        dragStart = p2 -> paintableElem.bounds
-        e.getComponent.repaint
-      }
-    }
-    frame.addMouseListener(listener)
-    frame.addMouseWheelListener(listener)
-    frame.addMouseMotionListener(listener)
-    frame.pack();
     frame.setSize(d);
     frame.setVisible(true);
-    frame
+    (frame, update)
   }
 
   def savePaint[T](g: Graphics2D)(fun: Graphics2D => T) = {
     val save = g.getPaint
-    try { fun(g) } finally { g.setPaint(save) }
+    try {
+      fun(g)
+    } finally {
+      g.setPaint(save)
+    }
   }
 
   def saveStroke[T](g: Graphics2D)(fun: Graphics2D => T) = {
     val save = g.getStroke
-    try { fun(g) } finally { g.setStroke(save) }
+    try {
+      fun(g)
+    } finally {
+      g.setStroke(save)
+    }
   }
 
   def writeVector[K <: Renderable[K]](
@@ -233,10 +212,14 @@ trait JavaAWTUtil {
 
     val g2d = bimage.createGraphics();
 
-    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                         RenderingHints.VALUE_ANTIALIAS_ON);
-    g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-                         RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+    g2d.setRenderingHint(
+      RenderingHints.KEY_ANTIALIASING,
+      RenderingHints.VALUE_ANTIALIAS_ON
+    );
+    g2d.setRenderingHint(
+      RenderingHints.KEY_TEXT_ANTIALIASING,
+      RenderingHints.VALUE_TEXT_ANTIALIAS_ON
+    );
 
     val bounds = Bounds(0, 0, width, height)
     fitToBounds(elem, bounds).render(JavaRC(g2d))

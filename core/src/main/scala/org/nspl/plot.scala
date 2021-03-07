@@ -85,13 +85,15 @@ trait Plots {
       ylabFontSize: RelFontSize = 1.0 fts,
       ylabDistance: RelFontSize = 0.5 fts,
       ylabAlignment: Alignment = Center,
-      topPadding: Double = 0.2 fts,
-      bottomPadding: Double = 0d,
-      leftPadding: Double = 0d,
-      rightPadding: Double = 0.2 fts
-  ) =
+      topPadding: RelFontSize = 0.2 fts,
+      bottomPadding: RelFontSize = 0d fts,
+      leftPadding: RelFontSize = 0d fts,
+      rightPadding: RelFontSize = 0.2 fts
+  ) = {
+    val id = java.util.UUID.randomUUID.toString
     Build(
       xyplotarea(
+        id,
         data,
         xAxisSetting,
         yAxisSetting,
@@ -125,6 +127,7 @@ trait Plots {
       case (Some(old), BuildEvent) =>
         import old._
         xyplotarea(
+          id,
           data,
           xAxisSetting,
           yAxisSetting,
@@ -154,13 +157,14 @@ trait Plots {
           leftPadding,
           rightPadding
         )
-      case (Some(old), Scroll(v1, p)) if old.frameElem.bounds.contains(p) =>
+      case (Some(old), Scroll(v1, p, plotAreaId)) if plotAreaId.id == id =>
         import old._
         val v = if (v1 > 0) 1.05 else if (v1 < 0) 0.95 else 1.0
         val mappedPoint = mapPoint(
           p,
-          old.frameElem.bounds,
-          Bounds(xMin, yMin, xMax - xMin, yMax - yMin)
+          plotAreaId.bounds.get,
+          Bounds(xMin, yMin, xMax - xMin, yMax - yMin),
+          true
         )
         val xMid = mappedPoint.x
         val yMid = mappedPoint.y
@@ -171,6 +175,7 @@ trait Plots {
         val yMin1 = yMid - (yMax - yMin) * yF * v
         val yMax1 = yMid + (yMax - yMin) * (1 - yF) * v
         xyplotarea(
+          id,
           data,
           xAxisSetting,
           yAxisSetting,
@@ -201,19 +206,21 @@ trait Plots {
           rightPadding
         )
 
-      case (Some(old), Drag(dragStart, dragTo))
-          if old.frameElem.bounds.contains(dragStart) =>
+      case (Some(old), Drag(dragStart, dragTo, plotAreaId))
+          if plotAreaId.id == id =>
         import old._
         val dragStartWorld =
           mapPoint(
             dragStart,
-            old.frameElem.bounds,
-            Bounds(xMin, yMin, xMax - xMin, yMax - yMin)
+            plotAreaId.bounds.get,
+            Bounds(xMin, yMin, xMax - xMin, yMax - yMin),
+            true
           )
         val dragToWorld = mapPoint(
           dragTo,
-          old.frameElem.bounds,
-          Bounds(xMin, yMin, xMax - xMin, yMax - yMin)
+          plotAreaId.bounds.get,
+          Bounds(xMin, yMin, xMax - xMin, yMax - yMin),
+          true
         )
         val dragDirection = Point(
           dragStartWorld.x - dragToWorld.x,
@@ -225,9 +232,10 @@ trait Plots {
 
         val xMin1 = xMin + xT
         val xMax1 = xMax + xT
-        val yMin1 = yMin - yT
-        val yMax1 = yMax - yT
+        val yMin1 = yMin + yT
+        val yMax1 = yMax + yT
         xyplotarea(
+          id,
           data,
           xAxisSetting,
           yAxisSetting,
@@ -258,8 +266,10 @@ trait Plots {
           rightPadding
         )
     }
+  }
 
   def xyplotarea[F: FC](
+      id: String,
       data: Seq[(DataSource, List[DataRenderer])],
       xAxisSetting: AxisSettings,
       yAxisSetting: AxisSettings,
@@ -284,10 +294,10 @@ trait Plots {
       ylabFontSize: RelFontSize = 1.0 fts,
       ylabDistance: RelFontSize = 0.5 fts,
       ylabAlignment: Alignment = Center,
-      topPadding: Double = 0.2 fts,
-      bottomPadding: Double = 0d,
-      leftPadding: Double = 0d,
-      rightPadding: Double = 0.2 fts
+      topPadding: RelFontSize = 0.2 fts,
+      bottomPadding: RelFontSize = 0d fts,
+      leftPadding: RelFontSize = 0d fts,
+      rightPadding: RelFontSize = 0.2 fts
   ) = {
 
     val xMinMax = data.flatMap {
@@ -338,7 +348,7 @@ trait Plots {
       }
       case Log10AxisFactory =>
         val xMax1 = xLimMax.getOrElse {
-          math.pow(10d, math.log10(dataYMax).ceil)
+          math.pow(10d, math.log10(dataXMax).ceil)
         }
         if (xMax1 == xMin) {
           xMax1 + 1
@@ -376,9 +386,9 @@ trait Plots {
     }
 
     val xAxis =
-      xAxisSetting.axisFactory.make(xMin, xMax, xAxisSetting.width, true)
+      xAxisSetting.axisFactory.make(xMin, xMax, xAxisSetting.width.value, true)
     val yAxis =
-      yAxisSetting.axisFactory.make(yMin, yMax, yAxisSetting.width, false)
+      yAxisSetting.axisFactory.make(yMin, yMax, yAxisSetting.width.value, false)
 
     val xMinV = xAxis.worldToView(xMin)
     val xMaxV = xAxis.worldToView(xMax)
@@ -386,10 +396,10 @@ trait Plots {
     val yMaxV = yAxis.worldToView(yMax)
 
     val yAxisViewMin = yAxisSetting.lineStartFraction * yAxis.width
-    val yAxisViewMax = yAxisViewMin + yAxisSetting.width * yAxisSetting.lineLengthFraction
+    val yAxisViewMax = yAxisViewMin + yAxisSetting.width.value * yAxisSetting.lineLengthFraction
 
     val xAxisViewMin = xAxisSetting.lineStartFraction * xAxis.width
-    val xAxisViewMax = xAxisViewMin + xAxisSetting.width * xAxisSetting.lineLengthFraction
+    val xAxisViewMax = xAxisViewMin + xAxisSetting.width.value * xAxisSetting.lineLengthFraction
 
     val originWX1 = origin.map { origin =>
       xlim.map {
@@ -443,12 +453,12 @@ trait Plots {
       val v = xAxis.worldToView(w)
       ShapeElem(
         Shape.line(Point(v, yAxisViewMin), Point(v, yAxisViewMax)),
-        stroke = if (xgrid) Some(Stroke(lineWidth)) else None,
+        stroke = if (xgrid) Some(Stroke(lineWidth.value)) else None,
         strokeColor = Color.gray5
       )
     })
 
-    val frameStroke = if (frame) Some(Stroke(lineWidth)) else None
+    val frameStroke = if (frame) Some(Stroke(lineWidth.value)) else None
     val frameElem =
       ShapeElem(
         Shape.rectangle(
@@ -460,7 +470,7 @@ trait Plots {
         ),
         stroke = frameStroke,
         fill = Color.transparent
-      )
+      ).withIdentifier(PlotAreaIdentifier(id, None))
 
     val ygridElem = sequence(ygridPoints map { w =>
       val v = yAxis.worldToView(w)
@@ -469,7 +479,7 @@ trait Plots {
           Point(xAxisViewMin, v),
           Point(xAxisViewMax, v)
         ),
-        stroke = if (ygrid) Some(Stroke(lineWidth)) else None,
+        stroke = if (ygrid) Some(Stroke(lineWidth.value)) else None,
         strokeColor = Color.gray5
       )
     })
@@ -485,28 +495,28 @@ trait Plots {
       TextBox(ylab, fontSize = ylabFontSize, width = Some(frameElem.bounds.h))
 
     val padTop = ShapeElem(
-      shape = Shape.circle(topPadding),
+      shape = Shape.circle(topPadding.value),
       fill = Color.transparent,
       strokeColor = Color.transparent,
       stroke = None
     )
 
     val padBottom = ShapeElem(
-      shape = Shape.circle(bottomPadding),
+      shape = Shape.circle(bottomPadding.value),
       fill = Color.transparent,
       strokeColor = Color.transparent,
       stroke = None
     )
 
     val padLeft = ShapeElem(
-      shape = Shape.circle(leftPadding),
+      shape = Shape.circle(leftPadding.value),
       fill = Color.transparent,
       strokeColor = Color.transparent,
       stroke = None
     )
 
     val padRight = ShapeElem(
-      shape = Shape.circle(rightPadding),
+      shape = Shape.circle(rightPadding.value),
       fill = Color.transparent,
       strokeColor = Color.transparent,
       stroke = None
@@ -520,7 +530,7 @@ trait Plots {
             AlignTo.verticalGapBeforeReference(
               AlignTo.horizontalCenter(mainBox, frameElem.bounds),
               frameElem.bounds,
-              mainDistance
+              mainDistance.value
             ),
             0
           ),
@@ -550,9 +560,14 @@ trait Plots {
 
     val elem = group(
       padTop,
-      group(padLeft, plotWithAxisLabels, padRight, HorizontalStack(Center, 0d)),
+      group(
+        padLeft,
+        plotWithAxisLabels,
+        padRight,
+        HorizontalStack(Center, 0d fts)
+      ),
       padBottom,
-      VerticalStack(Center, 0d)
+      VerticalStack(Center, 0d fts)
     )
 
     XYPlotArea(elem, xMin, xMax, yMin, yMax)
@@ -578,21 +593,27 @@ trait Plots {
             case PointLegend(s, c) =>
               fitToBounds(
                 ShapeElem(s, fill = c),
-                Bounds(0, 0, fontSize, fontSize)
+                Bounds(0, 0, fontSize.value, fontSize.value)
               )
             case LineLegend(s, c) =>
               fitToBounds(
                 ShapeElem(
-                  Shape.line(Point(0, 0), Point(fontSize, 0)),
+                  Shape.line(Point(0, 0), Point(fontSize.value, 0)),
                   strokeColor = c,
                   stroke = Some(s)
                 ),
-                Bounds(0, 0, fontSize, fontSize)
+                Bounds(0, 0, fontSize.value, fontSize.value)
               )
           }
+          val elemGroup = elem1
+          val textbox =
+            TextBox(text, fontSize = fontSize, width = Some(width.value))
+          val lineHeight =
+            TextBox("A", fontSize = fontSize, width = Some(width.value)).bounds.h
+
           group(
-            elem1,
-            TextBox(text, fontSize = fontSize, width = Some(width)),
+            fitToHeight(elemGroup, lineHeight),
+            TextBox(text, fontSize = fontSize, width = Some(width.value)),
             HorizontalStack(Center, fontSize)
           )
       },
@@ -600,12 +621,9 @@ trait Plots {
     )
   }
 
-  type HeatmapLegend = Elems2[ElemList[ShapeElem],
-                              Elems3[ShapeElem,
-                                     ElemList[
-                                       Elems2[ShapeElem, TextBox]
-                                     ],
-                                     ElemList[ShapeElem]]]
+  type HeatmapLegend = Elems2[ElemList[ShapeElem], Elems3[ShapeElem, ElemList[
+    Elems2[ShapeElem, TextBox]
+  ], ElemList[ShapeElem]]]
 
   def heatmapLegend[F: FC](
       min: Double,
@@ -625,7 +643,7 @@ trait Plots {
       numTicks = 2,
       tickAlignment = 1
     )
-    val axis = axisSettings.axisFactory.make(min, max, width, false)
+    val axis = axisSettings.axisFactory.make(min, max, width.value, false)
 
     val (majorTicks, _, axisElem) =
       axisSettings.renderable(
@@ -639,8 +657,8 @@ trait Plots {
         val world = axis.min + i * space
         val view = axis.worldToView(world)
         ShapeElem(
-          Shape.line(Point(1d, view), Point(height, view)),
-          stroke = Some(Stroke(lineWidth)),
+          Shape.line(Point(1d, view), Point(height.value, view)),
+          stroke = Some(Stroke(lineWidth.value)),
           strokeColor = color1(world)
         )
       })

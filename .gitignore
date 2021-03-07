@@ -6,3 +6,5 @@ targetNative
 .bloop
 .metals
 metals.sbt
+build.sbt
+.bsp/

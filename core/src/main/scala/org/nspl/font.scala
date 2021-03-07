@@ -15,18 +15,14 @@ trait GlyphMeasurer[-F <: Font] {
 trait FontConfiguration {
   def font: Font
   def advance(c: Char): Double
-  def lineMetrics: LineMetrics
+  val lineMetrics: LineMetrics
 }
 
 case object Monospace extends Font with FontConfiguration {
   val font = this
   val size = 10
   def advance(c: Char) = FixGlyphMeasurer.advance(c, font)
-  def lineMetrics = FixGlyphMeasurer.lineMetrics(font)
-}
-
-object FontConfiguration {
-  implicit def defaultMonospace: FontConfiguration = Monospace
+  val lineMetrics = FixGlyphMeasurer.lineMetrics(font)
 }
 
 case class NamedFont(name: String, size: Int) extends Font
@@ -37,16 +33,18 @@ case class LineMetrics(ascent: Double, descent: Double, leading: Double)
 object FixGlyphMeasurer extends GlyphMeasurer[Font#F] {
   def advance(s: Char, f: Font#F) = f.size.toDouble * 0.6
   def lineMetrics(f: Font#F) =
-    LineMetrics(ascent = f.size.toDouble * 0.78,
-                descent = f.size.toDouble * 0.22,
-                leading = 0d)
+    LineMetrics(
+      ascent = f.size.toDouble * 0.78,
+      descent = f.size.toDouble * 0.22,
+      leading = 0d
+    )
 }
 
 case class GenericFontConfig[F <: Font](font: F)(
-    implicit val measure: GlyphMeasurer[F#F])
-    extends FontConfiguration {
+    implicit val measure: GlyphMeasurer[F#F]
+) extends FontConfiguration {
   def advance(c: Char) = measure.advance(c, font)
-  def lineMetrics = measure.lineMetrics(font)
+  val lineMetrics = measure.lineMetrics(font)
 }
 
 case class TextLayout(lines: Seq[(String, AffineTransform)], bounds: Bounds) {
@@ -64,7 +62,7 @@ object TextLayout {
       TextLayout(List("" -> AffineTransform.identity), Bounds(0, 0, 0, 0))
     else {
 
-      val fontSizeFactor = fontSize.v
+      val fontSizeFactor = fontSize.factor
       val scale = AffineTransform.scale(fontSizeFactor, fontSizeFactor)
 
       def advance(c: Char) = fc.advance(c)
@@ -115,8 +113,10 @@ object TextLayout {
         val transformations = lines.map {
           case (text, bounds) =>
             val tx = AffineTransform
-              .translate(bounds.x, bounds.y + ascent)
-              .concat(scale)
+              .scale(fontSizeFactor, fontSizeFactor)
+              .concat(
+                AffineTransform.translate(bounds.x, bounds.y + ascent)
+              )
             (text, tx)
         }
 

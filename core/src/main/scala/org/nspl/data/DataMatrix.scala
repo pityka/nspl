@@ -10,7 +10,7 @@ case class DataMatrix(rows: Array[Double], numCols: Int, numRows: Int)
     var k = 0;
     def hasNext = k < n;
 
-    def next = {
+    def next() = {
       if (!hasNext) throw new RuntimeException("!hasNext");
 
       val row = new Row {

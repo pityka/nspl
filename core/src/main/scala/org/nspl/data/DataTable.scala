@@ -14,11 +14,13 @@ case class DataTable(rows: Array[Double], numCols: Int)
         var j = 0;
         var n = rows.length / numCols;
         def hasNext = j < n
-        def next = {
+        def next() = {
           val row = new Row {
             val off = j;
             def apply(i: Int) = rows(off * numCols + i)
-            def allColumns = rows.slice(off * numCols, off * numCols + numCols)
+            def allColumns =
+              rows.toIndexedSeq
+                .slice(off * numCols, off * numCols + numCols)
             def dimension = numCols
             def label = allColumns.mkString("(", ",", ")")
             override def toString = label

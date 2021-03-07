@@ -1,14 +1,23 @@
-scalaVersion := "2.12.12"
+scalaVersion := "2.13.5"
 
 lazy val commonSettings = Seq(
   organization := "io.github.pityka",
-  version := "0.0.22",
-  scalaVersion := "2.12.12",
-  crossScalaVersions := Seq("2.11.12", "2.12.6"),
+  version := "0.0.23",
+  scalaVersion := "2.13.5",
   javacOptions ++= Seq("-Xdoclint:none"),
+  scalacOptions ++= Seq(
+    "-language:postfixOps",
+    "-encoding",
+    "utf8", // Option and arguments on same line
+    "-Xfatal-warnings", // New lines for each options
+    "-language:implicitConversions",
+    "-deprecation",
+    "-unchecked",
+    "-feature"
+  ),
   licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
   publishTo := sonatypePublishTo.value,
-  fork := true
+  fork := false
 )
 
 lazy val core = project
@@ -30,62 +39,12 @@ lazy val coreJS = project
   .enablePlugins(ScalaJSPlugin)
   .enablePlugins(spray.boilerplate.BoilerplatePlugin)
 
-lazy val coreNative = project
-  .in(file("core"))
-  .settings(commonSettings)
-  .settings(
-    scalaVersion := "2.11.12",
-    crossScalaVersions := Seq("2.11.12")
-  )
-  .settings(
-    name := "nspl-core-native",
-    target := file("core/targetNative"),
-    sourceManaged in Compile := (sourceManaged in Compile).value.getAbsoluteFile
-  )
-  .enablePlugins(ScalaNativePlugin)
-  .enablePlugins(spray.boilerplate.BoilerplatePlugin)
-
-lazy val nanovg = project
-  .in(file("nanovg"))
-  .settings(commonSettings)
-  .settings(
-    scalaVersion := "2.11.12",
-    crossScalaVersions := Seq("2.11.12"),
-    nativeLinkingOptions ++= Seq("-framework", "OpenGL")
-  )
-  .settings(
-    name := "nspl-nanovg-native"
-  )
-  .enablePlugins(ScalaNativePlugin)
-  .dependsOn(coreNative)
-
-lazy val cli = project
-  .in(file("cli"))
-  .settings(commonSettings)
-  .settings(
-    scalaVersion := "2.11.12",
-    crossScalaVersions := Seq("2.11.12"),
-    nativeLinkingOptions ++= Seq("-framework", "OpenGL"),
-    nativeLinkStubs := true,
-    libraryDependencies ++= Seq(
-      ("com.lihaoyi") %%% "fastparse" % "1.0.0",
-      ("io.github.pityka") %%% "stringsplit" % "1.0.1",
-      ("com.lihaoyi") %%% "utest" % "0.6.2" % "test"
-    ),
-    testFrameworks += new TestFramework("utest.runner.Framework")
-  )
-  .settings(
-    name := "nsplcli"
-  )
-  .enablePlugins(ScalaNativePlugin)
-  .dependsOn(nanovg)
-
 lazy val sharedJs = project
   .in(file("shared-js"))
   .settings(commonSettings)
   .settings(
     name := "nspl-shared-js",
-    libraryDependencies += ("org.scala-js") %%% "scalajs-dom" % "0.9.8"
+    libraryDependencies += ("org.scala-js") %%% "scalajs-dom" % "1.0.0"
   )
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(coreJS)
@@ -127,7 +86,7 @@ lazy val awt = project
     name := "nspl-awt",
     libraryDependencies ++= Seq(
       "de.erichseifert.vectorgraphics2d" % "VectorGraphics2D" % "0.13",
-      "org.scalatest" %% "scalatest" % "3.0.0" % "test"
+      "org.scalatest" %% "scalatest" % "3.2.5" % "test"
     )
   )
   .dependsOn(core, sharedJvm)
@@ -137,21 +96,33 @@ lazy val scalatagsJvm = project
   .settings(commonSettings)
   .settings(
     name := "nspl-scalatags-jvm",
-    libraryDependencies += "com.lihaoyi" %% "scalatags" % "0.6.7"
+    libraryDependencies += "com.lihaoyi" %% "scalatags" % "0.7.0"
   )
   .dependsOn(core, sharedJvm)
 
 lazy val saddle = (project in file("saddle"))
   .settings(commonSettings)
   .settings(
-    crossScalaVersions := Seq("2.11.12"),
     name := "nspl-saddle",
     libraryDependencies ++= Seq(
-      "io.github.pityka" %% "saddle-core" % "2.0.0-M26",
-      "org.scalatest" %% "scalatest" % "3.0.0" % "test"
+      "io.github.pityka" %% "saddle-core" % "2.2.3",
+      "org.scalatest" %% "scalatest" % "3.2.5" % "test"
     )
   )
   .dependsOn(core, awt, scalatagsJvm)
+
+lazy val saddleJS = (project in file("saddle"))
+  .settings(commonSettings)
+  .settings(
+    name := "nspl-saddle-js",
+    target := file("saddle/targetJS"),
+    libraryDependencies ++= Seq(
+      "io.github.pityka" %%% "saddle-core" % "2.2.3"
+    )
+  )
+  .dependsOn(coreJS)
+  .enablePlugins(ScalaJSPlugin)
+  .enablePlugins(spray.boilerplate.BoilerplatePlugin)
 
 publishArtifact := false
 
@@ -159,6 +130,7 @@ lazy val root = (project in file("."))
   .settings(commonSettings: _*)
   .aggregate(
     saddle,
+    saddleJS,
     scalatagsJvm,
     awt,
     canvas,
@@ -183,5 +155,3 @@ pomExtra in Global := {
     </developer>
   </developers>
 }
-
-scalafmtOnCompile in ThisBuild := true

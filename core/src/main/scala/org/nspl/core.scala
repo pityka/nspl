@@ -1,10 +1,12 @@
 package org.nspl
 
-case class Bounds(x: Double,
-                  y: Double,
-                  w: Double,
-                  h: Double,
-                  anchor: Option[Point] = None) {
+case class Bounds(
+    x: Double,
+    y: Double,
+    w: Double,
+    h: Double,
+    anchor: Option[Point] = None
+) {
   def maxX = x + w
   def maxY = y + h
   def centerX = x + w * 0.5
@@ -20,7 +22,10 @@ case object CapButt extends Cap
 case object CapSquare extends Cap
 case object CapRound extends Cap
 
-case class Stroke(width: Double, cap: Cap = CapSquare)
+case class StrokeConf(width: RelFontSize, cap: Cap = CapButt) {
+  def value(implicit fc: FontConfiguration) = Stroke(width.value, cap)
+}
+case class Stroke(width: Double, cap: Cap = CapButt)
 
 case class Point(x: Double, y: Double) {
   def translate(dx: Double, dy: Double) = Point(x + dx, y + dy)
@@ -63,8 +68,17 @@ trait Renderable[K] { self: K =>
 
 /* Layouts tranform the bounding box of their members. */
 trait Layout {
-  def apply(s: Seq[Bounds]): Seq[Bounds]
+  def apply[F: FC](s: Seq[Bounds]): Seq[Bounds]
 }
 
-case class RelFontSize(v: Double) extends AnyVal
+case class RelFontSize(v: Double) extends AnyVal {
+  def *(t: Double) = RelFontSize(v * t)
+  def value(implicit fc: FontConfiguration) = v * fc.font.size
+  def factor = v
+}
 case class BaseFontSize(v: Int) extends AnyVal
+
+trait Identifier
+case object EmptyIdentifier extends Identifier
+case class PlotAreaIdentifier(id: String, bounds: Option[Bounds])
+    extends Identifier
