@@ -63,20 +63,20 @@ trait Plots3D {
 
   def xyzplotareaBuild[F: FC](
       data: Seq[(DataSource, List[DataRenderer3D])],
-      aspect: Double = 1d,
-      zNear: Double = 1d,
-      zFar: Double = 2000d,
-      fieldOfViewAngles: Double = 60,
-      cameraPosition: Vec3 = Vec3(50f, 50f, 300f),
-      cameraTarget: Vec3 = Vec3(0f, 0f, 0f),
+      aspect: Double,
+      zNear: Double,
+      zFar: Double,
+      fieldOfViewAngles: Double,
+      cameraPosition: Vec3,
+      cameraTarget: Vec3,
       // main: String = "",
       // mainFontSize: RelFontSize = 1 fts,
-      topPadding: RelFontSize = 0d fts,
-      bottomPadding: RelFontSize = 0d fts,
-      leftPadding: RelFontSize = 0d fts,
-      rightPadding: RelFontSize = 0d fts,
-      xWidth: RelFontSize = 20 fts,
-      yHeight: RelFontSize = 20 fts
+      topPadding: RelFontSize,
+      bottomPadding: RelFontSize,
+      leftPadding: RelFontSize,
+      rightPadding: RelFontSize,
+      xWidth: RelFontSize,
+      yHeight: RelFontSize
       // mainLabDistance: RelFontSize = 0.75 fts
   ) = {
     val id = java.util.UUID.randomUUID.toString
@@ -183,22 +183,20 @@ trait Plots3D {
   def xyzplotarea[F: FC](
       id: String,
       data: Seq[(DataSource, List[DataRenderer3D])],
-      aspect: Double = 1d,
-      zNear: Double = 1d,
-      zFar: Double = 2000d,
-      fieldOfViewAngles: Double = 60,
-      cameraPosition: Vec3 = Vec3(50f, 50f, 300f),
-      cameraTarget: Vec3 = Vec3(0f, 0f, 0f),
+      aspect: Double,
+      zNear: Double,
+      zFar: Double,
+      fieldOfViewAngles: Double,
+      cameraPosition: Vec3,
+      cameraTarget: Vec3,
       // main: String = "",
       // mainFontSize: RelFontSize = 1 fts,
-      topPadding: RelFontSize = 0d fts,
-      bottomPadding: RelFontSize = 0d fts,
-      leftPadding: RelFontSize = 0d fts,
-      rightPadding: RelFontSize = 0d fts,
-      xLabDistance: RelFontSize = 0.5 fts,
-      yLabDistance: RelFontSize = 0.5 fts,
-      xWidth: RelFontSize = 20 fts,
-      yHeight: RelFontSize = 20 fts
+      topPadding: RelFontSize,
+      bottomPadding: RelFontSize,
+      leftPadding: RelFontSize,
+      rightPadding: RelFontSize,
+      xWidth: RelFontSize,
+      yHeight: RelFontSize
       // mainLabDistance: RelFontSize = 0.75 fts
   ) = {
 
@@ -276,7 +274,7 @@ trait Plots3D {
         cameraPosition,
         cameraTarget
       ),
-      Bounds(0, 0, xWidth.v, yHeight.v)
+      Bounds(0, 0, xWidth.value, yHeight.value)
     )
 
   }

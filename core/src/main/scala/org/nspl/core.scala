@@ -71,7 +71,7 @@ trait Layout {
   def apply[F: FC](s: Seq[Bounds]): Seq[Bounds]
 }
 
-case class RelFontSize(v: Double) extends AnyVal {
+case class RelFontSize(private val v: Double) extends AnyVal {
   def *(t: Double) = RelFontSize(v * t)
   def value(implicit fc: FontConfiguration) = v * fc.font.size
   def factor = v

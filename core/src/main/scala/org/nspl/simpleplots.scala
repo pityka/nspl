@@ -219,14 +219,13 @@ trait SimplePlots {
     )
   }
   def xyzplot[F: FC](data: (DataSource, List[DataRenderer3D], LegendConfig)*)(
-      aspect: Double = 1d,
       zNear: Double = 1d,
       zFar: Double = 2000d,
       fieldOfViewAngles: Double = 60,
       cameraPosition: Math3D.Vec3 = Math3D.Vec3(50f, 50f, 300f),
       cameraTarget: Math3D.Vec3 = Math3D.Vec3(0f, 0f, 0f),
-      xWidth: RelFontSize = 809 fts,
-      yHeight: RelFontSize = 890 fts,
+      xWidth: RelFontSize = 20 fts,
+      yHeight: RelFontSize = 20 fts,
       // main: String = "",
       // mainFontSize: RelFontSize = 1 fts,
       extraLegend: Seq[(String, LegendElem)] = Nil,
@@ -268,6 +267,8 @@ trait SimplePlots {
         width = legendWidth,
         legendLayout
       )
+
+    val aspect = xWidth.value / yHeight.value
 
     val plotArea =
       xyzplotareaBuild(
