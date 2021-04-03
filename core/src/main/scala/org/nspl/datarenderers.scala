@@ -12,8 +12,8 @@ trait DataRenderer {
       tx: AffineTransform
   )(implicit re: Renderer[ShapeElem, R], rt: Renderer[TextBox, R]): Unit
   def asLegend: Option[LegendElem]
-  def clear[R <: RenderingContext](ctx: R)(
-      implicit re: Renderer[ShapeElem, R],
+  def clear[R <: RenderingContext](ctx: R)(implicit
+      re: Renderer[ShapeElem, R],
       rt: Renderer[TextBox, R]
   ): Unit = ()
   def xMinMax(ds: DataSource): Option[MinMax]
@@ -52,8 +52,8 @@ trait Renderers {
       scala.collection.mutable
         .ArrayBuffer[(ShapeElem, TextBox, AffineTransform)]()
 
-    override def clear[R <: RenderingContext](ctx: R)(
-        implicit re: Renderer[ShapeElem, R],
+    override def clear[R <: RenderingContext](ctx: R)(implicit
+        re: Renderer[ShapeElem, R],
         rt: Renderer[TextBox, R]
     ) = {
       val labelLayout =
@@ -96,11 +96,14 @@ trait Renderers {
         val wX = data(xCol)
         val wY = data(yCol)
 
-        if (wX >= xAxis.min && wX <= xAxis.max && wY >= yAxis.min && wY <= yAxis.max) {
+        if (
+          wX >= xAxis.min && wX <= xAxis.max && wY >= yAxis.min && wY <= yAxis.max
+        ) {
           val dataColorValue =
             if (data.dimension > colorCol) data(colorCol) else 0d
 
-          val skip = (transparent.isDefined && transparent.get == dataColorValue)
+          val skip =
+            (transparent.isDefined && transparent.get == dataColorValue)
 
           val color1 = color(dataColorValue)
           val shape =
@@ -127,11 +130,10 @@ trait Renderers {
           val vX = xAxis.worldToView(wX)
           val vY = yAxis.worldToView(wY)
           val shape1PreTransform: ShapeElem = ShapeElem(
-            shape.transform(
-              _ =>
-                AffineTransform
-                  .translate(vX, vY)
-                  .concatScale(factorX, factorY)
+            shape.transform(_ =>
+              AffineTransform
+                .translate(vX, vY)
+                .concatScale(factorX, factorY)
             ),
             fill = color1
           )
@@ -148,10 +150,9 @@ trait Renderers {
               color = labelColor,
               fontSize = labelFontSize
             ).translate(vX, vY)
-              .transform(
-                b =>
-                  AffineTransform
-                    .translate(0, -1 * b.h - shape.bounds.h * factorY * 0.5)
+              .transform(b =>
+                AffineTransform
+                  .translate(0, -1 * b.h - shape.bounds.h * factorY * 0.5)
               )
 
             shapesAndTextLabels += ((shape1PreTransform, tbPreTransform, tx))
@@ -164,12 +165,11 @@ trait Renderers {
               color = labelColor,
               fontSize = labelFontSize
             ).translate(vX, vY)
-              .transform(
-                b =>
-                  AffineTransform.translate(
-                    -0.2 * b.w,
-                    -1 * b.h - shape.bounds.h * factorY * 0.5
-                  )
+              .transform(b =>
+                AffineTransform.translate(
+                  -0.2 * b.w,
+                  -1 * b.h - shape.bounds.h * factorY * 0.5
+                )
               )
 
             shapesAndTextLabels += ((shape1PreTransform, tbPreTransform, tx))
@@ -220,8 +220,8 @@ trait Renderers {
     var currentPoint: Option[Point] = None
     def asLegend = Some(LineLegend(stroke.value, color(0)))
 
-    override def clear[R <: RenderingContext](ctx: R)(
-        implicit re: Renderer[ShapeElem, R],
+    override def clear[R <: RenderingContext](ctx: R)(implicit
+        re: Renderer[ShapeElem, R],
         rt: Renderer[TextBox, R]
     ): Unit = {
       currentPoint = None
@@ -238,7 +238,9 @@ trait Renderers {
       val wX = data(xCol)
       val wY = data(yCol)
 
-      if (wX >= xAxis.min && wX <= xAxis.max && wY >= yAxis.min && wY <= yAxis.max) {
+      if (
+        wX >= xAxis.min && wX <= xAxis.max && wY >= yAxis.min && wY <= yAxis.max
+      ) {
 
         val color1 =
           if (data.dimension > colorCol) color(data(colorCol)) else color(0d)
@@ -268,8 +270,7 @@ trait Renderers {
     }
   }
 
-  /**
-    *Paints the area between the (x,y) and (x,0) or
+  /** Paints the area between the (x,y) and (x,0) or
     *  between (x,y) and (x,y2) if y2 is present
     */
   def area(
@@ -283,8 +284,8 @@ trait Renderers {
     var currentPoint2: Option[Point] = None
     def asLegend = Some(PointLegend(shapeList(1), color(0)))
 
-    override def clear[R <: RenderingContext](ctx: R)(
-        implicit re: Renderer[ShapeElem, R],
+    override def clear[R <: RenderingContext](ctx: R)(implicit
+        re: Renderer[ShapeElem, R],
         rt: Renderer[TextBox, R]
     ): Unit = {
       currentPoint2 = None
@@ -309,7 +310,9 @@ trait Renderers {
       val wX = data(xCol)
       val wY = data(yCol)
 
-      if (wX >= xAxis.min && wX <= xAxis.max && wY >= yAxis.min && wY <= yAxis.max) {
+      if (
+        wX >= xAxis.min && wX <= xAxis.max && wY >= yAxis.min && wY <= yAxis.max
+      ) {
 
         val color1 =
           if (data.dimension > colorCol) color(data(colorCol)) else color(0d)
@@ -426,7 +429,9 @@ trait Renderers {
       val wX = data(xCol)
       val wY = data(yCol)
 
-      if (wX >= xAxis.min && wX <= xAxis.max && wY >= yAxis.min && wY <= yAxis.max) {
+      if (
+        wX >= xAxis.min && wX <= xAxis.max && wY >= yAxis.min && wY <= yAxis.max
+      ) {
 
         val color1 =
           if (data.dimension > fillCol) fill(data(fillCol)) else fill(0d)
@@ -689,7 +694,9 @@ trait Renderers {
       val wX2 = data(x2Col)
       val wY2 = data(y2Col)
 
-      if (wX >= xAxis.min && wX <= xAxis.max && wY >= yAxis.min && wY <= yAxis.max) {
+      if (
+        wX >= xAxis.min && wX <= xAxis.max && wY >= yAxis.min && wY <= yAxis.max
+      ) {
 
         val color1 =
           if (data.dimension > colorCol) color(data(colorCol)) else color(0d)

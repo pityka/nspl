@@ -5,10 +5,12 @@ object Ticks {
   /** Modified Heckbert's algorithm
     * Translated and modified from the source of R's labeling package. https://cran.r-project.org/web/packages/labeling/index.html
     */
-  def heckbert(dataMin: Double,
-               dataMax: Double,
-               numTicksMajor: Int,
-               numTicksMinorFactor: Int): (Seq[Double], Seq[Double]) = {
+  def heckbert(
+      dataMin: Double,
+      dataMax: Double,
+      numTicksMajor: Int,
+      numTicksMinorFactor: Int
+  ): (Seq[Double], Seq[Double]) = {
     def niceNum(x: Double, round: Boolean) = {
       val e = math.floor(math.log10(x))
       val f = x / math.pow(10d, e)

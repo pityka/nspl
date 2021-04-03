@@ -34,8 +34,8 @@ object scalatagrenderer {
   def svgToFile[K <: Renderable[K]](
       elem: K,
       width: Int = 1000
-  )(
-      implicit er: SER[K]
+  )(implicit
+      er: SER[K]
   ): java.io.File = {
     import java.io._
     val f = File.createTempFile("nspl", ".svg")
@@ -47,8 +47,8 @@ object scalatagrenderer {
       f: java.io.File,
       elem: K,
       width: Int
-  )(
-      implicit er: SER[K]
+  )(implicit
+      er: SER[K]
   ): java.io.File = {
     import java.io._
     val os = new FileOutputStream(f)
@@ -66,8 +66,8 @@ object scalatagrenderer {
   def renderToScalaTag[K <: Renderable[K]](
       elem: K,
       width: Int = 1000
-  )(
-      implicit er: SER[K]
+  )(implicit
+      er: SER[K]
   ) = {
 
     val ctx = ScalaTagRC(scala.collection.mutable.ArrayBuffer[Modifier]())
@@ -87,7 +87,9 @@ object scalatagrenderer {
 
   implicit val shapeRenderer = new SER[ShapeElem] {
     def render(ctx: ScalaTagRC, elem: ShapeElem): Unit = {
-      if (elem.fill.a > 0d || (elem.stroke.isDefined && elem.strokeColor.a > 0)) {
+      if (
+        elem.fill.a > 0d || (elem.stroke.isDefined && elem.strokeColor.a > 0)
+      ) {
         val svgShape = elem.shape match {
           case Rectangle(x1, y1, w1, h1, tx, _) => {
             rect(
@@ -162,16 +164,15 @@ object scalatagrenderer {
   implicit val textRenderer = new SER[TextBox] {
     def render(ctx: ScalaTagRC, elem: TextBox): Unit = {
       if (!elem.layout.isEmpty) {
-        elem.layout.lines.foreach {
-          case (line, lineTx) =>
-            val tx = elem.txLoc.concat(lineTx)
-            val svgElem = text(
-              svgAttrs.x := 0,
-              svgAttrs.y := 0,
-              svgAttrs.transform := tx.svg,
-              svgAttrs.style := s"font-family: monospace;font-size: ${elem.font.size}"
-            )(line)
-            ctx.elems.append(svgElem)
+        elem.layout.lines.foreach { case (line, lineTx) =>
+          val tx = elem.txLoc.concat(lineTx)
+          val svgElem = text(
+            svgAttrs.x := 0,
+            svgAttrs.y := 0,
+            svgAttrs.transform := tx.svg,
+            svgAttrs.style := s"font-family: monospace;font-size: ${elem.font.size}"
+          )(line)
+          ctx.elems.append(svgElem)
         }
       }
     }

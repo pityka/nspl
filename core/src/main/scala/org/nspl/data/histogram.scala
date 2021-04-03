@@ -53,28 +53,25 @@ case class HistogramData(
     }
 
   def toScatter =
-    bins.toSeq.map {
-      case ((xstart, xend, ystart), height) =>
-        ((xstart), (ystart + height), 0d, xend - xstart, ystart)
+    bins.toSeq.map { case ((xstart, xend, ystart), height) =>
+      ((xstart), (ystart + height), 0d, xend - xstart, ystart)
     } sortBy (_._1)
 }
 object HistogramData {
 
-  /**
-    * Merge maps with key collision
+  /** Merge maps with key collision
     * @param fun Handles key collision
     */
   private def addMaps[K, V](a: Map[K, V], b: Map[K, V])(
       fun: (V, V) => V
   ): Map[K, V] = {
-    a ++ b.map {
-      case (key, bval) =>
-        val aval = a.get(key)
-        val cval = aval match {
-          case None    => bval
-          case Some(a) => fun((a), (bval))
-        }
-        (key, cval)
+    a ++ b.map { case (key, bval) =>
+      val aval = a.get(key)
+      val cval = aval match {
+        case None    => bval
+        case Some(a) => fun((a), (bval))
+      }
+      (key, cval)
     }
   }
 
@@ -195,11 +192,10 @@ object HistogramData {
     val bins: Seq[Map[(Double, Double), Double]] = data2
       .map { stratum =>
         baseBins ++ stratum.zipWithIndex
-          .map {
-            case (value, idx) =>
-              val i = ((value - min) / step).toInt
-              val bin = i * step + min
-              bin -> value
+          .map { case (value, idx) =>
+            val i = ((value - min) / step).toInt
+            val bin = i * step + min
+            bin -> value
           }
           .groupBy(_._1)
           .map(x => (x._1, 0.0) -> x._2.map(_._2).size.toDouble)
@@ -210,15 +206,16 @@ object HistogramData {
           if (acc.isEmpty) Seq(binOfStratum)
           else {
             val head = acc.head
-            val updatedBin = binOfStratum.map {
-              case ((x, y), dens) =>
-                (x,
-                 head.filter(_._1._1 == x).headOption.map(_._2).getOrElse(0.0) +
-                   head
-                     .filter(_._1._1 == x)
-                     .headOption
-                     .map(_._1._2)
-                     .getOrElse(0.0)) -> dens
+            val updatedBin = binOfStratum.map { case ((x, y), dens) =>
+              (
+                x,
+                head.filter(_._1._1 == x).headOption.map(_._2).getOrElse(0.0) +
+                  head
+                    .filter(_._1._1 == x)
+                    .headOption
+                    .map(_._1._2)
+                    .getOrElse(0.0)
+              ) -> dens
             }.toMap
             updatedBin +: acc
           }
@@ -230,11 +227,12 @@ object HistogramData {
         .reduce((x, y) => addMaps(x, y)(_ + _))
 
       val newbins = bins.map(
-        _.map(
-          x =>
-            (x._1._1, x._1._2 / perBinMaxY(x._1._1)) -> x._2 / perBinMaxY(
-              x._1._1
-          )))
+        _.map(x =>
+          (x._1._1, x._1._2 / perBinMaxY(x._1._1)) -> x._2 / perBinMaxY(
+            x._1._1
+          )
+        )
+      )
       newbins.map { bin =>
         HistogramData(
           bin.map { case (x, v) => (x._1, x._1 + step, x._2) -> v },

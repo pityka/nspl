@@ -14,8 +14,7 @@ package object data {
     (s.foldLeft(0.0)((s, i) => (i - m) * (i - m) + s)) / (n - 1)
   }
 
-  /**
-    * Copyright (c) 2013 Saddle Development Team
+  /** Copyright (c) 2013 Saddle Development Team
     *
     * Licensed under the Apache License, Version 2.0 (the "License");
     * you may not use this file except in compliance with the License.
@@ -47,11 +46,10 @@ package object data {
         val ks = ns.map(n => math.floor(n).toInt)
         val ds = ns zip ks map (x => x._1 - x._2)
 
-        ks zip ds map {
-          case (k, d) =>
-            if (k <= 0) s(0)
-            else if (k >= c) s.last
-            else s(k - 1) + d * (s(k) - s(k - 1))
+        ks zip ds map { case (k, d) =>
+          if (k <= 0) s(0)
+          else if (k >= c) s.last
+          else s(k - 1) + d * (s(k) - s(k - 1))
         }
       }
     }

@@ -10,8 +10,8 @@ trait DataRenderer3D {
       viewProjectionMatrix: Math3D.Mat4,
       tx: AffineTransform
   )(implicit re: Renderer[ShapeElem, R], rt: Renderer[TextBox, R]): Unit
-  def clear[R <: RenderingContext](ctx: R)(
-      implicit re: Renderer[ShapeElem, R],
+  def clear[R <: RenderingContext](ctx: R)(implicit
+      re: Renderer[ShapeElem, R],
       rt: Renderer[TextBox, R]
   ): Unit = ()
   def asLegend: Option[LegendElem] = None
@@ -142,14 +142,13 @@ trait Renderers3D {
         val vX = clip1(0)
         val vY = clip1(1)
         val shape1PreTransform: ShapeElem = ShapeElem(
-          shape.transform(
-            _ =>
-              AffineTransform
-                .translate(clip1(0), vY)
-                .concatScale(
-                  perspectivFactorX,
-                  perspectivFactorY
-                )
+          shape.transform(_ =>
+            AffineTransform
+              .translate(clip1(0), vY)
+              .concatScale(
+                perspectivFactorX,
+                perspectivFactorY
+              )
           ),
           fill = color1
         )

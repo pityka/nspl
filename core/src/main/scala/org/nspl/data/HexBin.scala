@@ -34,47 +34,44 @@ object HexBin {
 
     val bins = scala.collection.mutable.AnyRefMap[(Double, Double), Long]()
 
-    data.foreach {
-      case (x, y) =>
-        // lattice 1 coordinates
-        val x1 = (x - xOrigin1) / width
-        val y1 = (y - yOrigin1) / height
+    data.foreach { case (x, y) =>
+      // lattice 1 coordinates
+      val x1 = (x - xOrigin1) / width
+      val y1 = (y - yOrigin1) / height
 
-        // lattice 2 coordinates
-        val x2 = (x - xOrigin2) / width
-        val y2 = (y - yOrigin2) / height
+      // lattice 2 coordinates
+      val x2 = (x - xOrigin2) / width
+      val y2 = (y - yOrigin2) / height
 
-        def transformBack1(pair: (Double, Double)) =
-          (pair._1 * width + xOrigin1, pair._2 * height + yOrigin1)
+      def transformBack1(pair: (Double, Double)) =
+        (pair._1 * width + xOrigin1, pair._2 * height + yOrigin1)
 
-        def transformBack2(pair: (Double, Double)) =
-          (pair._1 * width + xOrigin2, pair._2 * height + yOrigin2)
+      def transformBack2(pair: (Double, Double)) =
+        (pair._1 * width + xOrigin2, pair._2 * height + yOrigin2)
 
-        val candidates = List(
-          transformBack1(x1.floor, y1.floor),
-          transformBack1(x1.floor, y1.ceil),
-          transformBack1(x1.ceil, y1.floor),
-          transformBack1(x1.ceil, y1.ceil),
-          transformBack2(x2.floor, y2.floor),
-          transformBack2(x2.floor, y2.ceil),
-          transformBack2(x2.ceil, y2.floor),
-          transformBack2(x2.ceil, y2.ceil)
-        )
+      val candidates = List(
+        transformBack1(x1.floor, y1.floor),
+        transformBack1(x1.floor, y1.ceil),
+        transformBack1(x1.ceil, y1.floor),
+        transformBack1(x1.ceil, y1.ceil),
+        transformBack2(x2.floor, y2.floor),
+        transformBack2(x2.floor, y2.ceil),
+        transformBack2(x2.ceil, y2.floor),
+        transformBack2(x2.ceil, y2.ceil)
+      )
 
-        val selectedCenter = candidates.minBy {
-          case (centerX, centerY) =>
-            (centerX - x) * (centerX - x) + (centerY - y) * (centerY - y)
-        }
+      val selectedCenter = candidates.minBy { case (centerX, centerY) =>
+        (centerX - x) * (centerX - x) + (centerY - y) * (centerY - y)
+      }
 
-        bins.get(selectedCenter) match {
-          case None        => bins.update(selectedCenter, 1)
-          case Some(count) => bins.update(selectedCenter, count + 1)
-        }
+      bins.get(selectedCenter) match {
+        case None        => bins.update(selectedCenter, 1)
+        case Some(count) => bins.update(selectedCenter, count + 1)
+      }
     }
 
-    bins.toSeq.map {
-      case ((x, y), count) =>
-        (x, y, if (log) math.log10(count.toDouble) else count.toDouble)
+    bins.toSeq.map { case ((x, y), count) =>
+      (x, y, if (log) math.log10(count.toDouble) else count.toDouble)
     }
 
   }

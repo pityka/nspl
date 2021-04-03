@@ -35,18 +35,19 @@ case class ElemList2[T1 <: Renderable[T1], T2 <: Renderable[T2]](
 }
 object ElemList2 {
 
-  implicit def compositeListRenderer2[T <: Renderable[T], T2 <: Renderable[T2], R <: RenderingContext](
-      implicit r1: Renderer[T, R],
+  implicit def compositeListRenderer2[T <: Renderable[T], T2 <: Renderable[
+    T2
+  ], R <: RenderingContext](implicit
+      r1: Renderer[T, R],
       r2: Renderer[T2, R]
   ) =
     new Renderer[ElemList2[T, T2], R] {
       def render(ctx: R, elem: ElemList2[T, T2]): Unit = {
-        elem.members.foreach(
-          e =>
-            (e match {
-              case scala.util.Left(e)  => r1.render(ctx, e)
-              case scala.util.Right(e) => r2.render(ctx, e)
-            })
+        elem.members.foreach(e =>
+          (e match {
+            case scala.util.Left(e)  => r1.render(ctx, e)
+            case scala.util.Right(e) => r2.render(ctx, e)
+          })
         )
       }
     }

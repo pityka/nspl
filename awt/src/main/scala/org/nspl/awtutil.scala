@@ -78,8 +78,8 @@ trait JavaAWTUtil {
       tx.m5
     )
 
-  def show[K <: Renderable[K]](elem: Build[K])(
-      implicit er: Renderer[K, JavaRC]
+  def show[K <: Renderable[K]](elem: Build[K])(implicit
+      er: Renderer[K, JavaRC]
   ) = {
     import javax.swing._
     import java.awt.{Graphics, RenderingHints}
@@ -143,8 +143,8 @@ trait JavaAWTUtil {
       os: java.io.OutputStream,
       width: Int = 500,
       format: String = "pdf"
-  )(
-      implicit er: Renderer[K, JavaRC]
+  )(implicit
+      er: Renderer[K, JavaRC]
   ) = {
     import de.erichseifert.vectorgraphics2d._
     import de.erichseifert.vectorgraphics2d.pdf._
@@ -176,8 +176,8 @@ trait JavaAWTUtil {
       os: java.io.OutputStream,
       width: Int = 1000,
       mimeType: String = "image/png"
-  )(
-      implicit er: Renderer[K, JavaRC]
+  )(implicit
+      er: Renderer[K, JavaRC]
   ) = {
     mimeType.split("/").last match {
       case "pdf" | "svg" | "eps" =>
@@ -191,8 +191,8 @@ trait JavaAWTUtil {
       os: java.io.OutputStream,
       width: Int = 1000,
       mimeType: String = "image/png"
-  )(
-      implicit er: Renderer[K, JavaRC]
+  )(implicit
+      er: Renderer[K, JavaRC]
   ) = {
     import java.awt.image.BufferedImage
 
@@ -252,8 +252,8 @@ trait JavaAWTUtil {
       elem: K,
       width: Int = 1000,
       mimeType: String = "image/png"
-  )(
-      implicit er: Renderer[K, JavaRC]
+  )(implicit
+      er: Renderer[K, JavaRC]
   ): Array[Byte] = {
     val bs = new java.io.ByteArrayOutputStream()
     write(elem, bs, width, mimeType);
@@ -264,8 +264,8 @@ trait JavaAWTUtil {
       elem: K,
       width: Int = 1000,
       mimeType: String = "image/png"
-  )(
-      implicit er: Renderer[K, JavaRC]
+  )(implicit
+      er: Renderer[K, JavaRC]
   ) = {
     val f = java.io.File.createTempFile("nspl", "." + mimeType.split("/").last)
     val os = new BufferedOutputStream(new FileOutputStream(f))
@@ -282,8 +282,8 @@ trait JavaAWTUtil {
       elem: K,
       width: Int,
       mimeType: String
-  )(
-      implicit er: Renderer[K, JavaRC]
+  )(implicit
+      er: Renderer[K, JavaRC]
   ): File = {
     val os = new BufferedOutputStream(new FileOutputStream(f))
     try {
@@ -298,8 +298,8 @@ trait JavaAWTUtil {
       f: File,
       elem: K,
       width: Int
-  )(
-      implicit er: Renderer[K, JavaRC]
+  )(implicit
+      er: Renderer[K, JavaRC]
   ): File = {
     renderToFile(f, elem, width, "application/pdf")
     f
@@ -308,15 +308,15 @@ trait JavaAWTUtil {
   def pdfToFile[K <: Renderable[K]](
       f: File,
       elem: K
-  )(
-      implicit er: Renderer[K, JavaRC]
+  )(implicit
+      er: Renderer[K, JavaRC]
   ): File = pdfToFile(f, elem, 500)
 
   def pdfToFile[K <: Renderable[K]](
       elem: K,
       width: Int = 500
-  )(
-      implicit er: Renderer[K, JavaRC]
+  )(implicit
+      er: Renderer[K, JavaRC]
   ) = {
     val f = java.io.File.createTempFile("nspl", ".pdf")
     renderToFile(f, elem, width, "application/pdf")
@@ -327,8 +327,8 @@ trait JavaAWTUtil {
       f: File,
       elem: K,
       width: Int
-  )(
-      implicit er: Renderer[K, JavaRC]
+  )(implicit
+      er: Renderer[K, JavaRC]
   ): File = {
     renderToFile(f, elem, width, "image/png")
     f
@@ -337,15 +337,15 @@ trait JavaAWTUtil {
   def pngToFile[K <: Renderable[K]](
       f: File,
       elem: K
-  )(
-      implicit er: Renderer[K, JavaRC]
+  )(implicit
+      er: Renderer[K, JavaRC]
   ): File = pngToFile(f, elem, 1000)
 
   def pngToFile[K <: Renderable[K]](
       elem: K,
       width: Int = 1000
-  )(
-      implicit er: Renderer[K, JavaRC]
+  )(implicit
+      er: Renderer[K, JavaRC]
   ): File = {
     renderToFile(elem, width, "image/png")
   }

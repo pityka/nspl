@@ -32,9 +32,8 @@ trait DataAdaptors extends DataTuples {
   ): DataSource =
     new DataSource {
 
-      def iterator = s1.zipWithIndex.map {
-        case (v, i) =>
-          productsToRow(((i % numCols).toDouble, (i / numCols).toDouble, v))
+      def iterator = s1.zipWithIndex.map { case (v, i) =>
+        productsToRow(((i % numCols).toDouble, (i / numCols).toDouble, v))
       }
       def dimension = 3
       def columnMinMax(i: Int) = i match {
@@ -51,9 +50,8 @@ trait DataAdaptors extends DataTuples {
   ): DataSource =
     new DataSource {
 
-      def iterator = s1.zipWithIndex.iterator.map {
-        case (v, i) =>
-          productsToRow(((i % numCols).toDouble, (i / numCols).toDouble, v))
+      def iterator = s1.zipWithIndex.iterator.map { case (v, i) =>
+        productsToRow(((i % numCols).toDouble, (i / numCols).toDouble, v))
       }
       def dimension = 3
       def columnMinMax(i: Int) = i match {
@@ -63,8 +61,8 @@ trait DataAdaptors extends DataTuples {
       }
     }
 
-  def dataSource[T](s1: Iterator[T], minmax: IndexedSeq[MinMax])(
-      implicit f: T => Row
+  def dataSource[T](s1: Iterator[T], minmax: IndexedSeq[MinMax])(implicit
+      f: T => Row
   ): DataSource =
     new DataSource {
 
@@ -73,13 +71,12 @@ trait DataAdaptors extends DataTuples {
       def columnMinMax(i: Int) = minmax(i)
     }
 
-  /**
-    * Need to iterate twice on the data:
+  /** Need to iterate twice on the data:
     * once for the bounds to get the axis right,
     * once for the plot
     */
-  def dataSource[T](s1: Iterator[T], s2: Iterator[T])(
-      implicit f: T => Row
+  def dataSource[T](s1: Iterator[T], s2: Iterator[T])(implicit
+      f: T => Row
   ): DataSource =
     new DataSource {
 
@@ -94,14 +91,13 @@ trait DataAdaptors extends DataTuples {
           min = ArrayBuffer.fill(columncount.get)(Double.MaxValue)
         }
 
-        row.allColumns.zipWithIndex.foreach {
-          case (v, i) =>
-            if (max(i) < v) {
-              max(i) = v
-            }
-            if (min(i) > v) {
-              min(i) = v
-            }
+        row.allColumns.zipWithIndex.foreach { case (v, i) =>
+          if (max(i) < v) {
+            max(i) = v
+          }
+          if (min(i) > v) {
+            min(i) = v
+          }
         }
       }
 
@@ -306,11 +302,15 @@ trait DataAdaptors extends DataTuples {
     val w1 = linspace(min1, max1, n)
     val w2 = linspace(min2, max2, n)
 
-    new DataMatrix(w2.flatMap { y =>
-      w1.map { x =>
-        KDE.density2d(data, (x, y), bandwidth)
-      }
-    }.toArray, n, n)
+    new DataMatrix(
+      w2.flatMap { y =>
+        w1.map { x =>
+          KDE.density2d(data, (x, y), bandwidth)
+        }
+      }.toArray,
+      n,
+      n
+    )
 
   }
 
@@ -319,12 +319,10 @@ trait DataAdaptors extends DataTuples {
       stroke: StrokeConf = StrokeConf(lineWidth),
       color: Colormap = HeatMapColors(0, 1)
   ) = {
-    val datasource: DataSourceWithQuantiles = data.flatMap {
-      case (z, pairs) =>
-        pairs.map {
-          case ((x1, y1), (x2, y2)) =>
-            VectorRow(Vector(x1, y1, x2, y2, z), "")
-        }
+    val datasource: DataSourceWithQuantiles = data.flatMap { case (z, pairs) =>
+      pairs.map { case ((x1, y1), (x2, y2)) =>
+        VectorRow(Vector(x1, y1, x2, y2, z), "")
+      }
     }
     val zmin = data.map(_._1).min
     val zmax = data.map(_._1).max

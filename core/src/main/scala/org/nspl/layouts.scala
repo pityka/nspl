@@ -30,8 +30,7 @@ case class RelativeToFirst(x: Double, y: Double) extends Layout {
   }
 }
 
-/**
-  * A Layout which stacks elements on top of each other
+/** A Layout which stacks elements on top of each other
   *  and aligns the horizontal axis.
   */
 case class VerticalStack(
@@ -59,27 +58,24 @@ case class VerticalStack(
             referenceAnchorX - shift
         }
       }
-      s.foldLeft(s.map(_.y).min -> Seq[Bounds]()) {
-          case ((y, seq), bounds) =>
-            val xp = xpos(bounds.w, bounds.x, bounds.anchor)
-            (
-              y + bounds.h + gap.value,
-              seq :+ Bounds(
-                xp,
-                y,
-                bounds.w,
-                bounds.h,
-                bounds.anchor.map(_.translate(xp - bounds.x, y - bounds.y))
-              )
-            )
-        }
-        ._2
+      s.foldLeft(s.map(_.y).min -> Seq[Bounds]()) { case ((y, seq), bounds) =>
+        val xp = xpos(bounds.w, bounds.x, bounds.anchor)
+        (
+          y + bounds.h + gap.value,
+          seq :+ Bounds(
+            xp,
+            y,
+            bounds.w,
+            bounds.h,
+            bounds.anchor.map(_.translate(xp - bounds.x, y - bounds.y))
+          )
+        )
+      }._2
     }
   }
 }
 
-/**
-  * A Layout which stacks elements beside each other
+/** A Layout which stacks elements beside each other
   *  and aligns the vertical axis.
   */
 case class HorizontalStack(alignment: Alignment, gap: RelFontSize = 0.0 fts)
@@ -104,21 +100,19 @@ case class HorizontalStack(alignment: Alignment, gap: RelFontSize = 0.0 fts)
             referenceAnchorY - shift
         }
       }
-      s.foldLeft(s.map(_.x).min -> List[Bounds]()) {
-          case ((x, seq), elem) =>
-            val yp = ypos(elem.h, elem.y, elem.anchor)
-            (
-              x + elem.w + gap.value,
-              Bounds(
-                x,
-                yp,
-                elem.w,
-                elem.h,
-                elem.anchor.map(_.translate(x - elem.x, yp - elem.y))
-              ) :: seq
-            )
-        }
-        ._2
+      s.foldLeft(s.map(_.x).min -> List[Bounds]()) { case ((x, seq), elem) =>
+        val yp = ypos(elem.h, elem.y, elem.anchor)
+        (
+          x + elem.w + gap.value,
+          Bounds(
+            x,
+            yp,
+            elem.w,
+            elem.h,
+            elem.anchor.map(_.translate(x - elem.x, yp - elem.y))
+          ) :: seq
+        )
+      }._2
         .reverse
     }
   }

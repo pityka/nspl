@@ -18,8 +18,8 @@ case class DataElem(
 }
 
 object DataElem {
-  implicit def dataElemRenderer[RC <: RenderingContext](
-      implicit re: Renderer[ShapeElem, RC],
+  implicit def dataElemRenderer[RC <: RenderingContext](implicit
+      re: Renderer[ShapeElem, RC],
       rt: Renderer[TextBox, RC]
   ) = new Renderer[DataElem, RC] {
     def render(r: RC, e: DataElem): Unit = {
@@ -51,8 +51,8 @@ trait Plots {
   }
 
   object XYPlotArea {
-    implicit def renderer[RC <: RenderingContext](
-        implicit re: Renderer[ShapeElem, RC],
+    implicit def renderer[RC <: RenderingContext](implicit
+        re: Renderer[ShapeElem, RC],
         rt: Renderer[TextBox, RC]
     ) = new Renderer[XYPlotArea, RC] {
       def render(r: RC, e: XYPlotArea): Unit =
@@ -300,18 +300,16 @@ trait Plots {
       rightPadding: RelFontSize = 0.2 fts
   ) = {
 
-    val xMinMax = data.flatMap {
-      case (data, renderers) =>
-        renderers.flatMap { renderer =>
-          renderer.xMinMax(data)
-        }
+    val xMinMax = data.flatMap { case (data, renderers) =>
+      renderers.flatMap { renderer =>
+        renderer.xMinMax(data)
+      }
     }
 
-    val yMinMax = data.flatMap {
-      case (data, renderers) =>
-        renderers.flatMap { renderer =>
-          renderer.yMinMax(data)
-        }
+    val yMinMax = data.flatMap { case (data, renderers) =>
+      renderers.flatMap { renderer =>
+        renderer.yMinMax(data)
+      }
     }
 
     val xLimMin = xlim.map(_._1).filterNot(_.isNaN)
@@ -327,9 +325,12 @@ trait Plots {
 
     val xMin = xAxisSetting.axisFactory match {
       case LinearAxisFactory =>
-        math.min(xLimMin.getOrElse {
-          dataXMin - xAxisMargin * (dataXMax - dataXMin)
-        }, origin.map(_.x).getOrElse(Double.MaxValue))
+        math.min(
+          xLimMin.getOrElse {
+            dataXMin - xAxisMargin * (dataXMax - dataXMin)
+          },
+          origin.map(_.x).getOrElse(Double.MaxValue)
+        )
       case Log10AxisFactory =>
         math.min(
           xLimMin.getOrElse(math.pow(10d, math.log10(dataXMin).floor)),
@@ -358,9 +359,12 @@ trait Plots {
 
     val yMin = yAxisSetting.axisFactory match {
       case LinearAxisFactory =>
-        math.min(yLimMin.getOrElse {
-          dataYMin - yAxisMargin * (dataYMax - dataYMin)
-        }, origin.map(_.y).getOrElse(Double.MaxValue))
+        math.min(
+          yLimMin.getOrElse {
+            dataYMin - yAxisMargin * (dataYMax - dataYMin)
+          },
+          origin.map(_.y).getOrElse(Double.MaxValue)
+        )
       case Log10AxisFactory =>
         math.min(
           yLimMin.getOrElse(math.pow(10d, math.log10(dataYMin).floor)),
@@ -396,26 +400,26 @@ trait Plots {
     val yMaxV = yAxis.worldToView(yMax)
 
     val yAxisViewMin = yAxisSetting.lineStartFraction * yAxis.width
-    val yAxisViewMax = yAxisViewMin + yAxisSetting.width.value * yAxisSetting.lineLengthFraction
+    val yAxisViewMax =
+      yAxisViewMin + yAxisSetting.width.value * yAxisSetting.lineLengthFraction
 
     val xAxisViewMin = xAxisSetting.lineStartFraction * xAxis.width
-    val xAxisViewMax = xAxisViewMin + xAxisSetting.width.value * xAxisSetting.lineLengthFraction
+    val xAxisViewMax =
+      xAxisViewMin + xAxisSetting.width.value * xAxisSetting.lineLengthFraction
 
     val originWX1 = origin.map { origin =>
-      xlim.map {
-        case (a, b) =>
-          if (origin.x < a) a
-          else if (origin.x > b) b
-          else origin.x
+      xlim.map { case (a, b) =>
+        if (origin.x < a) a
+        else if (origin.x > b) b
+        else origin.x
       } getOrElse origin.x
     } getOrElse xMin
 
     val originWY1 = origin.map { origin =>
-      ylim.map {
-        case (a, b) =>
-          if (origin.y < a) a
-          else if (origin.y > b) b
-          else origin.y
+      ylim.map { case (a, b) =>
+        if (origin.y < a) a
+        else if (origin.y > b) b
+        else origin.y
       } getOrElse origin.y
     } getOrElse yMin
 
@@ -438,9 +442,8 @@ trait Plots {
       FreeLayout
     )
 
-    val dataelem = sequence(data.toList.map {
-      case (ds, drs) =>
-        DataElem(ds, xAxis, yAxis, drs, axes.bounds, AffineTransform.identity)
+    val dataelem = sequence(data.toList.map { case (ds, drs) =>
+      DataElem(ds, xAxis, yAxis, drs, axes.bounds, AffineTransform.identity)
     })
 
     val xgridPoints =
@@ -587,35 +590,34 @@ trait Plots {
       layout: Layout
   ): Legend = {
     sequence(
-      entries.map {
-        case (text, elem) =>
-          val elem1 = elem match {
-            case PointLegend(s, c) =>
-              fitToBounds(
-                ShapeElem(s, fill = c),
-                Bounds(0, 0, fontSize.value, fontSize.value)
-              )
-            case LineLegend(s, c) =>
-              fitToBounds(
-                ShapeElem(
-                  Shape.line(Point(0, 0), Point(fontSize.value, 0)),
-                  strokeColor = c,
-                  stroke = Some(s)
-                ),
-                Bounds(0, 0, fontSize.value, fontSize.value)
-              )
-          }
-          val elemGroup = elem1
-          val textbox =
-            TextBox(text, fontSize = fontSize, width = Some(width.value))
-          val lineHeight =
-            TextBox("A", fontSize = fontSize, width = Some(width.value)).bounds.h
+      entries.map { case (text, elem) =>
+        val elem1 = elem match {
+          case PointLegend(s, c) =>
+            fitToBounds(
+              ShapeElem(s, fill = c),
+              Bounds(0, 0, fontSize.value, fontSize.value)
+            )
+          case LineLegend(s, c) =>
+            fitToBounds(
+              ShapeElem(
+                Shape.line(Point(0, 0), Point(fontSize.value, 0)),
+                strokeColor = c,
+                stroke = Some(s)
+              ),
+              Bounds(0, 0, fontSize.value, fontSize.value)
+            )
+        }
+        val elemGroup = elem1
+        val textbox =
+          TextBox(text, fontSize = fontSize, width = Some(width.value))
+        val lineHeight =
+          TextBox("A", fontSize = fontSize, width = Some(width.value)).bounds.h
 
-          group(
-            fitToHeight(elemGroup, lineHeight),
-            TextBox(text, fontSize = fontSize, width = Some(width.value)),
-            HorizontalStack(Center, fontSize)
-          )
+        group(
+          fitToHeight(elemGroup, lineHeight),
+          TextBox(text, fontSize = fontSize, width = Some(width.value)),
+          HorizontalStack(Center, fontSize)
+        )
       },
       layout
     )

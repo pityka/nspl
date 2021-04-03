@@ -1,7 +1,6 @@
 package org.nspl
 
-/**
-  * 2D Affine Transformation Matrix in row major order
+/** 2D Affine Transformation Matrix in row major order
   */
 case class AffineTransform(
     m0: Double,

@@ -11,8 +11,10 @@ object LabelLayout {
     val x4 = p4.x
     val y4 = p4.y
 
-    val t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4))
-    val u = -1 * ((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4))
+    val t =
+      ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4))
+    val u =
+      -1 * ((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4))
 
     if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
       val px1 = x1 + t * (x2 - x1)
@@ -97,9 +99,8 @@ object LabelLayout {
     var i = 1
     val n = 100
     while (i < n) {
-      state = state.map {
-        case (point, rec) =>
-          one(point, rec, state.flatMap(x => List(x._1, x._2)))
+      state = state.map { case (point, rec) =>
+        one(point, rec, state.flatMap(x => List(x._1, x._2)))
       }
       i += 1
     }

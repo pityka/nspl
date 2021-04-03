@@ -30,22 +30,21 @@ case class CanvasRC(
     import canvasrenderer._
     val ctx = graphics
 
-    shapes.foreach {
-      case (shape, id) =>
-        val hit = shape match {
-          case Rectangle(x, y, w, h, tx, _) =>
-            tx.applyTo(ctx)
-            ctx.beginPath()
-            ctx.rect(x, y, w, h)
-            AffineTransform.identity.applyTo(ctx)
-            val r = ctx.isPointInPath(p.x, p.y)
-            r
+    shapes.foreach { case (shape, id) =>
+      val hit = shape match {
+        case Rectangle(x, y, w, h, tx, _) =>
+          tx.applyTo(ctx)
+          ctx.beginPath()
+          ctx.rect(x, y, w, h)
+          AffineTransform.identity.applyTo(ctx)
+          val r = ctx.isPointInPath(p.x, p.y)
+          r
 
-          case _ => ???
-        }
-        if (hit) {
-          callback(id)
-        }
+        case _ => ???
+      }
+      if (hit) {
+        callback(id)
+      }
 
     }
   }
@@ -75,8 +74,8 @@ object canvasrenderer {
       width: Int,
       height: Int,
       click: Identifier => Unit = (_ => ())
-  )(
-      implicit er: Renderer[K, CanvasRC]
+  )(implicit
+      er: Renderer[K, CanvasRC]
   ) = {
 
     val canvas = dom.document.createElement("canvas").asInstanceOf[html.Canvas]
@@ -333,11 +332,10 @@ object canvasrenderer {
       if (!elem.layout.isEmpty) {
         ctx.graphics.fillStyle = elem.color.css
         ctx.graphics.font = canvasFont(elem.font)
-        elem.layout.lines.foreach {
-          case (line, lineTx) =>
-            val tx = elem.txLoc.concat(lineTx)
-            tx.applyTo(ctx.graphics)
-            ctx.graphics.fillText(line, 0, 0)
+        elem.layout.lines.foreach { case (line, lineTx) =>
+          val tx = elem.txLoc.concat(lineTx)
+          tx.applyTo(ctx.graphics)
+          ctx.graphics.fillText(line, 0, 0)
         }
       }
       AffineTransform.identity.applyTo(ctx.graphics)
