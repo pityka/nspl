@@ -13,7 +13,6 @@ Renders to
 * PDF/SVG/EPS (via [VectorGraphics2D](https://github.com/eseifert/vectorgraphics2d))
 * SVG (via [ScalaTags](http://www.lihaoyi.com/scalatags/), both in browser or on jvm)
 * Html5 Canvas ([scala-js](http://www.scala-js.org))
-* OpenGL (via [NanoVG](https://github.com/memononen/nanovg))
 
 Minimal dependencies (VectorGraphics2D for PDF output).
 
@@ -35,21 +34,9 @@ See `saddle/src/test/scala/plots/plots.test.scala` for JVM examples.
 * JVM AWT backend: `libraryDependencies += "io.github.pityka" %% "nspl-awt" % "0.0.???"`
 * JVM SVG via scalatags: `libraryDependencies += "io.github.pityka" %% "nspl-scalatags-jvm" % "0.0.???"`
 * scala-js svg via scalatags: `libraryDependencies += "io.github.pityka" %% "nspl-scalatags-js" % "0.0.???"` 
+* scala-js canvas via scalatags: `libraryDependencies += "io.github.pityka" %% "nspl-canvas-js" % "0.0.???"` 
 
 
 ## Alternatives
 
 See the excellent java graphing library: [GRAL](https://github.com/eseifert/gral), which inspired the design of this library.
-
-## Scala Native
-You will need lodepng, glfw3 and nanovg. For nanovg compile and install a file like this:
-```
-#define GLFW_INCLUDE_GLCOREARB
-#define GLFW_INCLUDE_GLEXT
-#include <GLFW/glfw3.h>
-#include "nanovg.h"
-#define NANOVG_GL3_IMPLEMENTATION
-#include "nanovg_gl.h"
-```
-
-In `cli/` there is an experimental command line interface.
