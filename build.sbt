@@ -1,8 +1,22 @@
 scalaVersion := "2.13.5"
 
+inThisBuild(
+  List(
+    organization := "io.github.pityka",
+    homepage := Some(url("https://pityka.github.io/nspl/")),
+    licenses := List(("MIT", url("https://opensource.org/licenses/MIT"))),
+    developers := List(
+      Developer(
+        "pityka",
+        "Istvan Bartha",
+        "bartha.pityu@gmail.com",
+        url("https://github.com/pityka/nspl")
+      )
+    )
+  )
+)
+
 lazy val commonSettings = Seq(
-  organization := "io.github.pityka",
-  version := "0.0.23",
   scalaVersion := "2.13.5",
   crossScalaVersions := Seq("2.12.13", "2.13.5"),
   javacOptions ++= Seq("-Xdoclint:none"),
@@ -17,7 +31,6 @@ lazy val commonSettings = Seq(
     "-feature"
   ),
   licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
-  publishTo := sonatypePublishTo.value,
   fork := false
 )
 
@@ -143,19 +156,3 @@ lazy val root = (project in file("."))
     core,
     coreJS
   )
-
-pomExtra in Global := {
-  <url>https://pityka.github.io/nspl/</url>
-  <scm>
-    <connection>scm:git:github.com/pityka/nspl</connection>
-    <developerConnection>scm:git:git@github.com:pityka/nspl</developerConnection>
-    <url>github.com/pityka/nspl</url>
-  </scm>
-  <developers>
-    <developer>
-      <id>pityka</id>
-      <name>Istvan Bartha</name>
-      <url>https://pityka.github.io/nspl/</url>
-    </developer>
-  </developers>
-}
