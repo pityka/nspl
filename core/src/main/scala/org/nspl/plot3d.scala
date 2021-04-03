@@ -17,8 +17,8 @@ case class DataElem3D(
 }
 
 object DataElem3D {
-  implicit def dataElemRenderer[RC <: RenderingContext](
-      implicit re: Renderer[ShapeElem, RC],
+  implicit def dataElemRenderer[RC <: RenderingContext](implicit
+      re: Renderer[ShapeElem, RC],
       rt: Renderer[TextBox, RC]
   ) = new Renderer[DataElem3D, RC] {
     def render(r: RC, e: DataElem3D): Unit = {
@@ -52,8 +52,8 @@ trait Plots3D {
   }
 
   object XYZPlotArea {
-    implicit def renderer[RC <: RenderingContext](
-        implicit re: Renderer[ShapeElem, RC],
+    implicit def renderer[RC <: RenderingContext](implicit
+        re: Renderer[ShapeElem, RC],
         rt: Renderer[TextBox, RC]
     ) = new Renderer[XYZPlotArea, RC] {
       def render(r: RC, e: XYZPlotArea): Unit =
@@ -121,7 +121,8 @@ trait Plots3D {
 
         val cameraDirection =
           normalize(subtractVectors(old.cameraTarget, old.cameraPosition))
-        val newCameraPosition = old.cameraPosition + cameraDirection * (-v.toFloat)
+        val newCameraPosition =
+          old.cameraPosition + cameraDirection * (-v.toFloat)
 
         xyzplotarea(
           id,
@@ -145,7 +146,8 @@ trait Plots3D {
         val dX = (dragTo.x - dragStart.x)
         val dY = (dragTo.y - dragStart.y)
 
-        val upperHalf = dragStart.y > plotAreaId.bounds.get.y + plotAreaId.bounds.get.h * 0.5
+        val upperHalf =
+          dragStart.y > plotAreaId.bounds.get.y + plotAreaId.bounds.get.h * 0.5
 
         val newCameraTarget =
           if (upperHalf)
@@ -221,9 +223,8 @@ trait Plots3D {
       strokeColor = Color.black
     ).withIdentifier(PlotAreaIdentifier(id, None))
 
-    val dataelem = sequence(data.toList.map {
-      case (ds, drs) =>
-        DataElem3D(ds, drs, viewProjectionMatrix)
+    val dataelem = sequence(data.toList.map { case (ds, drs) =>
+      DataElem3D(ds, drs, viewProjectionMatrix)
     })
 
     val padTop = ShapeElem(

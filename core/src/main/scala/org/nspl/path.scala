@@ -23,15 +23,16 @@ case class QuadTo(p2: Point, p1: Point) extends PathOperation {
     val tx = (p0.x - p1.x) / (p0.x - p2.x)
     val ty = (p0.y - p1.y) / (p0.y - p2.y)
 
-    p0 :: p2 :: (List(tx, ty)
-      .filter(t => t >= 0d && t <= 1d)
-      .map(
-        t =>
+    p0 :: p2 :: (
+      List(tx, ty)
+        .filter(t => t >= 0d && t <= 1d)
+        .map(t =>
           Point(
             (1 - t) * ((1 - t) * p0.x + t * p1.x) + t * ((1 - t) * p1.x + t * p2.x),
             (1 - t) * ((1 - t) * p0.y + t * p1.y) + t * ((1 - t) * p1.y + t * p2.y)
           )
-      ))
+        )
+    )
   }
   def transform(tx: AffineTransform) =
     QuadTo(tx.transform(p1), tx.transform(p2))
@@ -59,15 +60,16 @@ case class CubicTo(p3: Point, p1: Point, p2: Point) extends PathOperation {
     val t3x = (2 * p1.x - 3 * p2.x + p3.x) / (2 * (p1.x - 2 * p2.x + p3.x))
     val t3y = (2 * p1.y - 3 * p2.y + p3.y) / (2 * (p1.y - 2 * p2.y + p3.y))
 
-    (p0 :: p3 :: (List(t1x, t2x, t1y, t2y, t3x, t3y)
-      .filter(t => t >= 0d && t <= 1d)
-      .map(
-        t =>
+    (p0 :: p3 :: (
+      List(t1x, t2x, t1y, t2y, t3x, t3y)
+        .filter(t => t >= 0d && t <= 1d)
+        .map(t =>
           Point(
             (1 - t) * (1 - t) * (1 - t) * p0.x + 3 * (1 - t) * (1 - t) * t * p1.x + 3 * (1 - t) * t * t * p2.x + t * t * t * p3.x,
             (1 - t) * (1 - t) * (1 - t) * p0.y + 3 * (1 - t) * (1 - t) * t * p1.y + 3 * (1 - t) * t * t * p2.y + t * t * t * p3.y
           )
-      ))).filterNot(v => v.x.isNaN || v.y.isNaN)
+        )
+    )).filterNot(v => v.x.isNaN || v.y.isNaN)
 
   }
   def transform(tx: AffineTransform) =

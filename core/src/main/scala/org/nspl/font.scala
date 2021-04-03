@@ -40,8 +40,8 @@ object FixGlyphMeasurer extends GlyphMeasurer[Font#F] {
     )
 }
 
-case class GenericFontConfig[F <: Font](font: F)(
-    implicit val measure: GlyphMeasurer[F#F]
+case class GenericFontConfig[F <: Font](font: F)(implicit
+    val measure: GlyphMeasurer[F#F]
 ) extends FontConfiguration {
   def advance(c: Char) = measure.advance(c, font)
   val lineMetrics = measure.lineMetrics(font)
@@ -110,14 +110,13 @@ object TextLayout {
 
         val outerBounds = outline(lines.iterator.map(_._2), anchor = None)
 
-        val transformations = lines.map {
-          case (text, bounds) =>
-            val tx = AffineTransform
-              .scale(fontSizeFactor, fontSizeFactor)
-              .concat(
-                AffineTransform.translate(bounds.x, bounds.y + ascent)
-              )
-            (text, tx)
+        val transformations = lines.map { case (text, bounds) =>
+          val tx = AffineTransform
+            .scale(fontSizeFactor, fontSizeFactor)
+            .concat(
+              AffineTransform.translate(bounds.x, bounds.y + ascent)
+            )
+          (text, tx)
         }
 
         val scaledOuterBounds = scale.transform(outerBounds)

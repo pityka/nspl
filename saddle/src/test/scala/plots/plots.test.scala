@@ -92,12 +92,11 @@ class SaddlePlotSpec extends FunSpec with Matchers {
       val fig0 = xyplot(
         data2.col("Sepal.Length", "Sepal.Width", "spec")
       )(
-        extraLegend = spec2Num.toSeq.map(
-          x =>
-            x._1 -> PointLegend(
-              shape = Shape.rectangle(0, 0, 1, 1),
-              color = DiscreteColors(spec2Num.size)(x._2)
-            )
+        extraLegend = spec2Num.toSeq.map(x =>
+          x._1 -> PointLegend(
+            shape = Shape.rectangle(0, 0, 1, 1),
+            color = DiscreteColors(spec2Num.size)(x._2)
+          )
         ),
         xlab = "Sepal.Length",
         ylab = "Sepal.Width",
@@ -105,7 +104,9 @@ class SaddlePlotSpec extends FunSpec with Matchers {
       )
 
       val fig1 = xyplot(
-        Frame((rotated.col("PC1", "PC2").toColSeq :+ ("spec" -> spec)): _*) -> point(
+        Frame(
+          (rotated.col("PC1", "PC2").toColSeq :+ ("spec" -> spec)): _*
+        ) -> point(
           valueText = true
         ),
         density2d(
@@ -115,12 +116,11 @@ class SaddlePlotSpec extends FunSpec with Matchers {
             .toSeq
         )
       )(
-        extraLegend = spec2Num.toSeq.map(
-          x =>
-            x._1 -> PointLegend(
-              shape = Shape.rectangle(0, 0, 1, 1),
-              color = DiscreteColors(spec2Num.size)(x._2)
-            )
+        extraLegend = spec2Num.toSeq.map(x =>
+          x._1 -> PointLegend(
+            shape = Shape.rectangle(0, 0, 1, 1),
+            color = DiscreteColors(spec2Num.size)(x._2)
+          )
         ),
         xlab = "PC1",
         ylab = "PC2",
@@ -141,12 +141,11 @@ class SaddlePlotSpec extends FunSpec with Matchers {
       val fig2 = xyplot(
         Frame((rotated.col("PC2", "PC3").toColSeq :+ ("spec" -> spec)): _*)
       )(
-        extraLegend = spec2Num.toSeq.map(
-          x =>
-            x._1 -> PointLegend(
-              shape = Shape.rectangle(0, 0, 1, 1),
-              color = DiscreteColors(spec2Num.size)(x._2)
-            )
+        extraLegend = spec2Num.toSeq.map(x =>
+          x._1 -> PointLegend(
+            shape = Shape.rectangle(0, 0, 1, 1),
+            color = DiscreteColors(spec2Num.size)(x._2)
+          )
         ),
         xlab = "PC2",
         ylab = "PC3",
@@ -194,7 +193,8 @@ class SaddlePlotSpec extends FunSpec with Matchers {
           ylim = Some(-1d -> 1d)
         )
 
-      val rs = (1 to 99 map (i => scala.util.Random.nextGaussian())).toSeq :+ 1e3
+      val rs =
+        (1 to 99 map (i => scala.util.Random.nextGaussian())).toSeq :+ 1e3
 
       val p6 = rasterplot(
         rasterFromSeq(rs, 10, 10),
@@ -224,15 +224,14 @@ class SaddlePlotSpec extends FunSpec with Matchers {
       )
 
       val barplot2 = {
-        val dataraw
-            : IndexedSeq[(Double, Double, Double, Double)] = 1 to 100 map (
-            i =>
-              (
-                i.toDouble,
-                scala.util.Random.nextInt(i).toDouble,
-                scala.util.Random.nextInt(101 - i).toDouble,
-                scala.util.Random.nextInt(50).toDouble
-              )
+        val dataraw: IndexedSeq[(Double, Double, Double, Double)] =
+          1 to 100 map (i =>
+            (
+              i.toDouble,
+              scala.util.Random.nextInt(i).toDouble,
+              scala.util.Random.nextInt(101 - i).toDouble,
+              scala.util.Random.nextInt(50).toDouble
+            )
           )
 
         stackedBarPlot(
@@ -314,16 +313,17 @@ class SaddlePlotSpec extends FunSpec with Matchers {
           )
         xyplot(
           binning,
-          Frame((rotated.col("PC1", "PC2").toColSeq :+ ("spec" -> spec)): _*) -> point(
+          Frame(
+            (rotated.col("PC1", "PC2").toColSeq :+ ("spec" -> spec)): _*
+          ) -> point(
             size = 1
           )
         )(
-          extraLegend = spec2Num.toSeq.map(
-            x =>
-              x._1 -> PointLegend(
-                shape = Shape.rectangle(0, 0, 1, 1),
-                color = DiscreteColors(spec2Num.size)(x._2)
-              )
+          extraLegend = spec2Num.toSeq.map(x =>
+            x._1 -> PointLegend(
+              shape = Shape.rectangle(0, 0, 1, 1),
+              color = DiscreteColors(spec2Num.size)(x._2)
+            )
           ),
           xlab = "PC1",
           ylab = "PC2",

@@ -163,9 +163,8 @@ package object nspl
       layout: Layout
   ): Build[ElemList[T]] = {
     case (Some(old), e: Event) =>
-      val members1 = (old.members zip members) map {
-        case (old, build) =>
-          build(Some(old), e)
+      val members1 = (old.members zip members) map { case (old, build) =>
+        build(Some(old), e)
       }
       sequence(members1, layout)
     case (None, BuildEvent) =>
@@ -186,15 +185,14 @@ package object nspl
 
     val n = layout(bounds)
 
-    val transformed = n zip members map (
-        x =>
-          x._2 match {
-            case scala.util.Left(y) =>
-              scala.util.Left(fitToBounds(y, x._1))
-            case scala.util.Right(y) =>
-              scala.util.Right(fitToBounds(y, x._1))
-          }
-      )
+    val transformed = n zip members map (x =>
+      x._2 match {
+        case scala.util.Left(y) =>
+          scala.util.Left(fitToBounds(y, x._1))
+        case scala.util.Right(y) =>
+          scala.util.Right(fitToBounds(y, x._1))
+      }
+    )
     ElemList2(transformed)
   }
 

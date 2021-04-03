@@ -23,7 +23,8 @@ object LinearAxisFactory extends AxisFactory {
         val max = if (min1 == max1) max1 + 1d else max1
         val horizontal = true
         val log = false
-      } else
+      }
+    else
       new Axis {
 
         val tmp = width1 / (max1 - min1)
@@ -51,7 +52,8 @@ object Log10AxisFactory extends AxisFactory {
         val max = if (min1 == max1) max1 + 1d else max1
         val horizontal = true
         val log = true
-      } else
+      }
+    else
       new Axis {
         def worldToView(v: Double) = {
           if (v <= 0d) throw new RuntimeException("<0")
@@ -208,7 +210,8 @@ case class AxisSettings(
             val e = math.pow(10d, i)
             e >= axis.min - 1e-3 && e <= axis.max + 1e-3
           }
-      val majorTicksExp = axis.min +: (lmaj1.map(i => math.pow(10d, i)) :+ axis.max)
+      val majorTicksExp =
+        axis.min +: (lmaj1.map(i => math.pow(10d, i)) :+ axis.max)
       val minorTicksExp = majorTicksExp
         .sliding(2)
         .flatMap { group =>

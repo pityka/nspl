@@ -204,9 +204,8 @@ object saddle {
     new DataSourceWithQuantiles {
 
       def iterator =
-        frame.toRowSeq.map {
-          case (rx, series) =>
-            VectorRow(series.toVec.toSeq.toVector, rx.toString)
+        frame.toRowSeq.map { case (rx, series) =>
+          VectorRow(series.toVec.toSeq.toVector, rx.toString)
         }.iterator
 
       def dimension = frame.numCols

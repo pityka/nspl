@@ -29,7 +29,8 @@ object contour {
 
     def neigbours(i: Int, j: Int) =
       ((i + 1, j) :: (i, j + 1) :: Nil).filter(x =>
-        x._1 >= 0 && x._2 >= 0 && x._1 <= n && x._2 <= n)
+        x._1 >= 0 && x._2 >= 0 && x._1 <= n && x._2 <= n
+      )
 
     def segment(
         x1: Double,
@@ -92,7 +93,8 @@ object contour {
         else throw new RuntimeException("")
       ).filter(x =>
         x._1 >= 0 && x._2 >= 0 && x._3 >= 0 && x._4 >= 0 &&
-          x._1 <= n && x._2 <= n && x._3 <= n && x._4 <= n)
+          x._1 <= n && x._2 <= n && x._3 <= n && x._4 <= n
+      )
 
     zs map { z =>
       val segments = 0 to n flatMap { j =>
@@ -100,31 +102,29 @@ object contour {
           val x = min1 + i * w1
           val y = min2 + j * w2
           val v = cached(x -> y)
-          neigbours(i, j) flatMap {
-            case (n, m) =>
-              val x2 = min1 + n * w1
-              val y2 = min2 + m * w2
-              val v2 = cached(x2 -> y2)
-              val intersection = segment(x, y, v, x2, y2, v2, z)
-              if (intersection.isDefined) {
-                val intersection2 = segmentNeighbours(i, j, n, m)
-                  .map {
-                    case (i, j, n, m) =>
-                      val x = min1 + i * w1
-                      val y = min2 + j * w2
-                      val v = cached(x -> y)
-                      val x2 = min1 + n * w1
-                      val y2 = min2 + m * w2
-                      val v2 = cached(x2 -> y2)
-                      segment(x, y, v, x2, y2, v2, z)
-                  }
-                  .filter(_.isDefined)
-                  .map(_.get)
-                  .headOption
-                if (intersection2.isDefined)
-                  (intersection.get -> intersection2.get) :: Nil
-                else Nil
-              } else Nil
+          neigbours(i, j) flatMap { case (n, m) =>
+            val x2 = min1 + n * w1
+            val y2 = min2 + m * w2
+            val v2 = cached(x2 -> y2)
+            val intersection = segment(x, y, v, x2, y2, v2, z)
+            if (intersection.isDefined) {
+              val intersection2 = segmentNeighbours(i, j, n, m)
+                .map { case (i, j, n, m) =>
+                  val x = min1 + i * w1
+                  val y = min2 + j * w2
+                  val v = cached(x -> y)
+                  val x2 = min1 + n * w1
+                  val y2 = min2 + m * w2
+                  val v2 = cached(x2 -> y2)
+                  segment(x, y, v, x2, y2, v2, z)
+                }
+                .filter(_.isDefined)
+                .map(_.get)
+                .headOption
+              if (intersection2.isDefined)
+                (intersection.get -> intersection2.get) :: Nil
+              else Nil
+            } else Nil
 
           }
         }

@@ -55,13 +55,12 @@ object awtrenderer extends JavaAWTUtil {
               new java.awt.font.TextLayout(text, font, frc)
                 .getOutline(new java.awt.geom.AffineTransform())
 
-            elem.layout.lines.foreach {
-              case (line, lineTx) =>
-                val shape = getOutline(line)
+            elem.layout.lines.foreach { case (line, lineTx) =>
+              val shape = getOutline(line)
 
-                val tx = elem.txLoc.concat(lineTx)
+              val tx = elem.txLoc.concat(lineTx)
 
-                graphics2.fill(tx.createTransformedShape(shape))
+              graphics2.fill(tx.createTransformedShape(shape))
             }
           }
         }

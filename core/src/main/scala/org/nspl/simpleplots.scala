@@ -135,25 +135,25 @@ trait SimplePlots {
 
     val data1 =
       if (draw1Line)
-        (dataSourceFromRows(List(0.0 -> 1.0)), List(polynom(() => line()))) +: data
-          .map(
-            x => x._1 -> x._2
-          )
+        (
+          dataSourceFromRows(List(0.0 -> 1.0)),
+          List(polynom(() => line()))
+        ) +: data
+          .map(x => x._1 -> x._2)
       else data.map(x => x._1 -> x._2)
 
     val legend1 =
       legend(
         entries = (
           (
-            (data map {
-              case (ds, render, conf) =>
-                conf match {
-                  case NotInLegend => None
-                  case InLegend(name) =>
-                    Some(
-                      name -> render.map(_.asLegend).find(_.isDefined).flatten
-                    )
-                }
+            (data map { case (ds, render, conf) =>
+              conf match {
+                case NotInLegend => None
+                case InLegend(name) =>
+                  Some(
+                    name -> render.map(_.asLegend).find(_.isDefined).flatten
+                  )
+              }
             }).filter(x => x.isDefined && x.get._2.isDefined).map(_.get)
           ).map(x => x._1 -> x._2.get) ++ extraLegend
         ).toList.distinct,
@@ -251,15 +251,14 @@ trait SimplePlots {
       legend(
         entries = (
           (
-            (data map {
-              case (ds, render, conf) =>
-                conf match {
-                  case NotInLegend => None
-                  case InLegend(name) =>
-                    Some(
-                      name -> render.map(_.asLegend).find(_.isDefined).flatten
-                    )
-                }
+            (data map { case (ds, render, conf) =>
+              conf match {
+                case NotInLegend => None
+                case InLegend(name) =>
+                  Some(
+                    name -> render.map(_.asLegend).find(_.isDefined).flatten
+                  )
+              }
             }).filter(x => x.isDefined && x.get._2.isDefined).map(_.get)
           ).map(x => x._1 -> x._2.get) ++ extraLegend
         ).toList.distinct,
@@ -337,8 +336,8 @@ trait SimplePlots {
           val accum: Seq[Double] =
             data.drop(1).scanLeft(data.head)((y, l) => y + l)
 
-          accum zip (0.0 +: accum.dropRight(1)) map (
-              y => VectorRow(Vector(x, y._1, y._2), "")
+          accum zip (0.0 +: accum.dropRight(1)) map (y =>
+            VectorRow(Vector(x, y._1, y._2), "")
           )
 
         }
@@ -347,8 +346,8 @@ trait SimplePlots {
 
       val legend1 = legend.zipWithIndex.map(x => (x._2, x._1._2, x._1._3))
 
-      val renderers = legend1.zip(data1).map {
-        case ((idx, label, color), data) =>
+      val renderers =
+        legend1.zip(data1).map { case ((idx, label, color), data) =>
           val ds: DataSource = data
           (
             ds,
@@ -363,7 +362,7 @@ trait SimplePlots {
             ),
             InLegend(label)
           )
-      }
+        }
 
       xyplot(renderers: _*)(
         main = main,
