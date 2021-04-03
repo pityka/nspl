@@ -1,6 +1,7 @@
 package org.nspl
 
 import scala.language.existentials
+import scala.collection.compat._
 
 trait Colormap { self =>
   def apply(v: Double): Color
@@ -221,7 +222,7 @@ trait Colors {
       (hueP, hueQ, b1, color)
     }
 
-    def loop(p: Int, q: Int, b: Int): LazyList[Color] = {
+    def loop(p: Int, q: Int, b: Int): immutable.LazyList[Color] = {
       val (p1, q1, b1, c) = next(p, q, b)
       c #:: loop(p1, q1, b1)
     }
@@ -237,7 +238,7 @@ trait Colors {
       val (r, g, b) = hsl2rgb2(hue, saturation, brightness)
       Color((r * 255).toInt, (g * 255).toInt, (b * 255).toInt, 255)
     }
-    def loop: LazyList[Color] = newRandomColor #:: loop
+    def loop: immutable.LazyList[Color] = newRandomColor #:: loop
     loop
   }
 

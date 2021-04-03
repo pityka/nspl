@@ -4,6 +4,7 @@ lazy val commonSettings = Seq(
   organization := "io.github.pityka",
   version := "0.0.23",
   scalaVersion := "2.13.5",
+  crossScalaVersions := Seq("2.12.13", "2.13.5"),
   javacOptions ++= Seq("-Xdoclint:none"),
   scalacOptions ++= Seq(
     "-language:postfixOps",
@@ -24,7 +25,8 @@ lazy val core = project
   .in(file("core"))
   .settings(commonSettings)
   .settings(
-    name := "nspl-core"
+    name := "nspl-core",
+    libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "2.4.3"
   )
   .enablePlugins(spray.boilerplate.BoilerplatePlugin)
 
@@ -34,7 +36,8 @@ lazy val coreJS = project
   .settings(
     name := "nspl-core-js",
     target := file("core/targetJS"),
-    sourceManaged in Compile := (sourceManaged in Compile).value.getAbsoluteFile
+    sourceManaged in Compile := (sourceManaged in Compile).value.getAbsoluteFile,
+    libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.4.3"
   )
   .enablePlugins(ScalaJSPlugin)
   .enablePlugins(spray.boilerplate.BoilerplatePlugin)
@@ -128,6 +131,7 @@ publishArtifact := false
 
 lazy val root = (project in file("."))
   .settings(commonSettings: _*)
+  .settings(crossScalaVersions := Nil, skip in publish := true)
   .aggregate(
     saddle,
     saddleJS,
