@@ -60,7 +60,7 @@ lazy val sharedJs = project
   .settings(commonSettings)
   .settings(
     name := "nspl-shared-js",
-    libraryDependencies += ("org.scala-js") %%% "scalajs-dom" % "1.0.0"
+    libraryDependencies += ("org.scala-js") %%% "scalajs-dom" % "1.1.0"
   )
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(coreJS)
@@ -80,7 +80,7 @@ lazy val scalatagsJs = project
   .settings(
     name := "nspl-scalatags-js",
     libraryDependencies ++= Seq(
-      ("org.scala-js") %%% "scalajs-dom" % "1.0.0",
+      ("org.scala-js") %%% "scalajs-dom" % "1.1.0",
       ("com.lihaoyi") %%% "scalatags" % "0.9.1"
     )
   )
