@@ -37,8 +37,9 @@ object saddle {
       xlab = xlab,
       ylab = ylab,
       xLabFontSize = xLabFontSize,
-      yLabFontSize =
-        yLabFontSize.getOrElse(math.min(2.0, yHeight.v / series.length) fts),
+      yLabFontSize = yLabFontSize.getOrElse(
+        math.min(2.0, yHeight.value / series.length) fts
+      ),
       mainFontSize = mainFontSize,
       xWidth = xWidth,
       yHeight = yHeight,
@@ -83,8 +84,9 @@ object saddle {
       xlab = xlab,
       ylab = ylab,
       yLabFontSize = yLabFontSize,
-      xLabFontSize =
-        xLabFontSize.getOrElse(math.min(2.0, yHeight.v / series.length) fts),
+      xLabFontSize = xLabFontSize.getOrElse(
+        math.min(2.0, yHeight.value / series.length) fts
+      ),
       mainFontSize = mainFontSize,
       xWidth = xWidth,
       yHeight = yHeight,
@@ -123,8 +125,12 @@ object saddle {
       main,
       xlab,
       ylab,
-      xLabFontSize.getOrElse(math.min(2.0, xWidth.v / dataFrame.numCols) fts),
-      yLabFontSize.getOrElse(math.min(2.0, yHeight.v / dataFrame.numRows) fts),
+      xLabFontSize.getOrElse(
+        math.min(2.0, xWidth.value / dataFrame.numCols) fts
+      ),
+      yLabFontSize.getOrElse(
+        math.min(2.0, yHeight.value / dataFrame.numRows) fts
+      ),
       mainFontSize,
       colormap,
       dataFrame.colIx.toSeq
