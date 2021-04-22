@@ -4,7 +4,7 @@
 
 
 
-# 2d Plotting Library for Scala (including scala-js and scala-native)
+# 2d Plotting Library for Scala (including scala-js)
 
 Creates scatter, line, contour, raster, barplots and boxplots, histograms, density plots. Composite figure of multiple plots.
 
