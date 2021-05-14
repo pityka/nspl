@@ -102,7 +102,7 @@ lazy val awt = project
     name := "nspl-awt",
     libraryDependencies ++= Seq(
       "de.erichseifert.vectorgraphics2d" % "VectorGraphics2D" % "0.13",
-      "org.scalatest" %% "scalatest" % "3.2.8" % "test"
+      "org.scalatest" %% "scalatest" % "3.2.9" % "test"
     )
   )
   .dependsOn(core, sharedJvm)
@@ -122,7 +122,7 @@ lazy val saddle = (project in file("saddle"))
     name := "nspl-saddle",
     libraryDependencies ++= Seq(
       "io.github.pityka" %% "saddle-core" % "2.2.5",
-      "org.scalatest" %% "scalatest" % "3.2.8" % "test"
+      "org.scalatest" %% "scalatest" % "3.2.9" % "test"
     )
   )
   .dependsOn(core, awt, scalatagsJvm)
