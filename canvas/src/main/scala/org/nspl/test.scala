@@ -63,7 +63,15 @@ object nsplcanvastest {
       rasterFromStream(z3.iterator, 30, 30, MinMaxImpl(0.0, 1.0))
     )(par(xLabFontSize = 0.5 fts, yLabFontSize = 0.5 fts))
 
-    val text = fitToWidth(
+    val text: Elems7[
+      ShapeElem,
+      TextBox,
+      TextBox,
+      TextBox,
+      TextBox,
+      TextBox,
+      TextBox
+    ] = fitToWidth(
       group(
         ShapeElem(Shape.circle(1)),
         TextBox("abc def ghijklmn opqrstvuwxyz"),
@@ -119,7 +127,7 @@ object nsplcanvastest {
         .toList
         .map(v => (v(0)._1, v(0)._2, v(0)._3, v(1)._1, v(1)._2, v(1)._3))
 
-    val xyzp = xyzplot(
+    val xyzp: Build[Elems2[XYZPlotArea, Legend]] = xyzplot(
       (cube, List(lineSegment3D()), NotInLegend),
       (cubeVertex, List(point3D()), NotInLegend)
     )()
@@ -137,9 +145,9 @@ object nsplcanvastest {
       VerticalStack(Anchor)
     )
 
-    val (canvas, update) = render(gallery, 800, 800, println)
+    val (canv, update) = render(gallery, 800, 800, println)
 
-    n.appendChild(canvas)
+    n.appendChild(canv)
 
     println("Bye")
   }

@@ -108,7 +108,7 @@ object saddle {
     new DataSourceWithQuantiles {
       def iterator =
         s.toSeq.iterator.zipWithIndex
-          .map(x => VectorRow(Vector(x._2, x._1._2), x._1._1.toString))
+          .map(x => VectorRow(Vector(x._2.toDouble, x._1._2), x._1._1.toString))
       def dimension = 2
       def columnMinMax(i: Int) = i match {
         case 0 => Some(MinMaxImpl(0, s.length - 1d))

@@ -28,7 +28,7 @@ private[nspl] case class ScalaTagRC(
 
 object scalatagrenderer {
 
-  implicit val defaultGlyphMeasurer = AwtGlyphMeasurer
+  implicit val defaultGlyphMeasurer : AwtGlyphMeasurer.type = AwtGlyphMeasurer
 
   implicit val defaultFont: FontConfiguration = org.nspl.font("Arial")
 
@@ -96,7 +96,7 @@ object scalatagrenderer {
 
   }
 
-  implicit val shapeRenderer = new Renderer[ShapeElem, ScalaTagRC] {
+  implicit val shapeRenderer:Renderer[ShapeElem, ScalaTagRC] = new Renderer[ShapeElem, ScalaTagRC] {
     def render(ctx: ScalaTagRC, elem: ShapeElem): Unit = {
       val tx =
         ctx.getTransform.applyBefore(elem.tx.applyBefore(elem.shape.currentTransform))
@@ -184,7 +184,7 @@ object scalatagrenderer {
     }
   }
 
-  implicit val textRenderer = new Renderer[TextBox, ScalaTagRC] {
+  implicit val textRenderer:Renderer[TextBox, ScalaTagRC]  = new Renderer[TextBox, ScalaTagRC] {
     def render(ctx: ScalaTagRC, elem: TextBox): Unit = {
       if (!elem.layout.isEmpty) {
         elem.layout.lines.foreach { case (line, lineTx) =>

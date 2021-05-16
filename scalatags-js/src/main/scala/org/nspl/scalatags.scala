@@ -12,9 +12,10 @@ import org.scalajs.dom.DOMRect
 import org.scalajs.dom.html
 import org.scalajs.dom.raw._
 import org.scalajs.dom.ext._
+import scalatags.JsDom
 
 private[nspl] case class ScalaTagRC(
-    elems: scala.collection.mutable.ArrayBuffer[Frag]
+    elems: scala.collection.mutable.ArrayBuffer[scalatags.generic.TypedTag[org.scalajs.dom.Element, org.scalajs.dom.Element,org.scalajs.dom.Node]]
 ) extends RenderingContext[ScalaTagRC] {
 
   var transform: AffineTransform = AffineTransform.identity
@@ -36,7 +37,7 @@ private[nspl] case class ScalaTagRC(
 
 object scalatagrenderer {
 
-  implicit val defaultGlyphMeasurer = CanvasGlyphMeasurer
+  implicit val defaultGlyphMeasurer: CanvasGlyphMeasurer.type  = CanvasGlyphMeasurer
 
   implicit val defaultAWTFont: FontConfiguration = org.nspl.font("Arial")
 
@@ -58,7 +59,7 @@ object scalatagrenderer {
       er: Renderer[K, ScalaTagRC]
   ) = {
 
-    val ctx = ScalaTagRC(scala.collection.mutable.ArrayBuffer[Frag]())
+    val ctx = ScalaTagRC(scala.collection.mutable.ArrayBuffer.empty)
 
     val rootElem = svg(
       svgAttrs.width := width,
@@ -93,7 +94,7 @@ object scalatagrenderer {
 
   }
 
-  implicit val shapeRenderer = new Renderer[ShapeElem, ScalaTagRC] {
+  implicit val shapeRenderer : Renderer[ShapeElem, ScalaTagRC]= new Renderer[ShapeElem, ScalaTagRC] {
     def render(ctx: ScalaTagRC, elem: ShapeElem): Unit = {
       val tx =
         ctx.getTransform.applyBefore(elem.tx.applyBefore(elem.shape.currentTransform))
@@ -182,7 +183,7 @@ object scalatagrenderer {
     }
   }
 
-  implicit val textRenderer = new Renderer[TextBox, ScalaTagRC] {
+  implicit val textRenderer : Renderer[TextBox, ScalaTagRC]= new Renderer[TextBox, ScalaTagRC] {
     def render(ctx: ScalaTagRC, elem: TextBox): Unit = {
       if (!elem.layout.isEmpty) {
         elem.layout.lines.foreach { case (line, lineTx) =>

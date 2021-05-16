@@ -46,7 +46,7 @@ trait JavaAWTUtil {
   private[nspl] def col2col(c: Color): java.awt.Paint =
     new java.awt.Color(c.r, c.g, c.b, c.a)
 
-  private[nspl] def str2str(s: Stroke) =
+  private[nspl] def str2str(s: Stroke): java.awt.BasicStroke =
     new java.awt.BasicStroke(
       s.width.toFloat,
       s.cap match {
@@ -60,10 +60,10 @@ trait JavaAWTUtil {
       0f
     )
 
-  private[nspl] def rec2bounds(r: java.awt.geom.Rectangle2D) =
+  private[nspl] def rec2bounds(r: java.awt.geom.Rectangle2D): Bounds =
     Bounds(r.getX, r.getY, r.getWidth, r.getHeight)
 
-  private[nspl] def bounds2rec(r: Bounds) =
+  private[nspl] def bounds2rec(r: Bounds): java.awt.geom.Rectangle2D.Double =
     new java.awt.geom.Rectangle2D.Double(r.x, r.y, r.w, r.h)
 
   private[nspl] def tx2tx(tx: AffineTransform): java.awt.geom.AffineTransform =

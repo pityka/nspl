@@ -189,7 +189,7 @@ case class DiscreteColors(
 
   def apply(value: Double): Color = if (value.isNaN) Color.transparent
   else {
-    val v = if (value > numColors) numColors else if (value < 0) 0 else value
+    val v : Double = if (value > numColors) numColors.toDouble else if (value < 0) 0d else value
     colorPick(v.toInt, numColors, saturation, lighting)
   }
 

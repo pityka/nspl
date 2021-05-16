@@ -20,15 +20,15 @@ object canvasFont {
   }
 }
 
-object CanvasGlyphMeasurer extends GlyphMeasurer[Font#F] {
+object CanvasGlyphMeasurer extends GlyphMeasurer[Font] {
   val canvas = dom.document.createElement("canvas").asInstanceOf[html.Canvas]
   val ctx =
     canvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
   val abc =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPRQRSTUVWXYZ0123456789%,./][()]"
 
-  var currentFont: Font#F = null
-  def withFont[T](font: Font#F)(f: => T) = {
+  var currentFont: Font = null
+  def withFont[T](font: Font)(f: => T) = {
     if (currentFont != null && currentFont != font) {
       currentFont = font
       ctx.font = canvasFont(font)
@@ -38,9 +38,9 @@ object CanvasGlyphMeasurer extends GlyphMeasurer[Font#F] {
 
   val fontWidthCache =
     scala.collection.mutable.Map[Char, Double]()
-  var fontOfCache: Font#F = null
+  var fontOfCache: Font = null
 
-  def advance(s: Char, f: Font#F): Double = {
+  def advance(s: Char, f: Font): Double = {
     if (fontOfCache != null && fontOfCache != f)
       ctx.measureText(s.toString).width
     else {
@@ -59,7 +59,7 @@ object CanvasGlyphMeasurer extends GlyphMeasurer[Font#F] {
     }
 
   }
-  def lineMetrics(f: Font#F): LineMetrics = {
+  def lineMetrics(f: Font): LineMetrics = {
     withFont(f) {
       val metric = ctx.measureText(abc).asInstanceOf[scalajs.js.Dynamic]
       LineMetrics(
