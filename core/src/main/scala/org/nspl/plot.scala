@@ -24,7 +24,7 @@ object DataElem {
   implicit def dataElemRenderer[RC <: RenderingContext[RC]](implicit
       re: Renderer[ShapeElem, RC],
       rt: Renderer[TextBox, RC]
-  ) = new Renderer[DataElem, RC] {
+  ): Renderer[DataElem, RC] = new Renderer[DataElem, RC] {
     def render(r: RC, e: DataElem): Unit = {
       e.data.iterator.foreach { row =>
         e.renderers.foreach { dr =>
@@ -58,7 +58,7 @@ trait Plots {
     implicit def renderer[RC <: RenderingContext[RC]](implicit
         re: Renderer[ShapeElem, RC],
         rt: Renderer[TextBox, RC]
-    ) = new Renderer[XYPlotArea, RC] {
+    ): Renderer[XYPlotArea, RC] = new Renderer[XYPlotArea, RC] {
       def render(r: RC, e: XYPlotArea): Unit =
         implicitly[Renderer[XYPlotAreaType, RC]].render(r, e.elem)
     }

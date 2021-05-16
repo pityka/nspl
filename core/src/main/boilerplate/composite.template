@@ -18,7 +18,7 @@ trait Tuples1 {
 
 trait Tuples2 {
 
-  [#def group[[#T1<:Renderable[T1]#],F:FC]([#m1:T1#],layout:Layout) =  {
+  [#def group[[#T1<:Renderable[T1]#],F:FC]([#m1:T1#],layout:Layout) : org.nspl.Elems1[[#T1#]] =  {
       val n = layout(List([#m1.bounds#]))
       org.nspl.Elems1([#fitToBounds(m1,n(0))#])
   }#
@@ -48,7 +48,7 @@ trait Tuples2 {
         }#
   ]
 
-  [#implicit def compositeRenderer1[[#T1<:Renderable[T1]#],R<:RenderingContext[R]](implicit [#r1:Renderer[T1,R]#]) = new Renderer[org.nspl.Elems1[[#T1#]],R] {
+  [#implicit def compositeRenderer1[[#T1<:Renderable[T1]#],R<:RenderingContext[R]](implicit [#r1:Renderer[T1,R]#]) : Renderer[org.nspl.Elems1[[#T1#]],R] = new Renderer[org.nspl.Elems1[[#T1#]],R] {
     def render(ctx:R,elem:Elems1[[#T1#]]) : Unit ={
         ctx.withTransform(elem.tx){
           [#r1.render(ctx,elem.m1)#

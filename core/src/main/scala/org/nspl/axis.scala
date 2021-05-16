@@ -103,7 +103,8 @@ case class AxisSettings(
     }
 
     val numTicks1 =
-      if (tickSpace.isEmpty) numTicks else (axis.max - axis.min) / tickSpace1
+      if (tickSpace.isEmpty) numTicks.toDouble
+      else (axis.max - axis.min) / tickSpace1
 
     val lineStart = lineStartFraction * axis.width
     val lineEnd = lineStart + axis.width * lineLengthFraction
@@ -269,7 +270,6 @@ case class AxisSettings(
               val rightWorld = group(2).fold(identity, _._1)
               val (world, tick) = group(1).toOption.get
               val leftV = axis.worldToView(leftWorld)
-              val centerV = axis.worldToView(centerWorld)
               val rightV = axis.worldToView(rightWorld)
               val availableSpace = (rightV - leftV) * 0.5
               List((world, tick, availableSpace))

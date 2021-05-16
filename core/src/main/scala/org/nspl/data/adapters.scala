@@ -115,7 +115,7 @@ trait DataAdaptors extends DataTuples {
   )(implicit f: T => Row): DataSourceWithQuantiles =
     new DataSourceWithQuantiles {
       def iterator = s.iterator.map(f)
-      def dimension = s.headOption.map(_.dimension).getOrElse(0)
+      def dimension = s.headOption.map(v => f(v).dimension).getOrElse(0)
 
       private var max = scala.collection.mutable.ArrayBuffer[Double]()
       private var min = scala.collection.mutable.ArrayBuffer[Double]()
@@ -142,7 +142,7 @@ trait DataAdaptors extends DataTuples {
         if (s.isEmpty) None
         else Some(MinMaxImpl(min(i), max(i)))
       def quantilesOfColumn(i: Int, qs: Vector[Double]) = {
-        val v = s.map(_.apply(i))
+        val v = s.map(v => f(v).apply(i))
         percentile(v, qs).toVector
       }
       override def toString = s"DataSourceFrom($s)"

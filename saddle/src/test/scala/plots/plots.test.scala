@@ -13,7 +13,7 @@ import org.saddle.index.InnerJoin
 class SaddlePlotSpec extends munit.FunSuite {
   
 
-  implicit val myfont = font("Hasklig")
+  implicit val myfont: GenericFontConfig[NamedFont]  = font("Hasklig")
 
   def readFrameFromClasspath(s: String) =
     CsvParser

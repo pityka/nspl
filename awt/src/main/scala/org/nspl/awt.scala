@@ -55,48 +55,49 @@ private[nspl] case class JavaRC(graphics: Graphics2D, doRender: Boolean)
 
 object awtrenderer extends JavaAWTUtil {
 
-  implicit val defaultGlyphMeasurer = AwtGlyphMeasurer
+  implicit val defaultGlyphMeasurer: GlyphMeasurer[Font] = AwtGlyphMeasurer
 
   implicit val defaultAWTFont: FontConfiguration = font("Arial")
 
-  implicit val shapeRenderer = new Renderer[ShapeElem, JavaRC] {
+  implicit val shapeRenderer: Renderer[ShapeElem, JavaRC] =
+    new Renderer[ShapeElem, JavaRC] {
 
-    private def drawAndFill(ctx: JavaRC, elem: ShapeElem) = {
+      private def drawAndFill(ctx: JavaRC, elem: ShapeElem) = {
 
-      if (
-        elem.fill.a > 0d || (elem.stroke.isDefined && elem.strokeColor.a > 0)
-      ) {
-        ctx.setTransformInGraphics()
+        if (
+          elem.fill.a > 0d || (elem.stroke.isDefined && elem.strokeColor.a > 0)
+        ) {
+          ctx.setTransformInGraphics()
 
-        val shape = elem.shape
+          val shape = elem.shape
 
-        if (elem.fill.a > 0.0) {
-          ctx.withPaint(elem.fill) {
-            ctx.graphics.fill(shape2awt(shape))
+          if (elem.fill.a > 0.0) {
+            ctx.withPaint(elem.fill) {
+              ctx.graphics.fill(shape2awt(shape))
+            }
           }
-        }
-        if (elem.stroke.isDefined && elem.strokeColor.a > 0) {
-          ctx.withPaint(elem.strokeColor) {
-            ctx.withStroke(elem.stroke.get) {
-              ctx.graphics.draw(shape2awt(shape))
+          if (elem.stroke.isDefined && elem.strokeColor.a > 0) {
+            ctx.withPaint(elem.strokeColor) {
+              ctx.withStroke(elem.stroke.get) {
+                ctx.graphics.draw(shape2awt(shape))
+              }
             }
           }
         }
       }
-    }
-    def render(ctx: JavaRC, elem: ShapeElem): Unit = {
+      def render(ctx: JavaRC, elem: ShapeElem): Unit = {
 
       ctx.withTransform(elem.tx applyBefore elem.shape.currentTransform) {
         if (ctx.doRender) {
           drawAndFill(ctx, elem)
         }
 
+        }
+
       }
-
     }
-  }
 
-  implicit val textRenderer = new Renderer[TextBox, JavaRC] {
+  implicit val textRenderer : Renderer[TextBox, JavaRC] = new Renderer[TextBox, JavaRC] {
 
     def render(ctx: JavaRC, elem: TextBox): Unit = {
       if (!elem.layout.isEmpty && elem.color.a > 0) {
@@ -111,12 +112,12 @@ object awtrenderer extends JavaAWTUtil {
                 }
               }
             }
+
           }
 
         }
-
       }
     }
-  }
 
+}
 }
