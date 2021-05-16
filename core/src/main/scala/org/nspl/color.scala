@@ -143,8 +143,8 @@ case class LogHeatMapColors(min: Double = 0.0, max: Double = 1.0)
 case class DiscreteColors(max: Int) extends Colormap {
 
   def apply(value: Double): Color = {
-    val v = if (value > max) max else if (value < 0) 0 else value
-    colorPick(v.toInt, max)
+    val v = if (value > max) max else if (value < 0) 0 else value.toInt
+    colorPick(v, max)
   }
 
   def withRange(min: Double, max: Double) = DiscreteColors(max.toInt)

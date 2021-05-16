@@ -100,7 +100,8 @@ case class AxisSettings(
     }
 
     val numTicks1 =
-      if (tickSpace.isEmpty) numTicks else (axis.max - axis.min) / tickSpace1
+      if (tickSpace.isEmpty) numTicks.toDouble
+      else (axis.max - axis.min) / tickSpace1
 
     def makeTick(world: Double, text: String) = {
       val view = worldToView(world)
@@ -224,7 +225,12 @@ case class AxisSettings(
         .toList
       (majorTicksExp, minorTicksExp)
     } else
-      Ticks.heckbert(axis.min, axis.max, numTicks1.toInt, numMinorTicksFactor)
+      Ticks.heckbert(
+        axis.min,
+        axis.max,
+        (numTicks1: Double).toInt,
+        numMinorTicksFactor
+      )
 
     val majorTicks =
       if (numTicks1 == 0) Nil

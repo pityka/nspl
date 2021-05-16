@@ -51,7 +51,7 @@ trait JavaAWTUtil {
   implicit def col2col(c: Color): java.awt.Paint =
     new java.awt.Color(c.r, c.g, c.b, c.a)
 
-  implicit def str2str(s: Stroke) =
+  implicit def str2str(s: Stroke): java.awt.BasicStroke =
     new java.awt.BasicStroke(
       s.width.toFloat,
       s.cap match {
@@ -62,10 +62,10 @@ trait JavaAWTUtil {
       java.awt.BasicStroke.JOIN_MITER
     )
 
-  implicit def rec2bounds(r: java.awt.geom.Rectangle2D) =
+  implicit def rec2bounds(r: java.awt.geom.Rectangle2D): Bounds =
     Bounds(r.getX, r.getY, r.getWidth, r.getHeight)
 
-  implicit def bounds2rec(r: Bounds) =
+  implicit def bounds2rec(r: Bounds): java.awt.geom.Rectangle2D.Double =
     new java.awt.geom.Rectangle2D.Double(r.x, r.y, r.w, r.h)
 
   implicit def tx2tx(tx: AffineTransform): java.awt.geom.AffineTransform =

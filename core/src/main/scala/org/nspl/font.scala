@@ -30,9 +30,9 @@ case class NamedFont(name: String, size: Int) extends Font
 /* https://docs.oracle.com/javase/tutorial/2d/text/fontconcepts.html */
 case class LineMetrics(ascent: Double, descent: Double, leading: Double)
 
-object FixGlyphMeasurer extends GlyphMeasurer[Font#F] {
-  def advance(s: Char, f: Font#F) = f.size.toDouble * 0.6
-  def lineMetrics(f: Font#F) =
+object FixGlyphMeasurer extends GlyphMeasurer[Font] {
+  def advance(s: Char, f: Font) = f.size.toDouble * 0.6
+  def lineMetrics(f: Font) =
     LineMetrics(
       ascent = f.size.toDouble * 0.78,
       descent = f.size.toDouble * 0.22,
@@ -41,7 +41,7 @@ object FixGlyphMeasurer extends GlyphMeasurer[Font#F] {
 }
 
 case class GenericFontConfig[F <: Font](font: F)(implicit
-    val measure: GlyphMeasurer[F#F]
+    val measure: GlyphMeasurer[F]
 ) extends FontConfiguration {
   def advance(c: Char) = measure.advance(c, font)
   val lineMetrics = measure.lineMetrics(font)

@@ -38,7 +38,7 @@ package object nspl
     def value(implicit bs: FontConfiguration) = v.value
   }
 
-  def importFont(name: String)(implicit gm: GlyphMeasurer[NamedFont#F]) =
+  def importFont(name: String)(implicit gm: GlyphMeasurer[NamedFont]) =
     GenericFontConfig(NamedFont(name, 10))(gm)
 
   def mapEvent[A <: Renderable[A], B <: Renderable[B]](

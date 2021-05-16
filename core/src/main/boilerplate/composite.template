@@ -45,7 +45,7 @@ trait Tuples2 {
         }#
   ]
 
-  [#implicit def compositeRenderer1[[#T1<:Renderable[T1]#],R<:RenderingContext](implicit [#r1:Renderer[T1,R]#]) = new Renderer[org.nspl.Elems1[[#T1#]],R] {
+  [#implicit def compositeRenderer1[[#T1<:Renderable[T1]#],R<:RenderingContext](implicit [#r1:Renderer[T1,R]#]) : Renderer[org.nspl.Elems1[[#T1#]],R] = new Renderer[org.nspl.Elems1[[#T1#]],R] {
     def render(ctx:R,elem:Elems1[[#T1#]]) : Unit ={
         [#r1.render(ctx,elem.m1)#
         ]

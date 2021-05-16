@@ -12,7 +12,7 @@ case class ElemList[T <: Renderable[T]](members: Seq[T])
 object ElemList {
   implicit def compositeListRenderer[T <: Renderable[T], R <: RenderingContext](
       implicit r: Renderer[T, R]
-  ) =
+  ): Renderer[ElemList[T], R] =
     new Renderer[ElemList[T], R] {
       def render(ctx: R, elem: ElemList[T]): Unit = {
         elem.members.foreach(e => r.render(ctx, e))
@@ -40,7 +40,7 @@ object ElemList2 {
   ], R <: RenderingContext](implicit
       r1: Renderer[T, R],
       r2: Renderer[T2, R]
-  ) =
+  ): Renderer[ElemList2[T, T2], R] =
     new Renderer[ElemList2[T, T2], R] {
       def render(ctx: R, elem: ElemList2[T, T2]): Unit = {
         elem.members.foreach(e =>

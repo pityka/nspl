@@ -20,7 +20,7 @@ object DataElem3D {
   implicit def dataElemRenderer[RC <: RenderingContext](implicit
       re: Renderer[ShapeElem, RC],
       rt: Renderer[TextBox, RC]
-  ) = new Renderer[DataElem3D, RC] {
+  ): Renderer[DataElem3D, RC] = new Renderer[DataElem3D, RC] {
     def render(r: RC, e: DataElem3D): Unit = {
       e.data.iterator.foreach { row =>
         e.renderers.foreach { dr =>
@@ -55,7 +55,7 @@ trait Plots3D {
     implicit def renderer[RC <: RenderingContext](implicit
         re: Renderer[ShapeElem, RC],
         rt: Renderer[TextBox, RC]
-    ) = new Renderer[XYZPlotArea, RC] {
+    ): Renderer[XYZPlotArea, RC] = new Renderer[XYZPlotArea, RC] {
       def render(r: RC, e: XYZPlotArea): Unit =
         implicitly[Renderer[T, RC]].render(r, e.elem)
     }

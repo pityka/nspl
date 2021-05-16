@@ -11,11 +11,11 @@ case class JavaRC(graphics: Graphics2D) extends RenderingContext
 
 object awtrenderer extends JavaAWTUtil {
 
-  implicit val defaultGlyphMeasurer = AwtGlyphMeasurer
+  implicit val defaultGlyphMeasurer: GlyphMeasurer[Font] = AwtGlyphMeasurer
 
   implicit val defaultAWTFont: FontConfiguration = importFont("Arial")
 
-  implicit val shapeRenderer = new AER[ShapeElem] {
+  implicit val shapeRenderer: AER[ShapeElem] = new AER[ShapeElem] {
     def render(ctx: JavaRC, elem: ShapeElem): Unit = {
       savePaint(ctx.graphics) { graphics =>
         saveStroke(graphics) { graphics2 =>
@@ -38,7 +38,7 @@ object awtrenderer extends JavaAWTUtil {
     }
   }
 
-  implicit val textRenderer = new AER[TextBox] {
+  implicit val textRenderer: AER[TextBox] = new AER[TextBox] {
 
     def render(ctx: JavaRC, elem: TextBox): Unit = {
       if (!elem.layout.isEmpty) {
