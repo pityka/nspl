@@ -39,7 +39,7 @@ lazy val core = project
   .settings(commonSettings)
   .settings(
     name := "nspl-core",
-    libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "2.4.4"
+    libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "2.5.0"
   )
   .enablePlugins(spray.boilerplate.BoilerplatePlugin)
 
@@ -50,7 +50,7 @@ lazy val coreJS = project
     name := "nspl-core-js",
     target := file("core/targetJS"),
     sourceManaged in Compile := (sourceManaged in Compile).value.getAbsoluteFile,
-    libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.4.4"
+    libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.5.0"
   )
   .enablePlugins(ScalaJSPlugin)
   .enablePlugins(spray.boilerplate.BoilerplatePlugin)
