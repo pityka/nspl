@@ -2,8 +2,9 @@ package org.nspl
 
 object Ticks {
 
-  /** Modified Heckbert's algorithm
-    * Translated and modified from the source of R's labeling package. https://cran.r-project.org/web/packages/labeling/index.html
+  /** Modified Heckbert's algorithm Translated and modified from the source of
+    * R's labeling package.
+    * https://cran.r-project.org/web/packages/labeling/index.html
     */
   def heckbert(
       dataMin: Double,

@@ -60,7 +60,8 @@ case class HistogramData(
 object HistogramData {
 
   /** Merge maps with key collision
-    * @param fun Handles key collision
+    * @param fun
+    *   Handles key collision
     */
   private def addMaps[K, V](a: Map[K, V], b: Map[K, V])(
       fun: (V, V) => V

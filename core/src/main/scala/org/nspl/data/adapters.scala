@@ -71,9 +71,8 @@ trait DataAdaptors extends DataTuples {
       def columnMinMax(i: Int) = minmax(i)
     }
 
-  /** Need to iterate twice on the data:
-    * once for the bounds to get the axis right,
-    * once for the plot
+  /** Need to iterate twice on the data: once for the bounds to get the axis
+    * right, once for the plot
     */
   def dataSource[T](s1: Iterator[T], s2: Iterator[T])(implicit
       f: T => Row

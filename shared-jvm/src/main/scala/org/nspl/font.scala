@@ -3,7 +3,7 @@ import java.awt.{Font => JFont}
 
 object JavaFontConversion {
   implicit def font2font(myFont: Font): JFont = myFont match {
-    case Monospace             => new JFont(JFont.MONOSPACED, JFont.PLAIN, Monospace.size)
+    case Monospace => new JFont(JFont.MONOSPACED, JFont.PLAIN, Monospace.size)
     case NamedFont(name, size) => new JFont(name, JFont.PLAIN, size)
   }
 
