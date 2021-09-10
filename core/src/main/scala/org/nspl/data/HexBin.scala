@@ -4,14 +4,15 @@ object HexBin {
 
   /** Hexagonal binning
     *
-    * Algorithm: https://cran.r-project.org/web/packages/hexbin/vignettes/hexagon_binning.pdf page10
-    * and: https://www.redblobgames.com/grids/hexagons/
+    * Algorithm:
+    * https://cran.r-project.org/web/packages/hexbin/vignettes/hexagon_binning.pdf
+    * page10 and: https://www.redblobgames.com/grids/hexagons/
     *
-    * Creates two Cartesian coordinate systems both with base (width,height) but with an offset origin
-    * Each integer valued coordinate (i,j) in those two coordinate systems are hexagon centers.
-    * Quickly find the 2 possible closest center of a point
-    *   by taking advantage of the Cartesian coordinate system
-    * Tests the 2 candidates
+    * Creates two Cartesian coordinate systems both with base (width,height) but
+    * with an offset origin Each integer valued coordinate (i,j) in those two
+    * coordinate systems are hexagon centers. Quickly find the 2 possible
+    * closest center of a point by taking advantage of the Cartesian coordinate
+    * system Tests the 2 candidates
     */
   def apply(
       data: Iterator[(Double, Double)],
