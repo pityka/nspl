@@ -270,8 +270,8 @@ trait Renderers {
     }
   }
 
-  /** Paints the area between the (x,y) and (x,0) or
-    *  between (x,y) and (x,y2) if y2 is present
+  /** Paints the area between the (x,y) and (x,0) or between (x,y) and (x,y2) if
+    * y2 is present
     */
   def area(
       xCol: Int = 0,

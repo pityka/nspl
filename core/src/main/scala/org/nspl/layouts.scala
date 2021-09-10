@@ -30,8 +30,8 @@ case class RelativeToFirst(x: Double, y: Double) extends Layout {
   }
 }
 
-/** A Layout which stacks elements on top of each other
-  *  and aligns the horizontal axis.
+/** A Layout which stacks elements on top of each other and aligns the
+  * horizontal axis.
   */
 case class VerticalStack(
     alignment: Alignment = Left,
@@ -75,8 +75,8 @@ case class VerticalStack(
   }
 }
 
-/** A Layout which stacks elements beside each other
-  *  and aligns the vertical axis.
+/** A Layout which stacks elements beside each other and aligns the vertical
+  * axis.
   */
 case class HorizontalStack(alignment: Alignment, gap: RelFontSize = 0.0 fts)
     extends Layout {
