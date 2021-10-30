@@ -184,7 +184,7 @@ object HistogramData {
     val min = data2.flatten.min
     val max = data2.flatten.max
 
-    val displayMax = max //(max - min) + step + min
+    val displayMax = max // (max - min) + step + min
 
     val baseBins = ((0 to (((max - min) / step).toInt + 1)) map { (idx: Int) =>
       ((min + idx * step), 0.0) -> 0.0
