@@ -1,14 +1,12 @@
 package org.nspl
-import org.scalatest.funspec.{AnyFunSpec => FunSpec}
-import org.scalatest.matchers.should.Matchers
 
 import org.nspl.data._
 import org.nspl.awtrenderer._
 
-class EventsSpec extends FunSpec with Matchers {
+class EventSpec extends munit.FunSuite {
 
-  describe("a") {
-    it("a") {
+  test("a") {
+   {
 
       println("boo")
       // val build = Build(group(

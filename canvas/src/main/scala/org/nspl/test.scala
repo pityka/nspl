@@ -2,7 +2,7 @@ package org.nspl
 
 import org.nspl.data._
 import canvasrenderer._
-import org.scalajs.dom.raw._
+import org.scalajs.dom._
 import org.scalajs.dom
 import org.scalajs.dom.html
 

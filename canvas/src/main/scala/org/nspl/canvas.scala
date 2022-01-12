@@ -1,7 +1,7 @@
 package org.nspl
 
+import org.scalajs.dom._
 import org.scalajs.dom
-import org.scalajs.dom.raw._
 import org.scalajs.dom.html
 import scala.collection.mutable.ArrayBuffer
 
@@ -57,7 +57,7 @@ object canvasrenderer {
 
   implicit val defaultAWTFont: FontConfiguration = importFont("Arial")
 
-  implicit def rec2bounds(r: ClientRect) =
+  implicit def rec2bounds(r: DOMRect) =
     Bounds(r.left, r.top, r.width, r.height)
 
   def cssColor(c: Color) = s"rgba(${c.r},${c.g},${c.b},${c.a}"
