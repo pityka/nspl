@@ -11,5 +11,5 @@ jobs:
         with:
           fetch-depth: 0
       - uses: olafurpg/setup-scala@v10
-      - run: sbt compile saddle/test
+      - run: sbt compile saddle/test versionPolicyCheck
         

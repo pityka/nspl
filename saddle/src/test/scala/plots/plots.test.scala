@@ -1,6 +1,4 @@
 package org.nspl
-import org.scalatest.funspec.{AnyFunSpec => FunSpec}
-import org.scalatest.matchers.should.Matchers
 
 import org.nspl.saddle._
 import org.nspl.data._
@@ -12,7 +10,8 @@ import org.saddle.csv._
 import org.saddle.scalar.ScalarTagDouble
 import org.saddle.index.InnerJoin
 
-class SaddlePlotSpec extends FunSpec with Matchers {
+class SaddlePlotSpec extends munit.FunSuite {
+  
 
   implicit val myfont = importFont("Hasklig")
 
@@ -28,9 +27,9 @@ class SaddlePlotSpec extends FunSpec with Matchers {
       .toOption
       .get
 
-  describe("plots") {
+  test("plot gallery") {
 
-    it("plot gallery") {
+    {
       val evec =
         readFrameFromClasspath("/evec.csv")
           .mapValues(ScalarTagDouble.parse)
