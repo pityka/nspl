@@ -6,7 +6,7 @@
 
 # 2d Plotting Library for Scala (including scala-js)
 
-Creates scatter, line, contour, raster, barplots and boxplots, histograms, density plots. Composite figure of multiple plots.
+Creates scatter, line, contour, raster, barplots and boxplots, histograms, density plots. Composite figure of multiple plots. 
 
 Renders to
 * java Graphics2D
@@ -16,13 +16,9 @@ Renders to
 
 Minimal dependencies (VectorGraphics2D for PDF output).
 
-Convenient interface for [SADDLE](https://saddle.github.io/) data structures.
+May use streams of data, and create plots from huge files to raster output.
 
-Ability to use streams of data without keeping them in memory, thus can create plots from huge files to raster output.
-
-Easily extendible, typesafe scene graph.
-
-Text labels may use any font accessible to the JVM or the browser. Font widths are properly measured.
+Text labels may use any font accessible to the JVM or the browser. 
 
 Simple user interaction: panning and zooming.
 
@@ -36,6 +32,9 @@ See `saddle/src/test/scala/plots/plots.test.scala` for JVM examples.
 * scala-js svg via scalatags: `libraryDependencies += "io.github.pityka" %% "nspl-scalatags-js" % "0.0.???"` 
 * scala-js canvas via scalatags: `libraryDependencies += "io.github.pityka" %% "nspl-canvas-js" % "0.0.???"` 
 
+## Version policy
+
+nspl uses 'early-semver' versioning enforced with https://github.com/scalacenter/sbt-version-policy. 
 
 ## Alternatives
 
