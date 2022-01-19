@@ -119,7 +119,7 @@ lazy val scalatagsJvm = project
   .settings(commonSettings)
   .settings(
     name := "nspl-scalatags-jvm",
-    libraryDependencies += "com.lihaoyi" %% "scalatags" % "0.11.0"
+    libraryDependencies += "com.lihaoyi" %% "scalatags" % "0.11.1"
   )
   .dependsOn(core, sharedJvm)
 
@@ -151,16 +151,16 @@ publishArtifact := false
 
 lazy val docs = project
   .in(file("nspl-docs"))
-  .dependsOn(core,saddle,awt)
+  .dependsOn(core, saddle, awt)
   .settings(
-    commonSettings:_*
+    commonSettings: _*
   )
   .settings(
     unidocProjectFilter in (ScalaUnidoc, unidoc) :=
       (inAnyProject -- inProjects(
         coreJS,
         saddleJS,
-        scalatagsJs       
+        scalatagsJs
       )),
     publish / skip := true,
     publishArtifact := false,
@@ -172,7 +172,6 @@ lazy val docs = project
     cleanFiles += (target in (ScalaUnidoc, unidoc)).value
   )
   .enablePlugins(MdocPlugin, ScalaUnidocPlugin)
-
 
 lazy val root = (project in file("."))
   .settings(commonSettings: _*)
