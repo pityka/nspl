@@ -18,3 +18,16 @@ jobs:
           PGP_SECRET: ${{ secrets.PGP_SECRET }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+      - name: website
+        run: |
+          sbt clean docs/mdoc docs/unidoc
+          cd website
+          hugo
+          cd public
+          touch .nojekyll
+      - name: gh-pages-deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./website/public

@@ -149,6 +149,31 @@ lazy val saddleJS = (project in file("saddle"))
 
 publishArtifact := false
 
+lazy val docs = project
+  .in(file("nspl-docs"))
+  .dependsOn(core,saddle,awt)
+  .settings(
+    commonSettings:_*
+  )
+  .settings(
+    unidocProjectFilter in (ScalaUnidoc, unidoc) :=
+      (inAnyProject -- inProjects(
+        coreJS,
+        saddleJS,
+        scalatagsJs       
+      )),
+    publish / skip := true,
+    publishArtifact := false,
+    moduleName := "nspl-docs",
+    mdocVariables := Map(
+      "VERSION" -> version.value
+    ),
+    target in (ScalaUnidoc, unidoc) := (baseDirectory in LocalRootProject).value / "website" / "static" / "api",
+    cleanFiles += (target in (ScalaUnidoc, unidoc)).value
+  )
+  .enablePlugins(MdocPlugin, ScalaUnidocPlugin)
+
+
 lazy val root = (project in file("."))
   .settings(commonSettings: _*)
   .settings(crossScalaVersions := Nil, skip in publish := true)

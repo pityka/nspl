@@ -39,3 +39,18 @@ nspl uses 'early-semver' versioning enforced with https://github.com/scalacenter
 ## Alternatives
 
 See the excellent java graphing library: [GRAL](https://github.com/eseifert/gral), which inspired the design of this library.
+
+## How to build the website
+The website is built with [hugo](https://gohugo.io/) and the [hugo-book](https://github.com/alex-shpak/hugo-book) theme.
+
+The theme is a git submodule. It must be initialized.
+
+```sh
+git submodule update --init 
+```
+
+Create and serve the site with:
+
+```sh
+sbt docs/mdoc docs/unidoc && cd website && hugo
+```

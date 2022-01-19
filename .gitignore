@@ -8,3 +8,7 @@ targetNative
 metals.sbt
 build.sbt
 .bsp/
+website/public/
+website/static/api
+_gen/
+.hugo_build.lock
