@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Docs on nspl</title>
+    <link>https://pityka.github.io/nspl/docs/</link>
+    <description>Recent content in Docs on nspl</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language><atom:link href="https://pityka.github.io/nspl/docs/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Getting started</title>
+      <link>https://pityka.github.io/nspl/docs/getting_started/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://pityka.github.io/nspl/docs/getting_started/</guid>
+      <description>Add any of these lines to your build.sbt:
+// On JVM libraryDependencies += &amp;#34;io.github.pityka&amp;#34; %% &amp;#34;nspl-awt&amp;#34; % &amp;#34;0.1.0+5-2e724034-SNAPSHOT&amp;#34; // In browser, using the canvas renderer libraryDependencies += &amp;#34;io.github.pityka&amp;#34; %%% &amp;#34;nspl-canvas-js&amp;#34; % &amp;#34;0.1.0+5-2e724034-SNAPSHOT&amp;#34; // Dependencies  nspl-awt depends on vectorgraphics2d nspl-canvas-js has no external dependencies besides the scalajs-dom from the Scala Js project.  Example: import scala.io.Source </description>
+    </item>
+    
+    <item>
+      <title>Usage</title>
+      <link>https://pityka.github.io/nspl/docs/usage/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://pityka.github.io/nspl/docs/usage/</guid>
+      <description>Imports </description>
+    </item>
+    
+  </channel>
+</rss>
