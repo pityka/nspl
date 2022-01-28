@@ -13,7 +13,7 @@
       
       <guid>https://pityka.github.io/nspl/docs/getting_started/</guid>
       <description>Add any of these lines to your build.sbt:
-// On JVM libraryDependencies += &amp;#34;io.github.pityka&amp;#34; %% &amp;#34;nspl-awt&amp;#34; % &amp;#34;0.1.0+6-488a1f6c-SNAPSHOT&amp;#34; // In browser, using the canvas renderer libraryDependencies += &amp;#34;io.github.pityka&amp;#34; %%% &amp;#34;nspl-canvas-js&amp;#34; % &amp;#34;0.1.0+6-488a1f6c-SNAPSHOT&amp;#34; // Dependencies #   nspl-awt depends on vectorgraphics2d nspl-canvas-js has no external dependencies besides the scalajs-dom from the Scala Js project.  Example: #  import scala.io.Source </description>
+// On JVM libraryDependencies += &amp;#34;io.github.pityka&amp;#34; %% &amp;#34;nspl-awt&amp;#34; % &amp;#34;0.1.0+7-9da18351-SNAPSHOT&amp;#34; // In browser, using the canvas renderer libraryDependencies += &amp;#34;io.github.pityka&amp;#34; %%% &amp;#34;nspl-canvas-js&amp;#34; % &amp;#34;0.1.0+7-9da18351-SNAPSHOT&amp;#34; // Dependencies #   nspl-awt depends on vectorgraphics2d nspl-canvas-js has no external dependencies besides the scalajs-dom from the Scala Js project.  Example: #  import scala.io.Source </description>
     </item>
     
     <item>
