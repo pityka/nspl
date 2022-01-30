@@ -145,8 +145,3 @@ renderToByteArray(plotBx.build, width=2000)
 
 Note, that these box and whiskers plots do not display individual outlier elements, neither the mean. 
 They display the median, the interquartile range and the minimum and maximum.
-
-
-
-
-
