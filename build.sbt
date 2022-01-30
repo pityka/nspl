@@ -180,7 +180,7 @@ lazy val docs = project
     publishArtifact := false,
     moduleName := "nspl-docs",
     mdocVariables := Map(
-      "VERSION" -> version.value
+      "VERSION" -> (awt/versionPolicyPreviousVersions).value.head
     ),
     mdocJS := Some(jsdocs),
     target in (ScalaUnidoc, unidoc) := (baseDirectory in LocalRootProject).value / "website" / "static" / "api",
