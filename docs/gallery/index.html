@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="This page lists a diverse collection of plots. They use the PCA of the classical Iris dataset as demo data. To facilitate data manipulation these examples use the Saddle data frame library.
+First some utilities and imports:
+import org.nspl._ import org.nspl.data.HistogramData import org.nspl.saddle._ import org.nspl.awtrenderer._ import org.saddle._ import org.saddle.order._ import org.saddle.csv._ import org.saddle.scalar.ScalarTagDouble import org.saddle.index.InnerJoin def readFrameFromClasspath(s: String) = CsvParser .parseSourceWithHeader[String]( scala.io.Source .fromInputStream( getClass.getResourceAsStream(s) ), recordSeparator = &#34;\n&#34; ) .toOption .">
+<meta name="theme-color" content="#FFFFFF">
+<meta name="color-scheme" content="light dark"><meta property="og:title" content="Plot gallery" />
+<meta property="og:description" content="This page lists a diverse collection of plots. They use the PCA of the classical Iris dataset as demo data. To facilitate data manipulation these examples use the Saddle data frame library.
+First some utilities and imports:
+import org.nspl._ import org.nspl.data.HistogramData import org.nspl.saddle._ import org.nspl.awtrenderer._ import org.saddle._ import org.saddle.order._ import org.saddle.csv._ import org.saddle.scalar.ScalarTagDouble import org.saddle.index.InnerJoin def readFrameFromClasspath(s: String) = CsvParser .parseSourceWithHeader[String]( scala.io.Source .fromInputStream( getClass.getResourceAsStream(s) ), recordSeparator = &#34;\n&#34; ) .toOption ." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://pityka.github.io/nspl/docs/gallery/" /><meta property="article:section" content="docs" />
+
+
+
+<title>Plot gallery | nspl</title>
+<link rel="manifest" href="/nspl/manifest.json">
+<link rel="icon" href="/nspl/favicon.png" type="image/x-icon">
+<link rel="stylesheet" href="/nspl/book.min.82c5dbd23447cee0b4c2aa3ed08ce0961faa40e1fa370eee4f8c9f02e0d46b5f.css" integrity="sha256-gsXb0jRHzuC0wqo&#43;0Izglh&#43;qQOH6Nw7uT4yfAuDUa18=" crossorigin="anonymous">
+  <script defer src="/nspl/flexsearch.min.js"></script>
+  <script defer src="/nspl/en.search.min.9bbf7883187529429d46a88f080dfd154d5f457ed93dc2fca3132ab2a9e4e808.js" integrity="sha256-m794gxh1KUKdRqiPCA39FU1fRX7ZPcL8oxMqsqnk6Ag=" crossorigin="anonymous"></script>
+
+  <script defer src="/nspl/sw.min.011b5f154e1d57a76fc75aaed4be4a07813108b2b19df910b069bb242d17785c.js" integrity="sha256-ARtfFU4dV6dvx1qu1L5KB4ExCLKxnfkQsGm7JC0XeFw=" crossorigin="anonymous"></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="/nspl/"><span>nspl</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://pityka.github.io/nspl/docs/usage/" class="">Usage overview</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://pityka.github.io/nspl/docs/datarenders/" class="">Data renderers</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://pityka.github.io/nspl/docs/layouts/" class="">Multi-panel figures</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://pityka.github.io/nspl/docs/gallery/" class=" active">Plot gallery</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="/nspl/api/" target="_blank" rel="noopener">
+        API
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://github.com/pityka/nspl" target="_blank" rel="noopener">
+        Code
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var a=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(b){localStorage.setItem("menu.scrollTop",a.scrollTop)}),a.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/nspl/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>Plot gallery</strong>
+
+  <label for="toc-control">
+    
+    <img src="/nspl/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#plot-gallery">Plot Gallery</a>
+      <ul>
+        <li><a href="#scatter-plots">Scatter plots</a></li>
+        <li><a href="#histogram">Histogram</a></li>
+        <li><a href="#bar-plots">Bar plots</a></li>
+        <li><a href="#density-plot">Density plot</a></li>
+        <li><a href="#raster-plot">Raster plot</a></li>
+        <li><a href="#density-raster">Density raster</a></li>
+        <li><a href="#box-plots">Box plots</a></li>
+        <li><a href="#scatter-on-log-axis">Scatter on log axis</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown"><p>This page lists a diverse collection of plots.
+They use the PCA of the classical Iris dataset as demo data.
+To facilitate data manipulation these examples use the Saddle data frame library.</p>
+<p>First some utilities and imports:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala"><span style="color:#66d9ef">import</span> org.nspl._
+<span style="color:#66d9ef">import</span> org.nspl.data.HistogramData
+<span style="color:#66d9ef">import</span> org.nspl.saddle._
+<span style="color:#66d9ef">import</span> org.nspl.awtrenderer._
+<span style="color:#66d9ef">import</span> org.saddle._
+<span style="color:#66d9ef">import</span> org.saddle.order._
+<span style="color:#66d9ef">import</span> org.saddle.csv._
+<span style="color:#66d9ef">import</span> org.saddle.scalar.ScalarTagDouble
+<span style="color:#66d9ef">import</span> org.saddle.index.InnerJoin
+
+  <span style="color:#66d9ef">def</span> readFrameFromClasspath<span style="color:#f92672">(</span>s<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">String</span><span style="color:#f92672">)</span> <span style="color:#66d9ef">=</span>
+    <span style="color:#a6e22e">CsvParser</span>
+      <span style="color:#f92672">.</span>parseSourceWithHeader<span style="color:#f92672">[</span><span style="color:#66d9ef">String</span><span style="color:#f92672">](</span>
+        scala<span style="color:#f92672">.</span>io<span style="color:#f92672">.</span><span style="color:#a6e22e">Source</span>
+          <span style="color:#f92672">.</span>fromInputStream<span style="color:#f92672">(</span>
+            getClass<span style="color:#f92672">.</span>getResourceAsStream<span style="color:#f92672">(</span>s<span style="color:#f92672">)</span>
+          <span style="color:#f92672">),</span>
+        recordSeparator <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;\n&#34;</span>
+      <span style="color:#f92672">)</span>
+      <span style="color:#f92672">.</span>toOption
+      <span style="color:#f92672">.</span>get
+</code></pre></div><p>Next read and parse some data:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala">
+<span style="color:#66d9ef">val</span> evec <span style="color:#66d9ef">=</span> readFrameFromClasspath<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/evec.csv&#34;</span><span style="color:#f92672">).</span>mapValues<span style="color:#f92672">(</span><span style="color:#a6e22e">ScalarTagDouble</span><span style="color:#f92672">.</span>parse<span style="color:#f92672">)</span>
+
+<span style="color:#66d9ef">val</span> rotated <span style="color:#66d9ef">=</span>
+        readFrameFromClasspath<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/rotated.csv&#34;</span><span style="color:#f92672">).</span>mapValues<span style="color:#f92672">(</span><span style="color:#a6e22e">ScalarTagDouble</span><span style="color:#f92672">.</span>parse<span style="color:#f92672">)</span>
+
+<span style="color:#66d9ef">val</span> data <span style="color:#66d9ef">=</span> readFrameFromClasspath<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/data.csv&#34;</span><span style="color:#f92672">)</span>
+        <span style="color:#f92672">.</span>mapValues<span style="color:#f92672">(</span><span style="color:#a6e22e">ScalarTagDouble</span><span style="color:#f92672">.</span>parse<span style="color:#f92672">)</span>
+        <span style="color:#f92672">.</span>colAt<span style="color:#f92672">(</span><span style="color:#a6e22e">Array</span><span style="color:#f92672">(</span><span style="color:#ae81ff">0</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">1</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">2</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">3</span><span style="color:#f92672">))</span>
+
+<span style="color:#66d9ef">val</span> species <span style="color:#66d9ef">=</span> readFrameFromClasspath<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/data.csv&#34;</span><span style="color:#f92672">).</span>colAt<span style="color:#f92672">(</span><span style="color:#ae81ff">4</span><span style="color:#f92672">)</span>
+
+<span style="color:#66d9ef">val</span> spec2Num <span style="color:#66d9ef">=</span> species<span style="color:#f92672">.</span>toVec<span style="color:#f92672">.</span>toSeq<span style="color:#f92672">.</span>distinct<span style="color:#f92672">.</span>sorted<span style="color:#f92672">.</span>zipWithIndex<span style="color:#f92672">.</span>toMap
+<span style="color:#66d9ef">val</span> spec<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Series</span><span style="color:#f92672">[</span><span style="color:#66d9ef">Int</span>, <span style="color:#66d9ef">Double</span><span style="color:#f92672">]</span> <span style="color:#66d9ef">=</span>
+        species<span style="color:#f92672">.</span>mapValues<span style="color:#f92672">(</span>spec2Num<span style="color:#f92672">).</span>mapValues<span style="color:#f92672">(</span><span style="color:#66d9ef">_</span><span style="color:#f92672">.</span>toDouble<span style="color:#f92672">)</span>
+
+<span style="color:#66d9ef">val</span> eval <span style="color:#66d9ef">=</span> readFrameFromClasspath<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/sqrteigen.csv&#34;</span><span style="color:#f92672">)</span>
+        <span style="color:#f92672">.</span>mapValues<span style="color:#f92672">(</span><span style="color:#a6e22e">ScalarTagDouble</span><span style="color:#f92672">.</span>parse<span style="color:#f92672">)</span>
+        <span style="color:#f92672">.</span>mapValues<span style="color:#f92672">(</span>x <span style="color:#66d9ef">=&gt;</span> x <span style="color:#f92672">*</span> x<span style="color:#f92672">)</span>
+
+<span style="color:#66d9ef">val</span> data2 <span style="color:#66d9ef">=</span> data<span style="color:#f92672">.</span>addCol<span style="color:#f92672">(</span>spec<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;spec&#34;</span><span style="color:#f92672">,</span> <span style="color:#a6e22e">InnerJoin</span><span style="color:#f92672">)</span>
+
+
+</code></pre></div><h1 id="plot-gallery">
+  Plot Gallery
+  <a class="anchor" href="#plot-gallery">#</a>
+</h1>
+<h2 id="scatter-plots">
+  Scatter plots
+  <a class="anchor" href="#scatter-plots">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala">      <span style="color:#66d9ef">val</span> fig0 <span style="color:#66d9ef">=</span> xyplot<span style="color:#f92672">(</span>
+        data2<span style="color:#f92672">.</span>col<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Sepal.Length&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;Sepal.Width&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;spec&#34;</span><span style="color:#f92672">)</span>
+      <span style="color:#f92672">)(</span>
+        extraLegend <span style="color:#66d9ef">=</span> spec2Num<span style="color:#f92672">.</span>toSeq<span style="color:#f92672">.</span>map<span style="color:#f92672">(</span>x <span style="color:#66d9ef">=&gt;</span>
+          x<span style="color:#f92672">.</span>_1 <span style="color:#f92672">-&gt;</span> <span style="color:#a6e22e">PointLegend</span><span style="color:#f92672">(</span>
+            shape <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">Shape</span><span style="color:#f92672">.</span>rectangle<span style="color:#f92672">(</span><span style="color:#ae81ff">0</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">1</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">1</span><span style="color:#f92672">),</span>
+            color <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">DiscreteColors</span><span style="color:#f92672">(</span>spec2Num<span style="color:#f92672">.</span>size<span style="color:#f92672">)(</span>x<span style="color:#f92672">.</span>_2<span style="color:#f92672">)</span>
+          <span style="color:#f92672">)</span>
+        <span style="color:#f92672">),</span>
+        xlab <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;Sepal.Length&#34;</span><span style="color:#f92672">,</span>
+        ylab <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;Sepal.Width&#34;</span><span style="color:#f92672">,</span>
+        main <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;Iris data&#34;</span>
+      <span style="color:#f92672">)</span>
+
+      <span style="color:#66d9ef">val</span> fig1 <span style="color:#66d9ef">=</span> xyplot<span style="color:#f92672">(</span>
+        <span style="color:#a6e22e">Frame</span><span style="color:#f92672">(</span>
+          <span style="color:#f92672">(</span>rotated<span style="color:#f92672">.</span>col<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;PC1&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;PC2&#34;</span><span style="color:#f92672">).</span>toColSeq <span style="color:#66d9ef">:</span><span style="color:#66d9ef">+</span> <span style="color:#f92672">(</span><span style="color:#960050;background-color:#1e0010">&#34;</span><span style="color:#66d9ef">spec</span><span style="color:#960050;background-color:#1e0010">&#34;</span> <span style="color:#66d9ef">-&gt;</span> <span style="color:#66d9ef">spec</span><span style="color:#f92672">))</span><span style="color:#66d9ef">:</span> <span style="color:#66d9ef">_</span><span style="color:#66d9ef">*</span>
+        <span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> point<span style="color:#f92672">(</span>
+          valueText <span style="color:#66d9ef">=</span> <span style="color:#66d9ef">true</span>
+        <span style="color:#f92672">),</span>
+        density2d<span style="color:#f92672">(</span>
+          rotated<span style="color:#f92672">.</span>firstCol<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;PC1&#34;</span><span style="color:#f92672">).</span>toVec<span style="color:#f92672">.</span>toSeq zip rotated
+            <span style="color:#f92672">.</span>firstCol<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;PC2&#34;</span><span style="color:#f92672">)</span>
+            <span style="color:#f92672">.</span>toVec
+            <span style="color:#f92672">.</span>toSeq
+        <span style="color:#f92672">)</span>
+      <span style="color:#f92672">)(</span>
+        extraLegend <span style="color:#66d9ef">=</span> spec2Num<span style="color:#f92672">.</span>toSeq<span style="color:#f92672">.</span>map<span style="color:#f92672">(</span>x <span style="color:#66d9ef">=&gt;</span>
+          x<span style="color:#f92672">.</span>_1 <span style="color:#f92672">-&gt;</span> <span style="color:#a6e22e">PointLegend</span><span style="color:#f92672">(</span>
+            shape <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">Shape</span><span style="color:#f92672">.</span>rectangle<span style="color:#f92672">(</span><span style="color:#ae81ff">0</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">1</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">1</span><span style="color:#f92672">),</span>
+            color <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">DiscreteColors</span><span style="color:#f92672">(</span>spec2Num<span style="color:#f92672">.</span>size<span style="color:#f92672">)(</span>x<span style="color:#f92672">.</span>_2<span style="color:#f92672">)</span>
+          <span style="color:#f92672">)</span>
+        <span style="color:#f92672">),</span>
+        xlab <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;PC1&#34;</span><span style="color:#f92672">,</span>
+        ylab <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;PC2&#34;</span><span style="color:#f92672">,</span>
+        main <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;PC1 vs PC2&#34;</span>
+      <span style="color:#f92672">)</span>
+
+   
+
+      <span style="color:#66d9ef">val</span> scree <span style="color:#66d9ef">=</span> xyplot<span style="color:#f92672">(</span>
+        indexed<span style="color:#f92672">(</span>eval<span style="color:#f92672">.</span>firstCol<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;x&#34;</span><span style="color:#f92672">).</span>toVec<span style="color:#f92672">.</span>toSeq<span style="color:#f92672">.</span>sorted<span style="color:#f92672">.</span>reverse<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> line<span style="color:#f92672">()</span>
+      <span style="color:#f92672">)(</span>
+        xAxisMargin <span style="color:#66d9ef">=</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">,</span>
+        xlab <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;Order&#34;</span><span style="color:#f92672">,</span>
+        ylab <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;Eval&#34;</span><span style="color:#f92672">,</span>
+        main <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;Scree&#34;</span>
+      <span style="color:#f92672">)</span>
+
+      renderToByteArray<span style="color:#f92672">(</span>
+      group<span style="color:#f92672">(</span>fig0<span style="color:#f92672">,</span>fig1<span style="color:#f92672">,</span>scree<span style="color:#f92672">,</span><span style="color:#a6e22e">TableLayout</span><span style="color:#f92672">(</span><span style="color:#ae81ff">2</span><span style="color:#f92672">)).</span>build<span style="color:#f92672">,</span>
+      width<span style="color:#66d9ef">=</span><span style="color:#ae81ff">2000</span><span style="color:#f92672">)</span>
+</code></pre></div><p>The above code block produces this plot: 
+  <img src="assets/scatter2.png" alt="" /></p>
+<h2 id="histogram">
+  Histogram
+  <a class="anchor" href="#histogram">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala">      <span style="color:#66d9ef">val</span> hist1 <span style="color:#66d9ef">=</span> xyplot<span style="color:#f92672">(</span>
+        <span style="color:#a6e22e">HistogramData</span><span style="color:#f92672">(</span>rotated<span style="color:#f92672">.</span>firstCol<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;PC1&#34;</span><span style="color:#f92672">).</span>toVec<span style="color:#f92672">.</span>toSeq<span style="color:#f92672">,</span> <span style="color:#ae81ff">10</span><span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> bar<span style="color:#f92672">()</span>
+      <span style="color:#f92672">)(</span>
+        xlab <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;PC1&#34;</span><span style="color:#f92672">,</span>
+        ylab <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;freq.&#34;</span><span style="color:#f92672">,</span>
+        main <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;Loading distribution&#34;</span><span style="color:#f92672">,</span>
+        ylim <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">Some</span><span style="color:#f92672">(</span><span style="color:#ae81ff">0</span>d<span style="color:#f92672">,</span> <span style="color:#a6e22e">Double</span><span style="color:#f92672">.</span><span style="color:#a6e22e">NaN</span><span style="color:#f92672">)</span>
+      <span style="color:#f92672">)</span>
+
+      renderToByteArray<span style="color:#f92672">(</span>hist1<span style="color:#f92672">.</span>build<span style="color:#f92672">,</span>width<span style="color:#66d9ef">=</span><span style="color:#ae81ff">2000</span><span style="color:#f92672">)</span>
+</code></pre></div><p>The above code block produces this plot: 
+  <img src="assets/hist1.png" alt="" /></p>
+<h2 id="bar-plots">
+  Bar plots
+  <a class="anchor" href="#bar-plots">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala">      <span style="color:#66d9ef">val</span> bar1 <span style="color:#66d9ef">=</span> barplotVertical<span style="color:#f92672">(</span>
+        <span style="color:#a6e22e">Series</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;a&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">(-</span><span style="color:#ae81ff">2</span>d<span style="color:#f92672">),</span> <span style="color:#e6db74">&#34;b&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">(-</span><span style="color:#ae81ff">1</span>d<span style="color:#f92672">),</span> <span style="color:#e6db74">&#34;c&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">0</span>d<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;d&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">1</span>d<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;e&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">2</span>d<span style="color:#f92672">),</span>
+        color <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">RedBlue</span><span style="color:#f92672">(-</span><span style="color:#ae81ff">2</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">2</span><span style="color:#f92672">)</span>
+      <span style="color:#f92672">)</span>
+      <span style="color:#66d9ef">val</span> bar2 <span style="color:#66d9ef">=</span> barplotHorizontal<span style="color:#f92672">(</span>
+        <span style="color:#a6e22e">Series</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;a&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">(-</span><span style="color:#ae81ff">2</span>d<span style="color:#f92672">),</span> <span style="color:#e6db74">&#34;b&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">(-</span><span style="color:#ae81ff">1</span>d<span style="color:#f92672">),</span> <span style="color:#e6db74">&#34;c&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">0</span>d<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;d&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">1</span>d<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;e&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">2</span>d<span style="color:#f92672">)</span>
+      <span style="color:#f92672">)</span>
+
+      renderToByteArray<span style="color:#f92672">((</span>group<span style="color:#f92672">(</span>bar1<span style="color:#f92672">,</span>bar2<span style="color:#f92672">,</span><span style="color:#a6e22e">TableLayout</span><span style="color:#f92672">(</span><span style="color:#ae81ff">2</span><span style="color:#f92672">))).</span>build<span style="color:#f92672">,</span>width<span style="color:#66d9ef">=</span><span style="color:#ae81ff">2000</span><span style="color:#f92672">)</span>
+</code></pre></div><p>The above code block produces this plot: 
+  <img src="assets/bars.png" alt="" /></p>
+<h2 id="density-plot">
+  Density plot
+  <a class="anchor" href="#density-plot">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala">
+      <span style="color:#66d9ef">val</span> density1 <span style="color:#66d9ef">=</span> xyplot<span style="color:#f92672">(</span>
+        density<span style="color:#f92672">(</span>rotated<span style="color:#f92672">.</span>firstCol<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;PC1&#34;</span><span style="color:#f92672">).</span>toVec<span style="color:#f92672">.</span>toSeq<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> line<span style="color:#f92672">(</span>
+          stroke <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">StrokeConf</span><span style="color:#f92672">(</span><span style="color:#ae81ff">1</span> fts<span style="color:#f92672">)</span>
+        <span style="color:#f92672">)</span>
+      <span style="color:#f92672">)(</span>xlab <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;PC1&#34;</span><span style="color:#f92672">,</span> ylab <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;dens.&#34;</span><span style="color:#f92672">,</span> main <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;Loading distribution&#34;</span><span style="color:#f92672">)</span>
+
+      renderToByteArray<span style="color:#f92672">(</span>density1<span style="color:#f92672">.</span>build<span style="color:#f92672">,</span>width<span style="color:#66d9ef">=</span><span style="color:#ae81ff">2000</span><span style="color:#f92672">)</span>
+
+</code></pre></div><p>The above code block produces this plot: 
+  <img src="assets/density.png" alt="" /></p>
+<h2 id="raster-plot">
+  Raster plot
+  <a class="anchor" href="#raster-plot">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala">      <span style="color:#66d9ef">import</span> org.nspl.saddle.rasterplotFromFrame
+      <span style="color:#66d9ef">val</span> raster1 <span style="color:#66d9ef">=</span> rasterplotFromFrame<span style="color:#f92672">(</span>
+        rotated<span style="color:#f92672">.</span>rowAt<span style="color:#f92672">(</span><span style="color:#ae81ff">0</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">10</span><span style="color:#f92672">),</span> 
+        yLabFontSize <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">Some</span><span style="color:#f92672">(</span><span style="color:#ae81ff">0.5</span> fts<span style="color:#f92672">))</span>
+
+      renderToByteArray<span style="color:#f92672">(</span>raster1<span style="color:#f92672">.</span>build<span style="color:#f92672">,</span>width<span style="color:#66d9ef">=</span><span style="color:#ae81ff">2000</span><span style="color:#f92672">)</span>
+</code></pre></div><p>The above code block produces this plot: 
+  <img src="assets/raster1.png" alt="" /></p>
+<h2 id="density-raster">
+  Density raster
+  <a class="anchor" href="#density-raster">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala">      <span style="color:#66d9ef">val</span> densmap <span style="color:#66d9ef">=</span> rasterplot<span style="color:#f92672">(</span>
+        densityMatrix<span style="color:#f92672">(</span>
+          rotated<span style="color:#f92672">.</span>firstCol<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;PC1&#34;</span><span style="color:#f92672">).</span>toVec<span style="color:#f92672">.</span>toSeq zip rotated
+            <span style="color:#f92672">.</span>firstCol<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;PC2&#34;</span><span style="color:#f92672">)</span>
+            <span style="color:#f92672">.</span>toVec
+            <span style="color:#f92672">.</span>toSeq
+        <span style="color:#f92672">)</span>
+      <span style="color:#f92672">)</span>
+
+      renderToByteArray<span style="color:#f92672">(</span>densmap<span style="color:#f92672">.</span>build<span style="color:#f92672">,</span>width<span style="color:#66d9ef">=</span><span style="color:#ae81ff">2000</span><span style="color:#f92672">)</span>
+</code></pre></div><p>The above code block produces this plot: 
+  <img src="assets/raster2.png" alt="" /></p>
+<h2 id="box-plots">
+  Box plots
+  <a class="anchor" href="#box-plots">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala">      <span style="color:#66d9ef">val</span> fig4 <span style="color:#66d9ef">=</span> boxplot<span style="color:#f92672">(</span>
+        data2
+          <span style="color:#f92672">.</span>firstCol<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Sepal.Length&#34;</span><span style="color:#f92672">)</span>
+          <span style="color:#f92672">.</span>toVec
+          <span style="color:#f92672">.</span>toSeq <span style="color:#f92672">-&gt;</span> data2<span style="color:#f92672">.</span>firstCol<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Sepal.Width&#34;</span><span style="color:#f92672">).</span>toVec<span style="color:#f92672">.</span>toSeq<span style="color:#f92672">,</span>
+        ylab <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;Sepal Length&#34;</span><span style="color:#f92672">,</span>
+        xnames <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">Seq</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Sepal Length&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;Sepal Width&#34;</span><span style="color:#f92672">),</span>
+        xLabelRotation <span style="color:#66d9ef">=</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">0.3</span>
+      <span style="color:#f92672">)</span>
+
+      <span style="color:#66d9ef">val</span> boxpl2 <span style="color:#66d9ef">=</span>
+        boxplotFromLabels<span style="color:#f92672">(</span><span style="color:#a6e22e">List</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;a&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">0</span>d<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;a&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">1</span>d<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;b&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">3</span>d<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;b&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">4</span>d<span style="color:#f92672">))</span>
+
+      renderToByteArray<span style="color:#f92672">(</span>group<span style="color:#f92672">(</span>fig4<span style="color:#f92672">,</span>boxpl2<span style="color:#f92672">,</span><span style="color:#a6e22e">TableLayout</span><span style="color:#f92672">(</span><span style="color:#ae81ff">2</span><span style="color:#f92672">)).</span>build<span style="color:#f92672">,</span>width<span style="color:#66d9ef">=</span><span style="color:#ae81ff">2000</span><span style="color:#f92672">)</span>
+</code></pre></div><p>The above code block produces this plot: 
+  <img src="assets/boxplot.png" alt="" /></p>
+<h2 id="scatter-on-log-axis">
+  Scatter on log axis
+  <a class="anchor" href="#scatter-on-log-axis">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala">    
+      <span style="color:#66d9ef">val</span> logaxis <span style="color:#66d9ef">=</span>
+        xyplot<span style="color:#f92672">(</span>
+          <span style="color:#a6e22e">Seq</span><span style="color:#f92672">(</span>
+            <span style="color:#ae81ff">1</span>e<span style="color:#f92672">-</span><span style="color:#ae81ff">6</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">1</span>e<span style="color:#f92672">-</span><span style="color:#ae81ff">6</span><span style="color:#f92672">,</span>
+            <span style="color:#ae81ff">1</span>e<span style="color:#f92672">-</span><span style="color:#ae81ff">5</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">1</span>e<span style="color:#f92672">-</span><span style="color:#ae81ff">5</span><span style="color:#f92672">,</span>
+            <span style="color:#ae81ff">1</span>e<span style="color:#f92672">-</span><span style="color:#ae81ff">4</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">1</span>e<span style="color:#f92672">-</span><span style="color:#ae81ff">4</span><span style="color:#f92672">,</span>
+            <span style="color:#ae81ff">1</span>e<span style="color:#f92672">-</span><span style="color:#ae81ff">3</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">1</span>e<span style="color:#f92672">-</span><span style="color:#ae81ff">3</span><span style="color:#f92672">,</span>
+            <span style="color:#ae81ff">1</span>e<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">1</span>e<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span><span style="color:#f92672">,</span>
+            <span style="color:#ae81ff">1</span>e<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">1</span>e<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span><span style="color:#f92672">,</span>
+            <span style="color:#ae81ff">1</span>d <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">1</span>d<span style="color:#f92672">,</span>
+            <span style="color:#ae81ff">10</span>d <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">10</span>d<span style="color:#f92672">,</span>
+            <span style="color:#ae81ff">1</span>e2 <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">100</span>d<span style="color:#f92672">,</span>
+            <span style="color:#ae81ff">1</span>e3 <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">1000</span>d<span style="color:#f92672">,</span>
+            <span style="color:#ae81ff">1</span>e4 <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">10000</span>d<span style="color:#f92672">,</span>
+            <span style="color:#ae81ff">1</span>e5 <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">1</span>e5<span style="color:#f92672">,</span>
+            <span style="color:#ae81ff">1</span>e6 <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">1</span>e6<span style="color:#f92672">,</span>
+            <span style="color:#ae81ff">1</span>e7 <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">1</span>e7
+          <span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> point<span style="color:#f92672">()</span>
+        <span style="color:#f92672">)(</span>ylog <span style="color:#66d9ef">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">,</span> xlog <span style="color:#66d9ef">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">)</span>
+     renderToByteArray<span style="color:#f92672">(</span>logaxis<span style="color:#f92672">.</span>build<span style="color:#f92672">,</span>width<span style="color:#66d9ef">=</span><span style="color:#ae81ff">2000</span><span style="color:#f92672">)</span>
+</code></pre></div><p>The above code block produces this plot: 
+  <img src="assets/scatterlog.png" alt="" /></p>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+
+
+  <script>(function(){function a(c){const a=window.getSelection(),b=document.createRange();b.selectNodeContents(c),a.removeAllRanges(),a.addRange(b)}document.querySelectorAll("pre code").forEach(b=>{b.addEventListener("click",function(c){a(b.parentElement),navigator.clipboard&&navigator.clipboard.writeText(b.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#plot-gallery">Plot Gallery</a>
+      <ul>
+        <li><a href="#scatter-plots">Scatter plots</a></li>
+        <li><a href="#histogram">Histogram</a></li>
+        <li><a href="#bar-plots">Bar plots</a></li>
+        <li><a href="#density-plot">Density plot</a></li>
+        <li><a href="#raster-plot">Raster plot</a></li>
+        <li><a href="#density-raster">Density raster</a></li>
+        <li><a href="#box-plots">Box plots</a></li>
+        <li><a href="#scatter-on-log-axis">Scatter on log axis</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

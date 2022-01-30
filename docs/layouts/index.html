@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Layouts and combinators #  Individual plots may be combined into complex figures. This is done by the group() and the sequence() methods. group() turns a tuple of plots into a single plot containing each. sequence() turns a collection (sequence) of plots into a single plot containing each.
+Both group() and sequence() take multiple arguments and the last argument is an instance of the org.nspl.Layout type. The layout describes how to lay out the individual panels relative to each other.">
+<meta name="theme-color" content="#FFFFFF">
+<meta name="color-scheme" content="light dark"><meta property="og:title" content="Multi-panel figures" />
+<meta property="og:description" content="Layouts and combinators #  Individual plots may be combined into complex figures. This is done by the group() and the sequence() methods. group() turns a tuple of plots into a single plot containing each. sequence() turns a collection (sequence) of plots into a single plot containing each.
+Both group() and sequence() take multiple arguments and the last argument is an instance of the org.nspl.Layout type. The layout describes how to lay out the individual panels relative to each other." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://pityka.github.io/nspl/docs/layouts/" /><meta property="article:section" content="docs" />
+
+
+
+<title>Multi-panel figures | nspl</title>
+<link rel="manifest" href="/nspl/manifest.json">
+<link rel="icon" href="/nspl/favicon.png" type="image/x-icon">
+<link rel="stylesheet" href="/nspl/book.min.82c5dbd23447cee0b4c2aa3ed08ce0961faa40e1fa370eee4f8c9f02e0d46b5f.css" integrity="sha256-gsXb0jRHzuC0wqo&#43;0Izglh&#43;qQOH6Nw7uT4yfAuDUa18=" crossorigin="anonymous">
+  <script defer src="/nspl/flexsearch.min.js"></script>
+  <script defer src="/nspl/en.search.min.9bbf7883187529429d46a88f080dfd154d5f457ed93dc2fca3132ab2a9e4e808.js" integrity="sha256-m794gxh1KUKdRqiPCA39FU1fRX7ZPcL8oxMqsqnk6Ag=" crossorigin="anonymous"></script>
+
+  <script defer src="/nspl/sw.min.011b5f154e1d57a76fc75aaed4be4a07813108b2b19df910b069bb242d17785c.js" integrity="sha256-ARtfFU4dV6dvx1qu1L5KB4ExCLKxnfkQsGm7JC0XeFw=" crossorigin="anonymous"></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="/nspl/"><span>nspl</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://pityka.github.io/nspl/docs/usage/" class="">Usage overview</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://pityka.github.io/nspl/docs/datarenders/" class="">Data renderers</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://pityka.github.io/nspl/docs/layouts/" class=" active">Multi-panel figures</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://pityka.github.io/nspl/docs/gallery/" class="">Plot gallery</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="/nspl/api/" target="_blank" rel="noopener">
+        API
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://github.com/pityka/nspl" target="_blank" rel="noopener">
+        Code
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var a=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(b){localStorage.setItem("menu.scrollTop",a.scrollTop)}),a.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/nspl/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>Multi-panel figures</strong>
+
+  <label for="toc-control">
+    
+    <img src="/nspl/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#layouts-and-combinators">Layouts and combinators</a></li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown"><h1 id="layouts-and-combinators">
+  Layouts and combinators
+  <a class="anchor" href="#layouts-and-combinators">#</a>
+</h1>
+<p>Individual plots may be combined into complex figures.
+This is done by the <code>group()</code> and the <code>sequence()</code> methods.
+<code>group()</code> turns a tuple of plots into a single plot containing each.
+<code>sequence()</code> turns a collection (sequence) of plots into a single plot containing each.</p>
+<p>Both <code>group()</code> and <code>sequence()</code> take multiple arguments and the last argument is an instance of the <code>org.nspl.Layout</code> type.
+The layout describes how to lay out the individual panels relative to each other.
+The simplest three layouts are <code>TableLayout(numberOfColumns)</code>, <code>HorizontalStack()</code> and <code>VerticalStack()</code>, with these three you can build arbitrary multi-panel figures.</p>
+<p>Here are two plots from a previous example in a single panel:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala"><span style="color:#66d9ef">import</span> org.nspl._ 
+<span style="color:#66d9ef">import</span> org.nspl.awtrenderer._ 
+<span style="color:#66d9ef">import</span> org.nspl.data.DataMatrix
+<span style="color:#66d9ef">import</span> scala.util.Random.nextDouble
+
+<span style="color:#66d9ef">val</span> sparseMatrix <span style="color:#66d9ef">=</span> 
+  <span style="color:#a6e22e">List</span><span style="color:#f92672">(</span>
+    <span style="color:#f92672">(</span><span style="color:#ae81ff">0</span>d<span style="color:#f92672">,</span> <span style="color:#ae81ff">0</span>d<span style="color:#f92672">,</span> <span style="color:#ae81ff">1</span>d<span style="color:#f92672">),</span>
+    <span style="color:#f92672">(</span><span style="color:#ae81ff">1</span>d<span style="color:#f92672">,</span> <span style="color:#ae81ff">1</span>d<span style="color:#f92672">,</span> <span style="color:#ae81ff">1</span>d<span style="color:#f92672">),</span>
+    <span style="color:#f92672">(</span><span style="color:#ae81ff">2</span>d<span style="color:#f92672">,</span> <span style="color:#ae81ff">2</span>d<span style="color:#f92672">,</span> <span style="color:#ae81ff">1</span>d<span style="color:#f92672">),</span>
+  <span style="color:#f92672">)</span>
+
+<span style="color:#66d9ef">val</span> plot1 <span style="color:#66d9ef">=</span> rasterplot<span style="color:#f92672">(</span>sparseMatrix<span style="color:#f92672">,</span>
+            xlab<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;x axis label&#34;</span><span style="color:#f92672">,</span>
+            ylab<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;y axis label&#34;</span>
+          <span style="color:#f92672">)</span>
+
+
+<span style="color:#66d9ef">val</span> denseMatrix <span style="color:#66d9ef">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">DataMatrix</span><span style="color:#f92672">(</span>
+            rows <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">Array</span><span style="color:#f92672">.</span>fill<span style="color:#f92672">(</span><span style="color:#ae81ff">12</span><span style="color:#f92672">)(</span>nextDouble<span style="color:#f92672">()),</span> numCols <span style="color:#66d9ef">=</span> <span style="color:#ae81ff">4</span><span style="color:#f92672">,</span> numRows <span style="color:#66d9ef">=</span> <span style="color:#ae81ff">3</span><span style="color:#f92672">)</span>
+  
+<span style="color:#66d9ef">val</span> plot2 <span style="color:#66d9ef">=</span> rasterplot<span style="color:#f92672">(</span>denseMatrix<span style="color:#f92672">,</span>
+            xlab<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;x axis label&#34;</span><span style="color:#f92672">,</span>
+            ylab<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;y axis label&#34;</span>
+          <span style="color:#f92672">)</span>
+
+<span style="color:#66d9ef">val</span> complexPlot <span style="color:#66d9ef">=</span> group<span style="color:#f92672">(</span>plot1<span style="color:#f92672">,</span>plot2<span style="color:#f92672">,</span><span style="color:#a6e22e">TableLayout</span><span style="color:#f92672">(</span><span style="color:#ae81ff">2</span><span style="color:#f92672">))</span>
+
+renderToByteArray<span style="color:#f92672">(</span>complexPlot<span style="color:#f92672">.</span>build<span style="color:#f92672">,</span> width<span style="color:#66d9ef">=</span><span style="color:#ae81ff">2000</span><span style="color:#f92672">)</span>
+</code></pre></div><p>The above code block produces this plot: 
+  <img src="assets/layout1.png" alt="" />
+Or the same with <code>sequence()</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala"><span style="color:#66d9ef">import</span> org.nspl._ 
+<span style="color:#66d9ef">import</span> org.nspl.awtrenderer._ 
+<span style="color:#66d9ef">import</span> org.nspl.data.DataMatrix
+<span style="color:#66d9ef">import</span> scala.util.Random.nextDouble
+
+<span style="color:#66d9ef">val</span> sequencedPlot <span style="color:#66d9ef">=</span> sequence<span style="color:#f92672">(</span><span style="color:#a6e22e">List</span><span style="color:#f92672">(</span>plot1<span style="color:#f92672">,</span>plot2<span style="color:#f92672">),</span><span style="color:#a6e22e">TableLayout</span><span style="color:#f92672">(</span><span style="color:#ae81ff">2</span><span style="color:#f92672">))</span>
+
+renderToByteArray<span style="color:#f92672">(</span>sequencedPlot<span style="color:#f92672">.</span>build<span style="color:#f92672">,</span> width<span style="color:#66d9ef">=</span><span style="color:#ae81ff">2000</span><span style="color:#f92672">)</span>
+</code></pre></div><p>The above code block produces this plot: 
+  <img src="assets/layout2.png" alt="" /></p>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+
+
+  <script>(function(){function a(c){const a=window.getSelection(),b=document.createRange();b.selectNodeContents(c),a.removeAllRanges(),a.addRange(b)}document.querySelectorAll("pre code").forEach(b=>{b.addEventListener("click",function(c){a(b.parentElement),navigator.clipboard&&navigator.clipboard.writeText(b.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#layouts-and-combinators">Layouts and combinators</a></li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

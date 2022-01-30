@@ -2,11 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://pityka.github.io/nspl/docs/getting_started/</loc>
-  </url><url>
     <loc>https://pityka.github.io/nspl/</loc>
   </url><url>
     <loc>https://pityka.github.io/nspl/docs/usage/</loc>
+  </url><url>
+    <loc>https://pityka.github.io/nspl/docs/datarenders/</loc>
+  </url><url>
+    <loc>https://pityka.github.io/nspl/docs/layouts/</loc>
+  </url><url>
+    <loc>https://pityka.github.io/nspl/docs/gallery/</loc>
   </url><url>
     <loc>https://pityka.github.io/nspl/categories/</loc>
   </url><url>

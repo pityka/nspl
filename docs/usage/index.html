@@ -3,21 +3,25 @@
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Imports #  ">
+<meta name="description" content="Data sources #  nspl plotting routines take data from org.nspl.data.DataSource subtypes. A DataSource is a lazy collection of vectors of doubles, with definition:
+trait DataSource { def iterator: Iterator[Row] } trait Row { def apply(i: Int): Double def label: String } For most use cases the import org.nspl._ imports implicit conversions from standard library types like Seq[(Double,Double)] or tuples of other arity.
+There are a few concrete implementations of a DataSource in the org.">
 <meta name="theme-color" content="#FFFFFF">
-<meta name="color-scheme" content="light dark"><meta property="og:title" content="Usage" />
-<meta property="og:description" content="Imports #  " />
+<meta name="color-scheme" content="light dark"><meta property="og:title" content="Usage overview" />
+<meta property="og:description" content="Data sources #  nspl plotting routines take data from org.nspl.data.DataSource subtypes. A DataSource is a lazy collection of vectors of doubles, with definition:
+trait DataSource { def iterator: Iterator[Row] } trait Row { def apply(i: Int): Double def label: String } For most use cases the import org.nspl._ imports implicit conversions from standard library types like Seq[(Double,Double)] or tuples of other arity.
+There are a few concrete implementations of a DataSource in the org." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://pityka.github.io/nspl/docs/usage/" /><meta property="article:section" content="docs" />
 
 
 
-<title>Usage | nspl</title>
+<title>Usage overview | nspl</title>
 <link rel="manifest" href="/nspl/manifest.json">
 <link rel="icon" href="/nspl/favicon.png" type="image/x-icon">
 <link rel="stylesheet" href="/nspl/book.min.82c5dbd23447cee0b4c2aa3ed08ce0961faa40e1fa370eee4f8c9f02e0d46b5f.css" integrity="sha256-gsXb0jRHzuC0wqo&#43;0Izglh&#43;qQOH6Nw7uT4yfAuDUa18=" crossorigin="anonymous">
   <script defer src="/nspl/flexsearch.min.js"></script>
-  <script defer src="/nspl/en.search.min.843bc7279fa977ade3d4aa626ce73d70b42f1c863f3553627c253cbf14548a65.js" integrity="sha256-hDvHJ5&#43;pd63j1KpibOc9cLQvHIY/NVNifCU8vxRUimU=" crossorigin="anonymous"></script>
+  <script defer src="/nspl/en.search.min.9bbf7883187529429d46a88f080dfd154d5f457ed93dc2fca3132ab2a9e4e808.js" integrity="sha256-m794gxh1KUKdRqiPCA39FU1fRX7ZPcL8oxMqsqnk6Ag=" crossorigin="anonymous"></script>
 
   <script defer src="/nspl/sw.min.011b5f154e1d57a76fc75aaed4be4a07813108b2b19df910b069bb242d17785c.js" integrity="sha256-ARtfFU4dV6dvx1qu1L5KB4ExCLKxnfkQsGm7JC0XeFw=" crossorigin="anonymous"></script>
 <!--
@@ -71,7 +75,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://pityka.github.io/nspl/docs/getting_started/" class="">Getting started</a>
+    <a href="https://pityka.github.io/nspl/docs/usage/" class=" active">Usage overview</a>
   
 
         </li>
@@ -84,7 +88,33 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://pityka.github.io/nspl/docs/usage/" class=" active">Usage</a>
+    <a href="https://pityka.github.io/nspl/docs/datarenders/" class="">Data renderers</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://pityka.github.io/nspl/docs/layouts/" class="">Multi-panel figures</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://pityka.github.io/nspl/docs/gallery/" class="">Plot gallery</a>
   
 
         </li>
@@ -144,7 +174,7 @@ https://github.com/alex-shpak/hugo-book
     <img src="/nspl/svg/menu.svg" class="book-icon" alt="Menu" />
   </label>
 
-  <strong>Usage</strong>
+  <strong>Usage overview</strong>
 
   <label for="toc-control">
     
@@ -160,9 +190,17 @@ https://github.com/alex-shpak/hugo-book
   
 <nav id="TableOfContents">
   <ul>
-    <li>
+    <li><a href="#data-sources">Data sources</a>
       <ul>
-        <li><a href="#imports">Imports</a></li>
+        <li><a href="#lazyness">Lazyness</a></li>
+        <li><a href="#saddle-data-sources">Saddle data sources</a></li>
+      </ul>
+    </li>
+    <li><a href="#plotting-routines">Plotting routines</a>
+      <ul>
+        <li><a href="#xyplot">xyplot</a></li>
+        <li><a href="#rasterplot">rasterplot</a></li>
+        <li><a href="#box-and-whiskers-plot">Box and whiskers plot</a></li>
       </ul>
     </li>
   </ul>
@@ -177,10 +215,143 @@ https://github.com/alex-shpak/hugo-book
 
       
       
-  <article class="markdown"><h3 id="imports">
-  Imports
-  <a class="anchor" href="#imports">#</a>
-</h3>
+  <article class="markdown"><h1 id="data-sources">
+  Data sources
+  <a class="anchor" href="#data-sources">#</a>
+</h1>
+<p>nspl plotting routines take data from <code>org.nspl.data.DataSource</code> subtypes. A DataSource is a lazy collection of vectors of doubles, with definition:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala"><span style="color:#66d9ef">trait</span> <span style="color:#a6e22e">DataSource</span> <span style="color:#f92672">{</span>
+  <span style="color:#66d9ef">def</span> iterator<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Iterator</span><span style="color:#f92672">[</span><span style="color:#66d9ef">Row</span><span style="color:#f92672">]</span>
+<span style="color:#f92672">}</span>
+<span style="color:#66d9ef">trait</span> <span style="color:#a6e22e">Row</span> <span style="color:#f92672">{</span>
+  <span style="color:#66d9ef">def</span> apply<span style="color:#f92672">(</span>i<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Int</span><span style="color:#f92672">)</span><span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Double</span>
+  <span style="color:#66d9ef">def</span> label<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">String</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>For most use cases the <code>import org.nspl._</code> imports implicit conversions from standard library types like
+<code>Seq[(Double,Double)]</code> or tuples of other arity.</p>
+<p>There are a few concrete implementations of a DataSource in the <code>org.nspl.data</code> package like <code>DataTable</code> which is a row major matrix of doubles and <code>DataMatrix</code> which is a raster.</p>
+<h2 id="lazyness">
+  Lazyness
+  <a class="anchor" href="#lazyness">#</a>
+</h2>
+<p>Nspl is lazy in the data sources. The iterator of the rows of a data source is run only when needed and the rows are only kept in memory where absolute necessary. For example, nspl can render to bitmaps or other raster formats (jpg, png) without accumulating the data rows in memory.</p>
+<h2 id="saddle-data-sources">
+  Saddle data sources
+  <a class="anchor" href="#saddle-data-sources">#</a>
+</h2>
+<p>Saddle is a data manipulation library for Scala, it provides features similar to R&rsquo;s data frames or python&rsquo;s pandas.
+The <code>&quot;org.nspl&quot; %% &quot;nspl-saddle&quot; % &quot;0.1.0+10-370bee91-SNAPSHOT&quot;</code> module has adapters from Saddle data structures to nspl DataSource.
+Once on the class path you can import it with the <code>import org.nspl.saddle._</code> wildcard import, and then you can use an <code>org.saddle.Frame</code> everywhere where a DataSource is needed.</p>
+<h1 id="plotting-routines">
+  Plotting routines
+  <a class="anchor" href="#plotting-routines">#</a>
+</h1>
+<p>nspl&rsquo;s API separates the definition of the plot from the actual rendering.
+First a data structures is created which describes the plot, then that structure is interpreted by a renderer.</p>
+<h2 id="xyplot">
+  xyplot
+  <a class="anchor" href="#xyplot">#</a>
+</h2>
+<p>The most important method in nspl&rsquo;s API is the <code>xyplot()()</code> method, a factory for descriptions of 2D plots in a Cartesian coordinate system. It takes two parameter lists: the first parameter list is for data sources and data renderers, the second parameter list is for global plot parameters.
+Its signature is roughly:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala"><span style="color:#66d9ef">def</span> xyplot<span style="color:#f92672">[</span><span style="color:#66d9ef">F:</span> <span style="color:#66d9ef">FC</span><span style="color:#f92672">](</span>data<span style="color:#66d9ef">:</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">DataSource</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">List</span><span style="color:#f92672">[</span><span style="color:#66d9ef">DataRenderer</span><span style="color:#f92672">],</span> <span style="color:#a6e22e">LegendConfig</span><span style="color:#f92672">)*)(</span>
+      xlog<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Boolean</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">,</span>
+      ylog<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Boolean</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">,</span>
+      main<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">String</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span><span style="color:#f92672">,</span>
+      xlab<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">String</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span><span style="color:#f92672">,</span>
+      ylab<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">String</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span><span style="color:#f92672">,</span>
+      <span style="color:#f92672">..</span> many other global plot parameters <span style="color:#f92672">..)</span>
+</code></pre></div><p>In the first parameter list of <code>xyplot</code> we give one or more data sources each with zero or more <code>DataRenderer</code>.</p>
+<p>A <code>DataRenderer</code> is visual representation of a row or rows e.g. a point, a line segment, a horizontal or vertical bar, a boxplot, etc. A single data source may have multiple data renderes e.g. both a point and a line segment.
+For the full list of data renderers see the methods in the 
+  <a href="https://pityka.github.io/nspl
+
+/api/org/nspl/Renderers.html">Renderers trait</a>.</p>
+<p>The third element of the triple controls whether the data source is included in the legend or not.</p>
+<p>In the below example we have a single data source, each row is plotted as a series of consecutive line segments and also as a point. Finally, the data source is included in the legend.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala"><span style="color:#66d9ef">import</span> org.nspl._ 
+<span style="color:#66d9ef">import</span> org.nspl.awtrenderer._ 
+
+<span style="color:#66d9ef">val</span> someData <span style="color:#66d9ef">=</span> 
+  <span style="color:#a6e22e">List</span><span style="color:#f92672">(</span>
+    <span style="color:#ae81ff">0</span>d <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">0</span>d<span style="color:#f92672">,</span>
+    <span style="color:#ae81ff">1</span>d <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">1</span>d<span style="color:#f92672">,</span>
+    <span style="color:#ae81ff">2</span>d <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">1</span>d<span style="color:#f92672">,</span>
+    <span style="color:#ae81ff">3</span>d <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">0</span>d
+  <span style="color:#f92672">)</span>
+
+<span style="color:#66d9ef">val</span> plot <span style="color:#66d9ef">=</span> xyplot<span style="color:#f92672">((</span>someData <span style="color:#f92672">,</span> <span style="color:#a6e22e">List</span><span style="color:#f92672">(</span>point<span style="color:#f92672">(),</span>line<span style="color:#f92672">()),</span> <span style="color:#a6e22e">InLegend</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;series 1&#34;</span><span style="color:#f92672">)))(</span>
+            xlab<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;x axis label&#34;</span><span style="color:#f92672">,</span>
+            ylab<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;y axis label&#34;</span>
+          <span style="color:#f92672">)</span>
+
+renderToByteArray<span style="color:#f92672">(</span>plot<span style="color:#f92672">.</span>build<span style="color:#f92672">,</span> width<span style="color:#66d9ef">=</span><span style="color:#ae81ff">2000</span><span style="color:#f92672">)</span>
+</code></pre></div><p>The above code block produces this plot: 
+  <img src="assets/usage1.png" alt="" /></p>
+<h2 id="rasterplot">
+  rasterplot
+  <a class="anchor" href="#rasterplot">#</a>
+</h2>
+<p>There is a more specialized factory method for creating a plot from raster (bitmap) type data e.g. to visualize a matrix diretly or draw images. It takes a <code>DataSource</code> with at least three columns, ie. a list of triples: the x, y coordinates and the value. As this is a bitmap the coordinates must fall onto round integers (or they will be rounded down), even though they are stored as doubles.</p>
+<p>An example with a sparse coordinate list format:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala"><span style="color:#66d9ef">import</span> org.nspl._ 
+<span style="color:#66d9ef">import</span> org.nspl.awtrenderer._ 
+
+<span style="color:#66d9ef">val</span> sparseMatrix <span style="color:#66d9ef">=</span> 
+  <span style="color:#a6e22e">List</span><span style="color:#f92672">(</span>
+    <span style="color:#f92672">(</span><span style="color:#ae81ff">0</span>d<span style="color:#f92672">,</span> <span style="color:#ae81ff">0</span>d<span style="color:#f92672">,</span> <span style="color:#ae81ff">1</span>d<span style="color:#f92672">),</span>
+    <span style="color:#f92672">(</span><span style="color:#ae81ff">1</span>d<span style="color:#f92672">,</span> <span style="color:#ae81ff">1</span>d<span style="color:#f92672">,</span> <span style="color:#ae81ff">1</span>d<span style="color:#f92672">),</span>
+    <span style="color:#f92672">(</span><span style="color:#ae81ff">2</span>d<span style="color:#f92672">,</span> <span style="color:#ae81ff">2</span>d<span style="color:#f92672">,</span> <span style="color:#ae81ff">1</span>d<span style="color:#f92672">),</span>
+  <span style="color:#f92672">)</span>
+
+<span style="color:#66d9ef">val</span> plot2 <span style="color:#66d9ef">=</span> rasterplot<span style="color:#f92672">(</span>sparseMatrix<span style="color:#f92672">,</span>
+            xlab<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;x axis label&#34;</span><span style="color:#f92672">,</span>
+            ylab<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;y axis label&#34;</span>
+          <span style="color:#f92672">)</span>
+
+renderToByteArray<span style="color:#f92672">(</span>plot2<span style="color:#f92672">.</span>build<span style="color:#f92672">,</span> width<span style="color:#66d9ef">=</span><span style="color:#ae81ff">2000</span><span style="color:#f92672">)</span>
+</code></pre></div><p>The above code block produces this plot: 
+  <img src="assets/usage2.png" alt="" />
+An example with a dense matrix:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala"><span style="color:#66d9ef">import</span> org.nspl._ 
+<span style="color:#66d9ef">import</span> org.nspl.awtrenderer._ 
+<span style="color:#66d9ef">import</span> org.nspl.data.DataMatrix 
+<span style="color:#66d9ef">import</span> scala.util.Random.nextDouble
+
+<span style="color:#66d9ef">val</span> denseMatrix <span style="color:#66d9ef">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">DataMatrix</span><span style="color:#f92672">(</span>
+            rows <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">Array</span><span style="color:#f92672">.</span>fill<span style="color:#f92672">(</span><span style="color:#ae81ff">12</span><span style="color:#f92672">)(</span>nextDouble<span style="color:#f92672">()),</span> numCols <span style="color:#66d9ef">=</span> <span style="color:#ae81ff">4</span><span style="color:#f92672">,</span> numRows <span style="color:#66d9ef">=</span> <span style="color:#ae81ff">3</span><span style="color:#f92672">)</span>
+  
+<span style="color:#66d9ef">val</span> plot3 <span style="color:#66d9ef">=</span> rasterplot<span style="color:#f92672">(</span>denseMatrix<span style="color:#f92672">,</span>
+            xlab<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;x axis label&#34;</span><span style="color:#f92672">,</span>
+            ylab<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;y axis label&#34;</span>
+          <span style="color:#f92672">)</span>
+
+renderToByteArray<span style="color:#f92672">(</span>plot3<span style="color:#f92672">.</span>build<span style="color:#f92672">,</span> width<span style="color:#66d9ef">=</span><span style="color:#ae81ff">2000</span><span style="color:#f92672">)</span>
+</code></pre></div><p>The above code block produces this plot: 
+  <img src="assets/usage3.png" alt="" /></p>
+<h2 id="box-and-whiskers-plot">
+  Box and whiskers plot
+  <a class="anchor" href="#box-and-whiskers-plot">#</a>
+</h2>
+<p>For a box plot you have to first summarize the data distribution into 5 values: median, 25th and 75th percentiles, minimum and maximum.
+nspl has helper methods to achieve that summary and has a a <code>boxwhisker()</code> data renderer to actually draw the box figure from the summary which is a DataSource with 5 columns.</p>
+<p>There is also a factory method which does all these in one call:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala"><span style="color:#66d9ef">import</span> org.nspl._ 
+<span style="color:#66d9ef">import</span> org.nspl.awtrenderer._ 
+<span style="color:#66d9ef">import</span> org.nspl.data.DataMatrix 
+<span style="color:#66d9ef">import</span> scala.util.Random.nextDouble
+
+<span style="color:#66d9ef">val</span> randomData1 <span style="color:#66d9ef">=</span> <span style="color:#ae81ff">0</span> until <span style="color:#ae81ff">10</span> map <span style="color:#f92672">(</span><span style="color:#66d9ef">_</span> <span style="color:#66d9ef">=&gt;</span> nextDouble<span style="color:#f92672">())</span>
+<span style="color:#66d9ef">val</span> randomData2 <span style="color:#66d9ef">=</span> <span style="color:#ae81ff">0</span> until <span style="color:#ae81ff">10</span> map <span style="color:#f92672">(</span><span style="color:#66d9ef">_</span> <span style="color:#66d9ef">=&gt;</span> nextDouble<span style="color:#f92672">())</span>
+<span style="color:#66d9ef">val</span> randomData <span style="color:#66d9ef">=</span> randomData1 zip randomData2
+  
+<span style="color:#66d9ef">val</span> plotBx <span style="color:#66d9ef">=</span> boxplot<span style="color:#f92672">(</span>randomData<span style="color:#f92672">)</span>
+
+renderToByteArray<span style="color:#f92672">(</span>plotBx<span style="color:#f92672">.</span>build<span style="color:#f92672">,</span> width<span style="color:#66d9ef">=</span><span style="color:#ae81ff">2000</span><span style="color:#f92672">)</span>
+</code></pre></div><p>The above code block produces this plot: 
+  <img src="assets/usage_box.png" alt="" />
+Note, that these box and whiskers plots do not display individual outlier elements, neither the mean.
+They display the median, the interquartile range and the minimum and maximum.</p>
 </article>
  
       
@@ -218,9 +389,17 @@ https://github.com/alex-shpak/hugo-book
   
 <nav id="TableOfContents">
   <ul>
-    <li>
+    <li><a href="#data-sources">Data sources</a>
       <ul>
-        <li><a href="#imports">Imports</a></li>
+        <li><a href="#lazyness">Lazyness</a></li>
+        <li><a href="#saddle-data-sources">Saddle data sources</a></li>
+      </ul>
+    </li>
+    <li><a href="#plotting-routines">Plotting routines</a>
+      <ul>
+        <li><a href="#xyplot">xyplot</a></li>
+        <li><a href="#rasterplot">rasterplot</a></li>
+        <li><a href="#box-and-whiskers-plot">Box and whiskers plot</a></li>
       </ul>
     </li>
   </ul>

@@ -7,22 +7,47 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language><atom:link href="https://pityka.github.io/nspl/docs/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Getting started</title>
-      <link>https://pityka.github.io/nspl/docs/getting_started/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://pityka.github.io/nspl/docs/getting_started/</guid>
-      <description>Add any of these lines to your build.sbt:
-// On JVM libraryDependencies += &amp;#34;io.github.pityka&amp;#34; %% &amp;#34;nspl-awt&amp;#34; % &amp;#34;0.1.0+7-9da18351-SNAPSHOT&amp;#34; // In browser, using the canvas renderer libraryDependencies += &amp;#34;io.github.pityka&amp;#34; %%% &amp;#34;nspl-canvas-js&amp;#34; % &amp;#34;0.1.0+7-9da18351-SNAPSHOT&amp;#34; // Dependencies #   nspl-awt depends on vectorgraphics2d nspl-canvas-js has no external dependencies besides the scalajs-dom from the Scala Js project.  Example: #  import scala.io.Source </description>
-    </item>
-    
-    <item>
-      <title>Usage</title>
+      <title>Usage overview</title>
       <link>https://pityka.github.io/nspl/docs/usage/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://pityka.github.io/nspl/docs/usage/</guid>
-      <description>Imports #  </description>
+      <description>Data sources #  nspl plotting routines take data from org.nspl.data.DataSource subtypes. A DataSource is a lazy collection of vectors of doubles, with definition:
+trait DataSource { def iterator: Iterator[Row] } trait Row { def apply(i: Int): Double def label: String } For most use cases the import org.nspl._ imports implicit conversions from standard library types like Seq[(Double,Double)] or tuples of other arity.
+There are a few concrete implementations of a DataSource in the org.</description>
+    </item>
+    
+    <item>
+      <title>Data renderers</title>
+      <link>https://pityka.github.io/nspl/docs/datarenders/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://pityka.github.io/nspl/docs/datarenders/</guid>
+      <description>Data renderers #  Data renderers are implementations of the org.nspl.DataRenderer trait. They create a visual representation from a single data row. Data renderers provide much of the versatility of nspl, for a full you can consult the API documentation.
+Data renderers may be combined, as explained in the Usage Overview section.
+In this section we will use the following data and imports for each code examples:
+import org.nspl._ import org.</description>
+    </item>
+    
+    <item>
+      <title>Multi-panel figures</title>
+      <link>https://pityka.github.io/nspl/docs/layouts/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://pityka.github.io/nspl/docs/layouts/</guid>
+      <description>Layouts and combinators #  Individual plots may be combined into complex figures. This is done by the group() and the sequence() methods. group() turns a tuple of plots into a single plot containing each. sequence() turns a collection (sequence) of plots into a single plot containing each.
+Both group() and sequence() take multiple arguments and the last argument is an instance of the org.nspl.Layout type. The layout describes how to lay out the individual panels relative to each other.</description>
+    </item>
+    
+    <item>
+      <title>Plot gallery</title>
+      <link>https://pityka.github.io/nspl/docs/gallery/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://pityka.github.io/nspl/docs/gallery/</guid>
+      <description>This page lists a diverse collection of plots. They use the PCA of the classical Iris dataset as demo data. To facilitate data manipulation these examples use the Saddle data frame library.
+First some utilities and imports:
+import org.nspl._ import org.nspl.data.HistogramData import org.nspl.saddle._ import org.nspl.awtrenderer._ import org.saddle._ import org.saddle.order._ import org.saddle.csv._ import org.saddle.scalar.ScalarTagDouble import org.saddle.index.InnerJoin def readFrameFromClasspath(s: String) = CsvParser .parseSourceWithHeader[String]( scala.io.Source .fromInputStream( getClass.getResourceAsStream(s) ), recordSeparator = &amp;#34;\n&amp;#34; ) .toOption .</description>
     </item>
     
   </channel>
