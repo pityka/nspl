@@ -149,6 +149,20 @@ lazy val saddleJS = (project in file("saddle"))
 
 publishArtifact := false
 
+lazy val jsdocs = project
+  .settings(
+   libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.0.0"
+  )
+  .dependsOn(coreJS,canvas)
+  .settings(
+    commonSettings:_*
+  ).settings(
+     publish / skip := true,
+    publishArtifact := false,
+    moduleName := "nspl-docs-js",
+  )
+  .enablePlugins(ScalaJSPlugin)
+
 lazy val docs = project
   .in(file("nspl-docs"))
   .dependsOn(core,saddle,awt)
@@ -168,6 +182,7 @@ lazy val docs = project
     mdocVariables := Map(
       "VERSION" -> version.value
     ),
+    mdocJS := Some(jsdocs),
     target in (ScalaUnidoc, unidoc) := (baseDirectory in LocalRootProject).value / "website" / "static" / "api",
     cleanFiles += (target in (ScalaUnidoc, unidoc)).value
   )

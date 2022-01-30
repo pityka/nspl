@@ -97,3 +97,6 @@ contentDir = "../nspl-docs/target/mdoc/content"
     noClasses = true
     style = 'monokai'
     tabWidth = 2
+
+[markup.goldmark.renderer]
+  unsafe= true
