@@ -6,12 +6,13 @@ weight: 2
 # Data sources
 nspl plotting routines take data from `org.nspl.data.DataSource` subtypes. A DataSource is a lazy collection of vectors of doubles, with definition:
 
-```scala mdoc
+```scala
 trait DataSource {
   def iterator: Iterator[Row]
 }
 trait Row {
   def apply(i: Int): Double
+  def label: String
 }
 ```
 
@@ -22,9 +23,11 @@ For most use cases the `import org.nspl._` imports implicit conversions from sta
 
 There are a few concrete implementations of a DataSource in the `org.nspl.data` package like `DataTable` which is a row major matrix of doubles and `DataMatrix` which is a raster.
 
-nspl is lazy in data. The iterator of the rows of a data source is run only when needed and the rows are only kept in memory where absolute necessary. For example, nspl can make raster plots without accumulating data in memory.
+## Lazyness
 
-### Saddle data sources
+Nspl is lazy in the data sources. The iterator of the rows of a data source is run only when needed and the rows are only kept in memory where absolute necessary. For example, nspl can render to bitmaps or other raster formats (jpg, png) without accumulating the data rows in memory.
+
+## Saddle data sources
 Saddle is a data manipulation library for Scala, it provides features similar to R's data frames or python's pandas. 
 The `"org.nspl" %% "nspl-saddle" % "@VERSION@"` module has adapters from Saddle data structures to nspl DataSource. 
 Once on the class path you can import it with the `import org.nspl.saddle._` wildcard import, and then you can use an `org.saddle.Frame` everywhere where a DataSource is needed. 
@@ -75,6 +78,74 @@ val plot = xyplot((someData , List(point(),line()), InLegend("series 1")))(
 
 renderToByteArray(plot.build, width=2000)
 ```
+
+## rasterplot
+
+There is a more specialized factory method for creating a plot from raster (bitmap) type data e.g. to visualize a matrix diretly or draw images. It takes a `DataSource` with at least three columns, ie. a list of triples: the x, y coordinates and the value. As this is a bitmap the coordinates must fall onto round integers (or they will be rounded down), even though they are stored as doubles.
+
+An example with a sparse coordinate list format:
+```scala mdoc:bytes:assets/usage2.png
+import org.nspl._ 
+import org.nspl.awtrenderer._ 
+
+val sparseMatrix = 
+  List(
+    (0d, 0d, 1d),
+    (1d, 1d, 1d),
+    (2d, 2d, 1d),
+  )
+
+val plot2 = rasterplot(sparseMatrix,
+            xlab="x axis label",
+            ylab="y axis label"
+          )
+
+renderToByteArray(plot2.build, width=2000)
+```
+
+An example with a dense matrix:
+```scala mdoc:bytes:assets/usage3.png
+import org.nspl._ 
+import org.nspl.awtrenderer._ 
+import org.nspl.data.DataMatrix 
+import scala.util.Random.nextDouble
+
+val denseMatrix = new DataMatrix(
+            rows = Array.fill(12)(nextDouble()), numCols = 4, numRows = 3)
+  
+val plot3 = rasterplot(denseMatrix,
+            xlab="x axis label",
+            ylab="y axis label"
+          )
+
+renderToByteArray(plot3.build, width=2000)
+```
+
+## Box and whiskers plot
+
+For a box plot you have to first summarize the data distribution into 5 values: median, 25th and 75th percentiles, minimum and maximum. 
+nspl has helper methods to achieve that summary and has a a `boxwhisker()` data renderer to actually draw the box figure from the summary which is a DataSource with 5 columns. 
+
+There is also a factory method which does all these in one call:
+
+```scala mdoc:bytes:assets/usage_box.png
+import org.nspl._ 
+import org.nspl.awtrenderer._ 
+import org.nspl.data.DataMatrix 
+import scala.util.Random.nextDouble
+
+val randomData1 = 0 until 10 map (_ => nextDouble())
+val randomData2 = 0 until 10 map (_ => nextDouble())
+val randomData = randomData1 zip randomData2
+  
+val plotBx = boxplot(randomData)
+
+renderToByteArray(plotBx.build, width=2000)
+```
+
+Note, that these box and whiskers plots do not display individual outlier elements, neither the mean. 
+They display the median, the interquartile range and the minimum and maximum.
+
 
 
 
