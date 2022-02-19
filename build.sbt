@@ -56,7 +56,7 @@ lazy val coreJS = project
   .settings(
     name := "nspl-core-js",
     target := file("core/targetJS"),
-    Compile / sourceManaged := (Compile / sourceManaged ).value.getAbsoluteFile,
+    Compile / sourceManaged := (Compile / sourceManaged).value.getAbsoluteFile,
     libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.6.0"
   )
   .enablePlugins(ScalaJSPlugin)
@@ -76,7 +76,7 @@ lazy val canvas = project
   .in(file("canvas"))
   .settings(commonSettings)
   .settings(
-    name := "nspl-canvas-js",
+    name := "nspl-canvas-js"
   )
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(coreJS, sharedJs)
@@ -119,7 +119,7 @@ lazy val scalatagsJvm = project
   .settings(commonSettings)
   .settings(
     name := "nspl-scalatags-jvm",
-    libraryDependencies += "com.lihaoyi" %% "scalatags" % "0.11.0"
+    libraryDependencies += "com.lihaoyi" %% "scalatags" % "0.11.1"
   )
   .dependsOn(core, sharedJvm)
 
@@ -151,40 +151,42 @@ publishArtifact := false
 
 lazy val jsdocs = project
   .settings(
-   libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.0.0"
+    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.0.0"
   )
-  .dependsOn(coreJS,canvas)
+  .dependsOn(coreJS, canvas)
   .settings(
-    commonSettings:_*
-  ).settings(
-     publish / skip := true,
+    commonSettings: _*
+  )
+  .settings(
+    publish / skip := true,
     publishArtifact := false,
-    moduleName := "nspl-docs-js",
+    moduleName := "nspl-docs-js"
   )
   .enablePlugins(ScalaJSPlugin)
 
 lazy val docs = project
   .in(file("nspl-docs"))
-  .dependsOn(core,saddle,awt)
+  .dependsOn(core, saddle, awt)
   .settings(
-    commonSettings:_*
+    commonSettings: _*
   )
   .settings(
     Compile / doc / sources := Seq.empty
   )
   .settings(
     ScalaUnidoc / unidoc / unidocProjectFilter :=
-      inProjects(core,awt,saddle,scalatagsJvm,sharedJs,sharedJvm,canvas),
-      // (inAnyProject -- inProjects(
-      //   coreJS,
-      //   saddleJS,
-      //   scalatagsJs,
-      // )),
+      inProjects(core, awt, saddle, scalatagsJvm, sharedJs, sharedJvm, canvas),
+    // (inAnyProject -- inProjects(
+    //   coreJS,
+    //   saddleJS,
+    //   scalatagsJs,
+    // )),
     publish / skip := true,
     publishArtifact := false,
     moduleName := "nspl-docs",
     mdocVariables := Map(
-      "VERSION" -> (awt/versionPolicyPreviousVersions).value.headOption.getOrElse(version.value)
+      "VERSION" -> (awt / versionPolicyPreviousVersions).value.headOption
+        .getOrElse(version.value)
     ),
     mdocJS := Some(jsdocs),
     ScalaUnidoc / unidoc / target := (LocalRootProject / baseDirectory).value / "website" / "static" / "api",
@@ -192,10 +194,9 @@ lazy val docs = project
   )
   .enablePlugins(MdocPlugin, ScalaUnidocPlugin)
 
-
 lazy val root = (project in file("."))
   .settings(commonSettings: _*)
-  .settings(crossScalaVersions := Nil,  publish / skip := true)
+  .settings(crossScalaVersions := Nil, publish / skip := true)
   .aggregate(
     saddle,
     saddleJS,
