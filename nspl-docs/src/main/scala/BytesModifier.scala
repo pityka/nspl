@@ -14,10 +14,12 @@ class BytesModifier extends PostModifier {
     ctx.lastValue match {
       case data: Array[_] if data.length > 0 && data.head.isInstanceOf[Byte] =>
         Files.createDirectories(out.getParent)
-        if (!Files.isRegularFile(out)) {
-          Files.write(out, data.asInstanceOf[Array[Byte]])
-        }
-        s"![](${ctx.info})"
+        Files.write(out, data.asInstanceOf[Array[Byte]])
+        s"""
+```scala
+${ctx.originalCode.text}
+```
+The above code block produces this plot: ![](${relpath})"""
       case _ =>
         val (pos, obtained) = ctx.variables.lastOption match {
           case Some(variable) =>

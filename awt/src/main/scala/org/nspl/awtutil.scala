@@ -9,22 +9,17 @@ trait JavaAWTUtil {
 
   import org.nspl.JavaFontConversion._
 
-  implicit class Pimp[K <: Renderable[K]](t: K) {
-    def render(ctx: JavaRC)(implicit r: AER[K]) = r.render(ctx, t)
-  }
-
-  type AER[T] = Renderer[T, JavaRC]
-
-  implicit def shape2awt(s: Shape): java.awt.Shape = s match {
+  private[nspl] def shape2awt(s: Shape): java.awt.Shape = s match {
     case Rectangle(x, y, w, h, tx, _) =>
-      tx.createTransformedShape(
-        new java.awt.geom.Rectangle2D.Double(x, y, w, h)
-      )
+      new java.awt.geom.Rectangle2D.Double(x, y, w, h)
+
     case Ellipse(x, y, w, h, tx) =>
-      tx.createTransformedShape(new java.awt.geom.Ellipse2D.Double(x, y, w, h))
-    case Line(x1, y1, x2, y2) =>
+      new java.awt.geom.Ellipse2D.Double(x, y, w, h)
+
+    case Line(x1, y1, x2, y2, tx) =>
       new java.awt.geom.Line2D.Double(x1, y1, x2, y2)
-    case SimplePath(points) => {
+
+    case SimplePath(points, tx) => {
       val path = new java.awt.geom.GeneralPath()
       path.moveTo(points.head.x, points.head.y)
       points.drop(1).foreach { p =>
@@ -33,25 +28,25 @@ trait JavaAWTUtil {
       path.closePath
       path
     }
-    case Path(ops) => {
+    case Path(ops, tx) => {
       val path = new java.awt.geom.GeneralPath()
       ops foreach {
         case MoveTo(Point(x, y)) => path.moveTo(x, y)
         case LineTo(Point(x, y)) => path.lineTo(x, y)
         case QuadTo(Point(x2, y2), Point(x1, y1)) =>
           path.quadTo(x1, y1, x2, y2)
-        case _ => ???
-        // case CubicTo(Point(x3, y3), Point(x1, y1), Point(x2, y2)) => path.curveTo(x1, y1, x2, y2, x3, y3)
+        case CubicTo(Point(x3, y3), Point(x1, y1), Point(x2, y2)) =>
+          path.curveTo(x1, y1, x2, y2, x3, y3)
       }
       path.closePath
       path
     }
   }
 
-  implicit def col2col(c: Color): java.awt.Paint =
+  private[nspl] def col2col(c: Color): java.awt.Paint =
     new java.awt.Color(c.r, c.g, c.b, c.a)
 
-  implicit def str2str(s: Stroke) =
+  private[nspl] def str2str(s: Stroke) =
     new java.awt.BasicStroke(
       s.width.toFloat,
       s.cap match {
@@ -59,16 +54,19 @@ trait JavaAWTUtil {
         case CapSquare => java.awt.BasicStroke.CAP_SQUARE
         case CapRound  => java.awt.BasicStroke.CAP_ROUND
       },
-      java.awt.BasicStroke.JOIN_MITER
+      java.awt.BasicStroke.JOIN_MITER,
+      1f,
+      if (s.dash.count(_ > 0) == 0) null else s.dash.map(_.toFloat).toArray,
+      0f
     )
 
-  implicit def rec2bounds(r: java.awt.geom.Rectangle2D) =
+  private[nspl] def rec2bounds(r: java.awt.geom.Rectangle2D) =
     Bounds(r.getX, r.getY, r.getWidth, r.getHeight)
 
-  implicit def bounds2rec(r: Bounds) =
+  private[nspl] def bounds2rec(r: Bounds) =
     new java.awt.geom.Rectangle2D.Double(r.x, r.y, r.w, r.h)
 
-  implicit def tx2tx(tx: AffineTransform): java.awt.geom.AffineTransform =
+  private[nspl] def tx2tx(tx: AffineTransform): java.awt.geom.AffineTransform =
     new java.awt.geom.AffineTransform(
       tx.m0,
       tx.m3,
@@ -101,9 +99,11 @@ trait JavaAWTUtil {
           override def paintComponent(g: Graphics) = {
             super.paintComponent(g)
             val g2 = g.asInstanceOf[Graphics2D]
+            val renderingContext = JavaRC(g2)
             val bounds = getBounds()
 
-            fitToBounds(paintableElem, bounds).render(JavaRC(g2))
+            renderingContext
+              .render(fitToBounds(paintableElem, rec2bounds(bounds)))
           }
         },
         java.awt.BorderLayout.CENTER
@@ -113,33 +113,14 @@ trait JavaAWTUtil {
       (paintableElem.bounds.w * 3).toInt,
       (paintableElem.bounds.h * 3).toInt
     )
-    var dragStart = Point(0, 0) -> Bounds(0, 0, 0, 0)
 
     frame.setSize(d);
     frame.setVisible(true);
     (frame, update)
   }
 
-  def savePaint[T](g: Graphics2D)(fun: Graphics2D => T) = {
-    val save = g.getPaint
-    try {
-      fun(g)
-    } finally {
-      g.setPaint(save)
-    }
-  }
-
-  def saveStroke[T](g: Graphics2D)(fun: Graphics2D => T) = {
-    val save = g.getStroke
-    try {
-      fun(g)
-    } finally {
-      g.setStroke(save)
-    }
-  }
-
   def writeVector[K <: Renderable[K]](
-      elem: K,
+      build: Build[K],
       os: java.io.OutputStream,
       width: Int = 500,
       format: String = "pdf"
@@ -152,9 +133,12 @@ trait JavaAWTUtil {
     import de.erichseifert.vectorgraphics2d.eps._
     import util._
 
+    val elem = build.build
+
     val aspect = elem.bounds.h / elem.bounds.w
     val height = (width * aspect).toInt
     val g2d = new VectorGraphics2D()
+    val renderingContext = JavaRC(g2d)
 
     val processor =
       format match {
@@ -163,7 +147,7 @@ trait JavaAWTUtil {
         case "eps" => new EPSProcessor()
       }
     val bounds = Bounds(0, 0, width, height)
-    fitToBounds(elem, bounds).render(JavaRC(g2d))
+    renderingContext.render(fitToBounds(elem, bounds))
 
     val document =
       processor.getDocument(g2d.getCommands, new PageSize(width, height))
@@ -172,7 +156,7 @@ trait JavaAWTUtil {
   }
 
   def write[K <: Renderable[K]](
-      elem: K,
+      elem: Build[K],
       os: java.io.OutputStream,
       width: Int = 1000,
       mimeType: String = "image/png"
@@ -180,14 +164,14 @@ trait JavaAWTUtil {
       er: Renderer[K, JavaRC]
   ) = {
     mimeType.split("/").last match {
-      case "pdf" | "svg" | "eps" =>
+      case "pdf" | "svg" | "eps" | "svg+xml" =>
         writeVector(elem, os, width, mimeType.split("/").last)
       case _ => writeBitmap(elem, os, width, mimeType)
     }
   }
 
   def writeBitmap[K <: Renderable[K]](
-      elem: K,
+      build: Build[K],
       os: java.io.OutputStream,
       width: Int = 1000,
       mimeType: String = "image/png"
@@ -201,6 +185,8 @@ trait JavaAWTUtil {
     import javax.imageio.stream.ImageOutputStream;
     import java.awt.{Graphics, RenderingHints}
 
+    val elem = build.build
+
     val aspect = elem.bounds.h / elem.bounds.w
     val height = math.max((width * aspect).toInt, 1)
 
@@ -211,6 +197,7 @@ trait JavaAWTUtil {
     );
 
     val g2d = bimage.createGraphics();
+    val renderingContext = JavaRC(g2d)
 
     g2d.setRenderingHint(
       RenderingHints.KEY_ANTIALIASING,
@@ -222,7 +209,7 @@ trait JavaAWTUtil {
     );
 
     val bounds = Bounds(0, 0, width, height)
-    fitToBounds(elem, bounds).render(JavaRC(g2d))
+    renderingContext.render(fitToBounds(elem, bounds))
 
     {
       val imageWriter = ImageIO.getImageWritersByMIMEType(mimeType).next
@@ -249,7 +236,7 @@ trait JavaAWTUtil {
   }
 
   def renderToByteArray[K <: Renderable[K]](
-      elem: K,
+      elem: Build[K],
       width: Int = 1000,
       mimeType: String = "image/png"
   )(implicit
@@ -261,7 +248,7 @@ trait JavaAWTUtil {
   }
 
   def renderToFile[K <: Renderable[K]](
-      elem: K,
+      elem: Build[K],
       width: Int = 1000,
       mimeType: String = "image/png"
   )(implicit
@@ -279,7 +266,7 @@ trait JavaAWTUtil {
 
   def renderToFile[K <: Renderable[K]](
       f: File,
-      elem: K,
+      elem: Build[K],
       width: Int,
       mimeType: String
   )(implicit
@@ -294,9 +281,19 @@ trait JavaAWTUtil {
     f
   }
 
+  def svgToFile[K <: Renderable[K]](
+      f: File,
+      elem: Build[K],
+      width: Int
+  )(implicit
+      er: Renderer[K, JavaRC]
+  ): File = {
+    renderToFile(f, elem, width, "svg")
+    f
+  }
   def pdfToFile[K <: Renderable[K]](
       f: File,
-      elem: K,
+      elem: Build[K],
       width: Int
   )(implicit
       er: Renderer[K, JavaRC]
@@ -307,13 +304,13 @@ trait JavaAWTUtil {
 
   def pdfToFile[K <: Renderable[K]](
       f: File,
-      elem: K
+      elem: Build[K]
   )(implicit
       er: Renderer[K, JavaRC]
   ): File = pdfToFile(f, elem, 500)
 
   def pdfToFile[K <: Renderable[K]](
-      elem: K,
+      elem: Build[K],
       width: Int = 500
   )(implicit
       er: Renderer[K, JavaRC]
@@ -325,7 +322,7 @@ trait JavaAWTUtil {
 
   def pngToFile[K <: Renderable[K]](
       f: File,
-      elem: K,
+      elem: Build[K],
       width: Int
   )(implicit
       er: Renderer[K, JavaRC]
@@ -336,18 +333,43 @@ trait JavaAWTUtil {
 
   def pngToFile[K <: Renderable[K]](
       f: File,
-      elem: K
+      elem: Build[K]
   )(implicit
       er: Renderer[K, JavaRC]
   ): File = pngToFile(f, elem, 1000)
 
   def pngToFile[K <: Renderable[K]](
-      elem: K,
+      elem: Build[K],
       width: Int = 1000
   )(implicit
       er: Renderer[K, JavaRC]
   ): File = {
     renderToFile(elem, width, "image/png")
+  }
+  def pngToByteArray[K <: Renderable[K]](
+      elem: Build[K],
+      width: Int = 1000
+  )(implicit
+      er: Renderer[K, JavaRC]
+  ): Array[Byte] = {
+    renderToByteArray(elem, width, "image/png")
+  }
+
+  def pdfToByteArray[K <: Renderable[K]](
+      elem: Build[K],
+      width: Int = 1000
+  )(implicit
+      er: Renderer[K, JavaRC]
+  ): Array[Byte] = {
+    renderToByteArray(elem, width, "application/pdf")
+  }
+  def svgToByteArray[K <: Renderable[K]](
+      elem: Build[K],
+      width: Int = 1000
+  )(implicit
+      er: Renderer[K, JavaRC]
+  ): Array[Byte] = {
+    renderToByteArray(elem, width, "svg")
   }
 
 }

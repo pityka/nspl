@@ -8,21 +8,9 @@ object saddle {
 
   def barplotVertical[F: FC](
       series: Series[String, Double],
-      main: String = "",
-      xlab: String = "",
-      ylab: String = "",
-      xLabFontSize: RelFontSize = 1 fts,
-      yLabFontSize: Option[RelFontSize] = None,
-      mainFontSize: RelFontSize = 1 fts,
       color: Colormap = Color.white,
-      xWidth: RelFontSize = 20 fts,
-      yHeight: RelFontSize = 20 fts,
-      xLabelRotation: Double = 0d,
-      yLabelRotation: Double = 0d,
-      xlim: Option[(Double, Double)] = None,
-      ylim: Option[(Double, Double)] = None,
-      frame: Boolean = true
-  ) =
+      yLabFontSize: Option[RelFontSize] = None
+  )(parameters: Parameters) =
     xyplot(
       series.toSeq
         .map(_._2)
@@ -33,46 +21,18 @@ object saddle {
         fillCol = 0
       )
     )(
-      main = main,
-      xlab = xlab,
-      ylab = ylab,
-      xLabFontSize = xLabFontSize,
-      yLabFontSize = yLabFontSize.getOrElse(
-        math.min(2.0, yHeight.value / series.length) fts
-      ),
-      mainFontSize = mainFontSize,
-      xWidth = xWidth,
-      yHeight = yHeight,
-      ynames = series.toSeq
-        .map(_._1.toString)
-        .zipWithIndex
-        .map(x => x._1 -> x._2.toDouble)
-        .map(_.swap),
-      yNumTicks = 0,
-      xLabelRotation = xLabelRotation,
-      yLabelRotation = yLabelRotation,
-      xlim = xlim,
-      ylim = ylim,
-      frame = frame
+      parameters.copy(yLabFontSize =
+        yLabFontSize.getOrElse(
+          math.min(2d, parameters.yHeight.value / series.length) fts
+        )
+      )
     )
 
   def barplotHorizontal[F: FC](
       series: Series[String, Double],
-      main: String = "",
-      xlab: String = "",
-      ylab: String = "",
-      yLabFontSize: RelFontSize = 1 fts,
       xLabFontSize: Option[RelFontSize] = None,
-      mainFontSize: RelFontSize = 1 fts,
-      color: Colormap = Color.white,
-      xWidth: RelFontSize = 20 fts,
-      yHeight: RelFontSize = 20 fts,
-      xLabelRotation: Double = 0d,
-      yLabelRotation: Double = 0d,
-      xlim: Option[(Double, Double)] = None,
-      ylim: Option[(Double, Double)] = None,
-      frame: Boolean = true
-  ) =
+      color: Colormap = Color.white
+  )(parameters: Parameters) =
     xyplot(
       series.toSeq
         .map(_._2)
@@ -80,74 +40,57 @@ object saddle {
         .map(x => x._1 -> x._2.toDouble)
         .map(_.swap) -> bar(horizontal = false, fill = color, fillCol = 1)
     )(
-      main = main,
-      xlab = xlab,
-      ylab = ylab,
-      yLabFontSize = yLabFontSize,
-      xLabFontSize = xLabFontSize.getOrElse(
-        math.min(2.0, yHeight.value / series.length) fts
-      ),
-      mainFontSize = mainFontSize,
-      xWidth = xWidth,
-      yHeight = yHeight,
-      xnames = series.toSeq
-        .map(_._1.toString)
-        .zipWithIndex
-        .map(x => x._1 -> x._2.toDouble)
-        .map(_.swap),
-      xNumTicks = 0,
-      xLabelRotation = xLabelRotation,
-      yLabelRotation = yLabelRotation,
-      ylim = ylim,
-      xlim = xlim,
-      frame = frame
+      parameters.copy(
+        xLabFontSize = xLabFontSize.getOrElse(
+          math.min(2d, parameters.xWidth.value / series.length) fts
+        ),
+        xnames = series.toSeq
+          .map(_._1.toString)
+          .zipWithIndex
+          .map(x => x._1 -> x._2.toDouble)
+          .map(_.swap)
+      )
     )
 
   def rasterplotFromFrame[RX, CX, F: FC](
       dataFrame: Frame[RX, CX, Double],
-      main: String = "",
-      xlab: String = "",
-      ylab: String = "",
-      xLabFontSize: Option[RelFontSize] = None,
-      yLabFontSize: Option[RelFontSize] = None,
-      mainFontSize: RelFontSize = 1 fts,
       colormap: Colormap = HeatMapColors(0, 1),
-      xWidth: RelFontSize = 20 fts,
-      yHeight: RelFontSize = 20 fts,
       valueText: Boolean = false,
       valueColor: Color = Color.black,
       valueFontSize: RelFontSize = 0.4 fts,
-      tickLength: RelFontSize = 0.4 fts,
-      zlim: Option[(Double, Double)] = None
-  ) =
+      zlim: Option[(Double, Double)] = None,
+      transparentPixels: Option[Double] = None,
+      xLabFontSize: Option[RelFontSize] = None,
+      yLabFontSize: Option[RelFontSize] = None
+  )(parameters: Parameters) =
     rasterplot(
       asRaster(dataFrame.toMat),
-      main,
-      xlab,
-      ylab,
-      xLabFontSize.getOrElse(
-        math.min(2.0, xWidth.value / dataFrame.numCols) fts
-      ),
-      yLabFontSize.getOrElse(
-        math.min(2.0, yHeight.value / dataFrame.numRows) fts
-      ),
-      mainFontSize,
       colormap,
-      dataFrame.colIx.toSeq
-        .map(_.toString)
-        .zipWithIndex
-        .map(x => x._2.toDouble + 0.5 -> x._1),
-      dataFrame.rowIx.toSeq
-        .map(_.toString)
-        .zipWithIndex
-        .map(x => x._2.toDouble + 0.5 -> x._1),
-      xWidth = xWidth,
-      yHeight = yHeight,
       valueText = valueText,
       valueColor = valueColor,
       valueFontSize = valueFontSize,
-      zlim = zlim,
-      tickLength = tickLength
+      zlim = zlim
+    )(
+      parameters.copy(
+        xLabFontSize = xLabFontSize.getOrElse(
+          math.min(2d, parameters.xWidth.value / dataFrame.numCols) fts
+        ),
+        yLabFontSize = yLabFontSize.getOrElse(
+          math.min(2d, parameters.yHeight.value / dataFrame.numRows) fts
+        ),
+        xnames = dataFrame.colIx.toSeq
+          .map(_.toString)
+          .zipWithIndex
+          .map(x => x._2.toDouble + 0.5 -> x._1),
+        ynames = dataFrame.rowIx.toSeq
+          .map(_.toString)
+          .zipWithIndex
+          .map(x => x._2.toDouble + 0.5 -> x._1),
+        yNumTicks = 0,
+        xNumTicks = 0,
+        xTickLength = 0d fts,
+        yTickLength = 0d fts
+      )
     )
 
   def asRaster(mat: Mat[Double]): DataMatrix =
@@ -168,8 +111,9 @@ object saddle {
           .map(x => VectorRow(Vector(x._2, x._1._2), x._1._1.toString))
       def dimension = 2
       def columnMinMax(i: Int) = i match {
-        case 0 => MinMaxImpl(0, s.length - 1d)
-        case 1 => MinMaxImpl(s.min.get, s.max.get)
+        case 0 => Some(MinMaxImpl(0, s.length - 1d))
+        case 1 => Some(MinMaxImpl(s.min.get, s.max.get))
+        case _ => None
       }
       def quantilesOfColumn(i: Int, qs: Vector[Double]) = {
         assert(i == 1 || i == 0)
@@ -210,9 +154,14 @@ object saddle {
 
       def dimension = frame.numCols
 
-      def columnMinMax(i: Int): MinMax = {
-        val v = frame.colAt(i).toVec
-        MinMaxImpl(v.min.get, v.max.get)
+      override def columnNames: Seq[String] = frame.colIx.toSeq.map(_.toString)
+
+      def columnMinMax(i: Int): Option[MinMax] = {
+        if (i < frame.numCols) {
+          val v = frame.colAt(i).toVec
+          for { min <- v.min; max <- v.max } yield MinMaxImpl(min, max)
+        } else None
+
       }
 
       def quantilesOfColumn(i: Int, qs: Vector[Double]) = {

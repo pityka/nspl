@@ -18,7 +18,7 @@ case class DataElem(
 }
 
 object DataElem {
-  implicit def dataElemRenderer[RC <: RenderingContext](implicit
+  implicit def dataElemRenderer[RC <: RenderingContext[RC]](implicit
       re: Renderer[ShapeElem, RC],
       rt: Renderer[TextBox, RC]
   ) = new Renderer[DataElem, RC] {
@@ -35,7 +35,7 @@ object DataElem {
 
 trait Plots {
   // format: off
-  type XYPlotAreaType = Elems3[ShapeElem, Elems3[ShapeElem, Elems2[Elems2[Elems2[Elems5[ElemList[ShapeElem], ElemList[ShapeElem], ElemList[DataElem], Elems2[AxisElem, AxisElem], ShapeElem], TextBox], TextBox], TextBox], ShapeElem], ShapeElem]
+  type XYPlotAreaType = Elems5[Elems2[Elems2[Elems2[Elems5[ElemList[ShapeElem],ElemList[ShapeElem],ElemList[DataElem],Elems2[Elems3[ShapeElem,ElemList[Elems2[ShapeElem,TextBox]],ElemList[ShapeElem]],Elems3[ShapeElem,ElemList[Elems2[ShapeElem,TextBox]],ElemList[ShapeElem]]],ShapeElem],TextBox],TextBox],TextBox],ShapeElem,ShapeElem,ShapeElem,ShapeElem]
   // format: on
   case class XYPlotArea(
       elem: XYPlotAreaType,
@@ -47,11 +47,11 @@ trait Plots {
     def transform(v: Bounds => AffineTransform) =
       this.copy(elem = elem.transform(v))
     def bounds: Bounds = elem.bounds
-    def frameElem = elem.m2.m2.m1.m1.m1.m5
+    def frameElem = elem.m1.m1.m1.m1.m5
   }
 
   object XYPlotArea {
-    implicit def renderer[RC <: RenderingContext](implicit
+    implicit def renderer[RC <: RenderingContext[RC]](implicit
         re: Renderer[ShapeElem, RC],
         rt: Renderer[TextBox, RC]
     ) = new Renderer[XYPlotArea, RC] {
@@ -88,7 +88,9 @@ trait Plots {
       topPadding: RelFontSize = 0.2 fts,
       bottomPadding: RelFontSize = 0d fts,
       leftPadding: RelFontSize = 0d fts,
-      rightPadding: RelFontSize = 0.2 fts
+      rightPadding: RelFontSize = 0.2 fts,
+      xNoTickLabel: Boolean = false,
+      yNoTickLabel: Boolean = false
   ) = {
     val id = java.util.UUID.randomUUID.toString
     Build(
@@ -121,7 +123,9 @@ trait Plots {
         topPadding,
         bottomPadding,
         leftPadding,
-        rightPadding
+        rightPadding,
+        xNoTickLabel,
+        yNoTickLabel
       )
     ) {
       case (Some(old), BuildEvent) =>
@@ -155,7 +159,9 @@ trait Plots {
           topPadding,
           bottomPadding,
           leftPadding,
-          rightPadding
+          rightPadding,
+          xNoTickLabel,
+          yNoTickLabel
         )
       case (Some(old), Scroll(v1, p, plotAreaId)) if plotAreaId.id == id =>
         import old._
@@ -203,7 +209,9 @@ trait Plots {
           topPadding,
           bottomPadding,
           leftPadding,
-          rightPadding
+          rightPadding,
+          xNoTickLabel,
+          yNoTickLabel
         )
 
       case (Some(old), Drag(dragStart, dragTo, plotAreaId))
@@ -263,7 +271,9 @@ trait Plots {
           topPadding,
           bottomPadding,
           leftPadding,
-          rightPadding
+          rightPadding,
+          xNoTickLabel,
+          yNoTickLabel
         )
     }
   }
@@ -297,7 +307,9 @@ trait Plots {
       topPadding: RelFontSize = 0.2 fts,
       bottomPadding: RelFontSize = 0d fts,
       leftPadding: RelFontSize = 0d fts,
-      rightPadding: RelFontSize = 0.2 fts
+      rightPadding: RelFontSize = 0.2 fts,
+      xNoTickLabel: Boolean = false,
+      yNoTickLabel: Boolean = false
   ) = {
 
     val xMinMax = data.flatMap { case (data, renderers) =>
@@ -318,10 +330,22 @@ trait Plots {
     val yLimMin = ylim.map(_._1).filterNot(_.isNaN)
     val yLimMax = ylim.map(_._2).filterNot(_.isNaN)
 
-    val dataXMin = if (xLimMin.isDefined) 0.0 else xMinMax.map(_.min).min
-    val dataXMax = if (xLimMax.isDefined) 0.0 else xMinMax.map(_.max).max
-    val dataYMin = if (yLimMin.isDefined) 0.0 else yMinMax.map(_.min).min
-    val dataYMax = if (yLimMax.isDefined) 0.0 else yMinMax.map(_.max).max
+    val dataXMin =
+      if (xLimMin.isDefined) 0.0
+      else if (xMinMax.isEmpty) 0d
+      else xMinMax.map(_.min).min
+    val dataXMax =
+      if (xLimMax.isDefined) 0.0
+      else if (xMinMax.isEmpty) 1d
+      else xMinMax.map(_.max).max
+    val dataYMin =
+      if (yLimMin.isDefined) 0.0
+      else if (xMinMax.isEmpty) 0d
+      else yMinMax.map(_.min).min
+    val dataYMax =
+      if (yLimMax.isDefined) 0.0
+      else if (xMinMax.isEmpty) 1d
+      else yMinMax.map(_.max).max
 
     val xMin = xAxisSetting.axisFactory match {
       case LinearAxisFactory =>
@@ -427,9 +451,10 @@ trait Plots {
     val noYTick = if (origin.isEmpty) Nil else List(originWY1)
 
     val (xMajorTicks, xCustomTicks, xAxisElem) =
-      xAxisSetting.renderable(xAxis, noXTick)
+      xAxisSetting.renderable(xAxis, xNoTickLabel, noXTick)
     val (yMajorTicks, yCustomTicks, yAxisElem) = yAxisSetting.renderable(
       yAxis,
+      yNoTickLabel,
       noYTick
     )
 
@@ -447,16 +472,21 @@ trait Plots {
     })
 
     val xgridPoints =
-      if (xCustomGrid) (xMajorTicks ++ xCustomTicks).distinct else xMajorTicks
+      if (xgrid) {
+        if (xCustomGrid) (xMajorTicks ++ xCustomTicks).distinct else xMajorTicks
+      } else Nil
 
     val ygridPoints =
-      if (yCustomGrid) (yMajorTicks ++ yCustomTicks).distinct else yMajorTicks
+      if (ygrid) {
+        if (yCustomGrid) (yMajorTicks ++ yCustomTicks).distinct else yMajorTicks
+      } else Nil
 
     val xgridElem = sequence(xgridPoints map { w =>
       val v = xAxis.worldToView(w)
       ShapeElem(
         Shape.line(Point(v, yAxisViewMin), Point(v, yAxisViewMax)),
-        stroke = if (xgrid) Some(Stroke(lineWidth.value)) else None,
+        stroke =
+          Some(Stroke(lineWidth.value * 0.5, dash = List((0.2 fts).value))),
         strokeColor = Color.gray5
       )
     })
@@ -482,7 +512,8 @@ trait Plots {
           Point(xAxisViewMin, v),
           Point(xAxisViewMax, v)
         ),
-        stroke = if (ygrid) Some(Stroke(lineWidth.value)) else None,
+        stroke =
+          Some(Stroke(lineWidth.value * 0.5, dash = List((0.2 fts).value))),
         strokeColor = Color.gray5
       )
     })
@@ -496,34 +527,6 @@ trait Plots {
       TextBox(xlab, fontSize = xlabFontSize, width = Some(frameElem.bounds.w))
     val ylabBox =
       TextBox(ylab, fontSize = ylabFontSize, width = Some(frameElem.bounds.h))
-
-    val padTop = ShapeElem(
-      shape = Shape.circle(topPadding.value),
-      fill = Color.transparent,
-      strokeColor = Color.transparent,
-      stroke = None
-    )
-
-    val padBottom = ShapeElem(
-      shape = Shape.circle(bottomPadding.value),
-      fill = Color.transparent,
-      strokeColor = Color.transparent,
-      stroke = None
-    )
-
-    val padLeft = ShapeElem(
-      shape = Shape.circle(leftPadding.value),
-      fill = Color.transparent,
-      strokeColor = Color.transparent,
-      stroke = None
-    )
-
-    val padRight = ShapeElem(
-      shape = Shape.circle(rightPadding.value),
-      fill = Color.transparent,
-      strokeColor = Color.transparent,
-      stroke = None
-    )
 
     val withHorizontalLabels = zgroup(
       (
@@ -561,16 +564,71 @@ trait Plots {
         HorizontalStack(NoAlignment, ylabDistance)
       )
 
-    val elem = group(
-      padTop,
-      group(
-        padLeft,
-        plotWithAxisLabels,
-        padRight,
-        HorizontalStack(Center, 0d fts)
+    val movedFrame2 = plotWithAxisLabels.m1.m1.m1.m5
+
+    val padTop = AlignTo.verticalGapBeforeReference(
+      AlignTo.horizontalCenter(
+        ShapeElem(
+          shape = Shape.line(Point(0d, 0d), Point(0d, topPadding.value)),
+          fill = Color.transparent,
+          strokeColor = Color.blue,
+          stroke = None
+        ),
+        movedFrame2.bounds
       ),
+      movedFrame2.bounds,
+      0d
+    )
+
+    val padBottom = AlignTo.verticalGapAfterReference(
+      AlignTo.horizontalCenter(
+        ShapeElem(
+          shape = Shape.line(Point(0d, 0d), Point(0d, bottomPadding.value)),
+          fill = Color.transparent,
+          strokeColor = Color.green,
+          stroke = None
+        ),
+        movedFrame2.bounds
+      ),
+      movedFrame2.bounds,
+      0d
+    )
+
+    val padLeft = AlignTo.horizontalGapBeforeReference(
+      AlignTo.verticalCenter(
+        ShapeElem(
+          shape = Shape.line(Point(0d, 0d), Point(leftPadding.value, 0d)),
+          fill = Color.transparent,
+          strokeColor = Color.red,
+          stroke = None
+        ),
+        movedFrame2.bounds
+      ),
+      movedFrame2.bounds,
+      0d
+    )
+
+    val padRight = AlignTo.horizontalGapAfterReference(
+      AlignTo.verticalCenter(
+        ShapeElem(
+          shape = Shape.line(Point(0d, 0d), Point(rightPadding.value, 0d)),
+          fill = Color.transparent,
+          strokeColor = Color.black,
+          stroke = None
+        ),
+        movedFrame2.bounds
+      ),
+      movedFrame2.bounds,
+      0d
+    )
+
+    val elem = group(
+      plotWithAxisLabels,
+      padLeft,
       padBottom,
-      VerticalStack(Center, 0d fts)
+      padTop,
+      padRight,
+      FreeLayout
     )
 
     XYPlotArea(elem, xMin, xMax, yMin, yMax)
@@ -581,40 +639,45 @@ trait Plots {
   case class PointLegend(shape: Shape, color: Color) extends LegendElem
   case class LineLegend(stroke: Stroke, color: Color) extends LegendElem
 
-  type Legend = ElemList[Elems2[ShapeElem, TextBox]]
+  type Legend = ElemList[Elems2[ElemList[ShapeElem], TextBox]]
 
   def legend[F: FC](
-      entries: List[(String, LegendElem)],
+      entries: List[(String, Seq[LegendElem])],
       fontSize: RelFontSize = 1.0 fts,
       width: RelFontSize = 30 fts,
       layout: Layout
   ): Legend = {
+    val lineHeight =
+      TextBox("A", fontSize = fontSize, width = Some(width.value)).bounds.h
+
     sequence(
-      entries.map { case (text, elem) =>
-        val elem1 = elem match {
+      entries.map { case (text, legendElems) =>
+        val renderables = legendElems.map {
           case PointLegend(s, c) =>
-            fitToBounds(
+            fitToHeight(
               ShapeElem(s, fill = c),
-              Bounds(0, 0, fontSize.value, fontSize.value)
+              lineHeight * 0.8
             )
           case LineLegend(s, c) =>
-            fitToBounds(
+            fitToHeight(
               ShapeElem(
-                Shape.line(Point(0, 0), Point(fontSize.value, 0)),
+                Shape.rectangle(0d, 0d, fontSize.value * 2, 1d),
                 strokeColor = c,
                 stroke = Some(s)
               ),
-              Bounds(0, 0, fontSize.value, fontSize.value)
+              lineHeight * 0.1
             )
+
         }
-        val elemGroup = elem1
+
+        // needs centering on the vertical axis
+        val aligned = sequence(renderables, HorizontalStack(Center))
+
         val textbox =
           TextBox(text, fontSize = fontSize, width = Some(width.value))
-        val lineHeight =
-          TextBox("A", fontSize = fontSize, width = Some(width.value)).bounds.h
 
         group(
-          fitToHeight(elemGroup, lineHeight),
+          aligned,
           TextBox(text, fontSize = fontSize, width = Some(width.value)),
           HorizontalStack(Center, fontSize)
         )
@@ -623,9 +686,7 @@ trait Plots {
     )
   }
 
-  type HeatmapLegend = Elems2[ElemList[ShapeElem], Elems3[ShapeElem, ElemList[
-    Elems2[ShapeElem, TextBox]
-  ], ElemList[ShapeElem]]]
+  type HeatmapLegend = Elems2[Elems2[ElemList[ShapeElem], AxisElem], TextBox]
 
   def heatmapLegend[F: FC](
       min: Double,
@@ -633,7 +694,9 @@ trait Plots {
       color: Colormap = HeatMapColors(0d, 1d),
       fontSize: RelFontSize = 1.0 fts,
       width: RelFontSize = 10 fts,
-      height: RelFontSize = 1 fts
+      height: RelFontSize = 1 fts,
+      labelText: String = "",
+      numTicks: Int = 2
   ): HeatmapLegend = {
 
     val color1 = color.withRange(min, max)
@@ -642,15 +705,25 @@ trait Plots {
       LinearAxisFactory,
       fontSize = fontSize,
       width = width,
-      numTicks = 2,
-      tickAlignment = 1
+      numTicks = numTicks,
+      tickAlignment = 1,
+      forceMajorTickOnMax = true,
+      forceMajorTickOnMin = true
     )
     val axis = axisSettings.axisFactory.make(min, max, width.value, false)
 
-    val (majorTicks, _, axisElem) =
+    val (_, _, axisElem) =
       axisSettings.renderable(
-        axis
+        axis,
+        false,
+        Nil
       )
+
+    val axisLabel = {
+      val box =
+        TextBox(labelText, fontSize = fontSize, width = Some(width.value))
+      rotate(box, -0.5 * math.Pi)
+    }
 
     val n = 500
     val space = (max - min) / n.toDouble
@@ -666,7 +739,11 @@ trait Plots {
       })
     )
 
-    group(ticks, axisElem, FreeLayout)
+    group(
+      group(ticks, axisElem, FreeLayout),
+      axisLabel,
+      HorizontalStack(Center, 1 fts)
+    )
 
   }
 

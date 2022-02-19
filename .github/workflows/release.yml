@@ -10,8 +10,13 @@ jobs:
       - uses: actions/checkout@v2.3.4
         with:
           fetch-depth: 0
+          submodules: recursive
       - uses: olafurpg/setup-scala@v10
       - uses: olafurpg/setup-gpg@v3
+      - uses: peaceiris/actions-hugo@v2.4.13
+        with: 
+          hugo-version: '0.89.4'
+          extended: true      
       - run: sbt versionCheck ci-release
         env:
           PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}

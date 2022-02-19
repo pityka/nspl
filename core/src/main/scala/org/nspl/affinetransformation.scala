@@ -26,6 +26,16 @@ case class AffineTransform(
     AffineTransform(ia, ib, idx, ic, id, idy)
   }
 
+  def transform(stroke: Stroke): Stroke = {
+    val oldWidth = stroke.width
+    val fx = {
+      val tp1 = this.transform(0d, 0d)
+      val tp2 = this.transform(0d, 1d)
+      tp1.distance(tp2)
+    }
+    Stroke(oldWidth * fx, stroke.cap, stroke.dash.map(_ * fx))
+  }
+
   def transform(x: Double, y: Double): Point = {
     val bx = m2
     val by = m5
@@ -82,14 +92,17 @@ case class AffineTransform(
     Bounds(nx, ny, width, height, transformedAnchor)
   }
 
-  def concat(tx: AffineTransform) = AffineTransform(
-    m0 * tx.m0 + m1 * tx.m3,
-    m0 * tx.m1 + m1 * tx.m4,
-    m0 * tx.m2 + m1 * tx.m5 + m2,
-    m3 * tx.m0 + m4 * tx.m3,
-    m3 * tx.m1 + m4 * tx.m4,
-    m3 * tx.m2 + m4 * tx.m5 + m5
-  )
+  def concat(tx: AffineTransform) =
+    if (tx == AffineTransform.identity) this
+    else
+      AffineTransform(
+        m0 * tx.m0 + m1 * tx.m3,
+        m0 * tx.m1 + m1 * tx.m4,
+        m0 * tx.m2 + m1 * tx.m5 + m2,
+        m3 * tx.m0 + m4 * tx.m3,
+        m3 * tx.m1 + m4 * tx.m4,
+        m3 * tx.m2 + m4 * tx.m5 + m5
+      )
 
   def concatTranslate(x: Double, y: Double) = AffineTransform(
     m0,
@@ -135,6 +148,9 @@ object AffineTransform {
 
   def scale(x: Double, y: Double) =
     AffineTransform(x, 0d, 0d, 0d, y, 0)
+
+  def translateAndScale(tx: Double, ty: Double, sx: Double, sy: Double) =
+    AffineTransform(sx, 0d, tx, 0d, sy, ty)
 
   def rotate(rad: Double) =
     AffineTransform(

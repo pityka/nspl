@@ -3,6 +3,7 @@ package org.nspl
 trait Shape {
   def bounds: Bounds
   def transform(tx: Bounds => AffineTransform): Shape
+  def currentTransform: AffineTransform
 }
 
 case class Rectangle(
@@ -13,6 +14,8 @@ case class Rectangle(
     tx: AffineTransform = AffineTransform.identity,
     anchor: Option[Point] = None
 ) extends Shape {
+
+  def currentTransform = tx
   def bounds = tx.transform(Bounds(x, y, w, h, anchor))
   def transform(tx: Bounds => AffineTransform) =
     this.copy(tx = tx(bounds).concat(this.tx))
@@ -25,29 +28,41 @@ case class Ellipse(
     h: Double,
     tx: AffineTransform = AffineTransform.identity
 ) extends Shape {
+
+  def currentTransform = tx
   def bounds = tx.transform(Bounds(x, y, w, h))
   def transform(tx: Bounds => AffineTransform) =
     this.copy(tx = tx(bounds).concat(this.tx))
 }
 
-case class Line(x1: Double, y1: Double, x2: Double, y2: Double) extends Shape {
+case class Line(
+    x1: Double,
+    y1: Double,
+    x2: Double,
+    y2: Double,
+    tx: AffineTransform = AffineTransform.identity
+) extends Shape {
+
+  def currentTransform = tx
   def bounds =
-    Bounds(
-      math.min(x1, x2),
-      math.min(y1, y2),
-      math.abs(x1 - x2),
-      math.abs(y1 - y2)
+    tx.transform(
+      Bounds(
+        math.min(x1, x2),
+        math.min(y1, y2),
+        math.abs(x1 - x2),
+        math.abs(y1 - y2)
+      )
     )
   def transform(tx: Bounds => AffineTransform) = {
-    val tx1 = tx(bounds)
-    val p1 = tx1.transform(Point(x1, y1))
-    val p2 = tx1.transform(Point(x2, y2))
-    Line(p1.x, p1.y, p2.x, p2.y)
+    this.copy(tx = tx(bounds).concat(this.tx))
   }
 }
 
 /* Path without curves. */
-case class SimplePath(ps: Seq[Point]) extends Shape {
+case class SimplePath(
+    ps: Seq[Point],
+    currentTransform: AffineTransform = AffineTransform.identity
+) extends Shape {
 
   def bounds = {
     val minx = ps.map(_.x).min
@@ -60,8 +75,7 @@ case class SimplePath(ps: Seq[Point]) extends Shape {
   }
 
   def transform(tx: Bounds => AffineTransform) = {
-    val tx1 = tx(bounds)
-    SimplePath(ps.map(p => tx1.transform(p)))
+    this.copy(currentTransform = tx(bounds).concat(this.currentTransform))
   }
 
 }

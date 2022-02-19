@@ -6,7 +6,7 @@ import org.nspl.awtrenderer._
 class EventSpec extends munit.FunSuite {
 
   test("a") {
-   {
+    {
 
       println("boo")
       // val build = Build(group(
@@ -20,8 +20,8 @@ class EventSpec extends munit.FunSuite {
       //     old.copy(m2 = ShapeElem(Shape.circle(5)).translate(x, y))
       // }
       val x = group(
-        xyplot(List(1d -> 2d, 3d -> 4d))(),
-        xyplot(List(1d -> 2d, 3d -> 4d))(),
+        xyplot(List(1d -> 2d, 3d -> 4d) -> point(color = Color.red))(),
+        xyplot(List(1d -> 2d, 3d -> 4d))(par(xlab = "boo")),
         TableLayout(2)
       )
       // println(x.build.m1.bounds)

@@ -2,12 +2,13 @@ package org.nspl
 
 trait Tuples1 {
 
-  [#case class Elems1[[#T1<:Renderable[T1]#]]([#m1:T1#], anchor: Option[Point] = None) extends Renderable[Elems1[[#T1#]]] {
+  [#case class Elems1[[#T1<:Renderable[T1]#]]([#m1:T1#], anchor: Option[Point] = None, tx: AffineTransform = AffineTransform.identity) extends Renderable[Elems1[[#T1#]]] {
     private def effectiveAnchor = anchor.orElse{ 
       Iterator([#m1.bounds#]).map(_.anchor).find(_.isDefined).map(_.get)
     }
-    def transform(tx:Bounds => AffineTransform) = Elems1([#m1.transform(tx)#], anchor.map(_.transform(tx)))
-    val bounds = outline(Iterator([#m1.bounds#]), effectiveAnchor)
+    def transform(tx:Bounds => AffineTransform) = this.copy(tx = tx(bounds).concat(this.tx))
+
+    val bounds = tx.transform(outline(Iterator([#m1.bounds#]), effectiveAnchor))
   }#
   ]
 
@@ -45,10 +46,12 @@ trait Tuples2 {
         }#
   ]
 
-  [#implicit def compositeRenderer1[[#T1<:Renderable[T1]#],R<:RenderingContext](implicit [#r1:Renderer[T1,R]#]) = new Renderer[org.nspl.Elems1[[#T1#]],R] {
+  [#implicit def compositeRenderer1[[#T1<:Renderable[T1]#],R<:RenderingContext[R]](implicit [#r1:Renderer[T1,R]#]) = new Renderer[org.nspl.Elems1[[#T1#]],R] {
     def render(ctx:R,elem:Elems1[[#T1#]]) : Unit ={
-        [#r1.render(ctx,elem.m1)#
+        ctx.withTransform(elem.tx){
+          [#r1.render(ctx,elem.m1)#
         ]
+        }
     }
   }#
   ]

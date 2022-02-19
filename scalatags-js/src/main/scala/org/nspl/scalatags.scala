@@ -7,31 +7,45 @@ import scalatags.JsDom.svgAttrs
 import scalatags.JsDom.svgTags
 import scalatags.jsdom.Frag
 import org.scalajs.dom
+import org.scalajs.dom.MouseEvent
+import org.scalajs.dom.DOMRect
 import org.scalajs.dom.html
 import org.scalajs.dom.raw._
 import org.scalajs.dom.ext._
 
-case class ScalaTagRC(elems: scala.collection.mutable.ArrayBuffer[Frag])
-    extends RenderingContext
+private[nspl] case class ScalaTagRC(
+    elems: scala.collection.mutable.ArrayBuffer[Frag]
+) extends RenderingContext[ScalaTagRC] {
+
+  var transform: AffineTransform = AffineTransform.identity
+
+  def getTransform: AffineTransform = transform
+
+  type LocalTx = AffineTransform
+
+  def localToScala(tx: AffineTransform): AffineTransform = tx
+
+  def concatTransform(tx: AffineTransform): Unit = {
+    transform = transform.concat(tx)
+  }
+
+  def setTransform(tx: LocalTx): Unit = {
+    transform = tx
+  }
+}
 
 object scalatagrenderer {
 
   implicit val defaultGlyphMeasurer = CanvasGlyphMeasurer
 
-  implicit val defaultAWTFont: FontConfiguration = importFont("Arial")
+  implicit val defaultAWTFont: FontConfiguration = org.nspl.font("Arial")
 
-  implicit def rec2bounds(r: ClientRect) =
+  def rec2bounds(r: DOMRect) =
     Bounds(r.left, r.top, r.width, r.height)
-
-  type SER[T] = Renderer[T, ScalaTagRC]
 
   def cssColor(c: org.nspl.Color) = f"#${c.r}%02x${c.g}%02x${c.b}%02x"
 
-  implicit class Pimp[K <: Renderable[K]](t: K) {
-    def render(ctx: ScalaTagRC)(implicit r: SER[K]) = r.render(ctx, t)
-  }
-
-  implicit class PimpedTx(tx: AffineTransform) {
+  private[nspl] implicit class PimpedTx(tx: AffineTransform) {
     def svg = {
       s"matrix(${tx.m0}, ${tx.m3}, ${tx.m1}, ${tx.m4}, ${tx.m2}, ${tx.m5})"
     }
@@ -41,7 +55,7 @@ object scalatagrenderer {
       elem: Build[K],
       width: Int = 1000
   )(implicit
-      er: SER[K]
+      er: Renderer[K, ScalaTagRC]
   ) = {
 
     val ctx = ScalaTagRC(scala.collection.mutable.ArrayBuffer[Frag]())
@@ -52,16 +66,13 @@ object scalatagrenderer {
     ).render
 
     var paintableElem = elem.build
-    var dragStart = Point(0, 0)
-    var mousedown = false
 
     def paint = {
       val aspect = paintableElem.bounds.h / paintableElem.bounds.w
       val height = (width * aspect)
       rootElem.setAttribute("height", height.toString)
 
-      fitToBounds(paintableElem, Bounds(0, 0, width, height)).render(ctx)
-      // rootElem.children.foreach(n => { println(n); rootElem.removeChild(n) })
+      ctx.render(fitToBounds(paintableElem, Bounds(0, 0, width, height)))
       while (rootElem.firstChild != null) {
         rootElem.removeChild(rootElem.firstChild)
       }
@@ -82,13 +93,16 @@ object scalatagrenderer {
 
   }
 
-  implicit val shapeRenderer = new SER[ShapeElem] {
+  implicit val shapeRenderer = new Renderer[ShapeElem, ScalaTagRC] {
     def render(ctx: ScalaTagRC, elem: ShapeElem): Unit = {
+      val tx =
+        ctx.getTransform.concat(elem.tx.concat(elem.shape.currentTransform))
+      val shape = elem.shape
       if (
         elem.fill.a > 0d || (elem.stroke.isDefined && elem.strokeColor.a > 0)
       ) {
-        val svgShape = elem.shape match {
-          case Rectangle(x1, y1, w1, h1, tx, _) => {
+        val svgShape = shape match {
+          case Rectangle(x1, y1, w1, h1, _, _) => {
             rect(
               x := x1.toString,
               y := y1,
@@ -97,7 +111,7 @@ object scalatagrenderer {
               svgAttrs.transform := tx.svg
             )
           }
-          case Ellipse(x, y, w, h, tx) => {
+          case Ellipse(x, y, w, h, _) => {
             val centerX = x + .5 * w
             val centerY = y + .5 * h
             val radiusX = w * .5
@@ -110,27 +124,35 @@ object scalatagrenderer {
               svgAttrs.transform := tx.svg
             )
           }
-          case Line(a, b, c, d) => {
-            svgTags.line(x1 := a, y1 := b, x2 := c, y2 := d)
+          case Line(a, b, c, d, _) => {
+            svgTags.line(
+              x1 := a,
+              y1 := b,
+              x2 := c,
+              y2 := d,
+              svgAttrs.transform := tx.svg
+            )
           }
-          case SimplePath(ps) => {
+          case SimplePath(ps, _) => {
             polyline(
               points := ps
                 .map { p =>
                   p.x.toString + " " + p.y.toString
                 }
-                .mkString(" ")
+                .mkString(" "),
+              svgAttrs.transform := tx.svg
             )
           }
-          case Path(ops) => {
+          case Path(ops, _) => {
             path(
               d := ops map {
                 case MoveTo(Point(x, y))                  => s"M$x,$y"
                 case LineTo(Point(x, y))                  => s"L$x,$y"
                 case QuadTo(Point(x2, y2), Point(x1, y1)) => s"Q$x1,$y1,$x2,$y2"
-                case _                                    => ???
-                // case CubicTo(Point(x3, y3), Point(x1, y1), Point(x2, y2)) => path.curveTo(x1, y1, x2, y2, x3, y3)
-              } mkString (" ")
+                case CubicTo(Point(x3, y3), Point(x1, y1), Point(x2, y2)) =>
+                  s"C$x1,$y1,$x2,$y2,$x3,$y3"
+              } mkString (" "),
+              svgAttrs.transform := tx.svg
             )
           }
         }
@@ -145,6 +167,7 @@ object scalatagrenderer {
             filled(
               stroke := cssColor(elem.strokeColor),
               strokeWidth := elem.stroke.get.width,
+              strokeDasharray := elem.stroke.get.dash.mkString(" "),
               strokeLinecap := (elem.stroke.get.cap match {
                 case CapRound  => "round"
                 case CapButt   => "butt"
@@ -159,11 +182,11 @@ object scalatagrenderer {
     }
   }
 
-  implicit val textRenderer = new SER[TextBox] {
+  implicit val textRenderer = new Renderer[TextBox, ScalaTagRC] {
     def render(ctx: ScalaTagRC, elem: TextBox): Unit = {
       if (!elem.layout.isEmpty) {
         elem.layout.lines.foreach { case (line, lineTx) =>
-          val tx = elem.txLoc.concat(lineTx)
+          val tx = ctx.getTransform.concat(elem.txLoc.concat(lineTx))
           val svgElem = text(
             svgAttrs.x := 0,
             svgAttrs.y := 0,

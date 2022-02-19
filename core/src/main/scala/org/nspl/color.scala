@@ -30,11 +30,30 @@ object Color {
   val gray3 = Color(150, 150, 150, 255)
   val gray4 = Color(200, 200, 200, 255)
   val gray5 = Color(220, 220, 220, 255)
+  val gray6 = Color(230, 230, 230, 255)
+  val grey1 = Color(50, 50, 50, 255)
+  val grey2 = Color(100, 100, 100, 255)
+  val grey3 = Color(150, 150, 150, 255)
+  val grey4 = Color(200, 200, 200, 255)
+  val grey5 = Color(220, 220, 220, 255)
+  val grey6 = Color(230, 230, 230, 255)
   val BLACK = black
   val WHITE = white
   val RED = red
   val GREEN = green
   val BLUE = blue
+
+  private def linearInterpolation(x0: Int, x1: Int, a: Double): Int =
+    (x0 + (x1 - x0) * a).toInt
+
+  def rgbInterpolate(x0: Color, x1: Color, a: Double): Color =
+    Color(
+      linearInterpolation(x0.r, x1.r, a),
+      linearInterpolation(x0.g, x1.g, a),
+      linearInterpolation(x0.b, x1.b, a),
+      linearInterpolation(x0.a, x1.a, a)
+    )
+
 }
 
 case class ManualColor(map: Map[Double, Color]) extends Colormap {
@@ -42,15 +61,28 @@ case class ManualColor(map: Map[Double, Color]) extends Colormap {
   def withRange(min: Double, max: Double) = this
 }
 
-case class HeatMapColors(min: Double = 0.0, max: Double = 1.0)
-    extends Colormap {
+object ManualColor {
+  def apply(colors: Color*): ManualColor = ManualColor(
+    colors.zipWithIndex.map(x => x._2.toDouble -> x._1).toMap
+  )
+}
 
-  def apply(value: Double): Color = {
+case class HeatMapColors(
+    min: Double = 0.0,
+    max: Double = 1.0,
+    center: Option[Double] = None
+) extends Colormap {
+
+  def apply(value: Double): Color = if (value.isNaN()) Color.transparent
+  else {
+
+    val c = center.getOrElse((min + max) * 0.5)
 
     val v =
       if (value > max) 1.0
       else if (value < min) 0.0
-      else (value - min) / (max - min)
+      else if (value > c) 0.5 * (value - c) / (max - c) + 0.5
+      else (value - min) * 0.5 / (c - min)
 
     def scaleHue(v: Double) = (2.0 / 3.0) - v * (2.0 / 3.0)
 
@@ -59,7 +91,7 @@ case class HeatMapColors(min: Double = 0.0, max: Double = 1.0)
     Color((r * 255).toInt, (g * 255).toInt, (b * 255).toInt, 255)
   }
 
-  def withRange(min: Double, max: Double) = HeatMapColors(min, max)
+  def withRange(min: Double, max: Double) = HeatMapColors(min, max, center)
 }
 
 case class GrayScale(
@@ -69,7 +101,8 @@ case class GrayScale(
     transparentBelowBounds: Boolean = false
 ) extends Colormap {
 
-  def apply(value: Double): Color = {
+  def apply(value: Double): Color = if (value.isNaN()) Color.transparent
+  else {
 
     val v =
       if (value > max) 1.0
@@ -90,31 +123,38 @@ case class GrayScale(
   def withRange(min: Double, max: Double) = GrayScale(min, max, white)
 }
 
-case class RedBlue(min: Double = 0.0, max: Double = 1.0, mid: Double = 0.5)
-    extends Colormap {
+case class RedBlue(
+    min: Double = 0.0,
+    max: Double = 1.0,
+    center: Option[Double] = None,
+    centerBrightness: Int = 255
+) extends Colormap {
 
-  def apply(value: Double): Color = {
+  def apply(value: Double): Color = if (value.isNaN()) Color.transparent
+  else {
 
-    val (r, g, b) = if (value > mid) {
+    val c = center.getOrElse((max + min) * 0.5)
+
+    val cColor = Color(centerBrightness, centerBrightness, centerBrightness)
+
+    if (value > c) {
       val v =
         if (value > max) 1.0
         else if (value < min) 0.0
-        else (value - mid) / (max - mid)
-      val v2 = 1 - v
-      (1d, v2, v2)
+        else (value - c) / (max - c)
+      Color.rgbInterpolate(cColor, Color.red, v)
     } else {
       val v =
         if (value < min) 1.0
         else if (value > max) 0.0
-        else (mid - value) / (mid - min)
-      val v2 = 1 - v
-      (v2, v2, 1d)
+        else (c - value) / (c - min)
+      Color.rgbInterpolate(cColor, Color.blue, v)
     }
 
-    Color((r * 255).toInt, (g * 255).toInt, (b * 255).toInt, 255)
   }
 
-  def withRange(min: Double, max: Double) = RedBlue(min, max, mid)
+  def withRange(min: Double, max: Double) =
+    RedBlue(min, max, center, centerBrightness)
 }
 
 case class LogHeatMapColors(min: Double = 0.0, max: Double = 1.0)
@@ -123,7 +163,8 @@ case class LogHeatMapColors(min: Double = 0.0, max: Double = 1.0)
   val min1 = 1d
   val max1 = (max - min) + 1
 
-  def apply(value: Double): Color = {
+  def apply(value: Double): Color = if (value.isNaN) Color.transparent
+  else {
 
     val v =
       if (value > max) 1.0
@@ -140,11 +181,16 @@ case class LogHeatMapColors(min: Double = 0.0, max: Double = 1.0)
   def withRange(min: Double, max: Double) = LogHeatMapColors(min, max)
 }
 
-case class DiscreteColors(max: Int) extends Colormap {
+case class DiscreteColors(
+    numColors: Int,
+    saturation: Double = 1d,
+    lighting: Double = 0.5
+) extends Colormap {
 
-  def apply(value: Double): Color = {
-    val v = if (value > max) max else if (value < 0) 0 else value
-    colorPick(v.toInt, max)
+  def apply(value: Double): Color = if (value.isNaN) Color.transparent
+  else {
+    val v = if (value > numColors) numColors else if (value < 0) 0 else value
+    colorPick(v.toInt, numColors, saturation, lighting)
   }
 
   def withRange(min: Double, max: Double) = DiscreteColors(max.toInt)
@@ -152,10 +198,32 @@ case class DiscreteColors(max: Int) extends Colormap {
 
 trait Colors {
 
-  def colorPick(idx: Int, max: Int) = {
-    if (max <= colorList.size && idx < colorList.size) colorList(idx)
-    else
-      myColorStream(idx)
+  def fromRBGHexString(s: String) = {
+    import java.lang.Integer.parseInt
+
+    Color(
+      parseInt(s.take(2), 16),
+      parseInt(s.drop(2).take(2), 16),
+      parseInt(s.drop(4).take(2), 16)
+    )
+  }
+
+  def colorPick(
+      idx: Int,
+      numColors: Int,
+      saturation: Double = 1d,
+      lighting: Double = 0.5
+  ) = {
+    if (idx >= numColors) hslCircle(idx, idx, saturation, lighting)
+    else if (numColors <= shortList.size) shortList(idx)
+    else if (numColors <= longList.size) longList(idx)
+    else hslCircle(idx, math.max(0, numColors - 1), saturation, lighting)
+  }
+
+  def hslCircle(idx: Int, max: Int, saturation: Double, lighting: Double) = {
+    val (r, g, b) = hsl2rgb2(idx.toDouble / max.toDouble, saturation, lighting)
+    val color = Color((r * 255).toInt, (g * 255).toInt, (b * 255).toInt)
+    color
   }
 
   // https://en.wikipedia.org/wiki/HSL_and_HSV#From_HSL
@@ -177,93 +245,34 @@ trait Colors {
     (r1 + m, g1 + m, b1 + m)
   }
 
-  lazy val myColorStream = {
-
-    def nextP(p: Int) = {
-      def isPrime(number: Int): Boolean =
-        if (number == 2 || number == 3) true
-        else if (number % 2 == 0 || number % 3 == 0) false
-        else {
-          var divisor = 6
-          var b = true
-          while (divisor * divisor - 2 * divisor + 1 <= number && b) {
-
-            if (number % (divisor - 1) == 0)
-              b = false
-
-            if (number % (divisor + 1) == 0)
-              b = false
-
-            divisor += 6
-          }
-          b
-        }
-
-      def loop(i: Int): Int = if (isPrime(i)) i else loop(i + 1)
-
-      loop(p + 1)
-
-    }
-
-    def nextQ(p: Int, q: Int): (Int, Int) = {
-      val q1 = if (p + 1 == q) nextP(q) else q
-      val p1 = if (q == q1) p + 1 else 1
-      (p1, q1)
-    }
-
-    def next(p: Int, q: Int, bb: Int): (Int, Int, Int, Color) = {
-      val (hueP, hueQ) = if (bb == 3) nextQ(p, q) else (p, q)
-      val b1: Int = if (bb == 3) 1 else bb + 1
-      val hue = hueP.toDouble / hueQ
-      val saturation = 1.0
-      val brightness = (b1 / 3d) * 0.9
-      val (r, g, b) = hsl2rgb2(hue, saturation, brightness)
-      val color = Color((r * 255).toInt, (g * 255).toInt, (b * 255).toInt, 255)
-      (hueP, hueQ, b1, color)
-    }
-
-    def loop(p: Int, q: Int, b: Int): immutable.LazyList[Color] = {
-      val (p1, q1, b1, c) = next(p, q, b)
-      c #:: loop(p1, q1, b1)
-    }
-    loop(0, 1, 0)
-  }
-
-  lazy val random = new scala.util.Random(1232432);
-  lazy val randomColorStream = {
-    def newRandomColor = {
-      val hue = (random.nextFloat())
-      val saturation = 0.6 + random.nextFloat() * 0.4
-      val brightness = 0.4 + random.nextFloat() * 0.3
-      val (r, g, b) = hsl2rgb2(hue, saturation, brightness)
-      Color((r * 255).toInt, (g * 255).toInt, (b * 255).toInt, 255)
-    }
-    def loop: immutable.LazyList[Color] = newRandomColor #:: loop
-    loop
-  }
-
-  lazy val colorList = Vector(
+  private val shortList = Vector(
     Color(0, 0, 0, 255),
-    Color(250, 0, 0, 255),
-    Color(237, 111, 9, 255),
-    Color(50, 0, 250, 255),
-    Color(9, 135, 237, 255),
-    Color(32, 110, 27, 255),
-    Color(84, 204, 204, 255),
-    Color(139, 196, 81, 255),
-    Color(171, 0, 250, 255),
-    Color(176, 224, 0, 255),
-    Color(250, 0, 158, 255),
-    Color(224, 180, 0, 255),
-    Color(196, 121, 0, 255),
-    Color(0, 252, 164, 255),
-    Color(255, 172, 120, 255),
-    Color(111, 178, 172, 255),
-    Color(96, 56, 40, 255),
-    Color(185, 86, 74, 255),
-    Color(129, 105, 185, 255),
-    Color(26, 25, 112, 255),
-    Color(0, 112, 99, 255)
+    Color(230, 50, 0, 255),
+    Color(86, 180, 233, 255),
+    Color(0, 158, 115, 255),
+    Color(240, 228, 66, 255),
+    Color(213, 94, 0, 255),
+    Color(20, 4121, 167, 255)
+  )
+
+  private val longList = Vector(
+    Color(230, 26, 75),
+    Color(60, 180, 75),
+    Color(255, 225, 25),
+    Color(0, 130, 200),
+    Color(245, 130, 48),
+    Color(70, 240, 240),
+    Color(240, 50, 230),
+    Color(250, 190, 212),
+    Color(0, 128, 128),
+    Color(220, 190, 255),
+    Color(170, 110, 40),
+    Color(255, 250, 200),
+    Color(128, 0, 0),
+    Color(170, 255, 195),
+    Color(0, 0, 128),
+    Color(128, 128, 128),
+    Color(0, 0, 0)
   )
 
 }

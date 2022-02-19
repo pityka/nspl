@@ -38,7 +38,7 @@ package object nspl
     def value(implicit bs: FontConfiguration) = v.value
   }
 
-  def importFont(name: String)(implicit gm: GlyphMeasurer[NamedFont#F]) =
+  def font(name: String)(implicit gm: GlyphMeasurer[NamedFont#F]) =
     GenericFontConfig(NamedFont(name, 10))(gm)
 
   def mapEvent[A <: Renderable[A], B <: Renderable[B]](
@@ -139,10 +139,12 @@ package object nspl
     fitToBounds(elem, bounds)
   }
   def fitToHeight[T <: Renderable[T]](elem: T, height: Double) = {
-    val aspect = elem.bounds.w / elem.bounds.h
-    val width = (height * aspect).toInt
-    val bounds = Bounds(0, 0, width, height)
-    fitToBounds(elem, bounds)
+    if (elem.bounds.h != 0) {
+      val aspect = elem.bounds.w / elem.bounds.h
+      val width = (height * aspect).toInt
+      val bounds = Bounds(0, 0, width, height)
+      fitToBounds(elem, bounds)
+    } else elem
   }
 
   def sequence[T <: Renderable[T], F: FC](
@@ -241,7 +243,7 @@ package object nspl
       )
     }
 
-  val lineWidth = 0.175 fts
+  val lineWidth = 0.08 fts
 
   val defaultTickFormatter: Seq[Double] => Seq[String] =
     (worldCoordinates: Seq[Double]) => {
@@ -253,7 +255,7 @@ package object nspl
           if ((math.abs(w) <= 1e-4 || math.abs(w) >= 1e4) && w != 0.0) {
             {
               val raw = (new java.util.Formatter)
-                .format("%." + precision + "e", new java.lang.Double(w))
+                .format("%." + precision + "e", java.lang.Double.valueOf(w))
                 .toString
               val sep = raw.split("e")
               sep(0).reverse
@@ -264,7 +266,7 @@ package object nspl
 
           } else
             (new java.util.Formatter)
-              .format("%." + precision + "f", new java.lang.Double(w))
+              .format("%." + precision + "f", java.lang.Double.valueOf(w))
               .toString
               .reverse
               .dropWhile(_ == '0')

@@ -1,16 +1,21 @@
 package org.nspl.data
 
 object KDE {
-  def normPDF(x: Double, u: Double, v: Double) =
-    1.0 / math.sqrt(2 * v * math.Pi) * math.exp(
-      (-1) * (x - u) * (x - u) / (2 * v)
+  def normPDF(x: Double) =
+    1.0 / math.sqrt(2 * math.Pi) * math.exp(
+      -0.5 * x * x
     )
 
-  def univariate(d: IndexedSeq[Double], x: Double, bandwidth: Double) = {
+  def univariate(d: Array[Double], center: Double, bandwidth: Double) = {
     val n = d.size
-    1d / (n * bandwidth) * d.foldLeft(0.0)((s, xi) =>
-      normPDF((x - xi) / bandwidth, 0, 1) + s
-    )
+    var s = 0d
+    var i = 0
+    while (i < n) {
+      s += normPDF((center - d(i)) / bandwidth)
+      i += 1
+    }
+    s / (n * bandwidth)
+
   }
 
   def density2d(

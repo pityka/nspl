@@ -84,7 +84,7 @@ contentDir = "../nspl-docs/target/mdoc/content"
   [markup.tableOfContents]
     endLevel = 3
     ordered = false
-    startLevel = 2
+    startLevel = 1
   [markup.highlight]
     anchorLineNos = false
     codeFences = true
@@ -95,6 +95,8 @@ contentDir = "../nspl-docs/target/mdoc/content"
     lineNos = false
     lineNumbersInTable = true
     noClasses = true
-    style = 'friendly'
+    style = 'monokai'
     tabWidth = 2
 
+[markup.goldmark.renderer]
+  unsafe= true
