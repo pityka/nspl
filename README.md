@@ -12,7 +12,6 @@ Renders to
 * SVG (via [ScalaTags](http://www.lihaoyi.com/scalatags/), both in browser or on jvm)
 * Html5 Canvas ([scala-js](http://www.scala-js.org))
 
-
 ## Usage
 
 See the documentation website at [https://pityka.github.io/nspl/](https://pityka.github.io/nspl/) .
