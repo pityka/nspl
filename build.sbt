@@ -195,7 +195,7 @@ lazy val docs = project
 
 lazy val root = (project in file("."))
   .settings(commonSettings: _*)
-  .settings(crossScalaVersions := Nil, skip in publish := true)
+  .settings(skip in publish := true)
   .aggregate(
     saddle,
     saddleJS,
