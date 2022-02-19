@@ -1,8 +1,6 @@
-[User documentation](https://pityka.github.io/nspl/)
 
 [![](https://img.shields.io/maven-central/v/io.github.pityka/nspl-core_2.12.svg)](https://search.maven.org/search?q=g:io.github.pityka%20nspl)
-
-
+[![documentation](https://img.shields.io/badge/docs-green)](https://pityka.github.io/nspl/)
 
 # 2d Plotting Library for Scala (including scala-js)
 
@@ -21,14 +19,12 @@ See the documentation website at [https://pityka.github.io/nspl/](https://pityka
 
 Maven coordinates: 
 
-* JVM AWT backend: `libraryDependencies += "io.github.pityka" %% "nspl-awt" % "0.0.???"`
-* JVM SVG via scalatags: `libraryDependencies += "io.github.pityka" %% "nspl-scalatags-jvm" % "0.0.???"`
-* scala-js svg via scalatags: `libraryDependencies += "io.github.pityka" %% "nspl-scalatags-js" % "0.0.???"` 
-* scala-js canvas via scalatags: `libraryDependencies += "io.github.pityka" %% "nspl-canvas-js" % "0.0.???"` 
+* For jvm: `libraryDependencies += "io.github.pityka" %% "nspl-awt" % "0.0.???"`
+* For canvas (Scala.js): `libraryDependencies += "io.github.pityka" %% "nspl-canvas-js" % "0.0.???"` 
 
 ## Version policy
 
-nspl uses 'early-semver' versioning enforced with https://github.com/scalacenter/sbt-version-policy. 
+nspl uses the recommended versioning scheme enforced with https://github.com/scalacenter/sbt-version-policy. 
 
 ## How to build the website
 The website is built with [hugo](https://gohugo.io/) and the [hugo-book](https://github.com/alex-shpak/hugo-book) theme.
