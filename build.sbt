@@ -56,7 +56,7 @@ lazy val coreJS = project
   .settings(
     name := "nspl-core-js",
     target := file("core/targetJS"),
-    sourceManaged in Compile := (sourceManaged in Compile).value.getAbsoluteFile,
+    Compile / sourceManaged := (Compile / sourceManaged ).value.getAbsoluteFile,
     libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.6.0"
   )
   .enablePlugins(ScalaJSPlugin)
@@ -173,7 +173,7 @@ lazy val docs = project
     Compile / doc / sources := Seq.empty
   )
   .settings(
-    unidocProjectFilter in (ScalaUnidoc, unidoc) :=
+    ScalaUnidoc / unidoc / unidocProjectFilter :=
       inProjects(core,awt,saddle,scalatagsJvm,sharedJs,sharedJvm,canvas),
       // (inAnyProject -- inProjects(
       //   coreJS,
@@ -187,19 +187,20 @@ lazy val docs = project
       "VERSION" -> (awt/versionPolicyPreviousVersions).value.head
     ),
     mdocJS := Some(jsdocs),
-    target in (ScalaUnidoc, unidoc) := (baseDirectory in LocalRootProject).value / "website" / "static" / "api",
-    cleanFiles += (target in (ScalaUnidoc, unidoc)).value
+    ScalaUnidoc / unidoc / target := (LocalRootProject / baseDirectory).value / "website" / "static" / "api",
+    cleanFiles += (ScalaUnidoc / unidoc / target).value
   )
   .enablePlugins(MdocPlugin, ScalaUnidocPlugin)
 
 
 lazy val root = (project in file("."))
   .settings(commonSettings: _*)
-  .settings(skip in publish := true)
+  .settings(crossScalaVersions := Nil,  publish / skip := true)
   .aggregate(
     saddle,
     saddleJS,
     scalatagsJvm,
+    scalatagsJs,
     awt,
     canvas,
     sharedJs,
