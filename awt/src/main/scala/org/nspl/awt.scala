@@ -7,63 +7,111 @@ import java.awt.font.LineBreakMeasurer
 
 import JavaFontConversion._
 
-case class JavaRC(graphics: Graphics2D) extends RenderingContext
+private[nspl] case class JavaRC(graphics: Graphics2D)
+    extends RenderingContext[JavaRC] {
+
+  var paintColor: Color = Color.black
+  var stroke: Stroke = Stroke(1d)
+  var transform: AffineTransform = AffineTransform.identity
+  var transformInGraphics: AffineTransform = AffineTransform.identity
+
+  def withPaint[T](color: Color)(f: => T) = {
+    val current = paintColor
+    if (current != color) {
+      paintColor = color
+      graphics.setPaint(awtrenderer.col2col(color))
+    }
+    f
+  }
+  def withStroke[T](str: Stroke)(f: => T) = {
+    val current = stroke
+    if (current != str) {
+      stroke = str
+      graphics.setStroke(awtrenderer.str2str(str))
+    }
+    f
+  }
+
+  type LocalTx = AffineTransform
+
+  override def getTransform: AffineTransform = transform
+  def localToScala(tx: AffineTransform): AffineTransform = tx
+
+  def concatTransform(tx: AffineTransform): Unit = {
+    transform = transform.concat(tx)
+  }
+
+  def setTransform(tx: LocalTx): Unit = {
+    transform = tx
+  }
+  def setTransformInGraphics() = {
+    if (transformInGraphics != transform) {
+      transformInGraphics = transform
+      graphics.setTransform(awtrenderer.tx2tx(transform))
+    }
+  }
+
+}
 
 object awtrenderer extends JavaAWTUtil {
 
   implicit val defaultGlyphMeasurer = AwtGlyphMeasurer
 
-  implicit val defaultAWTFont: FontConfiguration = importFont("Arial")
+  implicit val defaultAWTFont: FontConfiguration = font("Arial")
 
-  implicit val shapeRenderer = new AER[ShapeElem] {
-    def render(ctx: JavaRC, elem: ShapeElem): Unit = {
-      savePaint(ctx.graphics) { graphics =>
-        saveStroke(graphics) { graphics2 =>
-          if (elem.fill.a > 0.0) {
-            graphics2.setPaint(elem.fill)
-            graphics2.fill(elem.shape)
+  implicit val shapeRenderer = new Renderer[ShapeElem, JavaRC] {
+
+    private def drawAndFill(ctx: JavaRC, elem: ShapeElem) = {
+
+      if (
+        elem.fill.a > 0d || (elem.stroke.isDefined && elem.strokeColor.a > 0)
+      ) {
+        ctx.setTransformInGraphics()
+
+        val shape = elem.shape
+
+        if (elem.fill.a > 0.0) {
+          ctx.withPaint(elem.fill) {
+            ctx.graphics.fill(shape2awt(shape))
           }
-          if (elem.stroke.isDefined && elem.strokeColor.a > 0) {
-            val stroke = ctx.graphics match {
-              case _: de.erichseifert.vectorgraphics2d.VectorGraphics2D =>
-                elem.stroke.map(s => Stroke(s.width * 0.4)).get
-              case _ => elem.stroke.get
+        }
+        if (elem.stroke.isDefined && elem.strokeColor.a > 0) {
+          ctx.withPaint(elem.strokeColor) {
+            ctx.withStroke(elem.stroke.get) {
+              ctx.graphics.draw(shape2awt(shape))
             }
-            graphics2.setStroke(stroke)
-            graphics2.setPaint(elem.strokeColor)
-            graphics2.draw(elem.shape)
           }
         }
       }
     }
+    def render(ctx: JavaRC, elem: ShapeElem): Unit = {
+
+      ctx.withTransform(elem.tx concat elem.shape.currentTransform) {
+
+        drawAndFill(ctx, elem)
+
+      }
+
+    }
   }
 
-  implicit val textRenderer = new AER[TextBox] {
+  implicit val textRenderer = new Renderer[TextBox, JavaRC] {
 
     def render(ctx: JavaRC, elem: TextBox): Unit = {
-      if (!elem.layout.isEmpty) {
-        savePaint(ctx.graphics) { graphics =>
-          saveStroke(graphics) { graphics2 =>
-            // graphics2.draw(elem.bounds)
-            graphics2.setPaint(elem.color)
-
-            val font: JFont = elem.font
-
-            val frc = graphics2.getFontRenderContext()
-
-            def getOutline(text: String) =
-              new java.awt.font.TextLayout(text, font, frc)
-                .getOutline(new java.awt.geom.AffineTransform())
-
+      if (!elem.layout.isEmpty && elem.color.a > 0) {
+        ctx.withTransform(elem.txLoc) {
+          ctx.withPaint(elem.color) {
+            ctx.graphics.setFont(font2font(elem.font))
             elem.layout.lines.foreach { case (line, lineTx) =>
-              val shape = getOutline(line)
-
-              val tx = elem.txLoc.concat(lineTx)
-
-              graphics2.fill(tx.createTransformedShape(shape))
+              ctx.withTransform(lineTx) {
+                ctx.setTransformInGraphics()
+                ctx.graphics.drawString(line, 0, 0)
+              }
             }
           }
+
         }
+
       }
     }
   }

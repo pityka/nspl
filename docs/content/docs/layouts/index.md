@@ -1,6 +1,6 @@
 ---
 title: 'Multi-panel figures'
-weight: 4
+weight: 5
 ---
 
 
@@ -32,18 +32,14 @@ val sparseMatrix =
   )
 
 val plot1 = rasterplot(sparseMatrix,
-            xlab="x axis label",
-            ylab="y axis label"
-          )
+          )(par())
 
 
 val denseMatrix = new DataMatrix(
             rows = Array.fill(12)(nextDouble()), numCols = 4, numRows = 3)
   
 val plot2 = rasterplot(denseMatrix,
-            xlab="x axis label",
-            ylab="y axis label"
-          )
+          )(par())
 
 val complexPlot = group(plot1,plot2,TableLayout(2))
 

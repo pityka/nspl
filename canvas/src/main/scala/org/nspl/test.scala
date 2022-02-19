@@ -1,5 +1,4 @@
-package org.nspl
-
+import org.nspl._
 import org.nspl.data._
 import canvasrenderer._
 import org.scalajs.dom._
@@ -9,8 +8,8 @@ import org.scalajs.dom.html
 import scala.scalajs.js
 import js.annotation._
 
-@JSExportTopLevel("Test")
-object Test {
+@JSExportTopLevel("nsplcanvastest")
+object nsplcanvastest {
   @JSExport
   def bind(n: Node): Unit = {
     println("Hi")
@@ -25,15 +24,27 @@ object Test {
     val z3 = random2
     val idx = 0 until x.size map (_.toDouble)
 
-    val p1 = xyplot(indexed(x) -> point(shapes = Vector(shapeList(0))))(
-      ylab = "x",
-      xlab = "index",
-      main = "main"
+    val p1 = xyplot(
+      (
+        indexed(x),
+        List(
+          point(shapes = Vector(shapeList(1)))
+          // line()
+        ),
+        InLegend("dsf")
+      )
+    )(
+      par(
+        ylab = "x",
+        xlab = "index",
+        main =
+          "main\nsdfsd\nasdfsdfd fasd fds fds fds fds fda fdsa fd d ds fds ds df asdf asdf sad sd fsad fsda sda fdsaf "
+      )
     )
 
     val p2 = xyplot(
       density(x) -> line()
-    )(xlab = "x", ylab = "dens.")
+    )(par(xlab = "x", ylab = "dens."))
     val p3 = xyplot(
       z2 -> z3 -> point(size = 1d, color = Color(200, 200, 200, 255)),
       density2d(z2 zip z3, n = 100, levels = 10)
@@ -46,13 +57,11 @@ object Test {
       )
     )()
 
-    val p5 = binnedboxplot(x, y, xlab = "PC2", ylab = "PC3")
+    val p5 = binnedboxplot(x, y)(par(xlab = "PC2", ylab = "PC3"))
 
     val p6 = rasterplot(
-      rasterFromStream(z3.iterator, 30, 30, MinMaxImpl(0.0, 1.0)),
-      xFontSize = 0.5 fts,
-      yFontSize = 0.5 fts
-    )
+      rasterFromStream(z3.iterator, 30, 30, MinMaxImpl(0.0, 1.0))
+    )(par(xLabFontSize = 0.5 fts, yLabFontSize = 0.5 fts))
 
     val text = fitToWidth(
       group(
@@ -116,7 +125,7 @@ object Test {
     )()
 
     val gallery = group(
-      xyzp,
+      // xyzp,
       p1,
       // p2,
       // p2,
@@ -125,7 +134,7 @@ object Test {
       // p5,
       // p6,
       // text,
-      VerticalStack()
+      VerticalStack(Anchor)
     )
 
     val (canvas, update) = render(gallery, 800, 800, println)

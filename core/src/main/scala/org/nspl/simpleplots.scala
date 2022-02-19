@@ -6,127 +6,280 @@ sealed trait LegendConfig
 case object NotInLegend extends LegendConfig
 case class InLegend(text: String) extends LegendConfig
 
-trait CommonOptions {
-  def main: String
-  def xlab: String
-  def ylab: String
-  def xnames: Seq[(Double, String)]
-  def ynames: Seq[(Double, String)]
-  def xlim: Option[(Double, Double)]
-  def ylim: Option[(Double, Double)]
-  def xLabFontSize: RelFontSize
-  def yLabFontSize: RelFontSize
-  def mainFontSize: RelFontSize
-  def xNumTicks: Int
-  def yNumTicks: Int
-  def axisMargin: Double
-  def legendFontSize: RelFontSize
-  def legendWidth: RelFontSize
-  def xgrid: Boolean
-  def ygrid: Boolean
-  def xWidth: RelFontSize
-  def yHeight: RelFontSize
-  def frame: Boolean
-}
-
 /* Factory methods for common plots. */
 trait SimplePlots {
 
-  // def options(
-  //   main: String = "",
-  //   xlab: String = "",
-  //   ylab: String = "",
-  //   xnames: Seq[(Double, String)] = Seq(),
-  //   ynames: Seq[(Double, String)] = Seq(),
-  //   xlim: Option[(Double, Double)] = None,
-  //   ylim: Option[(Double, Double)] = None,
-  //   xLabFontSize: RelFontSize = 1 fts,
-  //   yLabFontSize: RelFontSize = 1 fts,
-  //   mainFontSize: RelFontSize = 1 fts,
-  //   xNumTicks: Int = 4,
-  //   yNumTicks: Int = 4,
-  //   axisMargin: Double = 0.05,
-  //   legendFontSize: RelFontSize = 1 fts,
-  //   legendWidth: RelFontSize = 30 fts,
-  //   xgrid: Boolean = true,
-  //   ygrid: Boolean = true,
-  //   xWidth: RelFontSize = 20 fts,
-  //   yHeight: RelFontSize = 20 fts,
-  //   frame: Boolean = true
-  // ) = new CommonOptions {
-  //   def main = _main
-  //   def xlab = _xlab
-  //   def ylab = _ylab
-  //   def xnames = _xnames
-  //   def ynames = _ynames
-  //   def xlim = _xlim
-  //   def ylim = _ylim
-  //   def xLabFontSize = _xLabFontSize
-  //   def yLabFontSize: RelFontSize = 1 fts,
-  //   def mainFontSize: RelFontSize = 1 fts,
-  //   def xNumTicks: Int = 4,
-  //   def yNumTicks: Int = 4,
-  //   def axisMargin: Double = 0.05,
-  //   def legendFontSize: RelFontSize = 1 fts,
-  //   def legendWidth: RelFontSize = 30 fts,
-  //   def xgrid: Boolean = true,
-  //   def ygrid: Boolean = true,
-  //   def xWidth: RelFontSize = 20 fts,
-  //   def yHeight: RelFontSize = 20 fts,
-  //   def frame: Boolean = true
-  // }
+  class Parameters(
+      val xlog: Boolean,
+      val ylog: Boolean,
+      val main: String,
+      val xlab: String,
+      val ylab: String,
+      val xnames: Seq[(Double, String)],
+      val ynames: Seq[(Double, String)],
+      val xlim: Option[(Double, Double)],
+      val ylim: Option[(Double, Double)],
+      val draw1Line: Boolean,
+      val extraLegend: Seq[(String, LegendElem)],
+      val xLabFontSize: RelFontSize,
+      val yLabFontSize: RelFontSize,
+      val mainFontSize: RelFontSize,
+      val xNumTicks: Int,
+      val yNumTicks: Int,
+      val xAxisMargin: Double,
+      val yAxisMargin: Double,
+      val legendFontSize: RelFontSize,
+      val legendWidth: RelFontSize,
+      val xgrid: Boolean,
+      val ygrid: Boolean,
+      val xWidth: RelFontSize,
+      val yHeight: RelFontSize,
+      val frame: Boolean,
+      val xLabelRotation: Double,
+      val yLabelRotation: Double,
+      val origin: Option[(Double, Double)],
+      val xCustomGrid: Boolean,
+      val yCustomGrid: Boolean,
+      val legendLayout: Layout,
+      val legendDistance: RelFontSize,
+      val xTickLength: RelFontSize,
+      val yTickLength: RelFontSize,
+      val xLineWidthFraction: Double,
+      val yLineWidthFraction: Double,
+      val xLineStartFraction: Double,
+      val yLineStartFraction: Double,
+      val topPadding: RelFontSize,
+      val bottomPadding: RelFontSize,
+      val leftPadding: RelFontSize,
+      val rightPadding: RelFontSize,
+      val xLabDistance: RelFontSize,
+      val yLabDistance: RelFontSize,
+      val mainLabDistance: RelFontSize,
+      val xTickSpace: Option[Double],
+      val yTickSpace: Option[Double],
+      val noLegend: Boolean,
+      val xNoTickLabel: Boolean,
+      val yNoTickLabel: Boolean
+  ) {
+    def copy(
+        yNoTickLabel: Boolean = yNoTickLabel,
+        xNoTickLabel: Boolean = xNoTickLabel,
+        noLegend: Boolean = noLegend,
+        yTickSpace: Option[Double] = yTickSpace,
+        xTickSpace: Option[Double] = xTickSpace,
+        mainLabDistance: RelFontSize = mainLabDistance,
+        yLabDistance: RelFontSize = yLabDistance,
+        xLabDistance: RelFontSize = xLabDistance,
+        rightPadding: RelFontSize = rightPadding,
+        leftPadding: RelFontSize = leftPadding,
+        bottomPadding: RelFontSize = bottomPadding,
+        topPadding: RelFontSize = topPadding,
+        yLineStartFraction: Double = yLineStartFraction,
+        xLineStartFraction: Double = xLineStartFraction,
+        yLineWidthFraction: Double = yLineWidthFraction,
+        xLineWidthFraction: Double = xLineWidthFraction,
+        yTickLength: RelFontSize = yTickLength,
+        xTickLength: RelFontSize = xTickLength,
+        legendDistance: RelFontSize = legendDistance,
+        legendLayout: Layout = legendLayout,
+        yCustomGrid: Boolean = yCustomGrid,
+        xCustomGrid: Boolean = xCustomGrid,
+        origin: Option[(Double, Double)] = origin,
+        yLabelRotation: Double = yLabelRotation,
+        xLabelRotation: Double = xLabelRotation,
+        frame: Boolean = frame,
+        yHeight: RelFontSize = yHeight,
+        xWidth: RelFontSize = xWidth,
+        ygrid: Boolean = ygrid,
+        xgrid: Boolean = xgrid,
+        legendWidth: RelFontSize = legendWidth,
+        legendFontSize: RelFontSize = legendFontSize,
+        yAxisMargin: Double = yAxisMargin,
+        xAxisMargin: Double = xAxisMargin,
+        yNumTicks: Int = yNumTicks,
+        xNumTicks: Int = xNumTicks,
+        mainFontSize: RelFontSize = mainFontSize,
+        yLabFontSize: RelFontSize = yLabFontSize,
+        xLabFontSize: RelFontSize = xLabFontSize,
+        extraLegend: Seq[(String, LegendElem)] = extraLegend,
+        draw1Line: Boolean = draw1Line,
+        ylim: Option[(Double, Double)] = ylim,
+        xlim: Option[(Double, Double)] = xlim,
+        ynames: Seq[(Double, String)] = ynames,
+        xnames: Seq[(Double, String)] = xnames,
+        ylab: String = ylab,
+        xlab: String = xlab,
+        main: String = main,
+        ylog: Boolean = ylog,
+        xlog: Boolean = xlog
+    ) = new Parameters(
+      xlog = xlog,
+      ylog = ylog,
+      main = main,
+      xlab = xlab,
+      ylab = ylab,
+      xnames = xnames,
+      ynames = ynames,
+      xlim = xlim,
+      ylim = ylim,
+      draw1Line = draw1Line,
+      extraLegend = extraLegend,
+      xLabFontSize = xLabFontSize,
+      yLabFontSize = yLabFontSize,
+      mainFontSize = mainFontSize,
+      xNumTicks = xNumTicks,
+      yNumTicks = yNumTicks,
+      xAxisMargin = xAxisMargin,
+      yAxisMargin = yAxisMargin,
+      legendFontSize = legendFontSize,
+      legendWidth = legendWidth,
+      xgrid = xgrid,
+      ygrid = ygrid,
+      xWidth = xWidth,
+      yHeight = yHeight,
+      frame = frame,
+      xLabelRotation = xLabelRotation,
+      yLabelRotation = yLabelRotation,
+      origin = origin,
+      xCustomGrid = xCustomGrid,
+      yCustomGrid = yCustomGrid,
+      legendLayout = legendLayout,
+      legendDistance = legendDistance,
+      xTickLength = xTickLength,
+      yTickLength = yTickLength,
+      xLineWidthFraction = xLineWidthFraction,
+      yLineWidthFraction = yLineWidthFraction,
+      xLineStartFraction = xLineStartFraction,
+      yLineStartFraction = yLineStartFraction,
+      topPadding = topPadding,
+      bottomPadding = bottomPadding,
+      leftPadding = leftPadding,
+      rightPadding = rightPadding,
+      xLabDistance = xLabDistance,
+      yLabDistance = yLabDistance,
+      mainLabDistance = mainLabDistance,
+      xTickSpace = xTickSpace,
+      yTickSpace = yTickSpace,
+      noLegend = noLegend,
+      xNoTickLabel = xNoTickLabel,
+      yNoTickLabel = yNoTickLabel
+    )
+  }
+
+  object par {
+    def apply(
+        noLegend: Boolean = false,
+        yTickSpace: Option[Double] = None,
+        xTickSpace: Option[Double] = None,
+        mainLabDistance: RelFontSize = 0.75 fts,
+        yLabDistance: RelFontSize = 0.5 fts,
+        xLabDistance: RelFontSize = 0.5 fts,
+        rightPadding: RelFontSize = 5d fts,
+        leftPadding: RelFontSize = 5d fts,
+        bottomPadding: RelFontSize = 3d fts,
+        topPadding: RelFontSize = 3d fts,
+        yLineStartFraction: Double = 0d,
+        xLineStartFraction: Double = 0d,
+        yLineWidthFraction: Double = 1d,
+        xLineWidthFraction: Double = 1d,
+        yTickLength: RelFontSize = 0.4 fts,
+        xTickLength: RelFontSize = 0.4 fts,
+        legendDistance: RelFontSize = 0.5 fts,
+        legendLayout: Layout = ColumnLayout(
+          numRows = 10,
+          horizontalGap = 0.75 fts,
+          verticalGap = 0.4 fts
+        ),
+        yCustomGrid: Boolean = false,
+        xCustomGrid: Boolean = false,
+        origin: Option[(Double, Double)] = None,
+        yLabelRotation: Double = 0d,
+        xLabelRotation: Double = 0d,
+        frame: Boolean = true,
+        yHeight: RelFontSize = 20 fts,
+        xWidth: RelFontSize = 20 fts,
+        ygrid: Boolean = true,
+        xgrid: Boolean = true,
+        legendWidth: RelFontSize = 30 fts,
+        legendFontSize: RelFontSize = 1 fts,
+        yAxisMargin: Double = 0.05,
+        xAxisMargin: Double = 0.05,
+        yNumTicks: Int = 6,
+        xNumTicks: Int = 6,
+        mainFontSize: RelFontSize = 1 fts,
+        yLabFontSize: RelFontSize = 1 fts,
+        xLabFontSize: RelFontSize = 1 fts,
+        extraLegend: Seq[(String, LegendElem)] = Nil,
+        draw1Line: Boolean = false,
+        ylim: Option[(Double, Double)] = None,
+        xlim: Option[(Double, Double)] = None,
+        ynames: Seq[(Double, String)] = Nil,
+        xnames: Seq[(Double, String)] = Nil,
+        ylab: String = "",
+        xlab: String = "",
+        main: String = "",
+        ylog: Boolean = false,
+        xlog: Boolean = false,
+        xNoTickLabel: Boolean = false,
+        yNoTickLabel: Boolean = false
+    ) = new Parameters(
+      xlog = xlog,
+      ylog = ylog,
+      main = main,
+      xlab = xlab,
+      ylab = ylab,
+      xnames = xnames,
+      ynames = ynames,
+      xlim = xlim,
+      ylim = ylim,
+      draw1Line = draw1Line,
+      extraLegend = extraLegend,
+      xLabFontSize = xLabFontSize,
+      yLabFontSize = yLabFontSize,
+      mainFontSize = mainFontSize,
+      xNumTicks = xNumTicks,
+      yNumTicks = yNumTicks,
+      xAxisMargin = xAxisMargin,
+      yAxisMargin = yAxisMargin,
+      legendFontSize = legendFontSize,
+      legendWidth = legendWidth,
+      xgrid = xgrid,
+      ygrid = ygrid,
+      xWidth = xWidth,
+      yHeight = yHeight,
+      frame = frame,
+      xLabelRotation = xLabelRotation,
+      yLabelRotation = yLabelRotation,
+      origin = origin,
+      xCustomGrid = xCustomGrid,
+      yCustomGrid = yCustomGrid,
+      legendLayout = legendLayout,
+      legendDistance = legendDistance,
+      xTickLength = xTickLength,
+      yTickLength = yTickLength,
+      xLineWidthFraction = xLineWidthFraction,
+      yLineWidthFraction = yLineWidthFraction,
+      xLineStartFraction = xLineStartFraction,
+      yLineStartFraction = yLineStartFraction,
+      topPadding = topPadding,
+      bottomPadding = bottomPadding,
+      leftPadding = leftPadding,
+      rightPadding = rightPadding,
+      xLabDistance = xLabDistance,
+      yLabDistance = yLabDistance,
+      mainLabDistance = mainLabDistance,
+      xTickSpace = xTickSpace,
+      yTickSpace = yTickSpace,
+      noLegend = noLegend,
+      xNoTickLabel = xNoTickLabel,
+      yNoTickLabel = yNoTickLabel
+    )
+  }
 
   def xyplot[F: FC](data: (DataSource, List[DataRenderer], LegendConfig)*)(
-      xlog: Boolean = false,
-      ylog: Boolean = false,
-      main: String = "",
-      xlab: String = "",
-      ylab: String = "",
-      xnames: Seq[(Double, String)] = Seq(),
-      ynames: Seq[(Double, String)] = Seq(),
-      xlim: Option[(Double, Double)] = None,
-      ylim: Option[(Double, Double)] = None,
-      draw1Line: Boolean = false,
-      extraLegend: Seq[(String, LegendElem)] = Nil,
-      xLabFontSize: RelFontSize = 1 fts,
-      yLabFontSize: RelFontSize = 1 fts,
-      mainFontSize: RelFontSize = 1 fts,
-      xNumTicks: Int = 4,
-      yNumTicks: Int = 4,
-      xAxisMargin: Double = 0.05,
-      yAxisMargin: Double = 0.05,
-      legendFontSize: RelFontSize = 1 fts,
-      legendWidth: RelFontSize = 30 fts,
-      xgrid: Boolean = true,
-      ygrid: Boolean = true,
-      xWidth: RelFontSize = 20 fts,
-      yHeight: RelFontSize = 20 fts,
-      frame: Boolean = true,
-      xLabelRotation: Double = 0d,
-      yLabelRotation: Double = 0d,
-      origin: Option[(Double, Double)] = None,
-      xCustomGrid: Boolean = false,
-      yCustomGrid: Boolean = false,
-      legendLayout: Layout = ColumnLayout(
-        numRows = 10,
-        horizontalGap = 0.75 fts,
-        verticalGap = 0.4 fts
-      ),
-      legendDistance: RelFontSize = 0.5 fts,
-      xTickLength: RelFontSize = 0.4 fts,
-      yTickLength: RelFontSize = 0.4 fts,
-      xLineWidthFraction: Double = 1d,
-      yLineWidthFraction: Double = 1d,
-      xLineStartFraction: Double = 0d,
-      yLineStartFraction: Double = 0d,
-      topPadding: RelFontSize = 0d fts,
-      bottomPadding: RelFontSize = 0d fts,
-      leftPadding: RelFontSize = 0d fts,
-      rightPadding: RelFontSize = 0d fts,
-      xLabDistance: RelFontSize = 0.5 fts,
-      yLabDistance: RelFontSize = 0.5 fts,
-      mainLabDistance: RelFontSize = 0.75 fts
+      parameters: Parameters = par()
   ) = {
+    import parameters._
     val xFac = if (xlog) Log10AxisFactory else LinearAxisFactory
     val yFac = if (ylog) Log10AxisFactory else LinearAxisFactory
 
@@ -144,19 +297,17 @@ trait SimplePlots {
 
     val legend1 =
       legend(
-        entries = (
-          (
-            (data map { case (ds, render, conf) =>
-              conf match {
-                case NotInLegend => None
-                case InLegend(name) =>
-                  Some(
-                    name -> render.map(_.asLegend).find(_.isDefined).flatten
-                  )
-              }
-            }).filter(x => x.isDefined && x.get._2.isDefined).map(_.get)
-          ).map(x => x._1 -> x._2.get) ++ extraLegend
-        ).toList.distinct,
+        entries = ((data
+          .map { case (ds, render, conf) =>
+            conf match {
+              case NotInLegend => None
+              case InLegend(name1) =>
+                Some(name1 -> render.flatMap(_.asLegend.toList))
+            }
+          }
+          .collect { case Some(x) => x }) ++ extraLegend.map(v =>
+          (v._1, List(v._2))
+        )).toList.distinct,
         fontSize = legendFontSize,
         width = legendWidth,
         legendLayout
@@ -209,7 +360,9 @@ trait SimplePlots {
         rightPadding = rightPadding,
         xlabDistance = xLabDistance,
         ylabDistance = yLabDistance,
-        mainDistance = mainLabDistance
+        mainDistance = mainLabDistance,
+        xNoTickLabel = xNoTickLabel,
+        yNoTickLabel = yNoTickLabel
       )
 
     group(
@@ -251,16 +404,18 @@ trait SimplePlots {
       legend(
         entries = (
           (
-            (data map { case (ds, render, conf) =>
-              conf match {
-                case NotInLegend => None
-                case InLegend(name) =>
-                  Some(
-                    name -> render.map(_.asLegend).find(_.isDefined).flatten
-                  )
+            data
+              .map { case (ds, render, conf) =>
+                conf match {
+                  case NotInLegend => None
+                  case InLegend(name) =>
+                    Some(
+                      name -> render.flatMap(_.asLegend.toList)
+                    )
+                }
               }
-            }).filter(x => x.isDefined && x.get._2.isDefined).map(_.get)
-          ).map(x => x._1 -> x._2.get) ++ extraLegend
+              .collect { case Some(x) => x }
+          ) ++ extraLegend.map { case (name, legend) => (name, List(legend)) }
         ).toList.distinct,
         fontSize = legendFontSize,
         width = legendWidth,
@@ -297,35 +452,10 @@ trait SimplePlots {
       data: DataSource,
       legend: Seq[(Int, String, Colormap)],
       xCol: Int = 0,
-      relative: Boolean = false,
-      main: String = "",
-      xlab: String = "",
-      ylab: String = "",
-      xnames: Seq[(Double, String)] = Seq(),
-      ynames: Seq[(Double, String)] = Seq(),
-      xlim: Option[(Double, Double)] = None,
-      ylim: Option[(Double, Double)] = None,
-      xLabFontSize: RelFontSize = 1 fts,
-      yLabFontSize: RelFontSize = 1 fts,
-      mainFontSize: RelFontSize = 1 fts,
-      xNumTicks: Int = 4,
-      yNumTicks: Int = 4,
-      xAxisMargin: Double = 0.05,
-      yAxisMargin: Double = 0.05,
-      legendFontSize: RelFontSize = 1 fts,
-      legendWidth: RelFontSize = 30 fts,
-      xgrid: Boolean = true,
-      ygrid: Boolean = true,
-      xWidth: RelFontSize = 20 fts,
-      yHeight: RelFontSize = 20 fts,
-      frame: Boolean = true,
-      xLabelRotation: Double = 0d,
-      yLabelRotation: Double = 0d,
-      xLabDistance: RelFontSize = 0.5 fts,
-      yLabDistance: RelFontSize = 0.5 fts,
-      mainLabDistance: RelFontSize = 0.75 fts
-  ) = {
+      relative: Boolean = false
+  )(parameters: Parameters) = {
     {
+      import parameters._
       val data1: Seq[Seq[VectorRow]] = data.iterator
         .map { row =>
           val x = row(xCol)
@@ -365,32 +495,7 @@ trait SimplePlots {
         }
 
       xyplot(renderers: _*)(
-        main = main,
-        xlab = xlab,
-        ylab = ylab,
-        xnames = xnames,
-        ynames = ynames,
-        xlim = xlim,
-        ylim = ylim,
-        xLabFontSize = xLabFontSize,
-        yLabFontSize = yLabFontSize,
-        mainFontSize = mainFontSize,
-        xNumTicks = xNumTicks,
-        yNumTicks = yNumTicks,
-        xAxisMargin = xAxisMargin,
-        yAxisMargin = yAxisMargin,
-        legendFontSize = legendFontSize,
-        legendWidth = legendWidth,
-        xgrid = xgrid,
-        ygrid = ygrid,
-        xWidth = xWidth,
-        yHeight = yHeight,
-        frame = frame,
-        xLabelRotation = xLabelRotation,
-        yLabelRotation = yLabelRotation,
-        xLabDistance = xLabDistance,
-        yLabDistance = yLabDistance,
-        mainLabDistance = mainLabDistance
+        parameters
       )
 
     }
@@ -398,146 +503,105 @@ trait SimplePlots {
 
   def boxplot[F: FC](
       data: DataSourceWithQuantiles,
-      main: String = "",
-      xlab: String = "",
-      ylab: String = "",
       xnames: Seq[String] = Nil,
-      fontSize: RelFontSize = 1 fts,
-      xgrid: Boolean = true,
-      ygrid: Boolean = true,
-      xWidth: RelFontSize = 20 fts,
-      yHeight: RelFontSize = 20 fts,
       boxColor: Colormap = Color.gray4,
-      frame: Boolean = true,
-      xLabelRotation: Double = 0d,
-      yLabelRotation: Double = 0d
-  ) = {
+      boxWidth: Double = 1d
+  )(parameters: Parameters) = {
 
     val bxdata = boxplotData(data)
 
     boxplotImpl(
       bxdata,
-      main,
-      xlab,
-      ylab,
       xnames,
-      fontSize,
-      xgrid,
-      ygrid,
-      xWidth,
-      yHeight,
       boxColor,
-      frame,
-      xLabelRotation,
-      yLabelRotation
-    )
+      boxWidth
+    )(parameters)
   }
 
   def boxplotImpl[F: FC](
       bxdata: DataSource,
-      main: String = "",
-      xlab: String = "",
-      ylab: String = "",
-      xnames: Seq[String] = Nil,
-      fontSize: RelFontSize = 1 fts,
-      xgrid: Boolean = true,
-      ygrid: Boolean = true,
-      xWidth: RelFontSize = 20 fts,
-      yHeight: RelFontSize = 20 fts,
+      xnames: Seq[String],
       boxColor: Colormap = Color.gray4,
-      frame: Boolean = true,
-      xLabelRotation: Double = 0d,
-      yLabelRotation: Double = 0d
-  ) = {
-
+      boxWidth: Double = 1d
+  )(parameters: Parameters) = {
+    import parameters.{xnames => _, _}
     val min = bxdata.iterator.flatMap(_.allColumns.iterator.drop(1).take(5)).min
     val max = bxdata.iterator.flatMap(_.allColumns.iterator.drop(1).take(5)).max
 
+    val xnames1 =
+      if (xnames.isEmpty)
+        bxdata.iterator.toList
+          .map(ds => (ds(0), ds.label))
+          .filter(_._2.nonEmpty)
+      else xnames.zipWithIndex.map(x => x._2.toDouble -> x._1)
+
     xyplotareaBuild(
-      List(bxdata -> List(boxwhisker(fill = boxColor))),
+      List(bxdata -> List(boxwhisker(fill = boxColor, width = boxWidth))),
       AxisSettings(
         LinearAxisFactory,
-        customTicks = xnames.zipWithIndex.map(x => x._2.toDouble + 1 -> x._1),
-        numTicks = if (xnames.isEmpty) 5 else 0,
-        fontSize = fontSize,
+        customTicks = xnames1,
+        numTicks = if (xnames1.isEmpty) 5 else 0,
+        fontSize = xLabFontSize,
         width = xWidth,
-        labelRotation = xLabelRotation
+        labelRotation = xLabelRotation,
+        tickLength = xTickLength,
+        lineLengthFraction = xLineWidthFraction,
+        lineStartFraction = xLineStartFraction,
+        tickSpace = xTickSpace
       ),
       AxisSettings(
         LinearAxisFactory,
-        fontSize = fontSize,
+        fontSize = yLabFontSize,
         width = yHeight,
-        labelRotation = yLabelRotation
+        labelRotation = yLabelRotation,
+        tickLength = yTickLength,
+        lineLengthFraction = yLineWidthFraction,
+        lineStartFraction = yLineStartFraction,
+        tickSpace = yTickSpace
       ),
       None,
-      xlim = Some(0d -> (bxdata.iterator.size + 1)),
-      ylim = Some(min -> max),
+      xlim = None,
+      ylim = parameters.ylim.orElse(Some(min -> max)),
       xgrid = xgrid,
       ygrid = ygrid,
       frame = frame,
       main = main,
       xlab = xlab,
       ylab = ylab,
-      xlabFontSize = fontSize,
-      ylabFontSize = fontSize,
-      mainFontSize = fontSize
+      xlabFontSize = xLabFontSize,
+      ylabFontSize = yLabFontSize,
+      mainFontSize = mainFontSize
     )
   }
 
   def boxplotFromLabels[T: Ordering, F: FC](
       data: Seq[(T, Double)],
-      main: String = "",
-      xlab: String = "",
-      ylab: String = "",
-      fontSize: RelFontSize = 1 fts,
-      xgrid: Boolean = true,
-      ygrid: Boolean = true,
-      xWidth: RelFontSize = 20 fts,
-      yHeight: RelFontSize = 20 fts,
       boxColor: Colormap = Color.gray4,
-      frame: Boolean = true,
-      xLabelRotation: Double = 0d,
-      yLabelRotation: Double = 0d,
       useLabels: Boolean = true
-  ) = {
+  )(parameters: Parameters) = {
+    import parameters._
     val bxdata = boxplotData(data.toSeq)
 
     boxplotImpl(
       bxdata,
-      main,
-      xlab,
-      ylab,
       if (useLabels) bxdata.iterator.map(_.label).toList else Nil,
-      fontSize,
-      xgrid,
-      ygrid,
-      xWidth,
-      yHeight,
-      boxColor,
-      frame,
-      xLabelRotation,
-      yLabelRotation
-    )
+      boxColor
+    )(parameters)
   }
 
   def binnedboxplot[F: FC](
       dim1: Seq[Double],
       dim2: Seq[Double],
-      main: String = "",
-      xlab: String = "",
-      ylab: String = "",
       xnames: Seq[String] = Nil,
-      fontSize: RelFontSize = 1 fts,
       bins: Int = 10,
-      xgrid: Boolean = false,
-      ygrid: Boolean = true,
-      xWidth: RelFontSize = 20 fts,
-      yHeight: RelFontSize = 20 fts,
       boxColor: Colormap = Color.gray4,
-      frame: Boolean = true,
-      xLabelRotation: Double = 0d,
-      yLabelRotation: Double = 0d
-  ) = {
+      xgrid: Boolean = false
+  )(parameters: Parameters) = {
+    val overriden = parameters.copy(
+      xgrid = xgrid,
+      xlim = Some(dim2.min -> dim2.max),
+      ylim = Some(dim1.min -> dim1.max)
+    )
 
     xyplot(
       boxplotData(
@@ -547,21 +611,7 @@ trait SimplePlots {
         Vector.fill(bins)(0d)
       ) -> boxwhisker(fill = boxColor)
     )(
-      xlab = xlab,
-      ylab = ylab,
-      main = main,
-      xlim = Some(dim2.min -> dim2.max),
-      ylim = Some(dim1.min -> dim1.max),
-      xLabFontSize = fontSize,
-      yLabFontSize = fontSize,
-      mainFontSize = fontSize,
-      xgrid = xgrid,
-      ygrid = ygrid,
-      xWidth = xWidth,
-      yHeight = yHeight,
-      frame = frame,
-      xLabelRotation = xLabelRotation,
-      yLabelRotation = yLabelRotation
+      overriden
     )
   }
 
@@ -570,17 +620,8 @@ trait SimplePlots {
       ylim: (Double, Double),
       f: (Double, Double) => Double,
       n: Int,
-      levels: Int,
-      main: String = "",
-      xlab: String = "",
-      ylab: String = "",
-      fontSize: RelFontSize = 1 fts,
-      xgrid: Boolean = true,
-      ygrid: Boolean = true,
-      xWidth: RelFontSize = 20 fts,
-      yHeight: RelFontSize = 20 fts,
-      frame: Boolean = true
-  ) = {
+      levels: Int
+  )(parameters: Parameters) = {
     val contours = data.contour(
       xlim._1,
       xlim._2,
@@ -593,65 +634,66 @@ trait SimplePlots {
     xyplot(
       linesegments(contours)
     )(
-      ylim = Some(ylim),
-      xlim = Some(xlim),
-      xlab = xlab,
-      ylab = ylab,
-      main = main,
-      xLabFontSize = fontSize,
-      yLabFontSize = fontSize,
-      mainFontSize = fontSize,
-      xgrid = xgrid,
-      ygrid = ygrid,
-      xWidth = xWidth,
-      yHeight = yHeight,
-      frame = frame
+      parameters
     )
   }
 
   def rasterplot[F: FC](
       data: DataSource,
-      main: String = "",
-      xlab: String = "",
-      ylab: String = "",
-      xFontSize: RelFontSize = 1 fts,
-      yFontSize: RelFontSize = 1 fts,
-      mainFontSize: RelFontSize = 1 fts,
       colormap: Colormap = HeatMapColors(0, 1),
-      xnames: Seq[(Double, String)] = Seq(),
-      ynames: Seq[(Double, String)] = Seq(),
       xCol: Int = 0,
       yCol: Int = 1,
       zCol: Int = 2,
-      xWidth: RelFontSize = 20 fts,
-      yHeight: RelFontSize = 20 fts,
       valueText: Boolean = false,
       valueColor: Color = Color.black,
       valueFontSize: RelFontSize = 0.4 fts,
-      tickLength: RelFontSize = 0.4 fts,
       zlim: Option[(Double, Double)] = None,
-      frame: Boolean = true,
-      xLabelRotation: Double = -.5 * math.Pi,
-      yLabelRotation: Double = 0d,
-      xNumTicks: Int = 4,
-      yNumTicks: Int = 4,
-      xTickSpace: Option[Double] = None,
-      yTickSpace: Option[Double] = None,
-      transparentPixels: Option[Double] = None
-  ) = {
+      transparentPixels: Option[Double] = None,
+      zlab: String = "",
+      zNumTicks: Int = 2
+  )(parameters: Parameters) = {
+    import parameters._
     val minmaxx = data.columnMinMax(xCol)
     val minmaxy = data.columnMinMax(yCol)
     val minmaxz = data.columnMinMax(zCol)
-    val xmin = minmaxx.min
-    val xmax = minmaxx.max
-    val ymin = minmaxy.min
-    val ymax = minmaxy.max
-    val zmin = zlim.map(_._1).getOrElse(minmaxz.min)
+    val xmin = minmaxx.map(_.min).getOrElse(0d)
+    val xmax = minmaxx.map(_.max).getOrElse(1d)
+    val ymin = minmaxy.map(_.min).getOrElse(0d)
+    val ymax = minmaxy.map(_.max).getOrElse(1d)
+    val zmin = zlim.map(_._1).orElse(minmaxz.map(_.min)).getOrElse(0d)
     val zmax = {
-      val v = zlim.map(_._2).getOrElse(minmaxz.max)
-      if (v == zmin) zmin + 1
-      else v
+      zlim
+        .map(_._2)
+        .orElse(minmaxz.map(_.max))
+        .map { v =>
+          if (v == zmin) zmin + 1
+          else v
+        }
+        .getOrElse(1d)
     }
+
+    val eitherLegend =
+      if (noLegend || extraLegend.nonEmpty)
+        scala.util.Left(
+          legend(
+            entries =
+              if (noLegend) Nil
+              else extraLegend.toList.map(v => (v._1 -> List(v._2))),
+            fontSize = legendFontSize,
+            width = legendWidth,
+            legendLayout
+          )
+        )
+      else
+        scala.util.Right(
+          heatmapLegend(
+            zmin,
+            zmax,
+            colormap,
+            labelText = zlab,
+            numTicks = zNumTicks
+          )
+        )
 
     group(
       xyplotareaBuild(
@@ -672,22 +714,22 @@ trait SimplePlots {
         AxisSettings(
           LinearAxisFactory,
           customTicks = xnames,
-          fontSize = xFontSize,
+          fontSize = xLabFontSize,
           numTicks = xNumTicks,
           tickSpace = xTickSpace,
           numMinorTicksFactor = 0,
-          tickLength = tickLength,
-          labelRotation = xLabelRotation,
+          tickLength = xTickLength,
+          labelRotation = -0.5 * math.Pi,
           width = xWidth
         ),
         AxisSettings(
           LinearAxisFactory,
           customTicks = ynames,
-          fontSize = yFontSize,
+          fontSize = yLabFontSize,
           numTicks = yNumTicks,
           tickSpace = yTickSpace,
           numMinorTicksFactor = 0,
-          tickLength = tickLength,
+          tickLength = yTickLength,
           labelRotation = yLabelRotation,
           width = yHeight
         ),
@@ -699,12 +741,16 @@ trait SimplePlots {
         main = main,
         xlab = xlab,
         ylab = ylab,
-        xlabFontSize = xFontSize,
-        ylabFontSize = yFontSize,
-        mainFontSize = mainFontSize
+        xlabFontSize = xLabFontSize,
+        ylabFontSize = yLabFontSize,
+        mainFontSize = mainFontSize,
+        xNoTickLabel = xNoTickLabel,
+        yNoTickLabel = yNoTickLabel,
+        xgrid = xgrid,
+        ygrid = ygrid
       ),
-      heatmapLegend(zmin, zmax, colormap),
-      HorizontalStack(Center, 1d fts)
+      ElemEither(eitherLegend),
+      HorizontalStack(Anchor, 1d fts)
     )
 
   }

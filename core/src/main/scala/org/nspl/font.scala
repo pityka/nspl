@@ -81,6 +81,8 @@ object TextLayout {
 
       val chars = text.toList
 
+      def lineBreakAllowed(c: Char) = c == ' ' || c == '\t' || c == '\n'
+
       if (maxWidth.isEmpty) {
         val bounds = measureLine(chars)
         val tx = AffineTransform
@@ -98,9 +100,16 @@ object TextLayout {
               case (lc, lb) :: ls =>
                 val nb = advanceWithChar(lb, char)
                 if (nb.w > maxWidth.get) {
-                  val newline = char :: Nil
-                  val cb = measureLine(newline)
-                  (newline -> cb.copy(y = cb.h + lb.y)) :: (lc, lb) :: ls
+                  val firstBreakable = lc.indexWhere(lineBreakAllowed)
+                  val (newLine1, oldLine1) = lc.splitAt(firstBreakable)
+                  val newLine = char :: newLine1
+                  val oldLine = oldLine1.dropWhile(lineBreakAllowed)
+                  val cbNew = measureLine(newLine)
+                  val cbOld = measureLine(oldLine)
+                  (newLine -> cbNew.copy(y = cbNew.h + lb.y)) :: (
+                    oldLine,
+                    cbOld.copy(y = lb.y)
+                  ) :: ls
                 } else (char :: lc, nb) :: ls
 
             }

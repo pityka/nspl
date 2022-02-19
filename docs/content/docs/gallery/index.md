@@ -1,6 +1,6 @@
 ---
 title: 'Plot gallery'
-weight: 5
+weight: 6 
 ---
 
 This page lists a diverse collection of plots. 
@@ -69,7 +69,7 @@ val data2 = data.addCol(spec, "spec", InnerJoin)
       val fig0 = xyplot(
         data2.col("Sepal.Length", "Sepal.Width", "spec")
       )(
-        extraLegend = spec2Num.toSeq.map(x =>
+        par(extraLegend = spec2Num.toSeq.map(x =>
           x._1 -> PointLegend(
             shape = Shape.rectangle(0, 0, 1, 1),
             color = DiscreteColors(spec2Num.size)(x._2)
@@ -77,7 +77,7 @@ val data2 = data.addCol(spec, "spec", InnerJoin)
         ),
         xlab = "Sepal.Length",
         ylab = "Sepal.Width",
-        main = "Iris data"
+        main = "Iris data")
       )
 
       val fig1 = xyplot(
@@ -93,7 +93,7 @@ val data2 = data.addCol(spec, "spec", InnerJoin)
             .toSeq
         )
       )(
-        extraLegend = spec2Num.toSeq.map(x =>
+       par(extraLegend = spec2Num.toSeq.map(x =>
           x._1 -> PointLegend(
             shape = Shape.rectangle(0, 0, 1, 1),
             color = DiscreteColors(spec2Num.size)(x._2)
@@ -101,7 +101,7 @@ val data2 = data.addCol(spec, "spec", InnerJoin)
         ),
         xlab = "PC1",
         ylab = "PC2",
-        main = "PC1 vs PC2"
+        main = "PC1 vs PC2")
       )
 
    
@@ -109,11 +109,11 @@ val data2 = data.addCol(spec, "spec", InnerJoin)
       val scree = xyplot(
         indexed(eval.firstCol("x").toVec.toSeq.sorted.reverse) -> line()
       )(
-        xAxisMargin = 0,
+        par(xAxisMargin = 0,
         xlab = "Order",
         ylab = "Eval",
         main = "Scree"
-      )
+      ))
 
       renderToByteArray(
       group(fig0,fig1,scree,TableLayout(2)).build,
@@ -127,10 +127,10 @@ val data2 = data.addCol(spec, "spec", InnerJoin)
       val hist1 = xyplot(
         HistogramData(rotated.firstCol("PC1").toVec.toSeq, 10) -> bar()
       )(
-        xlab = "PC1",
+        par(xlab = "PC1",
         ylab = "freq.",
         main = "Loading distribution",
-        ylim = Some(0d, Double.NaN)
+        ylim = Some(0d, Double.NaN))
       )
 
       renderToByteArray(hist1.build,width=2000)
@@ -142,10 +142,10 @@ val data2 = data.addCol(spec, "spec", InnerJoin)
       val bar1 = barplotVertical(
         Series("a" -> (-2d), "b" -> (-1d), "c" -> 0d, "d" -> 1d, "e" -> 2d),
         color = RedBlue(-2, 2)
-      )
+      )(par())
       val bar2 = barplotHorizontal(
         Series("a" -> (-2d), "b" -> (-1d), "c" -> 0d, "d" -> 1d, "e" -> 2d)
-      )
+      )(par())
 
       renderToByteArray((group(bar1,bar2,TableLayout(2))).build,width=2000)
 ```
@@ -158,7 +158,7 @@ val data2 = data.addCol(spec, "spec", InnerJoin)
         density(rotated.firstCol("PC1").toVec.toSeq) -> line(
           stroke = StrokeConf(1 fts)
         )
-      )(xlab = "PC1", ylab = "dens.", main = "Loading distribution")
+      )(par(xlab = "PC1", ylab = "dens.", main = "Loading distribution"))
 
       renderToByteArray(density1.build,width=2000)
 
@@ -170,7 +170,7 @@ val data2 = data.addCol(spec, "spec", InnerJoin)
       import org.nspl.saddle.rasterplotFromFrame
       val raster1 = rasterplotFromFrame(
         rotated.rowAt(0 -> 10), 
-        yLabFontSize = Some(0.5 fts))
+        yLabFontSize = Some(0.5 fts))(par())
 
       renderToByteArray(raster1.build,width=2000)
 ```
@@ -186,7 +186,7 @@ val data2 = data.addCol(spec, "spec", InnerJoin)
             .toVec
             .toSeq
         )
-      )
+      )(par())
 
       renderToByteArray(densmap.build,width=2000)
 ```
@@ -199,13 +199,13 @@ val data2 = data.addCol(spec, "spec", InnerJoin)
           .firstCol("Sepal.Length")
           .toVec
           .toSeq -> data2.firstCol("Sepal.Width").toVec.toSeq,
-        ylab = "Sepal Length",
         xnames = Seq("Sepal Length", "Sepal Width"),
-        xLabelRotation = -0.3
-      )
+        
+      )(par(ylab = "Sepal Length",
+        xLabelRotation = -0.3))
 
       val boxpl2 =
-        boxplotFromLabels(List("a" -> 0d, "a" -> 1d, "b" -> 3d, "b" -> 4d))
+        boxplotFromLabels(List("a" -> 0d, "a" -> 1d, "b" -> 3d, "b" -> 4d))(par())
 
       renderToByteArray(group(fig4,boxpl2,TableLayout(2)).build,width=2000)
 ```      
@@ -232,7 +232,7 @@ val data2 = data.addCol(spec, "spec", InnerJoin)
             1e6 -> 1e6,
             1e7 -> 1e7
           ) -> point()
-        )(ylog = true, xlog = true)
+        )(par(ylog = true, xlog = true))
      renderToByteArray(logaxis.build,width=2000)
 ```     
 

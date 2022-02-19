@@ -54,7 +54,7 @@ case class HistogramData(
 
   def toScatter =
     bins.toSeq.map { case ((xstart, xend, ystart), height) =>
-      ((xstart), (ystart + height), 0d, xend - xstart, ystart)
+      ((xstart + xend) * 0.5, (ystart + height), 0d, xend - xstart, ystart)
     } sortBy (_._1)
 }
 object HistogramData {
@@ -84,9 +84,11 @@ object HistogramData {
     assert(max >= min, "max < min")
     assert(step > 0, "step < 0")
     val c = ((max - min) / step).toInt
-    0 until c map { i =>
-      (min + step * i) -> (min + step * (i + 1))
-    } toSeq
+    if (c == 0) List((min, max))
+    else
+      0 until c map { i =>
+        (min + step * i) -> (min + step * (i + 1))
+      } toSeq
   }
 
   def makeBoundariesFromPercentiles(
@@ -139,10 +141,22 @@ object HistogramData {
       data: Seq[Double],
       step: Double,
       min: Double,
-      max: Double
+      max: Option[Double]
   ): HistogramData = {
-
-    HistogramData(data, makeBoundaries(step, min, max))
+    val data2 = data.filter(x => !x.isNaN() && !x.isInfinite())
+    if (data2.isEmpty) {
+      HistogramData(
+        bins = Map.empty,
+        minX = 1d,
+        maxX = 1d,
+        maxY = 0d,
+        n = 0,
+        lastBinUpperBound = 1d
+      )
+    } else {
+      val max1 = max.getOrElse(data2.max)
+      HistogramData(data2, makeBoundaries(step, min, max1))
+    }
   }
 
   def apply(data: Seq[Double], step: Double): HistogramData = {
@@ -161,7 +175,7 @@ object HistogramData {
       val min = data2.min
       val max = data2.max
 
-      HistogramData(data2, step, min, max)
+      HistogramData(data2, step, min, Some(max))
     }
   }
   def apply(data: Seq[Double], breaks: Int): HistogramData = {
@@ -270,19 +284,22 @@ object HistogramData {
 
   def getStep(data: Seq[Double], breaks: Int) = {
     val data2 = data.filter(x => !x.isNaN && !x.isInfinite)
-    val min = data2.min
-    val max = data2.max
-    if (max == min) 1.0
+    if (data2.isEmpty) 1d
     else {
-      val breaks2: Int =
-        if (breaks <= 0) (math.pow(2d * data.size, 0.5).toInt + 1) else breaks
-      val ret = (max - min) / breaks2
-      assert(
-        ret > 0,
-        "step < 0 " + ret + " " + breaks2 + " " + data.toString +
-          " breaks: " + breaks
-      )
-      ret
+      val min = data2.min
+      val max = data2.max
+      if (max == min) 1.0
+      else {
+        val breaks2: Int =
+          if (breaks <= 0) (math.pow(2d * data.size, 0.5).toInt + 1) else breaks
+        val ret = (max - min) / breaks2
+        assert(
+          ret > 0,
+          "step < 0 " + ret + " " + breaks2 + " " + data.toString +
+            " breaks: " + breaks
+        )
+        ret
+      }
     }
   }
 }

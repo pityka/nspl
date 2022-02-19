@@ -1,8 +1,8 @@
-package org.nspl
-
+import org.nspl._
 import org.nspl.data._
 import scalatagrenderer._
 import org.scalajs.dom.raw._
+import org.scalajs.dom.Node
 import org.scalajs.dom
 import org.scalajs.dom.html
 
@@ -10,8 +10,8 @@ import scala.scalajs.js
 import js.annotation.JSExport
 import scala.scalajs.js.annotation.JSExportTopLevel
 
-@JSExportTopLevel("TestSvg")
-object TestSvg {
+@JSExportTopLevel("nsplTestSvg")
+object nsplTestSvg {
   @JSExport
   def bind(n: Node): Unit = {
     println("Hi")
@@ -26,10 +26,10 @@ object TestSvg {
     val z3 = random2
     val idx = 0 until x.size map (_.toDouble)
 
-    val p1 = xyplot(indexed(x))(ylab = "x", xlab = "index", main = "main")
+    val p1 = xyplot(indexed(x))(par(ylab = "x", xlab = "index", main = "main"))
     val p2 = xyplot(
       density(x) -> line()
-    )(xlab = "x", ylab = "dens.")
+    )(par(xlab = "x", ylab = "dens."))
     val p3 = xyplot(
       z2 -> z3 -> point(size = 1d, color = Color(200, 200, 200, 255)),
       density2d(z2 zip z3, n = 100, levels = 10)
@@ -42,13 +42,11 @@ object TestSvg {
       )
     )()
 
-    val p5 = binnedboxplot(x, y, xlab = "PC2", ylab = "PC3")
+    val p5 = binnedboxplot(x, y)(par(xlab = "PC2", ylab = "PC3"))
 
     val p6 = rasterplot(
-      rasterFromStream(z3.iterator, 30, 30, MinMaxImpl(0.0, 1.0)),
-      xFontSize = 0.5 fts,
-      yFontSize = 0.5 fts
-    )
+      rasterFromStream(z3.iterator, 30, 30, MinMaxImpl(0.0, 1.0))
+    )(par())
 
     val text = fitToWidth(
       group(

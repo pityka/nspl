@@ -6,26 +6,37 @@ import scalatags.Text.svgAttrs._
 import scalatags.Text.svgAttrs
 import scalatags.Text.svgTags
 
-case class ScalaTagRC(elems: scala.collection.mutable.ArrayBuffer[Modifier])
-    extends RenderingContext
+private[nspl] case class ScalaTagRC(
+    elems: scala.collection.mutable.ArrayBuffer[Modifier]
+) extends RenderingContext[ScalaTagRC] {
+  var transform: AffineTransform = AffineTransform.identity
+
+  def getTransform: AffineTransform = transform
+
+  type LocalTx = AffineTransform
+
+  def localToScala(tx: AffineTransform): AffineTransform = tx
+
+  def concatTransform(tx: AffineTransform): Unit = {
+    transform = transform.concat(tx)
+  }
+
+  def setTransform(tx: LocalTx): Unit = {
+    transform = tx
+  }
+}
 
 object scalatagrenderer {
 
   implicit val defaultGlyphMeasurer = AwtGlyphMeasurer
 
-  implicit val defaultAWTFont: FontConfiguration = importFont("Arial")
+  implicit val defaultFont: FontConfiguration = org.nspl.font("Arial")
 
-  type SER[T] = Renderer[T, ScalaTagRC]
-
-  implicit class PimpedColor(c: Color) {
+  private[nspl] implicit class PimpedColor(c: Color) {
     def css = f"#${c.r}%02x${c.g}%02x${c.b}%02x"
   }
 
-  implicit class Pimp[K <: Renderable[K]](t: K) {
-    def render(ctx: ScalaTagRC)(implicit r: SER[K]) = r.render(ctx, t)
-  }
-
-  implicit class PimpedTx(tx: AffineTransform) {
+  private[nspl] implicit class PimpedTx(tx: AffineTransform) {
     def svg = {
       s"matrix(${tx.m0}, ${tx.m3}, ${tx.m1}, ${tx.m4}, ${tx.m2}, ${tx.m5})"
     }
@@ -35,7 +46,7 @@ object scalatagrenderer {
       elem: K,
       width: Int = 1000
   )(implicit
-      er: SER[K]
+      er: Renderer[K, ScalaTagRC]
   ): java.io.File = {
     import java.io._
     val f = File.createTempFile("nspl", ".svg")
@@ -48,7 +59,7 @@ object scalatagrenderer {
       elem: K,
       width: Int
   )(implicit
-      er: SER[K]
+      er: Renderer[K, ScalaTagRC]
   ): java.io.File = {
     import java.io._
     val os = new FileOutputStream(f)
@@ -67,7 +78,7 @@ object scalatagrenderer {
       elem: K,
       width: Int = 1000
   )(implicit
-      er: SER[K]
+      er: Renderer[K, ScalaTagRC]
   ) = {
 
     val ctx = ScalaTagRC(scala.collection.mutable.ArrayBuffer[Modifier]())
@@ -75,7 +86,7 @@ object scalatagrenderer {
     val aspect = elem.bounds.h / elem.bounds.w
     val height = (width * aspect).toInt
 
-    fitToBounds(elem, Bounds(0, 0, width, height)).render(ctx)
+    ctx.render(fitToBounds(elem, Bounds(0, 0, width, height)))
 
     svg(
       svgAttrs.width := width,
@@ -85,13 +96,16 @@ object scalatagrenderer {
 
   }
 
-  implicit val shapeRenderer = new SER[ShapeElem] {
+  implicit val shapeRenderer = new Renderer[ShapeElem, ScalaTagRC] {
     def render(ctx: ScalaTagRC, elem: ShapeElem): Unit = {
+      val tx =
+        ctx.getTransform.concat(elem.tx.concat(elem.shape.currentTransform))
+      val shape = elem.shape
       if (
         elem.fill.a > 0d || (elem.stroke.isDefined && elem.strokeColor.a > 0)
       ) {
-        val svgShape = elem.shape match {
-          case Rectangle(x1, y1, w1, h1, tx, _) => {
+        val svgShape = shape match {
+          case Rectangle(x1, y1, w1, h1, _, _) => {
             rect(
               x := x1.toString,
               y := y1,
@@ -100,7 +114,7 @@ object scalatagrenderer {
               svgAttrs.transform := tx.svg
             )
           }
-          case Ellipse(x, y, w, h, tx) => {
+          case Ellipse(x, y, w, h, _) => {
             val centerX = x + .5 * w
             val centerY = y + .5 * h
             val radiusX = w * .5
@@ -113,27 +127,35 @@ object scalatagrenderer {
               svgAttrs.transform := tx.svg
             )
           }
-          case Line(a, b, c, d) => {
-            svgTags.line(x1 := a, y1 := b, x2 := c, y2 := d)
+          case Line(a, b, c, d, _) => {
+            svgTags.line(
+              x1 := a,
+              y1 := b,
+              x2 := c,
+              y2 := d,
+              svgAttrs.transform := tx.svg
+            )
           }
-          case SimplePath(ps) => {
+          case SimplePath(ps, _) => {
             polyline(
               points := ps
                 .map { p =>
                   p.x.toString + " " + p.y
                 }
-                .mkString(" ")
+                .mkString(" "),
+              svgAttrs.transform := tx.svg
             )
           }
-          case Path(ops) => {
+          case Path(ops, _) => {
             path(
               d := ops map {
                 case MoveTo(Point(x, y))                  => s"M$x,$y"
                 case LineTo(Point(x, y))                  => s"L$x,$y"
                 case QuadTo(Point(x2, y2), Point(x1, y1)) => s"Q$x1,$y1,$x2,$y2"
-                case _                                    => ???
-                // case CubicTo(Point(x3, y3), Point(x1, y1), Point(x2, y2)) => path.curveTo(x1, y1, x2, y2, x3, y3)
-              } mkString (" ")
+                case CubicTo(Point(x3, y3), Point(x1, y1), Point(x2, y2)) =>
+                  s"C$x1,$y1,$x2,$y2,$x3,$y3"
+              } mkString (" "),
+              svgAttrs.transform := tx.svg
             )
           }
         }
@@ -148,6 +170,7 @@ object scalatagrenderer {
             filled(
               stroke := elem.strokeColor.css,
               strokeWidth := elem.stroke.get.width,
+              strokeDasharray := elem.stroke.get.dash.mkString(" "),
               strokeLinecap := (elem.stroke.get.cap match {
                 case CapRound  => "round"
                 case CapButt   => "butt"
@@ -161,11 +184,11 @@ object scalatagrenderer {
     }
   }
 
-  implicit val textRenderer = new SER[TextBox] {
+  implicit val textRenderer = new Renderer[TextBox, ScalaTagRC] {
     def render(ctx: ScalaTagRC, elem: TextBox): Unit = {
       if (!elem.layout.isEmpty) {
         elem.layout.lines.foreach { case (line, lineTx) =>
-          val tx = elem.txLoc.concat(lineTx)
+          val tx = ctx.getTransform.concat(elem.txLoc.concat(lineTx))
           val svgElem = text(
             svgAttrs.x := 0,
             svgAttrs.y := 0,

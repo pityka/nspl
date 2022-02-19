@@ -4,13 +4,13 @@ import data._
 import scala.util.Try
 
 trait DataRenderer3D {
-  def render[R <: RenderingContext](
+  def render[R <: RenderingContext[R]](
       data: Row,
       ctx: R,
       viewProjectionMatrix: Math3D.Mat4,
       tx: AffineTransform
   )(implicit re: Renderer[ShapeElem, R], rt: Renderer[TextBox, R]): Unit
-  def clear[R <: RenderingContext](ctx: R)(implicit
+  def clear[R <: RenderingContext[R]](ctx: R)(implicit
       re: Renderer[ShapeElem, R],
       rt: Renderer[TextBox, R]
   ): Unit = ()
@@ -26,11 +26,11 @@ trait Renderers3D {
       y2Col: Int = 4,
       z2Col: Int = 5,
       colorCol: Int = 6,
-      stroke: StrokeConf = StrokeConf(lineWidth, CapRound),
+      stroke: StrokeConf = StrokeConf(lineWidth * 0.01, CapRound),
       color: Colormap = HeatMapColors(0, 1)
   ) = new DataRenderer3D {
 
-    def render[R <: RenderingContext](
+    def render[R <: RenderingContext[R]](
         data: Row,
         ctx: R,
         viewProjectionMatrix: Math3D.Mat4,
@@ -91,7 +91,7 @@ trait Renderers3D {
       keepPointShapeAspectRatio: Boolean = true
   ) = new DataRenderer3D {
 
-    def render[R <: RenderingContext](
+    def render[R <: RenderingContext[R]](
         data: Row,
         ctx: R,
         viewProjectionMatrix: Math3D.Mat4,

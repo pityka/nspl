@@ -37,7 +37,7 @@ case class DataMatrix(rows: Array[Double], numCols: Int, numRows: Int)
     }
   }
 
-  def columnMinMax(i: Int) = {
+  def columnMinMax(i: Int) = Some {
     if (i == 0)
       new MinMax {
         def min = 0.0

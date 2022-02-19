@@ -4,13 +4,17 @@ weight: 1
 ---
 
 # Scala plotting library
-nspl is a plotting library for the Scala programming language. 
+nspl is a fast and expressive plotting library for the Scala programming language. 
 nspl can create various plots (scatter, line, bar, box etc) and complex figures.
 
 ## Platforms and output formats
-nspl supports Scala on the JVM and Scala.js.
+The library supports Scala on the JVM and Scala.js in the browser.
 It can render both vector graphics (SVG, PDF, postscript) and raster formats (JPG, PNG).
-nspl also supports graphics contexts like `java.awt.Graphics2D` or the html5 canvas.
+It also supports interactive graphics contexts like `java.awt.Graphics2D` or the html5 canvas.
+
+## Peformance
+nspl has reasonable performance. 
+For example the canvas backend can render and animate a plot containing a few thousand data points with 60fps.
 
 ## Getting started (on JVM)
 Add the following lines to your build.sbt depending on the runtime environment
@@ -41,9 +45,11 @@ val someData =
   0 until 100 map (_ => nextDouble() -> nextDouble())
 
 val plot = xyplot(someData)(
-            main="Main label", 
-            xlab="x axis label",
-            ylab="y axis label"
+            par(
+              main="Main label", 
+              xlab="x axis label",
+              ylab="y axis label"
+            )
           )
 
 renderToByteArray(plot.build, width=2000)
@@ -72,12 +78,14 @@ val someData =
   0 until 100 map (_ => nextDouble() -> nextDouble())
 
 val plot = xyplot(someData)(
-            main="Main label", 
-            xlab="x axis label",
-            ylab="y axis label"
+            par(
+              main="Main label", 
+              xlab="x axis label",
+              ylab="y axis label"
+            )
           )
 
-val (canvas, _) = render(plot, width = 400, height = 400)
+val (canvas, _) = render(plot, width = 600, height = 600)
 
 node.appendChild(canvas)
 ```

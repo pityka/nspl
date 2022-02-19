@@ -4,11 +4,71 @@ import org.scalajs.dom._
 import org.scalajs.dom
 import org.scalajs.dom.html
 import scala.collection.mutable.ArrayBuffer
+import scala.scalajs.js
 
-case class CanvasRC(
+private[nspl] case class CanvasRC(
     graphics: CanvasRenderingContext2D,
     cick: Identifier => Unit
-) extends RenderingContext {
+) extends RenderingContext[CanvasRC] {
+
+  var transform: AffineTransform = AffineTransform.identity
+  var fillColor: Color = Color.black
+  var strokeColor: Color = Color.black
+  var dash: Seq[Double] = Nil
+  var transformInGraphics: AffineTransform = AffineTransform.identity
+
+  def withDash[T](d: Seq[Double])(f: => T) = {
+    val current = dash
+    if (current != d) {
+      dash = d
+      graphics.setLineDash(scalajs.js.Array.apply(d: _*))
+    }
+    f
+  }
+  def withFill[T](color: Color)(f: => T) = {
+    val current = fillColor
+    if (current != color) {
+      fillColor = color
+      graphics.fillStyle = canvasrenderer.asCss(color)
+    }
+    f
+  }
+  def withStroke[T](color: Color)(f: => T) = {
+    val current = strokeColor
+    if (current != color) {
+      strokeColor = color
+      graphics.strokeStyle = canvasrenderer.asCss(color)
+    }
+    f
+  }
+
+  type LocalTx = AffineTransform
+
+  def localToScala(tx: AffineTransform): AffineTransform = tx
+
+  def concatTransform(tx: AffineTransform): Unit = {
+    transform = transform.concat(tx)
+  }
+
+  def setTransform(tx: LocalTx): Unit = {
+    transform = tx
+  }
+  def setTransformInGraphics() = {
+    if (transformInGraphics != transform) {
+      transformInGraphics = transform
+      graphics.setTransform(
+        transform.m0,
+        transform.m3,
+        transform.m1,
+        transform.m4,
+        transform.m2,
+        transform.m5
+      )
+    }
+  }
+
+  def getTransform: LocalTx = transform
+
   var mousedown = false
   val plotAreaShapes = ArrayBuffer[(Shape, PlotAreaIdentifier)]()
 
@@ -18,35 +78,61 @@ case class CanvasRC(
   def processPlotArea(e: MouseEvent, p: Point)(
       cb: PlotAreaIdentifier => Unit
   ) = {
-    hitTest(e, p, plotAreaShapes, cb)
+    hitTest[PlotAreaIdentifier](
+      e,
+      p,
+      true,
+      plotAreaShapes,
+      (id, bounds) => cb(id.copy(bounds = bounds))
+    )
   }
 
   private def hitTest[T](
       e: MouseEvent,
       p: Point,
+      needsTransformedBounds: Boolean,
       shapes: collection.Seq[(Shape, T)],
-      callback: T => Unit
+      callback: (T, Option[Bounds]) => Unit
   ) = {
     import canvasrenderer._
     val ctx = graphics
 
     shapes.foreach { case (shape, id) =>
-      val hit = shape match {
-        case Rectangle(x, y, w, h, tx, _) =>
-          tx.applyTo(ctx)
-          ctx.beginPath()
-          ctx.rect(x, y, w, h)
-          AffineTransform.identity.applyTo(ctx)
-          val r = ctx.isPointInPath(p.x, p.y)
-          r
+      val (hit, transformedBounds) = withTransform(shape.currentTransform) {
+        setTransformInGraphics()
+        shape match {
+          case Rectangle(x, y, w, h, tx, _) =>
+            ctx.beginPath()
+            ctx.rect(x, y, w, h)
+            val r =
+              ctx.isPointInPath(p.x, p.y)
 
-        case _ => ???
+            val transformedBounds =
+              if (needsTransformedBounds)
+                id match {
+                  case pl: PlotAreaIdentifier =>
+                    pl.bounds.map(transform.transform)
+                  case _ => None
+                }
+              else None
+            r -> transformedBounds
+
+          case _ => ???
+        }
+
       }
+
       if (hit) {
-        callback(id)
+        callback(id, transformedBounds)
       }
 
     }
+  }
+
+  def clear() = {
+    graphics.setTransform(1, 0, 0, 1, 0, 0)
+    transformInGraphics = AffineTransform.identity
+    graphics.clearRect(0, 0, graphics.canvas.width, graphics.canvas.height)
   }
 
 }
@@ -55,18 +141,22 @@ object canvasrenderer {
 
   implicit val defaultGlyphMeasurer = CanvasGlyphMeasurer
 
-  implicit val defaultAWTFont: FontConfiguration = importFont("Arial")
+  implicit val defaultFont: FontConfiguration = font("Arial")
 
-  implicit def rec2bounds(r: DOMRect) =
+  private[nspl] def rec2bounds(r: DOMRect) =
     Bounds(r.left, r.top, r.width, r.height)
 
-  def cssColor(c: Color) = s"rgba(${c.r},${c.g},${c.b},${c.a}"
+  private[nspl] def cssColor(c: Color) = s"rgba(${c.r},${c.g},${c.b},${c.a}"
 
-  def getCanvasCoordinate(canvas: html.Canvas, e: MouseEvent): Point = {
+  private[nspl] def getCanvasCoordinate(
+      canvas: html.Canvas,
+      e: MouseEvent,
+      devicePixelRatio: Double
+  ): Point = {
     def rect = canvas.getBoundingClientRect()
     val x = e.clientX - rect.left
     val y = e.clientY - rect.top
-    Point(x, y)
+    Point(x * devicePixelRatio, y * devicePixelRatio)
   }
 
   def render[K <: Renderable[K]](
@@ -79,6 +169,11 @@ object canvasrenderer {
   ) = {
 
     val canvas = dom.document.createElement("canvas").asInstanceOf[html.Canvas]
+    canvas.style.width = s"${width}px"
+    canvas.style.height = s"${height}px"
+    val devicePixelRatio = window.devicePixelRatio
+    canvas.width = (width * devicePixelRatio).toInt
+    canvas.height = (height * devicePixelRatio).toInt
 
     val ctx =
       CanvasRC(
@@ -90,6 +185,15 @@ object canvasrenderer {
     var paintableElem = build.build
     var dragStart = Point(0, 0)
     var queuedCallback: Double => Unit = null
+
+    def paintBounds = {
+      val aspect = paintableElem.bounds.h / paintableElem.bounds.w
+
+      val paintWidth = if (aspect > 1) canvas.height / aspect else canvas.width
+      val paintHeight =
+        if (aspect <= 1) canvas.width * aspect else canvas.height
+      Bounds(0, 0, paintWidth, paintHeight)
+    }
 
     def queueAnimationFrame(body: Double => Unit) = {
 
@@ -105,27 +209,24 @@ object canvasrenderer {
     }
 
     def paint() = {
-      val aspect = paintableElem.bounds.h / paintableElem.bounds.w
-      val height = (width * aspect)
 
-      canvas.height = height.toInt
-      canvas.width = width
-      ctx.graphics.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.clear()
+
       ctx.plotAreaShapes.clear()
-      fitToBounds(paintableElem, Bounds(0, 0, width, height))
-        .render(ctx)
+      ctx.render(
+        fitToBounds(paintableElem, paintBounds)
+      )
     }
 
     def onmousedown(e: MouseEvent) = {
       if (e.button == 0) {
         e.preventDefault()
-        queueAnimationFrame { _ =>
-          val componentBounds: Bounds = canvas.getBoundingClientRect()
-          val p = getCanvasCoordinate(canvas, e)
-          ctx.processPlotArea(e, p) { _ =>
-            ctx.mousedown = true
-            dragStart = p
-          }
+        val p = getCanvasCoordinate(canvas, e, devicePixelRatio)
+        ctx.processPlotArea(e, p) { identifier =>
+          ctx.mousedown = true
+          dragStart = p
+          click(identifier)
+
         }
       }
     }
@@ -134,8 +235,7 @@ object canvasrenderer {
       if (e.button == 0 && ctx.mousedown) {
         e.preventDefault()
         queueAnimationFrame { _ =>
-          val componentBounds = canvas.getBoundingClientRect()
-          val p = getCanvasCoordinate(canvas, e)
+          val p = getCanvasCoordinate(canvas, e, devicePixelRatio)
           val v = Point(dragStart.x - p.x, dragStart.y - p.y)
           val l = math.sqrt(v.x * v.x + v.y * v.y)
           if (l > 0) {
@@ -143,9 +243,9 @@ object canvasrenderer {
               paintableElem =
                 build(Some(paintableElem) -> Drag(dragStart, p, id))
               dragStart = p
+              paint()
             }
           }
-          paint()
         }
       }
     }
@@ -154,7 +254,7 @@ object canvasrenderer {
       e.preventDefault()
       queueAnimationFrame { _ =>
         val cb = canvas.getBoundingClientRect()
-        val p = getCanvasCoordinate(canvas, e)
+        val p = getCanvasCoordinate(canvas, e, devicePixelRatio)
         ctx.processPlotArea(e, p) { id =>
           paintableElem = build(
             Some(paintableElem) -> Scroll(
@@ -165,16 +265,17 @@ object canvasrenderer {
               id
             )
           )
+          paint()
         }
-        paint()
       }
     }
 
-    def update = (k: Build[K]) => {
-      build = k
-      paintableElem = k.build
-      paint()
-    }
+    def update = (k: Build[K]) =>
+      queueAnimationFrame { _ =>
+        build = k
+        paintableElem = k.build
+        paint()
+      }
 
     canvas.onmousedown = onmousedown _
     canvas.onmouseup = { _ =>
@@ -182,163 +283,190 @@ object canvasrenderer {
     }
     canvas.onmousemove = onmove _
     canvas.addEventListener("wheel", onwheel _)
-    paint()
+
+    queueAnimationFrame { _ =>
+      paint()
+    }
 
     (canvas, update)
 
   }
 
-  def fill(sh: Shape, ctx: CRC) = sh match {
-    case Rectangle(x, y, w, h, tx, _) => {
-      tx.applyTo(ctx)
-      ctx.fillRect(x, y, w, h)
+  private[nspl] def fill(sh: Shape, graphics: CanvasRenderingContext2D) =
+    sh match {
+      case sh: Rectangle => {
 
-    }
-    case Ellipse(x, y, w, h, tx) => {
-      val centerX = x + 0.5 * w
-      val centerY = y + 0.5 * h
-      val radiusX = w * 0.5
-      val radiusY = h * 0.5
+        graphics.fillRect(sh.x, sh.y, sh.w, sh.h)
 
-      tx.applyTo(ctx)
-      ctx.beginPath()
-      ctx
-        .asInstanceOf[scala.scalajs.js.Dynamic]
-        .ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI)
-      ctx.fill()
-    }
-    case Line(x1, y1, x2, y2) => ()
-    case SimplePath(points) =>
-      AffineTransform.identity.applyTo(ctx)
-      ctx.beginPath()
-      points.foreach { p =>
-        ctx.lineTo(p.x, p.y)
       }
-      ctx.fill()
+      case sh: Ellipse => {
+        val centerX = sh.x + 0.5 * sh.w
+        val centerY = sh.y + 0.5 * sh.h
+        val radiusX = sh.w * 0.5
+        val radiusY = sh.h * 0.5
 
-    case Path(ops) =>
-      AffineTransform.identity.applyTo(ctx)
-      ctx.beginPath()
-      ops foreach {
-        case MoveTo(Point(x, y)) => ctx.moveTo(x, y)
-        case LineTo(Point(x, y)) => ctx.lineTo(x, y)
-        case QuadTo(Point(x2, y2), Point(x1, y1)) =>
-          ctx.quadraticCurveTo(x1, y1, x2, y2)
-        case _ => ???
-        // case CubicTo(Point(x3, y3), Point(x1, y1), Point(x2, y2)) => path.curveTo(x1, y1, x2, y2, x3, y3)
+        graphics.beginPath()
+        graphics
+          .asInstanceOf[scala.scalajs.js.Dynamic]
+          .ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI)
+        graphics.fill()
       }
-      ctx.fill()
+      case sh: Line => ()
+      case sh: SimplePath =>
+        graphics.beginPath()
+        sh.ps.foreach { p =>
+          graphics.lineTo(p.x, p.y)
+        }
+        graphics.fill()
 
-  }
+      case sh: Path =>
+        graphics.beginPath()
+        sh.path foreach {
+          case cm: MoveTo => graphics.moveTo(cm.p.x, cm.p.y)
+          case cm: LineTo => graphics.lineTo(cm.p.x, cm.p.y)
+          case cm: QuadTo =>
+            graphics.quadraticCurveTo(cm.p1.x, cm.p1.y, cm.p2.x, cm.p2.y)
+          case cm: CubicTo =>
+            graphics.bezierCurveTo(
+              cm.p1.x,
+              cm.p1.y,
+              cm.p2.x,
+              cm.p2.y,
+              cm.p3.x,
+              cm.p3.y
+            )
+        }
+        graphics.fill()
 
-  def draw(sh: Shape, ctx: CRC) = sh match {
-    case Rectangle(x, y, w, h, tx, _) => {
-      tx.applyTo(ctx)
-      ctx.strokeRect(x, y, w, h)
-      // AffineTransform.identity.applyTo(ctx)
     }
-    case Ellipse(x, y, w, h, tx) => {
-      val centerX = x + 0.5 * w
-      val centerY = y + 0.5 * h
-      val radiusX = w * 0.5
-      val radiusY = h * 0.5
 
-      tx.applyTo(ctx)
-      ctx.beginPath()
-      ctx
-        .asInstanceOf[scala.scalajs.js.Dynamic]
-        .ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI)
-      ctx.stroke()
-      // AffineTransform.identity.applyTo(ctx)
-    }
-    case Line(x1, y1, x2, y2) => {
-      AffineTransform.identity.applyTo(ctx)
-      ctx.beginPath()
-      ctx.moveTo(x1, y1)
-      ctx.lineTo(x2, y2)
-      ctx.stroke()
-    }
-    case SimplePath(points) => {
-      AffineTransform.identity.applyTo(ctx)
-      ctx.beginPath()
-      points.foreach { p =>
-        ctx.lineTo(p.x, p.y)
+  private[nspl] def draw(
+      sh: Shape,
+      graphics: CanvasRenderingContext2D,
+      stroke: Stroke
+  ) = {
+    sh match {
+      case sh: Rectangle => {
+        graphics.strokeRect(sh.x, sh.y, sh.w, sh.h)
       }
-      ctx.stroke()
-    }
-    case Path(ops) => {
-      AffineTransform.identity.applyTo(ctx)
-      ctx.beginPath()
-      ops foreach {
-        case MoveTo(Point(x, y)) => ctx.moveTo(x, y)
-        case LineTo(Point(x, y)) => ctx.lineTo(x, y)
-        case QuadTo(Point(x2, y2), Point(x1, y1)) =>
-          ctx.quadraticCurveTo(x1, y1, x2, y2)
-        case _ => ???
-        // case CubicTo(Point(x3, y3), Point(x1, y1), Point(x2, y2)) => path.curveTo(x1, y1, x2, y2, x3, y3)
+      case sh: Ellipse => {
+        val centerX = sh.x + 0.5 * sh.w
+        val centerY = sh.y + 0.5 * sh.h
+        val radiusX = sh.w * 0.5
+        val radiusY = sh.h * 0.5
+
+        graphics.beginPath()
+        graphics
+          .asInstanceOf[scala.scalajs.js.Dynamic]
+          .ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI)
+        graphics.stroke()
       }
-      ctx.stroke()
-    }
-  }
-
-  type CRC = CanvasRenderingContext2D
-
-  implicit class PimpedColor(c: Color) {
-
-    def css = s"rgba(${c.r},${c.g},${c.b})"
-  }
-
-  implicit class PimpedTx(tx: AffineTransform) {
-    def applyTo(ctx: CRC) = {
-      ctx.setTransform(tx.m0, tx.m3, tx.m1, tx.m4, tx.m2, tx.m5)
-    }
-  }
-
-  implicit class Pimp[K <: Renderable[K]](t: K) {
-    def render(ctx: CanvasRC)(implicit r: CER[K]) = r.render(ctx, t)
-  }
-
-  type CER[T] = Renderer[T, CanvasRC]
-
-  implicit val shapeRenderer = new CER[ShapeElem] {
-    def render(ctx: CanvasRC, elem: ShapeElem): Unit = {
-      if (elem.fill.a > 0.0) {
-        ctx.graphics.fillStyle = elem.fill.css
-        fill(elem.shape, ctx.graphics)
+      case sh: Line => {
+        graphics.beginPath()
+        graphics.moveTo(sh.x1, sh.y1)
+        graphics.lineTo(sh.x2, sh.y2)
+        graphics.stroke()
       }
-      if (elem.stroke.isDefined && elem.strokeColor.a > 0) {
-        ctx.graphics.lineWidth = elem.stroke.get.width * 0.4
-        ctx.graphics.strokeStyle = elem.strokeColor.css
-        draw(elem.shape, ctx.graphics)
+      case sh: SimplePath => {
+        graphics.beginPath()
+        sh.ps.foreach { p =>
+          graphics.lineTo(p.x, p.y)
+        }
+        graphics.stroke()
       }
-
-      elem.identifier match {
-        case pa: PlotAreaIdentifier =>
-          ctx.registerPlotArea(
-            elem.shape,
-            pa.copy(bounds = Some(elem.bounds))
-          )
-        case _ =>
+      case sh: Path => {
+        graphics.beginPath()
+        sh.path foreach {
+          case cm: MoveTo => graphics.moveTo(cm.p.x, cm.p.y)
+          case cm: LineTo => graphics.lineTo(cm.p.x, cm.p.y)
+          case cm: QuadTo =>
+            graphics.quadraticCurveTo(cm.p1.x, cm.p1.y, cm.p2.x, cm.p2.y)
+          case cm: CubicTo =>
+            graphics.bezierCurveTo(
+              cm.p1.x,
+              cm.p1.y,
+              cm.p2.x,
+              cm.p2.y,
+              cm.p3.x,
+              cm.p3.y
+            )
+        }
+        graphics.stroke()
       }
-
     }
   }
 
-  implicit val textRenderer = new CER[TextBox] {
+  implicit val shapeRenderer = new Renderer[ShapeElem, CanvasRC] {
 
-    def render(ctx: CanvasRC, elem: TextBox): Unit = {
-      AffineTransform.identity.applyTo(ctx.graphics)
-      // ctx.graphics.strokeRect(elem.bounds.x, elem.bounds.y, elem.bounds.w, elem.bounds.h)
-      if (!elem.layout.isEmpty) {
-        ctx.graphics.fillStyle = elem.color.css
-        ctx.graphics.font = canvasFont(elem.font)
-        elem.layout.lines.foreach { case (line, lineTx) =>
-          val tx = elem.txLoc.concat(lineTx)
-          tx.applyTo(ctx.graphics)
-          ctx.graphics.fillText(line, 0, 0)
+    private def drawAndFill(ctx: CanvasRC, elem: ShapeElem) = {
+
+      if (
+        elem.fill.a > 0d || (elem.stroke.isDefined && elem.strokeColor.a > 0)
+      ) {
+        ctx.setTransformInGraphics()
+
+        val shape = elem.shape
+
+        if (elem.fill.a > 0.0) {
+          ctx.withFill(elem.fill) {
+            fill(shape, ctx.graphics)
+          }
+        }
+        if (elem.stroke.isDefined && elem.strokeColor.a > 0) {
+          ctx.withStroke(elem.strokeColor) {
+
+            ctx.withDash(elem.stroke.get.dash) {
+
+              if (ctx.graphics.lineWidth != elem.stroke.get.width) {
+                ctx.graphics.lineWidth = elem.stroke.get.width
+              }
+
+              draw(shape, ctx.graphics, elem.stroke.get)
+            }
+          }
         }
       }
-      AffineTransform.identity.applyTo(ctx.graphics)
+    }
+
+    def render(ctx: CanvasRC, elem: ShapeElem): Unit = {
+      ctx.withTransform(elem.tx concat elem.shape.currentTransform) {
+
+        drawAndFill(ctx, elem)
+
+        elem.identifier match {
+          case pa: PlotAreaIdentifier =>
+            ctx.registerPlotArea(
+              elem.shape.transform(_ => ctx.getAffineTransform),
+              pa.copy(bounds = Some(elem.bounds))
+            )
+          case _ =>
+        }
+      }
+
+    }
+  }
+
+  def asCss(c: Color) = s"rgba(${c.r},${c.g},${c.b}, ${c.a})"
+
+  implicit val textRenderer = new Renderer[TextBox, CanvasRC] {
+
+    def render(ctx: CanvasRC, elem: TextBox): Unit = {
+      ctx.withTransform(elem.txLoc) {
+
+        if (!elem.layout.isEmpty) {
+          ctx.withFill(elem.color) {
+            ctx.graphics.font = canvasFont(elem.font)
+            elem.layout.lines.foreach { case (line, lineTx) =>
+              ctx.withTransform(lineTx) {
+                // ctx.graphics.strokeStyle = asCss(elem.color)
+                // ctx.graphics.strokeRect(elem.bounds.x, elem.bounds.y, elem.bounds.w, elem.bounds.h)
+                ctx.setTransformInGraphics()
+                ctx.graphics.fillText(line, 0, 0)
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

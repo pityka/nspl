@@ -359,6 +359,35 @@ object AlignTo {
         move.bounds.h
       )
     )
+  def horizontalGapAfterReference[T <: Renderable[T]](
+      move: T,
+      reference: Bounds,
+      gap: Double
+  ): T =
+    fitToBounds(
+      move,
+      Bounds(
+        reference.x + reference.w + gap,
+        move.bounds.y,
+        move.bounds.w,
+        move.bounds.h
+      )
+    )
+
+  def horizontalGapBeforeReference[T <: Renderable[T]](
+      move: T,
+      reference: Bounds,
+      gap: Double
+  ): T =
+    fitToBounds(
+      move,
+      Bounds(
+        reference.x - gap - move.bounds.w,
+        move.bounds.y,
+        move.bounds.w,
+        move.bounds.h
+      )
+    )
   def verticalLeft[T <: Renderable[T]](move: T, reference: Bounds): T =
     fitToBounds(
       move,

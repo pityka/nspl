@@ -17,7 +17,7 @@ case class DataElem3D(
 }
 
 object DataElem3D {
-  implicit def dataElemRenderer[RC <: RenderingContext](implicit
+  implicit def dataElemRenderer[RC <: RenderingContext[RC]](implicit
       re: Renderer[ShapeElem, RC],
       rt: Renderer[TextBox, RC]
   ) = new Renderer[DataElem3D, RC] {
@@ -52,7 +52,7 @@ trait Plots3D {
   }
 
   object XYZPlotArea {
-    implicit def renderer[RC <: RenderingContext](implicit
+    implicit def renderer[RC <: RenderingContext[RC]](implicit
         re: Renderer[ShapeElem, RC],
         rt: Renderer[TextBox, RC]
     ) = new Renderer[XYZPlotArea, RC] {

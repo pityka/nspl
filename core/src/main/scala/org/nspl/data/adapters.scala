@@ -37,9 +37,9 @@ trait DataAdaptors extends DataTuples {
       }
       def dimension = 3
       def columnMinMax(i: Int) = i match {
-        case 0 => MinMaxImpl(0, numCols - 1d)
-        case 1 => MinMaxImpl(0, numRows - 1d)
-        case 2 => minmax
+        case 0 => Some(MinMaxImpl(0, numCols - 1d))
+        case 1 => Some(MinMaxImpl(0, numRows - 1d))
+        case 2 => Some(minmax)
       }
     }
 
@@ -55,9 +55,9 @@ trait DataAdaptors extends DataTuples {
       }
       def dimension = 3
       def columnMinMax(i: Int) = i match {
-        case 0 => MinMaxImpl(0, numCols - 1d)
-        case 1 => MinMaxImpl(0, numRows - 1d)
-        case 2 => MinMaxImpl(s1.min, s1.max)
+        case 0 => Some(MinMaxImpl(0, numCols - 1d))
+        case 1 => Some(MinMaxImpl(0, numRows - 1d))
+        case 2 => Some(MinMaxImpl(s1.min, s1.max))
       }
     }
 
@@ -68,7 +68,7 @@ trait DataAdaptors extends DataTuples {
 
       def iterator = s1.map(f)
       def dimension = minmax.size
-      def columnMinMax(i: Int) = minmax(i)
+      def columnMinMax(i: Int) = Some(minmax(i))
     }
 
   /** Need to iterate twice on the data: once for the bounds to get the axis
@@ -102,7 +102,7 @@ trait DataAdaptors extends DataTuples {
 
       def iterator = s1.map(f)
       def dimension = columncount.get
-      def columnMinMax(i: Int) = MinMaxImpl(min(i), max(i))
+      def columnMinMax(i: Int) = Some(MinMaxImpl(min(i), max(i)))
     }
 
   implicit def dataSourceFromRows[T](
@@ -112,7 +112,8 @@ trait DataAdaptors extends DataTuples {
       def iterator = s.iterator.map(f)
       def dimension = s.headOption.map(_.dimension).getOrElse(0)
       def columnMinMax(i: Int) =
-        MinMaxImpl(s.map(_.apply(i)).min, s.map(_.apply(i)).max)
+        if (s.isEmpty) None
+        else Some(MinMaxImpl(s.map(_.apply(i)).min, s.map(_.apply(i)).max))
       def quantilesOfColumn(i: Int, qs: Vector[Double]) = {
         val v = s.map(_.apply(i))
         percentile(v, qs).toVector
@@ -126,8 +127,9 @@ trait DataAdaptors extends DataTuples {
         s.iterator.zipWithIndex.map(x => productsToRow(x._2.toDouble -> x._1))
       def dimension = 2
       def columnMinMax(i: Int) = i match {
-        case 0 => MinMaxImpl(0, s.size - 1d)
-        case 1 => MinMaxImpl(s.min, s.max)
+        case 0 => Some(MinMaxImpl(0, s.size - 1d))
+        case 1 => Some(MinMaxImpl(s.min, s.max))
+        case _ => None
       }
       def quantilesOfColumn(i: Int, qs: Vector[Double]) = {
         assert(i == 1 || i == 0)
@@ -139,43 +141,49 @@ trait DataAdaptors extends DataTuples {
     }
 
   def boxplotData(s: DataSourceWithQuantiles): DataSource = {
-    val list = (0 until s.dimension).map { i =>
+    val list = (0 until s.dimension).flatMap { i =>
       val minmax = s.columnMinMax(i)
-      val quantiles = s.quantilesOfColumn(i, Vector(0.25, 0.5, 0.75))
+      if (minmax.isEmpty) None
+      else {
+        val quantiles = s.quantilesOfColumn(i, Vector(0.25, 0.5, 0.75))
 
-      VectorRow(
-        Vector(
-          i.toDouble + .5,
-          quantiles(1),
-          quantiles(0),
-          quantiles(2),
-          minmax.min,
-          minmax.max
-        ),
-        ""
-      )
+        Some(
+          VectorRow(
+            Vector(
+              i.toDouble,
+              quantiles(1),
+              quantiles(0),
+              quantiles(2),
+              minmax.get.min,
+              minmax.get.max
+            ),
+            s.columnNames(i)
+          )
+        )
+      }
     }
     list
   }
 
   def boxplotData[T: Ordering](s: Seq[(T, Double)]): DataSource = {
-    val list = s.groupBy(_._1).toSeq.sortBy(_._1).zipWithIndex.map {
+    val list = s.groupBy(_._1).toSeq.sortBy(_._1).zipWithIndex.flatMap {
       case ((label, data), i) =>
         val s = dataSourceFrom1DSeq(data.map(_._2))
-        val minmax = s.columnMinMax(0)
-        val quantiles = s.quantilesOfColumn(0, Vector(0.25, 0.5, 0.75))
+        s.columnMinMax(0).map { minmax =>
+          val quantiles = s.quantilesOfColumn(0, Vector(0.25, 0.5, 0.75))
 
-        VectorRow(
-          Vector(
-            i.toDouble + .5,
-            quantiles(1),
-            quantiles(0),
-            quantiles(2),
-            minmax.min,
-            minmax.max
-          ),
-          label.toString
-        )
+          VectorRow(
+            Vector(
+              i.toDouble,
+              quantiles(1),
+              quantiles(0),
+              quantiles(2),
+              minmax.min,
+              minmax.max
+            ),
+            label.toString
+          )
+        }
     }
     list
   }
@@ -186,23 +194,24 @@ trait DataAdaptors extends DataTuples {
       colors: Vector[Double],
       labels: Vector[String]
   ): DataSource = {
-    val list = (0 until s.dimension).map { i =>
-      val minmax = s.columnMinMax(i)
-      val quantiles = s.quantilesOfColumn(i, Vector(0.25, 0.5, 0.75))
+    val list = (0 until s.dimension).flatMap { i =>
+      s.columnMinMax(i).map { minmax =>
+        val quantiles = s.quantilesOfColumn(i, Vector(0.25, 0.5, 0.75))
 
-      VectorRow(
-        Vector(
-          x(i),
-          quantiles(1),
-          quantiles(0),
-          quantiles(2),
-          minmax.min,
-          minmax.max,
-          x(i) + 1,
-          colors(i)
-        ),
-        labels(i)
-      )
+        VectorRow(
+          Vector(
+            x(i),
+            quantiles(1),
+            quantiles(0),
+            quantiles(2),
+            minmax.min,
+            minmax.max,
+            x(i) + 1,
+            colors(i)
+          ),
+          labels(i)
+        )
+      }
     }
     list
   }
@@ -223,13 +232,13 @@ trait DataAdaptors extends DataTuples {
         val quantiles = percentile(group, Vector(0.25, 0.5, 0.75))
         VectorRow(
           Vector(
-            a,
+            (a + b) * 0.5,
             quantiles(1),
             quantiles(0),
             quantiles(2),
             min,
             max,
-            b,
+            b - a,
             colors(i)
           ),
           ""
@@ -252,7 +261,7 @@ trait DataAdaptors extends DataTuples {
 
     0 to n map { i =>
       val x = min + i * w
-      x -> KDE.univariate(data, x, h)
+      x -> KDE.univariate(data.toArray, x, h)
     }
   }
 
@@ -378,8 +387,8 @@ trait DataAdaptors extends DataTuples {
       color: Colormap,
       logCounts: Boolean
   ) = {
-    val xMinMax = data.columnMinMax(0)
-    val yMinMax = data.columnMinMax(1)
+    val xMinMax = data.columnMinMax(0).get
+    val yMinMax = data.columnMinMax(1).get
     val binning = HexBin.apply(
       data.iterator.map { row =>
         row(0) -> row(1)

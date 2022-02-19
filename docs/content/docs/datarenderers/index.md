@@ -1,6 +1,6 @@
 ---
 title: 'Data renderers'
-weight: 3
+weight: 4
 ---
 
 # Data renderers
@@ -38,8 +38,8 @@ An example with triples where the third column (the third element in the triple)
 
 
 val plot4 = xyplot(data -> point())(
-            xlab="x axis label",
-            ylab="y axis label"
+            par(xlab="x axis label",
+            ylab="y axis label")
           )
 
 renderToByteArray(plot4.build, width=2000)
@@ -52,8 +52,8 @@ import org.nspl._
 import org.nspl.awtrenderer._ 
 
 val plot5 = xyplot(data -> line())(
-            xlab="x axis label",
-            ylab="y axis label"
+            par(xlab="x axis label",
+            ylab="y axis label")
           )
 
 renderToByteArray(plot5.build, width=2000)
@@ -69,8 +69,8 @@ import org.nspl._
 import org.nspl.awtrenderer._ 
 
 val plot6 = xyplot(data -> lineSegment(color = Color.black))(
-            xlab="x axis label",
-            ylab="y axis label"
+            par(xlab="x axis label",
+            ylab="y axis label")
           )
 
 renderToByteArray(plot6.build, width=2000)
@@ -89,10 +89,10 @@ import org.nspl._
 import org.nspl.awtrenderer._ 
 
 val plot7 = xyplot(data.take(2) -> polynom(() => line()))(
-            xlab="x axis label",
+            par(xlab="x axis label",
             ylab="y axis label",
             xlim = Some(0d -> 1d),
-            ylim = Some(0d -> 1d)
+            ylim = Some(0d -> 1d))
           )
 
 renderToByteArray(plot7.build, width=2000)
@@ -114,9 +114,9 @@ val plot8 = xyplot(
                                  width = 0.5, 
                                  fill = Color.gray2)
             )(
-            xlab="x axis label",
+            par(xlab="x axis label",
             ylab="y axis label",
-            xlim = Some(0d -> 3d)
+            xlim = Some(0d -> 3d))
           )
 
 renderToByteArray(plot8.build, width=2000)

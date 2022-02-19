@@ -22,10 +22,15 @@ case object CapButt extends Cap
 case object CapSquare extends Cap
 case object CapRound extends Cap
 
-case class StrokeConf(width: RelFontSize, cap: Cap = CapButt) {
-  def value(implicit fc: FontConfiguration) = Stroke(width.value, cap)
+case class StrokeConf(
+    width: RelFontSize,
+    cap: Cap = CapButt,
+    dash: Seq[RelFontSize] = Nil
+) {
+  def value(implicit fc: FontConfiguration) =
+    Stroke(width.value, cap, dash.map(_.value))
 }
-case class Stroke(width: Double, cap: Cap = CapButt)
+case class Stroke(width: Double, cap: Cap = CapButt, dash: Seq[Double] = Nil)
 
 case class Point(x: Double, y: Double) {
   def translate(dx: Double, dy: Double) = Point(x + dx, y + dy)
@@ -39,9 +44,25 @@ case class Point(x: Double, y: Double) {
   }
 }
 
-trait RenderingContext
+trait RenderingContext[A <: RenderingContext[A]] { self: A =>
+  type LocalTx
+  def concatTransform(tx: AffineTransform): Unit
+  def setTransform(tx: LocalTx): Unit
+  def getTransform: LocalTx
+  def localToScala(tx: LocalTx): AffineTransform
+  def getAffineTransform: AffineTransform = localToScala(getTransform)
+  def withTransform[T](tx: AffineTransform)(f: => T) = {
+    val current = getTransform
+    concatTransform(tx)
+    val r = f
+    setTransform(current)
+    r
+  }
+  def render[K <: Renderable[K]](k: K)(implicit r: Renderer[K, A]) =
+    r.render(self, k)
+}
 
-trait Renderer[E, R <: RenderingContext] {
+trait Renderer[E, R <: RenderingContext[R]] {
   def render(r: R, e: E): Unit
 }
 

@@ -83,12 +83,15 @@ case class AxisSettings(
     lineWidth: RelFontSize = lineWidth,
     lineLengthFraction: Double = 1d,
     lineStartFraction: Double = 0.0,
-    tickFormatter: Seq[Double] => Seq[String] = defaultTickFormatter
+    tickFormatter: Seq[Double] => Seq[String] = defaultTickFormatter,
+    forceMajorTickOnMin: Boolean = false,
+    forceMajorTickOnMax: Boolean = false
 )(implicit fc: FontConfiguration) {
 
   def renderable(
       axis: Axis,
-      disableTicksAt: List[Double] = Nil
+      noTickLabel: Boolean,
+      disableTicksAt: List[Double]
   ): (List[Double], List[Double], AxisElem) = {
 
     import axis._
@@ -102,7 +105,74 @@ case class AxisSettings(
     val numTicks1 =
       if (tickSpace.isEmpty) numTicks else (axis.max - axis.min) / tickSpace1
 
-    def makeTick(world: Double, text: String) = {
+    val lineStart = lineStartFraction * axis.width
+    val lineEnd = lineStart + axis.width * lineLengthFraction
+
+    val line =
+      if (horizontal)
+        ShapeElem(
+          Shape.line(Point(lineStart, 0d), Point(lineEnd, 0d)),
+          stroke = Some(Stroke(lineWidth.value))
+        )
+      else
+        ShapeElem(
+          Shape.line(Point(0d, lineStart), Point(0d, lineEnd)),
+          stroke = Some(Stroke(lineWidth.value))
+        )
+
+    val extra =
+      customTicks
+        .filter(i => i._1 >= axis.min && i._1 <= axis.max)
+
+    val (majorTicks1, minorTicks1) = if (axis.log) {
+      val lmaj1 =
+        (math
+          .log10(axis.min)
+          .ceil
+          .toInt until math
+          .log10(axis.max)
+          .toInt)
+          .map(_.toDouble)
+          .filter { i =>
+            val e = math.pow(10d, i)
+            e >= axis.min - 1e-3 && e <= axis.max + 1e-3
+          }
+      val majorTicksExp =
+        axis.min +: (lmaj1.map(i => math.pow(10d, i)) :+ axis.max)
+      val minorTicksExp = majorTicksExp
+        .sliding(2)
+        .flatMap { group =>
+          val m1 = group(0)
+          val m2 = group(1)
+          val space = (m2 - m1) / numMinorTicksFactor
+          (0 to numMinorTicksFactor.toInt).map(i => m1 + i * space)
+        }
+        .filterNot(majorTicksExp.contains)
+        .toList
+      (majorTicksExp, minorTicksExp)
+    } else
+      Ticks.heckbert(axis.min, axis.max, numTicks1.toInt, numMinorTicksFactor)
+
+    val majorTicks =
+      if (numTicks1 == 0) Nil
+      else {
+        val addMin =
+          if (forceMajorTickOnMin && !majorTicks1.contains(axis.min))
+            List(axis.min)
+          else Nil
+        val addMax =
+          if (forceMajorTickOnMax && !majorTicks1.contains(axis.max))
+            List(axis.max)
+          else Nil
+        (majorTicks1 ++ addMin ++ addMax).iterator
+          .filterNot(x => customTicks.map(_._1).contains(x))
+          .filterNot(x => disableTicksAt.contains(x))
+          .filter(w => w <= axis.max && w >= axis.min)
+          .toList
+          .distinct
+      }
+
+    def makeTick(world: Double, text: String, availableSpace: Double) = {
       val view = worldToView(world)
       if (horizontal)
         group(
@@ -117,7 +187,13 @@ case class AxisSettings(
           transform(
             transform(
               transform(
-                TextBox(text, Point(view, 0.0), fontSize = fontSize),
+                TextBox(
+                  text,
+                  Point(view, 0.0),
+                  fontSize = fontSize,
+                  width =
+                    if (labelRotation == 0.0) Some(availableSpace) else None
+                ),
                 (b: Bounds) =>
                   AffineTransform.rotate(labelRotation, b.x, b.centerY)
               ),
@@ -177,65 +253,6 @@ case class AxisSettings(
         )
     }
 
-    val lineStart = lineStartFraction * axis.width
-    val lineEnd = lineStart + axis.width * lineLengthFraction
-
-    val line =
-      if (horizontal)
-        ShapeElem(
-          Shape.line(Point(lineStart, 0d), Point(lineEnd, 0d)),
-          stroke = Some(Stroke(lineWidth.value))
-        )
-      else
-        ShapeElem(
-          Shape.line(Point(0d, lineStart), Point(0d, lineEnd)),
-          stroke = Some(Stroke(lineWidth.value))
-        )
-
-    val extra =
-      customTicks
-        .filter(i => i._1 >= axis.min && i._1 <= axis.max)
-        .map(i => makeTick(i._1, i._2))
-
-    val (majorTicks1, minorTicks1) = if (axis.log) {
-      val lmaj1 =
-        (math
-          .log10(axis.min)
-          .ceil
-          .toInt until math
-          .log10(axis.max)
-          .toInt)
-          .map(_.toDouble)
-          .filter { i =>
-            val e = math.pow(10d, i)
-            e >= axis.min - 1e-3 && e <= axis.max + 1e-3
-          }
-      val majorTicksExp =
-        axis.min +: (lmaj1.map(i => math.pow(10d, i)) :+ axis.max)
-      val minorTicksExp = majorTicksExp
-        .sliding(2)
-        .flatMap { group =>
-          val m1 = group(0)
-          val m2 = group(1)
-          val space = (m2 - m1) / numMinorTicksFactor
-          (0 to numMinorTicksFactor.toInt).map(i => m1 + i * space)
-        }
-        .filterNot(majorTicksExp.contains)
-        .toList
-      (majorTicksExp, minorTicksExp)
-    } else
-      Ticks.heckbert(axis.min, axis.max, numTicks1.toInt, numMinorTicksFactor)
-
-    val majorTicks =
-      if (numTicks1 == 0) Nil
-      else
-        majorTicks1.iterator
-          .filterNot(x => customTicks.map(_._1).contains(x))
-          .filterNot(x => disableTicksAt.contains(x))
-          .filter(w => w <= axis.max && w >= axis.min)
-          .toList
-          .distinct
-
     val minorTicks =
       if (numTicks1 == 0 || numMinorTicksFactor <= 0) Nil
       else
@@ -248,10 +265,32 @@ case class AxisSettings(
 
     val majorTickLabels = tickFormatter(majorTicks)
 
-    val majorTickElems = sequence(
-      (majorTicks zip majorTickLabels)
-        .map { case (world, text) => makeTick(world, text) } ++ extra
-    )
+    val majorTickElems = sequence({
+      val allMajorTicks =
+        ((majorTicks zip majorTickLabels) ++ extra).sortBy(_._1)
+      val allMajorTicksWithAvailableSpace =
+        (List(scala.util.Left(axis.min)) ++ allMajorTicks.map(
+          scala.util.Right(_)
+        ) ++ List(scala.util.Left(axis.max))).sliding(3).toList.flatMap {
+          group =>
+            if (group.find(_.isRight).isEmpty) Nil
+            else {
+              val leftWorld = group(0).fold(identity, _._1)
+              val centerWorld = group(1).toOption.get._1
+              val rightWorld = group(2).fold(identity, _._1)
+              val (world, tick) = group(1).toOption.get
+              val leftV = axis.worldToView(leftWorld)
+              val centerV = axis.worldToView(centerWorld)
+              val rightV = axis.worldToView(rightWorld)
+              val availableSpace = (rightV - leftV) * 0.5
+              List((world, tick, availableSpace))
+            }
+        }
+      allMajorTicksWithAvailableSpace.map {
+        case (world, text, availableSpace) =>
+          makeTick(world, if (noTickLabel) "" else text, availableSpace)
+      }
+    })
 
     val minorTickElems = sequence(minorTicks.map(makeMinorTick))
 

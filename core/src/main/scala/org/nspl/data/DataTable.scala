@@ -48,10 +48,10 @@ case class DataTable(rows: Array[Double], numCols: Int)
     val min1 = min;
     val max1 = max;
 
-    new MinMax {
+    Some(new MinMax {
       val min = min1
       val max = max1
-    }
+    })
   }
 
   def quantilesOfColumn(i: Int, qs: Vector[Double]) = {

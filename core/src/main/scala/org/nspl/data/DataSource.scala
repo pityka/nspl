@@ -12,8 +12,9 @@ trait MinMax {
 trait DataSource {
 
   def iterator: Iterator[Row]
-  def columnMinMax(i: Int): MinMax
+  def columnMinMax(i: Int): Option[MinMax]
   def dimension: Int
+  def columnNames: Seq[String] = 0 until dimension map (_ => "")
 
 }
 
@@ -33,6 +34,15 @@ case class VectorRow(values: Vector[Double], label: String) extends Row {
   def apply(i: Int) = values(i)
   def allColumns = values
   def dimension = values.length
+
+  def withLabel(s: String) = copy(label = s)
+
+}
+
+object VectorRow {
+  def apply(values: Double*): VectorRow = VectorRow(values.toVector, "")
+  def apply(label: String, values: Double*): VectorRow =
+    VectorRow(values.toVector, label)
 
 }
 

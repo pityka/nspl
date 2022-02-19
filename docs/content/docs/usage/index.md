@@ -3,7 +3,11 @@ title: 'Usage overview'
 weight: 2
 ---
 
-# Data sources
+Creating a plot usually involves 1) getting some data, 2) describing the plot,
+ 3) producing some output in a serialized image format or in a graphics context.
+
+
+# I. Data sources
 nspl plotting routines take data from `org.nspl.data.DataSource` subtypes. A DataSource is a lazy collection of vectors of doubles, with definition:
 
 ```scala
@@ -32,7 +36,7 @@ Saddle is a data manipulation library for Scala, it provides features similar to
 The `"org.nspl" %% "nspl-saddle" % "@VERSION@"` module has adapters from Saddle data structures to nspl DataSource. 
 Once on the class path you can import it with the `import org.nspl.saddle._` wildcard import, and then you can use an `org.saddle.Frame` everywhere where a DataSource is needed. 
 
-# Plotting routines
+# II. Plotting routines
 
 nspl's API separates the definition of the plot from the actual rendering. 
 First a data structures is created which describes the plot, then that structure is interpreted by a renderer.
@@ -72,11 +76,11 @@ val someData =
   )
 
 val plot = xyplot((someData , List(point(),line()), InLegend("series 1")))(
-            xlab="x axis label",
-            ylab="y axis label"
+            par(xlab="x axis label",
+            ylab="y axis label")
           )
 
-renderToByteArray(plot.build, width=2000)
+renderToByteArray(plot, width=2000)
 ```
 
 ## rasterplot
@@ -95,10 +99,10 @@ val sparseMatrix =
     (2d, 2d, 1d),
   )
 
-val plot2 = rasterplot(sparseMatrix,
+val plot2 = rasterplot(sparseMatrix)(par(
             xlab="x axis label",
             ylab="y axis label"
-          )
+          ))
 
 renderToByteArray(plot2.build, width=2000)
 ```
@@ -113,10 +117,10 @@ import scala.util.Random.nextDouble
 val denseMatrix = new DataMatrix(
             rows = Array.fill(12)(nextDouble()), numCols = 4, numRows = 3)
   
-val plot3 = rasterplot(denseMatrix,
+val plot3 = rasterplot(denseMatrix)(par(
             xlab="x axis label",
             ylab="y axis label"
-          )
+          ))
 
 renderToByteArray(plot3.build, width=2000)
 ```
@@ -138,10 +142,35 @@ val randomData1 = 0 until 10 map (_ => nextDouble())
 val randomData2 = 0 until 10 map (_ => nextDouble())
 val randomData = randomData1 zip randomData2
   
-val plotBx = boxplot(randomData)
+val plotBx = boxplot(randomData)(par())
 
 renderToByteArray(plotBx.build, width=2000)
 ```
 
 Note, that these box and whiskers plots do not display individual outlier elements, neither the mean. 
 They display the median, the interquartile range and the minimum and maximum.
+
+# III. Output formats
+
+Nspl has different modules depending on the supported graphic context or platform.
+These modules have methods which take the data structure describing the plot and produce a platform dependent output, e.g. a file, a byte array, or draw to a canvas.
+
+For example, as demonstrated in the previous examples, to produce a byte array with a PNG encoded image one can use the `org.nspl.awtrenderer.renderToByteArray` method:
+
+```scala
+import org.nspl._ 
+import org.nspl.awtrenderer._ 
+val plot = xyplot(..)(..)
+renderToByteArray(plot.build, width=2000)
+```
+
+Similarly, there is an `org.nspl.canvasrenderer.render` method which returns a new canvas DOM node:
+
+```scala
+import org.nspl._ 
+import org.nspl.canvasrenderer._ 
+val plot = xyplot(..)(..)
+val (canvas, _) = render(plot)
+```
+
+
