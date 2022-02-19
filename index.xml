@@ -12,17 +12,27 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://pityka.github.io/nspl/docs/usage/</guid>
-      <description>Data sources #  nspl plotting routines take data from org.nspl.data.DataSource subtypes. A DataSource is a lazy collection of vectors of doubles, with definition:
-trait DataSource { def iterator: Iterator[Row] } trait Row { def apply(i: Int): Double def label: String } For most use cases the import org.nspl._ imports implicit conversions from standard library types like Seq[(Double,Double)] or tuples of other arity.
-There are a few concrete implementations of a DataSource in the org.</description>
+      <description>Creating a plot usually involves 1) getting some data, 2) describing the plot, 3) producing some output in a serialized image format or in a graphics context.
+I. Data sources #  nspl plotting routines take data from org.nspl.data.DataSource subtypes. A DataSource is a lazy collection of vectors of doubles, with definition:
+trait DataSource { def iterator: Iterator[Row] } trait Row { def apply(i: Int): Double def label: String } For most use cases the import org.</description>
+    </item>
+    
+    <item>
+      <title>Imports</title>
+      <link>https://pityka.github.io/nspl/docs/imports/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://pityka.github.io/nspl/docs/imports/</guid>
+      <description>Imports #  Wildcard imports #  If you decide to use wildcard imports then import everthing from the org.nspl package. This will import all the plotting routines, but will not import any platform specific code.
+Most plotting routines need a org.nspl.FontConfiguration instance in the implicit scope. This instance is platform specific, and if you import everything from one of the platform specific packages then this will be imported as well in the scope.</description>
     </item>
     
     <item>
       <title>Data renderers</title>
-      <link>https://pityka.github.io/nspl/docs/datarenders/</link>
+      <link>https://pityka.github.io/nspl/docs/datarenderers/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>https://pityka.github.io/nspl/docs/datarenders/</guid>
+      <guid>https://pityka.github.io/nspl/docs/datarenderers/</guid>
       <description>Data renderers #  Data renderers are implementations of the org.nspl.DataRenderer trait. They create a visual representation from a single data row. Data renderers provide much of the versatility of nspl, for a full you can consult the API documentation.
 Data renderers may be combined, as explained in the Usage Overview section.
 In this section we will use the following data and imports for each code examples:
@@ -37,6 +47,16 @@ import org.nspl._ import org.</description>
       <guid>https://pityka.github.io/nspl/docs/layouts/</guid>
       <description>Layouts and combinators #  Individual plots may be combined into complex figures. This is done by the group() and the sequence() methods. group() turns a tuple of plots into a single plot containing each. sequence() turns a collection (sequence) of plots into a single plot containing each.
 Both group() and sequence() take multiple arguments and the last argument is an instance of the org.nspl.Layout type. The layout describes how to lay out the individual panels relative to each other.</description>
+    </item>
+    
+    <item>
+      <title>Output formats</title>
+      <link>https://pityka.github.io/nspl/docs/backends/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://pityka.github.io/nspl/docs/backends/</guid>
+      <description>Nspl has support for the following output formats and platforms:
+ The &amp;quot;io.github.pityka&amp;quot; %% &amp;quot;nspl-awt&amp;quot; module works on the JVM and may produce PDF, SVG, EPS, PNG, JPG encoded images or documents, or draws into the interactive Java Graphics2D context). The &amp;quot;io.github.pityka&amp;quot; %%% &amp;quot;nspl-canvas-js&amp;quot; module runs in the browser and can draw onto an interactive html5 canvas. The &amp;quot;io.github.pityka&amp;quot; %%% &amp;quot;scalatags-js&amp;quot; module can produce an SVG image as a DOM subtree (using ScalaTags).</description>
     </item>
     
     <item>

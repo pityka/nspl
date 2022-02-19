@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Imports #  Wildcard imports #  If you decide to use wildcard imports then import everthing from the org.nspl package. This will import all the plotting routines, but will not import any platform specific code.
+Most plotting routines need a org.nspl.FontConfiguration instance in the implicit scope. This instance is platform specific, and if you import everything from one of the platform specific packages then this will be imported as well in the scope.">
+<meta name="theme-color" content="#FFFFFF">
+<meta name="color-scheme" content="light dark"><meta property="og:title" content="Imports" />
+<meta property="og:description" content="Imports #  Wildcard imports #  If you decide to use wildcard imports then import everthing from the org.nspl package. This will import all the plotting routines, but will not import any platform specific code.
+Most plotting routines need a org.nspl.FontConfiguration instance in the implicit scope. This instance is platform specific, and if you import everything from one of the platform specific packages then this will be imported as well in the scope." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://pityka.github.io/nspl/docs/imports/" /><meta property="article:section" content="docs" />
+
+
+
+<title>Imports | nspl</title>
+<link rel="manifest" href="/nspl/manifest.json">
+<link rel="icon" href="/nspl/favicon.png" type="image/x-icon">
+<link rel="stylesheet" href="/nspl/book.min.82c5dbd23447cee0b4c2aa3ed08ce0961faa40e1fa370eee4f8c9f02e0d46b5f.css" integrity="sha256-gsXb0jRHzuC0wqo&#43;0Izglh&#43;qQOH6Nw7uT4yfAuDUa18=" crossorigin="anonymous">
+  <script defer src="/nspl/flexsearch.min.js"></script>
+  <script defer src="/nspl/en.search.min.1b35708ca73d99a67019a816375dca6d3fb1fc297ad8a6ff2c81f07415a71dc6.js" integrity="sha256-GzVwjKc9maZwGagWN13KbT&#43;x/Cl62Kb/LIHwdBWnHcY=" crossorigin="anonymous"></script>
+
+  <script defer src="/nspl/sw.min.011b5f154e1d57a76fc75aaed4be4a07813108b2b19df910b069bb242d17785c.js" integrity="sha256-ARtfFU4dV6dvx1qu1L5KB4ExCLKxnfkQsGm7JC0XeFw=" crossorigin="anonymous"></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="/nspl/"><span>nspl</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://pityka.github.io/nspl/docs/usage/" class="">Usage overview</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://pityka.github.io/nspl/docs/imports/" class=" active">Imports</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://pityka.github.io/nspl/docs/datarenderers/" class="">Data renderers</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://pityka.github.io/nspl/docs/layouts/" class="">Multi-panel figures</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://pityka.github.io/nspl/docs/backends/" class="">Output formats</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://pityka.github.io/nspl/docs/gallery/" class="">Plot gallery</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="/nspl/api/" target="_blank" rel="noopener">
+        API
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://github.com/pityka/nspl" target="_blank" rel="noopener">
+        Code
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var a=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(b){localStorage.setItem("menu.scrollTop",a.scrollTop)}),a.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/nspl/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>Imports</strong>
+
+  <label for="toc-control">
+    
+    <img src="/nspl/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#imports">Imports</a>
+      <ul>
+        <li><a href="#wildcard-imports">Wildcard imports</a></li>
+        <li><a href="#non-wildcard-imports">Non-wildcard imports</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown"><h1 id="imports">
+  Imports
+  <a class="anchor" href="#imports">#</a>
+</h1>
+<h2 id="wildcard-imports">
+  Wildcard imports
+  <a class="anchor" href="#wildcard-imports">#</a>
+</h2>
+<p>If you decide to use wildcard imports then import everthing from the <code>org.nspl</code> package.
+This will import all the plotting routines, but will not import any platform specific code.</p>
+<p>Most plotting routines need a <code>org.nspl.FontConfiguration</code> instance in the implicit scope.
+This instance is platform specific, and if you import everything from one of the platform specific packages then this will be imported as well in the scope.</p>
+<p>In summary, with wildcard imports you need these two imports if using the canvas backend:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala"><span style="color:#66d9ef">import</span> org.nspl._
+<span style="color:#66d9ef">import</span> org.nspl.canvasrenderer._
+</code></pre></div><p>.. and these two if you use the JVM AWT backend:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala"><span style="color:#66d9ef">import</span> org.nspl._ 
+<span style="color:#66d9ef">import</span> org.nspl.awtrenderer._ 
+</code></pre></div><h2 id="non-wildcard-imports">
+  Non-wildcard imports
+  <a class="anchor" href="#non-wildcard-imports">#</a>
+</h2>
+<p>If you don&rsquo;t want to pollute the namespace then you can import only the <code>FontConfiguration</code> implicit instance, and prefix every call with its package e.g.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala"><span style="color:#66d9ef">import</span> org.nspl
+<span style="color:#66d9ef">import</span> org.nspl.awtrenderer.<span style="color:#f92672">{</span>defaultGlyphMeasurer<span style="color:#f92672">,</span> defaultAWTFont<span style="color:#f92672">}</span>
+</code></pre></div></article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+
+
+  <script>(function(){function a(c){const a=window.getSelection(),b=document.createRange();b.selectNodeContents(c),a.removeAllRanges(),a.addRange(b)}document.querySelectorAll("pre code").forEach(b=>{b.addEventListener("click",function(c){a(b.parentElement),navigator.clipboard&&navigator.clipboard.writeText(b.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#imports">Imports</a>
+      <ul>
+        <li><a href="#wildcard-imports">Wildcard imports</a></li>
+        <li><a href="#non-wildcard-imports">Non-wildcard imports</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

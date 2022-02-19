@@ -21,7 +21,7 @@ import org.nspl._ import org.nspl.data.HistogramData import org.nspl.saddle._ im
 <link rel="icon" href="/nspl/favicon.png" type="image/x-icon">
 <link rel="stylesheet" href="/nspl/book.min.82c5dbd23447cee0b4c2aa3ed08ce0961faa40e1fa370eee4f8c9f02e0d46b5f.css" integrity="sha256-gsXb0jRHzuC0wqo&#43;0Izglh&#43;qQOH6Nw7uT4yfAuDUa18=" crossorigin="anonymous">
   <script defer src="/nspl/flexsearch.min.js"></script>
-  <script defer src="/nspl/en.search.min.37e36b8a62047350565334b9b039402e5674db89e2cdb3806904d7bb3fc146dd.js" integrity="sha256-N&#43;NrimIEc1BWUzS5sDlALlZ024nizbOAaQTXuz/BRt0=" crossorigin="anonymous"></script>
+  <script defer src="/nspl/en.search.min.1b35708ca73d99a67019a816375dca6d3fb1fc297ad8a6ff2c81f07415a71dc6.js" integrity="sha256-GzVwjKc9maZwGagWN13KbT&#43;x/Cl62Kb/LIHwdBWnHcY=" crossorigin="anonymous"></script>
 
   <script defer src="/nspl/sw.min.011b5f154e1d57a76fc75aaed4be4a07813108b2b19df910b069bb242d17785c.js" integrity="sha256-ARtfFU4dV6dvx1qu1L5KB4ExCLKxnfkQsGm7JC0XeFw=" crossorigin="anonymous"></script>
 <!--
@@ -88,7 +88,20 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://pityka.github.io/nspl/docs/datarenders/" class="">Data renderers</a>
+    <a href="https://pityka.github.io/nspl/docs/imports/" class="">Imports</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://pityka.github.io/nspl/docs/datarenderers/" class="">Data renderers</a>
   
 
         </li>
@@ -102,6 +115,19 @@ https://github.com/alex-shpak/hugo-book
 
   
     <a href="https://pityka.github.io/nspl/docs/layouts/" class="">Multi-panel figures</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://pityka.github.io/nspl/docs/backends/" class="">Output formats</a>
   
 
         </li>
@@ -274,7 +300,7 @@ To facilitate data manipulation these examples use the Saddle data frame library
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala">      <span style="color:#66d9ef">val</span> fig0 <span style="color:#66d9ef">=</span> xyplot<span style="color:#f92672">(</span>
         data2<span style="color:#f92672">.</span>col<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Sepal.Length&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;Sepal.Width&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;spec&#34;</span><span style="color:#f92672">)</span>
       <span style="color:#f92672">)(</span>
-        extraLegend <span style="color:#66d9ef">=</span> spec2Num<span style="color:#f92672">.</span>toSeq<span style="color:#f92672">.</span>map<span style="color:#f92672">(</span>x <span style="color:#66d9ef">=&gt;</span>
+        par<span style="color:#f92672">(</span>extraLegend <span style="color:#66d9ef">=</span> spec2Num<span style="color:#f92672">.</span>toSeq<span style="color:#f92672">.</span>map<span style="color:#f92672">(</span>x <span style="color:#66d9ef">=&gt;</span>
           x<span style="color:#f92672">.</span>_1 <span style="color:#f92672">-&gt;</span> <span style="color:#a6e22e">PointLegend</span><span style="color:#f92672">(</span>
             shape <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">Shape</span><span style="color:#f92672">.</span>rectangle<span style="color:#f92672">(</span><span style="color:#ae81ff">0</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">1</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">1</span><span style="color:#f92672">),</span>
             color <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">DiscreteColors</span><span style="color:#f92672">(</span>spec2Num<span style="color:#f92672">.</span>size<span style="color:#f92672">)(</span>x<span style="color:#f92672">.</span>_2<span style="color:#f92672">)</span>
@@ -282,7 +308,7 @@ To facilitate data manipulation these examples use the Saddle data frame library
         <span style="color:#f92672">),</span>
         xlab <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;Sepal.Length&#34;</span><span style="color:#f92672">,</span>
         ylab <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;Sepal.Width&#34;</span><span style="color:#f92672">,</span>
-        main <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;Iris data&#34;</span>
+        main <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;Iris data&#34;</span><span style="color:#f92672">)</span>
       <span style="color:#f92672">)</span>
 
       <span style="color:#66d9ef">val</span> fig1 <span style="color:#66d9ef">=</span> xyplot<span style="color:#f92672">(</span>
@@ -298,7 +324,7 @@ To facilitate data manipulation these examples use the Saddle data frame library
             <span style="color:#f92672">.</span>toSeq
         <span style="color:#f92672">)</span>
       <span style="color:#f92672">)(</span>
-        extraLegend <span style="color:#66d9ef">=</span> spec2Num<span style="color:#f92672">.</span>toSeq<span style="color:#f92672">.</span>map<span style="color:#f92672">(</span>x <span style="color:#66d9ef">=&gt;</span>
+       par<span style="color:#f92672">(</span>extraLegend <span style="color:#66d9ef">=</span> spec2Num<span style="color:#f92672">.</span>toSeq<span style="color:#f92672">.</span>map<span style="color:#f92672">(</span>x <span style="color:#66d9ef">=&gt;</span>
           x<span style="color:#f92672">.</span>_1 <span style="color:#f92672">-&gt;</span> <span style="color:#a6e22e">PointLegend</span><span style="color:#f92672">(</span>
             shape <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">Shape</span><span style="color:#f92672">.</span>rectangle<span style="color:#f92672">(</span><span style="color:#ae81ff">0</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">1</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">1</span><span style="color:#f92672">),</span>
             color <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">DiscreteColors</span><span style="color:#f92672">(</span>spec2Num<span style="color:#f92672">.</span>size<span style="color:#f92672">)(</span>x<span style="color:#f92672">.</span>_2<span style="color:#f92672">)</span>
@@ -306,7 +332,7 @@ To facilitate data manipulation these examples use the Saddle data frame library
         <span style="color:#f92672">),</span>
         xlab <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;PC1&#34;</span><span style="color:#f92672">,</span>
         ylab <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;PC2&#34;</span><span style="color:#f92672">,</span>
-        main <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;PC1 vs PC2&#34;</span>
+        main <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;PC1 vs PC2&#34;</span><span style="color:#f92672">)</span>
       <span style="color:#f92672">)</span>
 
    
@@ -314,11 +340,11 @@ To facilitate data manipulation these examples use the Saddle data frame library
       <span style="color:#66d9ef">val</span> scree <span style="color:#66d9ef">=</span> xyplot<span style="color:#f92672">(</span>
         indexed<span style="color:#f92672">(</span>eval<span style="color:#f92672">.</span>firstCol<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;x&#34;</span><span style="color:#f92672">).</span>toVec<span style="color:#f92672">.</span>toSeq<span style="color:#f92672">.</span>sorted<span style="color:#f92672">.</span>reverse<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> line<span style="color:#f92672">()</span>
       <span style="color:#f92672">)(</span>
-        xAxisMargin <span style="color:#66d9ef">=</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">,</span>
+        par<span style="color:#f92672">(</span>xAxisMargin <span style="color:#66d9ef">=</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">,</span>
         xlab <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;Order&#34;</span><span style="color:#f92672">,</span>
         ylab <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;Eval&#34;</span><span style="color:#f92672">,</span>
         main <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;Scree&#34;</span>
-      <span style="color:#f92672">)</span>
+      <span style="color:#f92672">))</span>
 
       renderToByteArray<span style="color:#f92672">(</span>
       group<span style="color:#f92672">(</span>fig0<span style="color:#f92672">,</span>fig1<span style="color:#f92672">,</span>scree<span style="color:#f92672">,</span><span style="color:#a6e22e">TableLayout</span><span style="color:#f92672">(</span><span style="color:#ae81ff">2</span><span style="color:#f92672">)).</span>build<span style="color:#f92672">,</span>
@@ -332,10 +358,10 @@ To facilitate data manipulation these examples use the Saddle data frame library
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala">      <span style="color:#66d9ef">val</span> hist1 <span style="color:#66d9ef">=</span> xyplot<span style="color:#f92672">(</span>
         <span style="color:#a6e22e">HistogramData</span><span style="color:#f92672">(</span>rotated<span style="color:#f92672">.</span>firstCol<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;PC1&#34;</span><span style="color:#f92672">).</span>toVec<span style="color:#f92672">.</span>toSeq<span style="color:#f92672">,</span> <span style="color:#ae81ff">10</span><span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> bar<span style="color:#f92672">()</span>
       <span style="color:#f92672">)(</span>
-        xlab <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;PC1&#34;</span><span style="color:#f92672">,</span>
+        par<span style="color:#f92672">(</span>xlab <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;PC1&#34;</span><span style="color:#f92672">,</span>
         ylab <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;freq.&#34;</span><span style="color:#f92672">,</span>
         main <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;Loading distribution&#34;</span><span style="color:#f92672">,</span>
-        ylim <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">Some</span><span style="color:#f92672">(</span><span style="color:#ae81ff">0</span>d<span style="color:#f92672">,</span> <span style="color:#a6e22e">Double</span><span style="color:#f92672">.</span><span style="color:#a6e22e">NaN</span><span style="color:#f92672">)</span>
+        ylim <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">Some</span><span style="color:#f92672">(</span><span style="color:#ae81ff">0</span>d<span style="color:#f92672">,</span> <span style="color:#a6e22e">Double</span><span style="color:#f92672">.</span><span style="color:#a6e22e">NaN</span><span style="color:#f92672">))</span>
       <span style="color:#f92672">)</span>
 
       renderToByteArray<span style="color:#f92672">(</span>hist1<span style="color:#f92672">.</span>build<span style="color:#f92672">,</span>width<span style="color:#66d9ef">=</span><span style="color:#ae81ff">2000</span><span style="color:#f92672">)</span>
@@ -348,10 +374,10 @@ To facilitate data manipulation these examples use the Saddle data frame library
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala">      <span style="color:#66d9ef">val</span> bar1 <span style="color:#66d9ef">=</span> barplotVertical<span style="color:#f92672">(</span>
         <span style="color:#a6e22e">Series</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;a&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">(-</span><span style="color:#ae81ff">2</span>d<span style="color:#f92672">),</span> <span style="color:#e6db74">&#34;b&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">(-</span><span style="color:#ae81ff">1</span>d<span style="color:#f92672">),</span> <span style="color:#e6db74">&#34;c&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">0</span>d<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;d&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">1</span>d<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;e&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">2</span>d<span style="color:#f92672">),</span>
         color <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">RedBlue</span><span style="color:#f92672">(-</span><span style="color:#ae81ff">2</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">2</span><span style="color:#f92672">)</span>
-      <span style="color:#f92672">)</span>
+      <span style="color:#f92672">)(</span>par<span style="color:#f92672">())</span>
       <span style="color:#66d9ef">val</span> bar2 <span style="color:#66d9ef">=</span> barplotHorizontal<span style="color:#f92672">(</span>
         <span style="color:#a6e22e">Series</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;a&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">(-</span><span style="color:#ae81ff">2</span>d<span style="color:#f92672">),</span> <span style="color:#e6db74">&#34;b&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">(-</span><span style="color:#ae81ff">1</span>d<span style="color:#f92672">),</span> <span style="color:#e6db74">&#34;c&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">0</span>d<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;d&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">1</span>d<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;e&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">2</span>d<span style="color:#f92672">)</span>
-      <span style="color:#f92672">)</span>
+      <span style="color:#f92672">)(</span>par<span style="color:#f92672">())</span>
 
       renderToByteArray<span style="color:#f92672">((</span>group<span style="color:#f92672">(</span>bar1<span style="color:#f92672">,</span>bar2<span style="color:#f92672">,</span><span style="color:#a6e22e">TableLayout</span><span style="color:#f92672">(</span><span style="color:#ae81ff">2</span><span style="color:#f92672">))).</span>build<span style="color:#f92672">,</span>width<span style="color:#66d9ef">=</span><span style="color:#ae81ff">2000</span><span style="color:#f92672">)</span>
 </code></pre></div><p>The above code block produces this plot: 
@@ -365,7 +391,7 @@ To facilitate data manipulation these examples use the Saddle data frame library
         density<span style="color:#f92672">(</span>rotated<span style="color:#f92672">.</span>firstCol<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;PC1&#34;</span><span style="color:#f92672">).</span>toVec<span style="color:#f92672">.</span>toSeq<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> line<span style="color:#f92672">(</span>
           stroke <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">StrokeConf</span><span style="color:#f92672">(</span><span style="color:#ae81ff">1</span> fts<span style="color:#f92672">)</span>
         <span style="color:#f92672">)</span>
-      <span style="color:#f92672">)(</span>xlab <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;PC1&#34;</span><span style="color:#f92672">,</span> ylab <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;dens.&#34;</span><span style="color:#f92672">,</span> main <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;Loading distribution&#34;</span><span style="color:#f92672">)</span>
+      <span style="color:#f92672">)(</span>par<span style="color:#f92672">(</span>xlab <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;PC1&#34;</span><span style="color:#f92672">,</span> ylab <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;dens.&#34;</span><span style="color:#f92672">,</span> main <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;Loading distribution&#34;</span><span style="color:#f92672">))</span>
 
       renderToByteArray<span style="color:#f92672">(</span>density1<span style="color:#f92672">.</span>build<span style="color:#f92672">,</span>width<span style="color:#66d9ef">=</span><span style="color:#ae81ff">2000</span><span style="color:#f92672">)</span>
 
@@ -378,7 +404,7 @@ To facilitate data manipulation these examples use the Saddle data frame library
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala">      <span style="color:#66d9ef">import</span> org.nspl.saddle.rasterplotFromFrame
       <span style="color:#66d9ef">val</span> raster1 <span style="color:#66d9ef">=</span> rasterplotFromFrame<span style="color:#f92672">(</span>
         rotated<span style="color:#f92672">.</span>rowAt<span style="color:#f92672">(</span><span style="color:#ae81ff">0</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">10</span><span style="color:#f92672">),</span> 
-        yLabFontSize <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">Some</span><span style="color:#f92672">(</span><span style="color:#ae81ff">0.5</span> fts<span style="color:#f92672">))</span>
+        yLabFontSize <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">Some</span><span style="color:#f92672">(</span><span style="color:#ae81ff">0.5</span> fts<span style="color:#f92672">))(</span>par<span style="color:#f92672">())</span>
 
       renderToByteArray<span style="color:#f92672">(</span>raster1<span style="color:#f92672">.</span>build<span style="color:#f92672">,</span>width<span style="color:#66d9ef">=</span><span style="color:#ae81ff">2000</span><span style="color:#f92672">)</span>
 </code></pre></div><p>The above code block produces this plot: 
@@ -394,7 +420,7 @@ To facilitate data manipulation these examples use the Saddle data frame library
             <span style="color:#f92672">.</span>toVec
             <span style="color:#f92672">.</span>toSeq
         <span style="color:#f92672">)</span>
-      <span style="color:#f92672">)</span>
+      <span style="color:#f92672">)(</span>par<span style="color:#f92672">())</span>
 
       renderToByteArray<span style="color:#f92672">(</span>densmap<span style="color:#f92672">.</span>build<span style="color:#f92672">,</span>width<span style="color:#66d9ef">=</span><span style="color:#ae81ff">2000</span><span style="color:#f92672">)</span>
 </code></pre></div><p>The above code block produces this plot: 
@@ -408,13 +434,13 @@ To facilitate data manipulation these examples use the Saddle data frame library
           <span style="color:#f92672">.</span>firstCol<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Sepal.Length&#34;</span><span style="color:#f92672">)</span>
           <span style="color:#f92672">.</span>toVec
           <span style="color:#f92672">.</span>toSeq <span style="color:#f92672">-&gt;</span> data2<span style="color:#f92672">.</span>firstCol<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Sepal.Width&#34;</span><span style="color:#f92672">).</span>toVec<span style="color:#f92672">.</span>toSeq<span style="color:#f92672">,</span>
-        ylab <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;Sepal Length&#34;</span><span style="color:#f92672">,</span>
         xnames <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">Seq</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Sepal Length&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;Sepal Width&#34;</span><span style="color:#f92672">),</span>
-        xLabelRotation <span style="color:#66d9ef">=</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">0.3</span>
-      <span style="color:#f92672">)</span>
+        
+      <span style="color:#f92672">)(</span>par<span style="color:#f92672">(</span>ylab <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;Sepal Length&#34;</span><span style="color:#f92672">,</span>
+        xLabelRotation <span style="color:#66d9ef">=</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">0.3</span><span style="color:#f92672">))</span>
 
       <span style="color:#66d9ef">val</span> boxpl2 <span style="color:#66d9ef">=</span>
-        boxplotFromLabels<span style="color:#f92672">(</span><span style="color:#a6e22e">List</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;a&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">0</span>d<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;a&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">1</span>d<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;b&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">3</span>d<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;b&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">4</span>d<span style="color:#f92672">))</span>
+        boxplotFromLabels<span style="color:#f92672">(</span><span style="color:#a6e22e">List</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;a&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">0</span>d<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;a&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">1</span>d<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;b&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">3</span>d<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;b&#34;</span> <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">4</span>d<span style="color:#f92672">))(</span>par<span style="color:#f92672">())</span>
 
       renderToByteArray<span style="color:#f92672">(</span>group<span style="color:#f92672">(</span>fig4<span style="color:#f92672">,</span>boxpl2<span style="color:#f92672">,</span><span style="color:#a6e22e">TableLayout</span><span style="color:#f92672">(</span><span style="color:#ae81ff">2</span><span style="color:#f92672">)).</span>build<span style="color:#f92672">,</span>width<span style="color:#66d9ef">=</span><span style="color:#ae81ff">2000</span><span style="color:#f92672">)</span>
 </code></pre></div><p>The above code block produces this plot: 
@@ -442,7 +468,7 @@ To facilitate data manipulation these examples use the Saddle data frame library
             <span style="color:#ae81ff">1</span>e6 <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">1</span>e6<span style="color:#f92672">,</span>
             <span style="color:#ae81ff">1</span>e7 <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">1</span>e7
           <span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> point<span style="color:#f92672">()</span>
-        <span style="color:#f92672">)(</span>ylog <span style="color:#66d9ef">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">,</span> xlog <span style="color:#66d9ef">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">)</span>
+        <span style="color:#f92672">)(</span>par<span style="color:#f92672">(</span>ylog <span style="color:#66d9ef">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">,</span> xlog <span style="color:#66d9ef">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">))</span>
      renderToByteArray<span style="color:#f92672">(</span>logaxis<span style="color:#f92672">.</span>build<span style="color:#f92672">,</span>width<span style="color:#66d9ef">=</span><span style="color:#ae81ff">2000</span><span style="color:#f92672">)</span>
 </code></pre></div><p>The above code block produces this plot: 
   <img src="assets/scatterlog.png" alt="" /></p>

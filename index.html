@@ -4,9 +4,8 @@
 	<meta name="generator" content="Hugo 0.89.4" />
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Scala plotting library #  nspl is a plotting library for the Scala programming language. nspl can create various plots (scatter, line, bar, box etc) and complex figures.
-Platforms and output formats #  nspl supports Scala on the JVM and Scala.js. It can render both vector graphics (SVG, PDF, postscript) and raster formats (JPG, PNG). nspl also supports graphics contexts like java.awt.Graphics2D or the html5 canvas.
-Getting started (on JVM) #  Add the following lines to your build.">
+<meta name="description" content="Scala plotting library #  nspl is a fast and expressive plotting library for the Scala programming language. nspl can create various plots (scatter, line, bar, box etc) and complex figures.
+Platforms and output formats #  The library supports Scala on the JVM and Scala.js in the browser. It can render both vector graphics (SVG, PDF, postscript) and raster formats (JPG, PNG). It also supports interactive graphics contexts like java.">
 <meta name="theme-color" content="#FFFFFF">
 <meta name="color-scheme" content="light dark"><meta property="og:title" content="nspl plotting library" />
 <meta property="og:description" content="" />
@@ -18,7 +17,7 @@ Getting started (on JVM) #  Add the following lines to your build.">
 <link rel="icon" href="/nspl/favicon.png" type="image/x-icon">
 <link rel="stylesheet" href="/nspl/book.min.82c5dbd23447cee0b4c2aa3ed08ce0961faa40e1fa370eee4f8c9f02e0d46b5f.css" integrity="sha256-gsXb0jRHzuC0wqo&#43;0Izglh&#43;qQOH6Nw7uT4yfAuDUa18=" crossorigin="anonymous">
   <script defer src="/nspl/flexsearch.min.js"></script>
-  <script defer src="/nspl/en.search.min.37e36b8a62047350565334b9b039402e5674db89e2cdb3806904d7bb3fc146dd.js" integrity="sha256-N&#43;NrimIEc1BWUzS5sDlALlZ024nizbOAaQTXuz/BRt0=" crossorigin="anonymous"></script>
+  <script defer src="/nspl/en.search.min.1b35708ca73d99a67019a816375dca6d3fb1fc297ad8a6ff2c81f07415a71dc6.js" integrity="sha256-GzVwjKc9maZwGagWN13KbT&#43;x/Cl62Kb/LIHwdBWnHcY=" crossorigin="anonymous"></script>
 
   <script defer src="/nspl/sw.min.011b5f154e1d57a76fc75aaed4be4a07813108b2b19df910b069bb242d17785c.js" integrity="sha256-ARtfFU4dV6dvx1qu1L5KB4ExCLKxnfkQsGm7JC0XeFw=" crossorigin="anonymous"></script>
 <link rel="alternate" type="application/rss+xml" href="https://pityka.github.io/nspl/index.xml" title="nspl" />
@@ -86,7 +85,20 @@ https://github.com/alex-shpak/hugo-book
   
 
   
-    <a href="https://pityka.github.io/nspl/docs/datarenders/" class="">Data renderers</a>
+    <a href="https://pityka.github.io/nspl/docs/imports/" class="">Imports</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://pityka.github.io/nspl/docs/datarenderers/" class="">Data renderers</a>
   
 
         </li>
@@ -100,6 +112,19 @@ https://github.com/alex-shpak/hugo-book
 
   
     <a href="https://pityka.github.io/nspl/docs/layouts/" class="">Multi-panel figures</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="https://pityka.github.io/nspl/docs/backends/" class="">Output formats</a>
   
 
         </li>
@@ -191,6 +216,7 @@ https://github.com/alex-shpak/hugo-book
     <li><a href="#scala-plotting-library">Scala plotting library</a>
       <ul>
         <li><a href="#platforms-and-output-formats">Platforms and output formats</a></li>
+        <li><a href="#peformance">Peformance</a></li>
         <li><a href="#getting-started-on-jvm">Getting started (on JVM)</a></li>
         <li><a href="#getting-started-using-scalajs">Getting started (using Scala.js)</a></li>
         <li><a href="#dependencies">Dependencies</a></li>
@@ -212,21 +238,27 @@ https://github.com/alex-shpak/hugo-book
   Scala plotting library
   <a class="anchor" href="#scala-plotting-library">#</a>
 </h1>
-<p>nspl is a plotting library for the Scala programming language.
+<p>nspl is a fast and expressive plotting library for the Scala programming language.
 nspl can create various plots (scatter, line, bar, box etc) and complex figures.</p>
 <h2 id="platforms-and-output-formats">
   Platforms and output formats
   <a class="anchor" href="#platforms-and-output-formats">#</a>
 </h2>
-<p>nspl supports Scala on the JVM and Scala.js.
+<p>The library supports Scala on the JVM and Scala.js in the browser.
 It can render both vector graphics (SVG, PDF, postscript) and raster formats (JPG, PNG).
-nspl also supports graphics contexts like <code>java.awt.Graphics2D</code> or the html5 canvas.</p>
+It also supports interactive graphics contexts like <code>java.awt.Graphics2D</code> or the html5 canvas.</p>
+<h2 id="peformance">
+  Peformance
+  <a class="anchor" href="#peformance">#</a>
+</h2>
+<p>nspl has reasonable performance.
+For example the canvas backend can render and animate a plot containing a few thousand data points with 60fps.</p>
 <h2 id="getting-started-on-jvm">
   Getting started (on JVM)
   <a class="anchor" href="#getting-started-on-jvm">#</a>
 </h2>
 <p>Add the following lines to your build.sbt depending on the runtime environment</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala">libraryDependencies <span style="color:#f92672">+=</span> <span style="color:#e6db74">&#34;io.github.pityka&#34;</span> <span style="color:#f92672">%%</span> <span style="color:#e6db74">&#34;nspl-awt&#34;</span> <span style="color:#f92672">%</span> <span style="color:#e6db74">&#34;0.1.0&#34;</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala">libraryDependencies <span style="color:#f92672">+=</span> <span style="color:#e6db74">&#34;io.github.pityka&#34;</span> <span style="color:#f92672">%%</span> <span style="color:#e6db74">&#34;nspl-awt&#34;</span> <span style="color:#f92672">%</span> <span style="color:#e6db74">&#34;0.2.0&#34;</span>
 </code></pre></div><p>To use nspl on the JVM with the <code>java.awt</code> renderer you need the following imports:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala"><span style="color:#66d9ef">import</span> org.nspl._ 
 <span style="color:#66d9ef">import</span> org.nspl.awtrenderer._ 
@@ -242,9 +274,11 @@ nspl also supports graphics contexts like <code>java.awt.Graphics2D</code> or th
   <span style="color:#ae81ff">0</span> until <span style="color:#ae81ff">100</span> map <span style="color:#f92672">(</span><span style="color:#66d9ef">_</span> <span style="color:#66d9ef">=&gt;</span> nextDouble<span style="color:#f92672">()</span> <span style="color:#f92672">-&gt;</span> nextDouble<span style="color:#f92672">())</span>
 
 <span style="color:#66d9ef">val</span> plot <span style="color:#66d9ef">=</span> xyplot<span style="color:#f92672">(</span>someData<span style="color:#f92672">)(</span>
-            main<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Main label&#34;</span><span style="color:#f92672">,</span> 
-            xlab<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;x axis label&#34;</span><span style="color:#f92672">,</span>
-            ylab<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;y axis label&#34;</span>
+            par<span style="color:#f92672">(</span>
+              main<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Main label&#34;</span><span style="color:#f92672">,</span> 
+              xlab<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;x axis label&#34;</span><span style="color:#f92672">,</span>
+              ylab<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;y axis label&#34;</span>
+            <span style="color:#f92672">)</span>
           <span style="color:#f92672">)</span>
 
 renderToByteArray<span style="color:#f92672">(</span>plot<span style="color:#f92672">.</span>build<span style="color:#f92672">,</span> width<span style="color:#66d9ef">=</span><span style="color:#ae81ff">2000</span><span style="color:#f92672">)</span>
@@ -255,7 +289,7 @@ renderToByteArray<span style="color:#f92672">(</span>plot<span style="color:#f92
   <a class="anchor" href="#getting-started-using-scalajs">#</a>
 </h2>
 <p>Add the following lines to your build.sbt</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala">libraryDependencies <span style="color:#f92672">+=</span> <span style="color:#e6db74">&#34;io.github.pityka&#34;</span> <span style="color:#f92672">%%%</span> <span style="color:#e6db74">&#34;nspl-canvas-js&#34;</span> <span style="color:#f92672">%</span> <span style="color:#e6db74">&#34;0.1.0&#34;</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala">libraryDependencies <span style="color:#f92672">+=</span> <span style="color:#e6db74">&#34;io.github.pityka&#34;</span> <span style="color:#f92672">%%%</span> <span style="color:#e6db74">&#34;nspl-canvas-js&#34;</span> <span style="color:#f92672">%</span> <span style="color:#e6db74">&#34;0.2.0&#34;</span>
 </code></pre></div><p>To use nspl in the browser with the html5 canvas renderer you need these imports:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala"><span style="color:#66d9ef">import</span> org.nspl._
 <span style="color:#66d9ef">import</span> org.nspl.canvasrenderer._
@@ -268,12 +302,14 @@ renderToByteArray<span style="color:#f92672">(</span>plot<span style="color:#f92
   <span style="color:#ae81ff">0</span> until <span style="color:#ae81ff">100</span> map <span style="color:#f92672">(</span><span style="color:#66d9ef">_</span> <span style="color:#66d9ef">=&gt;</span> nextDouble<span style="color:#f92672">()</span> <span style="color:#f92672">-&gt;</span> nextDouble<span style="color:#f92672">())</span>
 
 <span style="color:#66d9ef">val</span> plot <span style="color:#66d9ef">=</span> xyplot<span style="color:#f92672">(</span>someData<span style="color:#f92672">)(</span>
-            main<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Main label&#34;</span><span style="color:#f92672">,</span> 
-            xlab<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;x axis label&#34;</span><span style="color:#f92672">,</span>
-            ylab<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;y axis label&#34;</span>
+            par<span style="color:#f92672">(</span>
+              main<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Main label&#34;</span><span style="color:#f92672">,</span> 
+              xlab<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;x axis label&#34;</span><span style="color:#f92672">,</span>
+              ylab<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;y axis label&#34;</span>
+            <span style="color:#f92672">)</span>
           <span style="color:#f92672">)</span>
 
-<span style="color:#66d9ef">val</span> <span style="color:#f92672">(</span>canvas<span style="color:#f92672">,</span> <span style="color:#66d9ef">_</span><span style="color:#f92672">)</span> <span style="color:#66d9ef">=</span> render<span style="color:#f92672">(</span>plot<span style="color:#f92672">,</span> width <span style="color:#66d9ef">=</span> <span style="color:#ae81ff">400</span><span style="color:#f92672">,</span> height <span style="color:#66d9ef">=</span> <span style="color:#ae81ff">400</span><span style="color:#f92672">)</span>
+<span style="color:#66d9ef">val</span> <span style="color:#f92672">(</span>canvas<span style="color:#f92672">,</span> <span style="color:#66d9ef">_</span><span style="color:#f92672">)</span> <span style="color:#66d9ef">=</span> render<span style="color:#f92672">(</span>plot<span style="color:#f92672">,</span> width <span style="color:#66d9ef">=</span> <span style="color:#ae81ff">600</span><span style="color:#f92672">,</span> height <span style="color:#66d9ef">=</span> <span style="color:#ae81ff">600</span><span style="color:#f92672">)</span>
 
 node<span style="color:#f92672">.</span>appendChild<span style="color:#f92672">(</span>canvas<span style="color:#f92672">)</span>
 </code></pre></div><div id="mdoc-html-run0" data-mdoc-js></div>
@@ -329,6 +365,7 @@ node<span style="color:#f92672">.</span>appendChild<span style="color:#f92672">(
     <li><a href="#scala-plotting-library">Scala plotting library</a>
       <ul>
         <li><a href="#platforms-and-output-formats">Platforms and output formats</a></li>
+        <li><a href="#peformance">Peformance</a></li>
         <li><a href="#getting-started-on-jvm">Getting started (on JVM)</a></li>
         <li><a href="#getting-started-using-scalajs">Getting started (using Scala.js)</a></li>
         <li><a href="#dependencies">Dependencies</a></li>
