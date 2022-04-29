@@ -26,7 +26,7 @@ inThisBuild(
 
 lazy val commonSettings = Seq(
   scalaVersion := "2.13.8",
-  crossScalaVersions := Seq("2.12.15", "2.13.8", "3.1.2"),
+  crossScalaVersions := Seq("2.12.15", "2.13.8"),
   javacOptions ++= Seq("-Xdoclint:none"),
   scalacOptions ++= Seq(
     "-language:postfixOps",
@@ -58,10 +58,7 @@ lazy val coreJS = project
     name := "nspl-core-js",
     target := file("core/targetJS"),
     Compile / sourceManaged := (Compile / sourceManaged ).value.getAbsoluteFile,
-    libraryDependencies ++= Seq(
-      "org.scala-lang.modules" %%% "scala-collection-compat" % "2.7.0",
-      ("org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0").cross(CrossVersion.for3Use2_13)
-    )
+    libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.7.0"
   )
   .enablePlugins(ScalaJSPlugin)
   .enablePlugins(spray.boilerplate.BoilerplatePlugin)

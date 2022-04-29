@@ -79,7 +79,7 @@ trait Plots3D {
       yHeight: RelFontSize
       // mainLabDistance: RelFontSize = 0.75 fts
   ) = {
-    val id = java.util.UUID.randomUUID.toString
+    val id = scala.util.Random.nextLong().toString
     Build(
       xyzplotarea(
         id,

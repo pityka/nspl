@@ -92,7 +92,7 @@ trait Plots {
       xNoTickLabel: Boolean = false,
       yNoTickLabel: Boolean = false
   ) = {
-    val id = java.util.UUID.randomUUID.toString
+    val id = scala.util.Random.nextLong().toString
     Build(
       xyplotarea(
         id,
