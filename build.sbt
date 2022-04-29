@@ -19,13 +19,14 @@ inThisBuild(
         "bartha.pityu@gmail.com",
         url("https://github.com/pityka/nspl")
       )
-    )
+    ),
+    scalaVersion := "2.13.8"
   )
 )
 
 lazy val commonSettings = Seq(
   scalaVersion := "2.13.8",
-  crossScalaVersions := Seq("2.12.15", "2.13.8"),
+  crossScalaVersions := Seq("2.12.15", "2.13.8", "3.1.2"),
   javacOptions ++= Seq("-Xdoclint:none"),
   scalacOptions ++= Seq(
     "-language:postfixOps",
@@ -46,7 +47,7 @@ lazy val core = project
   .settings(commonSettings)
   .settings(
     name := "nspl-core",
-    libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "2.6.0"
+    libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "2.7.0"
   )
   .enablePlugins(spray.boilerplate.BoilerplatePlugin)
 
@@ -57,7 +58,10 @@ lazy val coreJS = project
     name := "nspl-core-js",
     target := file("core/targetJS"),
     Compile / sourceManaged := (Compile / sourceManaged ).value.getAbsoluteFile,
-    libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.6.0"
+    libraryDependencies ++= Seq(
+      "org.scala-lang.modules" %%% "scala-collection-compat" % "2.7.0",
+      ("org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0").cross(CrossVersion.for3Use2_13)
+    )
   )
   .enablePlugins(ScalaJSPlugin)
   .enablePlugins(spray.boilerplate.BoilerplatePlugin)
@@ -88,7 +92,7 @@ lazy val scalatagsJs = project
     name := "nspl-scalatags-js",
     libraryDependencies ++= Seq(
       ("org.scala-js") %%% "scalajs-dom" % "2.1.0",
-      ("com.lihaoyi") %%% "scalatags" % "0.11.0"
+      ("com.lihaoyi") %%% "scalatags" % "0.11.1"
     )
   )
   .enablePlugins(ScalaJSPlugin)
@@ -109,7 +113,7 @@ lazy val awt = project
     name := "nspl-awt",
     libraryDependencies ++= Seq(
       "de.erichseifert.vectorgraphics2d" % "VectorGraphics2D" % "0.13",
-      "org.scalameta" %% "munit" % "1.0.0-M1" % Test
+      "org.scalameta" %% "munit" % "1.0.0-M3" % Test
     )
   )
   .dependsOn(core, sharedJvm)
@@ -119,7 +123,7 @@ lazy val scalatagsJvm = project
   .settings(commonSettings)
   .settings(
     name := "nspl-scalatags-jvm",
-    libraryDependencies += "com.lihaoyi" %% "scalatags" % "0.11.0"
+    libraryDependencies += "com.lihaoyi" %% "scalatags" % "0.11.1"
   )
   .dependsOn(core, sharedJvm)
 
@@ -129,7 +133,7 @@ lazy val saddle = (project in file("saddle"))
     name := "nspl-saddle",
     libraryDependencies ++= Seq(
       "io.github.pityka" %% "saddle-core" % "3.0.2",
-      "org.scalameta" %% "munit" % "1.0.0-M1" % Test
+      "org.scalameta" %% "munit" % "1.0.0-M3" % Test
     )
   )
   .dependsOn(core, awt, scalatagsJvm)
