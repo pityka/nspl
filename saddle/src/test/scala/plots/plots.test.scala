@@ -181,7 +181,7 @@ class SaddlePlotSpec extends munit.FunSuite {
 
       val empty2 =
         xyplotarea(
-          id = "sffasfsdfdf",
+          id = new PlotId,
           Nil,
           AxisSettings(LinearAxisFactory),
           AxisSettings(LinearAxisFactory),

@@ -92,7 +92,7 @@ trait Plots {
       xNoTickLabel: Boolean = false,
       yNoTickLabel: Boolean = false
   ) = {
-    val id = java.util.UUID.randomUUID.toString
+    val id = new PlotId
     Build(
       xyplotarea(
         id,
@@ -279,7 +279,7 @@ trait Plots {
   }
 
   def xyplotarea[F: FC](
-      id: String,
+      id: PlotId,
       data: Seq[(DataSource, List[DataRenderer])],
       xAxisSetting: AxisSettings,
       yAxisSetting: AxisSettings,

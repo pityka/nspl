@@ -79,7 +79,7 @@ trait Plots3D {
       yHeight: RelFontSize
       // mainLabDistance: RelFontSize = 0.75 fts
   ) = {
-    val id = java.util.UUID.randomUUID.toString
+    val id = new PlotId
     Build(
       xyzplotarea(
         id,
@@ -183,7 +183,7 @@ trait Plots3D {
   }
 
   def xyzplotarea[F: FC](
-      id: String,
+      id: PlotId,
       data: Seq[(DataSource, List[DataRenderer3D])],
       aspect: Double,
       zNear: Double,
