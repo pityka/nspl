@@ -5,6 +5,7 @@ import org.scalajs.dom
 import org.scalajs.dom.html
 import scala.collection.mutable.ArrayBuffer
 import scala.scalajs.js
+import java.util.ConcurrentModificationException
 
 private[nspl] case class CanvasRC(
     graphics: CanvasRenderingContext2D,
@@ -201,7 +202,11 @@ object canvasrenderer {
         dom.window.requestAnimationFrame { d =>
           val cb = queuedCallback
           queuedCallback = null
-          cb(d)
+          try {
+            cb(d)
+          } catch {
+            case _: ConcurrentModificationException => ()
+          }
         }
       }
       queuedCallback = body
