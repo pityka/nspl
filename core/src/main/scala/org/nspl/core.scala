@@ -99,7 +99,9 @@ case class RelFontSize(private val v: Double) extends AnyVal {
 }
 case class BaseFontSize(v: Int) extends AnyVal
 
+class PlotId 
+
 trait Identifier
 case object EmptyIdentifier extends Identifier
-case class PlotAreaIdentifier(id: String, bounds: Option[Bounds])
+case class PlotAreaIdentifier(id: PlotId, bounds: Option[Bounds])
     extends Identifier
