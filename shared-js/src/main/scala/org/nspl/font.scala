@@ -43,19 +43,7 @@ object CanvasGlyphMeasurer extends GlyphMeasurer[Font#F] {
     fontWidthCache.get((s, f)) match {
       case None =>
         val width = withFont(f) {
-          val metric = ctx.measureText(s.toString)
-          math.abs(
-            metric
-              .asInstanceOf[scalajs.js.Dynamic]
-              .actualBoundingBoxLeft
-              .asInstanceOf[Double]
-          ) +
-            math.abs(
-              metric
-                .asInstanceOf[scalajs.js.Dynamic]
-                .actualBoundingBoxRight
-                .asInstanceOf[Double]
-            )
+          ctx.measureText(s.toString).width
         }
         if (fontWidthCache.size < 5000) {
           fontWidthCache.update((s, f), width)
