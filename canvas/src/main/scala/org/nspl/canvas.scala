@@ -436,13 +436,13 @@ object canvasrenderer {
     private def drawAndFill(ctx: CanvasRC, elem: ShapeElem) = {
 
       if (
-        elem.fill.a > 0d || (elem.stroke.isDefined && elem.strokeColor.a > 0)
+        elem.fill.a > 0 || (elem.stroke.isDefined && elem.strokeColor.a > 0)
       ) {
         ctx.setTransformInGraphics()
 
         val shape = elem.shape
 
-        if (elem.fill.a > 0.0) {
+        if (elem.fill.a > 0) {
           ctx.withFill(elem.fill) {
             fill(shape, ctx.graphics)
           }
