@@ -37,19 +37,25 @@ object CanvasGlyphMeasurer extends GlyphMeasurer[Font#F] {
   }
 
   val fontWidthCache =
-    scala.collection.mutable.AnyRefMap[(Char, Font#F), Double]()
+    scala.collection.mutable.Map[Char, Double]()
+  var fontOfCache: Font#F = null
 
   def advance(s: Char, f: Font#F): Double = {
-    fontWidthCache.get((s, f)) match {
-      case None =>
-        val width = withFont(f) {
-          ctx.measureText(s.toString).width
-        }
-        if (fontWidthCache.size < 5000) {
-          fontWidthCache.update((s, f), width)
-        }
-        width
-      case Some(w) => w
+    if (fontOfCache != null && fontOfCache != f)
+      ctx.measureText(s.toString).width
+    else {
+      fontOfCache = f
+      fontWidthCache.get(s) match {
+        case None =>
+          val width = withFont(f) {
+            ctx.measureText(s.toString).width
+          }
+          if (fontWidthCache.size < 5000) {
+            fontWidthCache.update(s, width)
+          }
+          width
+        case Some(w) => w
+      }
     }
 
   }
