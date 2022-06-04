@@ -257,8 +257,8 @@ case class AxisSettings(
       if (numTicks1 == 0 || numMinorTicksFactor <= 0) Nil
       else
         minorTicks1.iterator
-          .filterNot(x => customTicks.map(_._1).contains(x))
           .filter(w => w <= axis.max && w >= axis.min)
+          .filterNot(x => customTicks.map(_._1).contains(x))
           .filterNot(majorTicks.contains)
           .toList
           .distinct
