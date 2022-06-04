@@ -226,6 +226,62 @@ trait JavaAWTUtil {
 
   }
 
+  private[nspl] def bench[K <: Renderable[K]](
+      build: => K,
+      width: Int = 1000
+  )(implicit
+      er: Renderer[K, JavaRC]
+  ) = {
+    import java.awt.image.BufferedImage
+
+    import javax.imageio.ImageIO;
+    import javax.imageio.ImageWriter;
+    import javax.imageio.stream.ImageOutputStream;
+    import java.awt.{Graphics, RenderingHints}
+
+    var elem = build
+
+    val aspect = elem.bounds.h / elem.bounds.w
+    val height = math.max((width * aspect).toInt, 1)
+
+    val bimage = new BufferedImage(
+      width,
+      height,
+      BufferedImage.TYPE_INT_ARGB
+    );
+
+    val g2d = bimage.createGraphics();
+    val renderingContext = JavaRC(g2d)
+
+    g2d.setRenderingHint(
+      RenderingHints.KEY_ANTIALIASING,
+      RenderingHints.VALUE_ANTIALIAS_ON
+    );
+    g2d.setRenderingHint(
+      RenderingHints.KEY_TEXT_ANTIALIASING,
+      RenderingHints.VALUE_TEXT_ANTIALIAS_ON
+    );
+
+    val bounds = Bounds(0, 0, width, height)
+
+    var i = 0
+    val N = 50000
+    while (i <= N) {
+      elem = build
+      renderingContext.render(fitToBounds(elem, bounds))
+      i += 1
+    }
+    i = 0
+    val t1 = System.nanoTime()
+    while (i <= N) {
+      elem = build
+      renderingContext.render(fitToBounds(elem, bounds))
+      i += 1
+    }
+    println((System.nanoTime - t1).toDouble / N * 1e-9)
+
+  }
+
   private def writeBinaryToFile(f: File, data: Array[Byte]): Unit = {
     val os = new BufferedOutputStream(new FileOutputStream(f))
     try {
