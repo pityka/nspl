@@ -7,6 +7,23 @@ import scala.collection.mutable.ArrayBuffer
 import scala.scalajs.js
 import java.util.ConcurrentModificationException
 
+private[nspl] class RunningAvg {
+  private var avg = 0d
+  private var n = 0d
+  private var n0 = 0L
+  def add(t: Double) = {
+    if (n0 > 50) {
+      n += 1
+      avg = avg + (t - avg) / n
+    } else {
+
+      n0 += 1
+    }
+  }
+  def current = avg
+  def currentN = n
+}
+
 private[nspl] case class CanvasRC(
     graphics: CanvasRenderingContext2D,
     cick: Identifier => Unit
@@ -17,6 +34,7 @@ private[nspl] case class CanvasRC(
   var strokeColor: Color = Color.black
   var dash: Seq[Double] = Nil
   var transformInGraphics: AffineTransform = AffineTransform.identity
+  val bench = new RunningAvg
 
   def withDash[T](d: Seq[Double])(f: => T) = {
     val current = dash
@@ -213,11 +231,23 @@ object canvasrenderer {
 
     }
 
-    def paint() = {
+    def bench[T](enabled: Boolean)(f: => T) = if (enabled) {
+      val t1 = System.nanoTime
+      val r = f
+      val t2 = System.nanoTime
+      ctx.bench.add((t2 - t1).toDouble)
+      if (ctx.bench.currentN % 100 == 0) {
+        println(ctx.bench.current * 1e-9)
+      }
+      r
+    } else f
+
+    def paint() = bench(false) {
 
       ctx.clear()
 
       ctx.plotAreaShapes.clear()
+
       ctx.render(
         fitToBounds(paintableElem, paintBounds)
       )
