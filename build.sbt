@@ -110,7 +110,8 @@ lazy val awt = project
     libraryDependencies ++= Seq(
       "de.erichseifert.vectorgraphics2d" % "VectorGraphics2D" % "0.13",
       "org.scalameta" %% "munit" % "1.0.0-M1" % Test
-    )
+    ),
+    fork := true
   )
   .dependsOn(core, sharedJvm)
 
