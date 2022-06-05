@@ -7,8 +7,8 @@ class BenchSpec extends munit.FunSuite {
 
   test("a") {
 
-    def random = 1 to 1000 map (i => scala.util.Random.nextDouble())
-    def random2 = 1 to 1000 map (i => scala.util.Random.nextGaussian())
+    def random = 1 to 10 map (i => scala.util.Random.nextDouble())
+    def random2 = 1 to 10 map (i => scala.util.Random.nextGaussian())
 
     val x = random
     val y = random

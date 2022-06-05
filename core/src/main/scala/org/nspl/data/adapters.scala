@@ -54,11 +54,16 @@ trait DataAdaptors extends DataTuples {
         productsToRow(((i % numCols).toDouble, (i / numCols).toDouble, v))
       }
       def dimension = 3
-      def columnMinMax(i: Int) = i match {
-        case 0 => Some(MinMaxImpl(0, numCols - 1d))
-        case 1 => Some(MinMaxImpl(0, numRows - 1d))
-        case 2 => Some(MinMaxImpl(s1.min, s1.max))
-      }
+
+      private val min = if (s1.isEmpty) Double.NaN else s1.min
+      private val max = if (s1.isEmpty) Double.NaN else s1.max
+      def columnMinMax(i: Int) = if (s1.isEmpty) None
+      else
+        i match {
+          case 0 => Some(MinMaxImpl(0, numCols - 1d))
+          case 1 => Some(MinMaxImpl(0, numRows - 1d))
+          case 2 => Some(MinMaxImpl(min, max))
+        }
     }
 
   def dataSource[T](s1: Iterator[T], minmax: IndexedSeq[MinMax])(implicit
@@ -79,9 +84,9 @@ trait DataAdaptors extends DataTuples {
   ): DataSource =
     new DataSource {
 
-      var max = scala.collection.mutable.ArrayBuffer[Double]()
-      var min = scala.collection.mutable.ArrayBuffer[Double]()
-      var columncount: Option[Int] = None
+      private var max = scala.collection.mutable.ArrayBuffer[Double]()
+      private var min = scala.collection.mutable.ArrayBuffer[Double]()
+      private var columncount: Option[Int] = None
 
       s2.map(f).foreach { row =>
         if (columncount.isEmpty) {
@@ -111,9 +116,31 @@ trait DataAdaptors extends DataTuples {
     new DataSourceWithQuantiles {
       def iterator = s.iterator.map(f)
       def dimension = s.headOption.map(_.dimension).getOrElse(0)
+
+      private var max = scala.collection.mutable.ArrayBuffer[Double]()
+      private var min = scala.collection.mutable.ArrayBuffer[Double]()
+      private var columncount: Option[Int] = None
+
+      s.map(f).foreach { row =>
+        if (columncount.isEmpty) {
+          columncount = Some(row.dimension)
+          max = ArrayBuffer.fill(columncount.get)(Double.MinValue)
+          min = ArrayBuffer.fill(columncount.get)(Double.MaxValue)
+        }
+
+        row.allColumns.zipWithIndex.foreach { case (v, i) =>
+          if (max(i) < v) {
+            max(i) = v
+          }
+          if (min(i) > v) {
+            min(i) = v
+          }
+        }
+      }
+
       def columnMinMax(i: Int) =
         if (s.isEmpty) None
-        else Some(MinMaxImpl(s.map(_.apply(i)).min, s.map(_.apply(i)).max))
+        else Some(MinMaxImpl(min(i), max(i)))
       def quantilesOfColumn(i: Int, qs: Vector[Double]) = {
         val v = s.map(_.apply(i))
         percentile(v, qs).toVector
@@ -126,11 +153,16 @@ trait DataAdaptors extends DataTuples {
       def iterator =
         s.iterator.zipWithIndex.map(x => productsToRow(x._2.toDouble -> x._1))
       def dimension = 2
-      def columnMinMax(i: Int) = i match {
-        case 0 => Some(MinMaxImpl(0, s.size - 1d))
-        case 1 => Some(MinMaxImpl(s.min, s.max))
-        case _ => None
-      }
+
+      private val min = if (s.isEmpty) Double.NaN else s.min
+      private val max = if (s.isEmpty) Double.NaN else s.max
+      def columnMinMax(i: Int) = if (s.isEmpty) None
+      else
+        i match {
+          case 0 => Some(MinMaxImpl(0, s.size - 1d))
+          case 1 => Some(MinMaxImpl(min, max))
+          case _ => None
+        }
       def quantilesOfColumn(i: Int, qs: Vector[Double]) = {
         assert(i == 1 || i == 0)
         val v =
