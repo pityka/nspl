@@ -51,17 +51,20 @@ case class AffineTransform(
   // 0  1  2  3  4  5  6  7  8
   // 00 01 02 10 11 12 20 21 22
   def transform(p: Point): Point = {
-    val bx = m2
-    val by = m5
-    val a00 = m0
-    val a01 = m1
-    val a10 = m3
-    val a11 = m4
+    if (this eq AffineTransform.identity) p
+    else {
+      val bx = m2
+      val by = m5
+      val a00 = m0
+      val a01 = m1
+      val a10 = m3
+      val a11 = m4
 
-    val nx = bx + a00 * p.x + a01 * p.y
-    val ny = by + a10 * p.x + a11 * p.y
+      val nx = bx + a00 * p.x + a01 * p.y
+      val ny = by + a10 * p.x + a11 * p.y
 
-    Point(nx, ny)
+      Point(nx, ny)
+    }
   }
   def transform(b: Bounds): Bounds = {
     transformBounds(b.x, b.y, b.w, b.h, b.anchor)
@@ -73,7 +76,7 @@ case class AffineTransform(
       h: Double,
       anchor: Option[Point]
   ): Bounds = {
-    if (this == AffineTransform.identity) Bounds(x, y, w, h, anchor)
+    if (this eq AffineTransform.identity) Bounds(x, y, w, h, anchor)
     else {
       val topLeft = transform(x, y)
       val topRight = transform(x + w, y)
@@ -108,7 +111,7 @@ case class AffineTransform(
     * which first applies tx then applies this
     */
   def applyBefore(tx: AffineTransform) =
-    if (tx == AffineTransform.identity) this
+    if (tx eq AffineTransform.identity) this
     else
       AffineTransform(
         m0 * tx.m0 + m1 * tx.m3,
@@ -123,7 +126,7 @@ case class AffineTransform(
     * which first applies this then applies tx
     */
   def andThen(tx: AffineTransform) =
-    if (tx == AffineTransform.identity) this
+    if (tx eq AffineTransform.identity) this
     else
       tx.applyBefore(this)
 
