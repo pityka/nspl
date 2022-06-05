@@ -35,7 +35,7 @@ class BenchSpec extends munit.FunSuite {
       )
     ).build
 
-    bench(p1)
+    bench(p1,render=false)
 
   }
 

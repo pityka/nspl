@@ -99,7 +99,7 @@ trait JavaAWTUtil {
           override def paintComponent(g: Graphics) = {
             super.paintComponent(g)
             val g2 = g.asInstanceOf[Graphics2D]
-            val renderingContext = JavaRC(g2)
+            val renderingContext = JavaRC(g2,true)
             val bounds = getBounds()
 
             renderingContext
@@ -138,7 +138,7 @@ trait JavaAWTUtil {
     val aspect = elem.bounds.h / elem.bounds.w
     val height = (width * aspect).toInt
     val g2d = new VectorGraphics2D()
-    val renderingContext = JavaRC(g2d)
+    val renderingContext = JavaRC(g2d,true)
 
     val processor =
       format match {
@@ -197,7 +197,7 @@ trait JavaAWTUtil {
     );
 
     val g2d = bimage.createGraphics();
-    val renderingContext = JavaRC(g2d)
+    val renderingContext = JavaRC(g2d, true)
 
     g2d.setRenderingHint(
       RenderingHints.KEY_ANTIALIASING,
@@ -228,7 +228,8 @@ trait JavaAWTUtil {
 
   private[nspl] def bench[K <: Renderable[K]](
       build: => K,
-      width: Int = 1000
+      width: Int = 1000,
+      render: Boolean = true
   )(implicit
       er: Renderer[K, JavaRC]
   ) = {
@@ -251,7 +252,7 @@ trait JavaAWTUtil {
     );
 
     val g2d = bimage.createGraphics();
-    val renderingContext = JavaRC(g2d)
+    val renderingContext = JavaRC(g2d,render)
 
     g2d.setRenderingHint(
       RenderingHints.KEY_ANTIALIASING,

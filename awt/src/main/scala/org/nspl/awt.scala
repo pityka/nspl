@@ -7,7 +7,7 @@ import java.awt.font.LineBreakMeasurer
 
 import JavaFontConversion._
 
-private[nspl] case class JavaRC(graphics: Graphics2D)
+private[nspl] case class JavaRC(graphics: Graphics2D, doRender: Boolean)
     extends RenderingContext[JavaRC] {
 
   var paintColor: Color = Color.black
@@ -87,8 +87,9 @@ object awtrenderer extends JavaAWTUtil {
     def render(ctx: JavaRC, elem: ShapeElem): Unit = {
 
       ctx.withTransform(elem.tx applyBefore elem.shape.currentTransform) {
-
-        drawAndFill(ctx, elem)
+        if (ctx.doRender) {
+          drawAndFill(ctx, elem)
+        }
 
       }
 
@@ -104,8 +105,10 @@ object awtrenderer extends JavaAWTUtil {
             ctx.graphics.setFont(font2font(elem.font))
             elem.layout.lines.foreach { case (line, lineTx) =>
               ctx.withTransform(lineTx) {
-                ctx.setTransformInGraphics()
-                ctx.graphics.drawString(line, 0, 0)
+                if (ctx.doRender) {
+                  ctx.setTransformInGraphics()
+                  ctx.graphics.drawString(line, 0, 0)
+                }
               }
             }
           }
