@@ -1,8 +1,8 @@
 package org.nspl
 
 trait Shape {
-  val bounds: Bounds
-  def transform(tx: (Bounds,AffineTransform) => AffineTransform): Shape
+  def bounds: Bounds
+  def transform(tx: (Bounds, AffineTransform) => AffineTransform): Shape
   def currentTransform: AffineTransform
 }
 
@@ -16,9 +16,9 @@ case class Rectangle(
 ) extends Shape {
 
   def currentTransform = tx
-  val bounds = tx.transform(Bounds(x, y, w, h, anchor))
-  def transform(tx: (Bounds,AffineTransform) => AffineTransform) =
-    this.copy(tx = tx(bounds,this.tx))
+  def bounds = tx.transformBounds(x, y, w, h, anchor)
+  def transform(tx: (Bounds, AffineTransform) => AffineTransform) =
+    this.copy(tx = tx(bounds, this.tx))
 }
 
 case class Ellipse(
@@ -30,9 +30,9 @@ case class Ellipse(
 ) extends Shape {
 
   def currentTransform = tx
-  val bounds = tx.transform(Bounds(x, y, w, h))
-  def transform(tx: (Bounds,AffineTransform) => AffineTransform) =
-    this.copy(tx = tx(bounds,this.tx))
+  def bounds = tx.transformBounds(x, y, w, h, None)
+  def transform(tx: (Bounds, AffineTransform) => AffineTransform) =
+    this.copy(tx = tx(bounds, this.tx))
 }
 
 case class Line(
@@ -44,17 +44,16 @@ case class Line(
 ) extends Shape {
 
   def currentTransform = tx
-  val bounds =
-    tx.transform(
-      Bounds(
-        math.min(x1, x2),
-        math.min(y1, y2),
-        math.abs(x1 - x2),
-        math.abs(y1 - y2)
-      )
+  def bounds =
+    tx.transformBounds(
+      math.min(x1, x2),
+      math.min(y1, y2),
+      math.abs(x1 - x2),
+      math.abs(y1 - y2),
+      None
     )
-  def transform(tx: (Bounds,AffineTransform) => AffineTransform) = {
-    this.copy(tx = tx(bounds,this.tx))
+  def transform(tx: (Bounds, AffineTransform) => AffineTransform) = {
+    this.copy(tx = tx(bounds, this.tx))
   }
 }
 
@@ -64,18 +63,18 @@ case class SimplePath(
     currentTransform: AffineTransform = AffineTransform.identity
 ) extends Shape {
 
-  val bounds = {
+  def bounds = {
     val minx = ps.map(_.x).min
     val maxx = ps.map(_.x).max
 
     val miny = ps.map(_.y).min
     val maxy = ps.map(_.y).max
 
-    Bounds(minx, miny, maxx - minx, maxy - miny)
+    currentTransform.transformBounds(minx, miny, maxx - minx, maxy - miny,None)
   }
 
-  def transform(tx: (Bounds,AffineTransform) => AffineTransform) = {
-    this.copy(currentTransform = tx(bounds,this.currentTransform))
+  def transform(tx: (Bounds, AffineTransform) => AffineTransform) = {
+    this.copy(currentTransform = tx(bounds, this.currentTransform))
   }
 
 }

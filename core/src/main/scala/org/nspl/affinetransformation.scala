@@ -64,32 +64,44 @@ case class AffineTransform(
     Point(nx, ny)
   }
   def transform(b: Bounds): Bounds = {
-    val topLeft = transform(b.x, b.y)
-    val topRight = transform(b.x + b.w, b.y)
-    val bottomRight = transform(b.x + b.w, b.y + b.h)
-    val bottomLeft = transform(b.x, b.y + b.h)
-    val transformedAnchor = b.anchor.map(p => transform(p))
+    transformBounds(b.x, b.y, b.w, b.h, b.anchor)
+  }
+  def transformBounds(
+      x: Double,
+      y: Double,
+      w: Double,
+      h: Double,
+      anchor: Option[Point]
+  ): Bounds = {
+    if (this == AffineTransform.identity) Bounds(x, y, w, h, anchor)
+    else {
+      val topLeft = transform(x, y)
+      val topRight = transform(x + w, y)
+      val bottomRight = transform(x + w, y + h)
+      val bottomLeft = transform(x, y + h)
+      val transformedAnchor = anchor.map(transform)
 
-    val nx = math.min(
-      topLeft.x,
-      math.min(topRight.x, math.min(bottomRight.x, bottomLeft.x))
-    )
-    val nx2 = math.max(
-      topLeft.x,
-      math.max(topRight.x, math.max(bottomRight.x, bottomLeft.x))
-    )
-    val ny = math.min(
-      topLeft.y,
-      math.min(topRight.y, math.min(bottomRight.y, bottomLeft.y))
-    )
-    val ny2 = math.max(
-      topLeft.y,
-      math.max(topRight.y, math.max(bottomRight.y, bottomLeft.y))
-    )
+      val nx = math.min(
+        topLeft.x,
+        math.min(topRight.x, math.min(bottomRight.x, bottomLeft.x))
+      )
+      val nx2 = math.max(
+        topLeft.x,
+        math.max(topRight.x, math.max(bottomRight.x, bottomLeft.x))
+      )
+      val ny = math.min(
+        topLeft.y,
+        math.min(topRight.y, math.min(bottomRight.y, bottomLeft.y))
+      )
+      val ny2 = math.max(
+        topLeft.y,
+        math.max(topRight.y, math.max(bottomRight.y, bottomLeft.y))
+      )
 
-    val width = math.abs(nx2 - nx)
-    val height = math.abs(ny2 - ny)
-    Bounds(nx, ny, width, height, transformedAnchor)
+      val width = math.abs(nx2 - nx)
+      val height = math.abs(ny2 - ny)
+      Bounds(nx, ny, width, height, transformedAnchor)
+    }
   }
 
   /** returns (this mm tx) in terms of transformations returns a transformation
@@ -154,7 +166,7 @@ case class AffineTransform(
   }
 
   /** Returns a transformation which applies this then scales then translates
-   */
+    */
   def scaleThenTranslate(tx: Double, ty: Double, sx: Double, sy: Double) =
     AffineTransform(
       m0 * sx,
