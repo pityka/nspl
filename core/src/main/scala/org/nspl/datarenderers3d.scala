@@ -71,7 +71,7 @@ trait Renderers3D {
           Shape.line(clip1.toPoint, clip2.toPoint),
           strokeColor = color1,
           stroke = Some(stroke.value)
-        ).transform(_ => tx)
+        ).transform(tx)
 
         re.render(ctx, shape1)
       }
@@ -142,18 +142,13 @@ trait Renderers3D {
         val vX = clip1(0)
         val vY = clip1(1)
         val shape1PreTransform: ShapeElem = ShapeElem(
-          shape.transform(_ =>
-            AffineTransform
-              .translate(clip1(0), vY)
-              .concatScale(
-                perspectivFactorX,
-                perspectivFactorY
-              )
+          shape.transform((_,old) =>
+            old.scaleThenTranslate(tx=clip1(0),ty=vY,sx=perspectivFactorX,sy=perspectivFactorY)
           ),
           fill = color1
         )
 
-        val shape1 = shape1PreTransform.transform(b => tx)
+        val shape1 = shape1PreTransform.transform(tx)
 
         re.render(ctx, shape1)
       }

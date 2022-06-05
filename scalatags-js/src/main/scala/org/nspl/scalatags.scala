@@ -26,7 +26,7 @@ private[nspl] case class ScalaTagRC(
   def localToScala(tx: AffineTransform): AffineTransform = tx
 
   def concatTransform(tx: AffineTransform): Unit = {
-    transform = transform.concat(tx)
+    transform = transform.applyBefore(tx)
   }
 
   def setTransform(tx: LocalTx): Unit = {
@@ -96,7 +96,7 @@ object scalatagrenderer {
   implicit val shapeRenderer = new Renderer[ShapeElem, ScalaTagRC] {
     def render(ctx: ScalaTagRC, elem: ShapeElem): Unit = {
       val tx =
-        ctx.getTransform.concat(elem.tx.concat(elem.shape.currentTransform))
+        ctx.getTransform.applyBefore(elem.tx.applyBefore(elem.shape.currentTransform))
       val shape = elem.shape
       if (
         elem.fill.a > 0d || (elem.stroke.isDefined && elem.strokeColor.a > 0)
@@ -186,7 +186,7 @@ object scalatagrenderer {
     def render(ctx: ScalaTagRC, elem: TextBox): Unit = {
       if (!elem.layout.isEmpty) {
         elem.layout.lines.foreach { case (line, lineTx) =>
-          val tx = ctx.getTransform.concat(elem.txLoc.concat(lineTx))
+          val tx = ctx.getTransform.applyBefore(elem.tx.applyBefore(lineTx))
           val svgElem = text(
             svgAttrs.x := 0,
             svgAttrs.y := 0,

@@ -86,46 +86,15 @@ package object nspl
     }
   }
 
-  def transform[T <: Renderable[T]](
-      member: T,
-      tx: Bounds => AffineTransform
-  ): T =
-    member.transform(tx)
-
-  def translate[T <: Renderable[T]](member: T, x: Double, y: Double): T =
-    member.translate(x, y)
-
-  def rotate[T <: Renderable[T]](
-      member: T,
-      rad: Double,
-      x: Double,
-      y: Double
-  ): T = member.rotate(rad, x, y)
-
-  def rotate[T <: Renderable[T]](member: T, rad: Double) =
-    member.rotate(rad)
-
-  def reflectOrigin[T <: Renderable[T]](member: T) =
-    member.reflectOrigin
-
-  def reflectX[T <: Renderable[T]](member: T) =
-    member.reflectX
-
-  def rotateCenter[T <: Renderable[T]](member: T, rad: Double) =
-    member.rotateCenter(rad)
-
-  def reflectY[T <: Renderable[T]](member: T) =
-    member.reflectY
-
-  def scale[T <: Renderable[T]](member: T, x: Double, y: Double) =
-    member.scale(x, y)
-
   def fitToBounds[T <: Renderable[T]](member: T, bounds: Bounds) = {
     val current = member.bounds
-    scale(
-      translate(member, bounds.x - current.x, bounds.y - current.y),
-      if (current.w != 0d) bounds.w / current.w else 1d,
-      if (current.h != 0d) bounds.h / current.h else 1d
+    member.transform(
+      AffineTransform.translateThenScale(
+        tx = bounds.x - current.x,
+        ty = bounds.y - current.y,
+        sx = if (current.w != 0d) bounds.w / current.w else 1d,
+        sy = if (current.h != 0d) bounds.h / current.h else 1d
+      )
     )
   }
 

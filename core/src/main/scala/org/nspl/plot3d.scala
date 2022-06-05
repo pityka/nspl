@@ -9,8 +9,9 @@ case class DataElem3D(
     originalBounds: Bounds = Bounds(-1, -1, 2, 2),
     tx: AffineTransform = AffineTransform.identity
 ) extends Renderable[DataElem3D] {
-  def transform(tx: Bounds => AffineTransform) = {
-    val ntx = tx(bounds).concat(this.tx)
+  def transform(tx: AffineTransform) = this.copy(tx = tx.applyBefore(this.tx))
+  def transform(tx: (Bounds, AffineTransform) => AffineTransform) = {
+    val ntx = tx(bounds, this.tx)
     this.copy(tx = ntx)
   }
   def bounds = tx.transform(originalBounds)
@@ -46,7 +47,8 @@ trait Plots3D {
 
   case class XYZPlotArea(elem: T, cameraPosition: Vec3, cameraTarget: Vec3)
       extends Renderable[XYZPlotArea] {
-    def transform(v: Bounds => AffineTransform) =
+    def transform(v: AffineTransform) = copy(elem = elem.transform(v))
+    def transform(v: (Bounds, AffineTransform) => AffineTransform) =
       this.copy(elem = elem.transform(v))
     def bounds: Bounds = elem.bounds
   }

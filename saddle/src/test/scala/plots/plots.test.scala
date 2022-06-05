@@ -329,8 +329,38 @@ class SaddlePlotSpec extends munit.FunSuite {
         )
       }
 
+       val rotations = fitToBounds(sequence(
+      List(ShapeElem(Shape.circle(0.01d)).translate(0,0),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1),
+      ShapeElem(Shape.circle(0.01d)).translate(1,1),
+      ShapeElem(Shape.circle(0.01d)).translate(1,0),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.1),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.2),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.3),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.4),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.5),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.6),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.7),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.8),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.9),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(1),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.1,0,0.75),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.2,0,0.75),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.3,0,0.75),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.4,0,0.75),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.5,0,0.75),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.6,0,0.75),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.7,0,0.75),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.8,0,0.75),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.9,0,0.75),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(1,0,0.75)
+      ),
+      FreeLayout
+    ),Bounds(0,0,100,100))
+
       val gallery = group(
         group(
+          rotations,
           ticktest,
           ticktest2,
           ticktest3,

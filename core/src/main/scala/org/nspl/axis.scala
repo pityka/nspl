@@ -165,9 +165,9 @@ case class AxisSettings(
             List(axis.max)
           else Nil
         (majorTicks1 ++ addMin ++ addMax).iterator
+          .filter(w => w <= axis.max && w >= axis.min)
           .filterNot(x => customTicks.map(_._1).contains(x))
           .filterNot(x => disableTicksAt.contains(x))
-          .filter(w => w <= axis.max && w >= axis.min)
           .toList
           .distinct
       }
@@ -184,26 +184,19 @@ case class AxisSettings(
               ),
             stroke = Some(Stroke(lineWidth.value))
           ),
-          transform(
-            transform(
-              transform(
-                TextBox(
-                  text,
-                  Point(view, 0.0),
-                  fontSize = fontSize,
-                  width =
-                    if (labelRotation == 0.0) Some(availableSpace) else None
-                ),
-                (b: Bounds) =>
-                  AffineTransform.rotate(labelRotation, b.x, b.centerY)
-              ),
-              (b: Bounds) =>
-                AffineTransform.translate(0, tickLabelDistance.value)
+          TextBox(
+            text,
+            fontSize = fontSize,
+            width = if (labelRotation == 0.0) Some(availableSpace) else None
+          ).translate(view, 0)
+            .transform((b, old) =>
+              old
+                .rotate(labelRotation, b.x, b.centerY)
+                .translate(
+                  if (labelRotation == 0.0) b.w * (-0.5) else 0,
+                  tickLabelDistance.value
+                )
             ),
-            (b: Bounds) =>
-              AffineTransform
-                .translate(if (labelRotation == 0.0) b.w * (-0.5) else 0, 0)
-          ),
           FreeLayout
         )
       else
@@ -215,20 +208,16 @@ case class AxisSettings(
             ),
             stroke = Some(Stroke(lineWidth.value))
           ),
-          transform(
-            transform(
-              transform(
-                TextBox(text, Point(0.0, view), fontSize = fontSize),
-                (b: Bounds) =>
-                  AffineTransform.rotate(labelRotation, b.x + b.w, b.centerY)
-              ),
-              (b: Bounds) =>
-                AffineTransform.translate(-1 * tickLabelDistance.value - b.w, 0)
+          TextBox(text, fontSize = fontSize)
+            .translate(0, view)
+            .transform((b, old) =>
+              old
+                .rotate(labelRotation, b.x + b.w, b.centerY)
+                .translate(
+                  -1 * tickLabelDistance.value - b.w,
+                  if (labelRotation == 0.0) b.h * (-0.5) else 0
+                )
             ),
-            (b: Bounds) =>
-              AffineTransform
-                .translate(0, if (labelRotation == 0.0) b.h * (-0.5) else 0)
-          ),
           FreeLayout
         )
     }

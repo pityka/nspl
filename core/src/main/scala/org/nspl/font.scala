@@ -85,9 +85,13 @@ object TextLayout {
 
       if (maxWidth.isEmpty) {
         val bounds = measureLine(chars)
-        val tx = AffineTransform
-          .scale(fontSizeFactor, fontSizeFactor)
-          .concat(AffineTransform.translate(bounds.x, bounds.y + ascent))
+        
+        val tx = AffineTransform.translateThenScale(
+          tx = bounds.x,
+          ty = bounds.y + ascent,
+          sx = fontSizeFactor,
+          sy = fontSizeFactor
+        )
 
         TextLayout(List(chars.mkString -> tx), scale.transform(bounds))
       } else {
@@ -120,11 +124,12 @@ object TextLayout {
         val outerBounds = outline(lines.iterator.map(_._2), anchor = None)
 
         val transformations = lines.map { case (text, bounds) =>
-          val tx = AffineTransform
-            .scale(fontSizeFactor, fontSizeFactor)
-            .concat(
-              AffineTransform.translate(bounds.x, bounds.y + ascent)
-            )
+          val tx = AffineTransform.translateThenScale(
+            tx = bounds.x,
+            ty = bounds.y + ascent,
+            sx = fontSizeFactor,
+            sy = fontSizeFactor
+          )
           (text, tx)
         }
 

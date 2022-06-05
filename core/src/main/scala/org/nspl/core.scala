@@ -68,22 +68,18 @@ trait Renderer[E, R <: RenderingContext[R]] {
 
 /* Basic unit of the scene graph.*/
 trait Renderable[K] { self: K =>
-  def transform(v: Bounds => AffineTransform): K
+  def transform(v: (Bounds,AffineTransform) => AffineTransform): K
+  def transform(v:AffineTransform) : K
   def bounds: Bounds
 
   def translate(x: Double, y: Double) =
-    transform(_ => AffineTransform.translate(x, y))
-  def scale(x: Double, y: Double) = transform(_ => AffineTransform.scale(x, y))
+    transform((_,old) => old.translate(x, y))
+  def scale(x: Double, y: Double) = transform((_,old) => old.scale(x, y))
   def rotate(rad: Double, x: Double, y: Double) =
-    transform(_ => AffineTransform.rotate(rad, x, y))
-  def rotate(rad: Double) = transform(_ => AffineTransform.rotate(rad))
-  def reflectOrigin = transform(_ => AffineTransform.reflectOrigin)
-  def reflectY = transform(_ => AffineTransform.reflectY)
-  def reflectX = transform(_ => AffineTransform.reflectX)
-  def reflectXCenter = transform(b => AffineTransform.reflectXCenter(b))
-  def reflectYCenter = transform(b => AffineTransform.reflectYCenter(b))
+    transform((_,old) => old.rotate(rad, x, y))
+  def rotate(rad: Double) = transform((_,old) => old.rotate(rad))
   def rotateCenter(rad: Double) =
-    transform(b => AffineTransform.rotateCenter(rad)(b))
+    transform((b,old) => old.rotate(rad, b.centerX, b.centerY) )
 
 }
 

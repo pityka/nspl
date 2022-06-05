@@ -66,7 +66,7 @@ private[nspl] case class CanvasRC(
   def localToScala(tx: AffineTransform): AffineTransform = tx
 
   def concatTransform(tx: AffineTransform): Unit = {
-    transform = transform.concat(tx)
+    transform = transform.applyBefore(tx)
   }
 
   def setTransform(tx: LocalTx): Unit = {
@@ -464,14 +464,16 @@ object canvasrenderer {
     }
 
     def render(ctx: CanvasRC, elem: ShapeElem): Unit = {
-      ctx.withTransform(elem.tx concat elem.shape.currentTransform) {
+      ctx.withTransform(elem.tx applyBefore elem.shape.currentTransform) {
 
         drawAndFill(ctx, elem)
 
         elem.identifier match {
           case pa: PlotAreaIdentifier =>
             ctx.registerPlotArea(
-              elem.shape.transform(_ => ctx.getAffineTransform),
+              elem.shape.transform((_, old) =>
+                ctx.getAffineTransform.applyBefore(old)
+              ),
               pa.copy(bounds = Some(elem.bounds))
             )
           case _ =>
@@ -486,15 +488,23 @@ object canvasrenderer {
   implicit val textRenderer = new Renderer[TextBox, CanvasRC] {
 
     def render(ctx: CanvasRC, elem: TextBox): Unit = {
-      ctx.withTransform(elem.txLoc) {
+      if (!elem.layout.isEmpty) {
+        ctx.withTransform(elem.tx) {
 
-        if (!elem.layout.isEmpty) {
           ctx.withFill(elem.color) {
             ctx.graphics.font = canvasFont(elem.font)
+            /* debug */
+            // ctx.setTransformInGraphics()
+            // ctx.graphics.strokeStyle = asCss(elem.color)
+            // ctx.graphics.strokeRect(
+            //   elem.layout.bounds.x,
+            //   elem.layout.bounds.y,
+            //   elem.layout.bounds.w,
+            //   elem.layout.bounds.h
+            // )
+            /* debug off */
             elem.layout.lines.foreach { case (line, lineTx) =>
               ctx.withTransform(lineTx) {
-                // ctx.graphics.strokeStyle = asCss(elem.color)
-                // ctx.graphics.strokeRect(elem.bounds.x, elem.bounds.y, elem.bounds.w, elem.bounds.h)
                 ctx.setTransformInGraphics()
                 ctx.graphics.fillText(line, 0, 0)
               }

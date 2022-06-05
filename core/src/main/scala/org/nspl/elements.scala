@@ -4,8 +4,10 @@ case class ElemList[T <: Renderable[T]](
     members: Seq[T],
     tx: AffineTransform = AffineTransform.identity
 ) extends Renderable[ElemList[T]] {
-  def transform(tx: Bounds => AffineTransform) =
-    this.copy(tx = tx(bounds).concat(this.tx))
+  def transform(tx: (Bounds, AffineTransform) => AffineTransform) =
+    this.copy(tx = tx(bounds, this.tx))
+
+  def transform(tx: AffineTransform) = this.copy(tx = tx.applyBefore(this.tx))
 
   val bounds =
     if (members.size > 0)
@@ -32,8 +34,10 @@ case class ElemList2[T1 <: Renderable[T1], T2 <: Renderable[T2]](
     members: Seq[Either[T1, T2]],
     tx: AffineTransform = AffineTransform.identity
 ) extends Renderable[ElemList2[T1, T2]] {
-  def transform(tx: Bounds => AffineTransform) =
-    this.copy(tx = tx(bounds).concat(this.tx))
+  def transform(tx: (Bounds, AffineTransform) => AffineTransform) =
+    this.copy(tx = tx(bounds, this.tx))
+
+  def transform(tx: AffineTransform) = this.copy(tx = tx.applyBefore(this.tx))
 
   val bounds =
     if (members.size > 0)
@@ -65,9 +69,10 @@ object ElemList2 {
 
 case class ElemOption[A <: Renderable[A]](option: Option[A])
     extends Renderable[ElemOption[A]] {
-  def transform(tx: Bounds => AffineTransform) = ElemOption(
+  def transform(tx: (Bounds, AffineTransform) => AffineTransform) = ElemOption(
     option.map(_.transform(tx))
   )
+  def transform(tx: AffineTransform) = ElemOption(option.map(_.transform(tx)))
   def bounds = option.fold(Bounds(0, 0, 0, 0))(_.bounds)
   def map[K <: Renderable[K]](f: A => K) = ElemOption(option.map(f))
 }
@@ -83,8 +88,9 @@ case class ElemEither[A <: Renderable[A], B <: Renderable[B]](
     either: Either[A, B],
     tx: AffineTransform = AffineTransform.identity
 ) extends Renderable[ElemEither[A, B]] {
-  def transform(tx: Bounds => AffineTransform) =
-    this.copy(tx = tx(bounds).concat(this.tx))
+  def transform(tx: (Bounds, AffineTransform) => AffineTransform) =
+    this.copy(tx = tx(bounds, this.tx))
+  def transform(tx: AffineTransform) = this.copy(tx = tx.applyBefore(this.tx))
   def bounds = tx.transform(either.fold(_.bounds, _.bounds))
 }
 object ElemEither {
@@ -115,8 +121,10 @@ case class ShapeElem(
 
   def withIdentifier(id: Identifier) = copy(identifier = id)
 
-  def transform(tx: Bounds => AffineTransform) =
-    this.copy(tx = tx(bounds).concat(this.tx))
+  def transform(tx: (Bounds, AffineTransform) => AffineTransform) =
+    this.copy(tx = tx(bounds, this.tx))
+
+  def transform(tx: AffineTransform) = this.copy(tx = tx.applyBefore(this.tx))
 
   val bounds = {
     tx.transform(shape.bounds)
@@ -126,7 +134,6 @@ case class ShapeElem(
 
 case class TextBox(
     layout: TextLayout,
-    loc: Point,
     color: Color,
     tx: AffineTransform
 )(implicit fc: FontConfiguration)
@@ -134,24 +141,23 @@ case class TextBox(
 
   val font = fc.font
 
-  val txLoc = tx.concat(AffineTransform.translate(loc.x, loc.y))
 
   val bounds =
     if (layout.isEmpty) Bounds(0, 0, 0, 0)
-    else txLoc.transform(layout.bounds)
+    else tx.transform(layout.bounds)
 
-  def transform(tx: Bounds => AffineTransform) =
-    this.copy(tx = tx(bounds).concat(this.tx))
+  def transform(tx: (Bounds, AffineTransform) => AffineTransform) =
+    this.copy(tx = tx(bounds, this.tx))
+  def transform(tx: AffineTransform) = this.copy(tx = tx.applyBefore(this.tx))
 }
 
 object TextBox {
   def apply(
       text: String,
-      loc: Point = Point(0d, 0d),
       width: Option[Double] = None,
       fontSize: RelFontSize = 1 fts,
       color: Color = Color.black,
       tx: AffineTransform = AffineTransform.identity
   )(implicit fc: FontConfiguration): TextBox =
-    TextBox(TextLayout(width, text, fontSize), loc, color, tx)
+    TextBox(TextLayout(width, text, fontSize),  color, tx)
 }

@@ -10,8 +10,11 @@ case class DataElem(
     originalBounds: Bounds,
     tx: AffineTransform = AffineTransform.identity
 ) extends Renderable[DataElem] {
-  def transform(tx: Bounds => AffineTransform) = {
-    val ntx = tx(bounds).concat(this.tx)
+  def transform(tx: AffineTransform) =
+    copy(tx = tx.applyBefore(this.tx))
+
+  def transform(tx: (Bounds, AffineTransform) => AffineTransform) = {
+    val ntx = tx(bounds, this.tx)
     this.copy(tx = ntx)
   }
   def bounds = tx.transform(originalBounds)
@@ -44,8 +47,9 @@ trait Plots {
       yMin: Double,
       yMax: Double
   ) extends Renderable[XYPlotArea] {
-    def transform(v: Bounds => AffineTransform) =
+    def transform(v: (Bounds, AffineTransform) => AffineTransform) =
       this.copy(elem = elem.transform(v))
+    def transform(v: AffineTransform) = this.copy(elem = elem.transform(v))
     def bounds: Bounds = elem.bounds
     def frameElem = elem.m1.m1.m1.m1.m5
   }
@@ -462,8 +466,8 @@ trait Plots {
     val originY = yAxis.worldToView(originWY1)
 
     val axes = group(
-      translate(xAxisElem, 0, originY),
-      translate(yAxisElem, originX, 0),
+      xAxisElem.translate( 0, originY),
+      yAxisElem.translate( originX, 0),
       FreeLayout
     )
 
@@ -555,7 +559,7 @@ trait Plots {
         (withHorizontalLabels, 1),
         (
           AlignTo.vertical(
-            rotate(ylabBox, 0.5 * math.Pi),
+            ylabBox.rotate( 0.5 * math.Pi),
             movedFrame.bounds,
             ylabAlignment
           ),
@@ -722,7 +726,7 @@ trait Plots {
     val axisLabel = {
       val box =
         TextBox(labelText, fontSize = fontSize, width = Some(width.value))
-      rotate(box, -0.5 * math.Pi)
+      box.rotate( -0.5 * math.Pi)
     }
 
     val n = 500

@@ -1,8 +1,8 @@
 package org.nspl
 
 trait Shape {
-  def bounds: Bounds
-  def transform(tx: Bounds => AffineTransform): Shape
+  val bounds: Bounds
+  def transform(tx: (Bounds,AffineTransform) => AffineTransform): Shape
   def currentTransform: AffineTransform
 }
 
@@ -16,9 +16,9 @@ case class Rectangle(
 ) extends Shape {
 
   def currentTransform = tx
-  def bounds = tx.transform(Bounds(x, y, w, h, anchor))
-  def transform(tx: Bounds => AffineTransform) =
-    this.copy(tx = tx(bounds).concat(this.tx))
+  val bounds = tx.transform(Bounds(x, y, w, h, anchor))
+  def transform(tx: (Bounds,AffineTransform) => AffineTransform) =
+    this.copy(tx = tx(bounds,this.tx))
 }
 
 case class Ellipse(
@@ -30,9 +30,9 @@ case class Ellipse(
 ) extends Shape {
 
   def currentTransform = tx
-  def bounds = tx.transform(Bounds(x, y, w, h))
-  def transform(tx: Bounds => AffineTransform) =
-    this.copy(tx = tx(bounds).concat(this.tx))
+  val bounds = tx.transform(Bounds(x, y, w, h))
+  def transform(tx: (Bounds,AffineTransform) => AffineTransform) =
+    this.copy(tx = tx(bounds,this.tx))
 }
 
 case class Line(
@@ -44,7 +44,7 @@ case class Line(
 ) extends Shape {
 
   def currentTransform = tx
-  def bounds =
+  val bounds =
     tx.transform(
       Bounds(
         math.min(x1, x2),
@@ -53,8 +53,8 @@ case class Line(
         math.abs(y1 - y2)
       )
     )
-  def transform(tx: Bounds => AffineTransform) = {
-    this.copy(tx = tx(bounds).concat(this.tx))
+  def transform(tx: (Bounds,AffineTransform) => AffineTransform) = {
+    this.copy(tx = tx(bounds,this.tx))
   }
 }
 
@@ -64,7 +64,7 @@ case class SimplePath(
     currentTransform: AffineTransform = AffineTransform.identity
 ) extends Shape {
 
-  def bounds = {
+  val bounds = {
     val minx = ps.map(_.x).min
     val maxx = ps.map(_.x).max
 
@@ -74,8 +74,8 @@ case class SimplePath(
     Bounds(minx, miny, maxx - minx, maxy - miny)
   }
 
-  def transform(tx: Bounds => AffineTransform) = {
-    this.copy(currentTransform = tx(bounds).concat(this.currentTransform))
+  def transform(tx: (Bounds,AffineTransform) => AffineTransform) = {
+    this.copy(currentTransform = tx(bounds,this.currentTransform))
   }
 
 }

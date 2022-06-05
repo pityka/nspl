@@ -6,7 +6,9 @@ trait Tuples1 {
     private def effectiveAnchor = anchor.orElse{ 
       Iterator([#m1.bounds#]).map(_.anchor).find(_.isDefined).map(_.get)
     }
-    def transform(tx:Bounds => AffineTransform) = this.copy(tx = tx(bounds).concat(this.tx))
+    def transform(tx: AffineTransform) = this.copy(tx = tx.applyBefore(this.tx))
+    def transform(tx:(Bounds,AffineTransform) => AffineTransform) = 
+      this.copy(tx = tx(bounds,this.tx))
 
     val bounds = tx.transform(outline(Iterator([#m1.bounds#]), effectiveAnchor))
   }#

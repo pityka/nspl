@@ -77,7 +77,7 @@ case class CubicTo(p3: Point, p1: Point, p2: Point) extends PathOperation {
 
 case class Path(path: Seq[PathOperation], currentTransform: AffineTransform)
     extends Shape {
-  def bounds: Bounds = {
+  val bounds: Bounds = {
     val extrema =
       path.sliding(2).toList.flatMap { pair =>
         val first = pair(0)
@@ -94,7 +94,11 @@ case class Path(path: Seq[PathOperation], currentTransform: AffineTransform)
     Bounds(minx, miny, maxx - minx, maxy - miny)
 
   }
-  def transform(tx: Bounds => AffineTransform) = {
-    this.copy(currentTransform = tx(bounds).concat(this.currentTransform))
-  }
+
+  def transform(tx: (Bounds, AffineTransform) => AffineTransform) =
+    this.copy(currentTransform = tx(bounds, this.currentTransform))
+
+  def transform(tx: AffineTransform) =
+    this.copy(currentTransform = tx.applyBefore(this.currentTransform))
+
 }

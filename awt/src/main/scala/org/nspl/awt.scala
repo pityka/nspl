@@ -38,7 +38,7 @@ private[nspl] case class JavaRC(graphics: Graphics2D)
   def localToScala(tx: AffineTransform): AffineTransform = tx
 
   def concatTransform(tx: AffineTransform): Unit = {
-    transform = transform.concat(tx)
+    transform = transform.applyBefore(tx)
   }
 
   def setTransform(tx: LocalTx): Unit = {
@@ -86,7 +86,7 @@ object awtrenderer extends JavaAWTUtil {
     }
     def render(ctx: JavaRC, elem: ShapeElem): Unit = {
 
-      ctx.withTransform(elem.tx concat elem.shape.currentTransform) {
+      ctx.withTransform(elem.tx applyBefore elem.shape.currentTransform) {
 
         drawAndFill(ctx, elem)
 
@@ -99,7 +99,7 @@ object awtrenderer extends JavaAWTUtil {
 
     def render(ctx: JavaRC, elem: TextBox): Unit = {
       if (!elem.layout.isEmpty && elem.color.a > 0) {
-        ctx.withTransform(elem.txLoc) {
+        ctx.withTransform(elem.tx) {
           ctx.withPaint(elem.color) {
             ctx.graphics.setFont(font2font(elem.font))
             elem.layout.lines.foreach { case (line, lineTx) =>
