@@ -5,7 +5,7 @@ import org.nspl.awtrenderer._
 
 class BenchSpec extends munit.FunSuite {
 
-  test("a") {
+  test("a".ignore) {
 
     def random = 1 to 10 map (i => scala.util.Random.nextDouble())
     def random2 = 1 to 10 map (i => scala.util.Random.nextGaussian())
