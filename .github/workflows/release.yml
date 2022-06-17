@@ -11,7 +11,10 @@ jobs:
         with:
           fetch-depth: 0
           submodules: recursive
-      - uses: olafurpg/setup-scala@v10
+      - uses: actions/setup-java@v2
+        with:
+          distribution: temurin
+          java-version: 17
       - uses: olafurpg/setup-gpg@v3
       - uses: peaceiris/actions-hugo@v2.4.13
         with: 
