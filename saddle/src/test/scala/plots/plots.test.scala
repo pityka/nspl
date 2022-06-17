@@ -12,7 +12,7 @@ import org.saddle.index.InnerJoin
 
 class SaddlePlotSpec extends munit.FunSuite {
   
-
+  override val munitTimeout = scala.concurrent.duration.Duration(300, "s")
   implicit val myfont: GenericFontConfig[NamedFont]  = font("Hasklig")
 
   def readFrameFromClasspath(s: String) =
@@ -27,8 +27,8 @@ class SaddlePlotSpec extends munit.FunSuite {
       .toOption
       .get
 
+      
   test("plot gallery") {
-
     {
       val evec =
         readFrameFromClasspath("/evec.csv")
