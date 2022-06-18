@@ -14,7 +14,7 @@ import org.scalajs.dom.raw._
 import org.scalajs.dom.ext._
 import scalatags.JsDom
 
-case class ScalaTagRC private (
+case class ScalaTagRC private[nspl] (
     elems: scala.collection.mutable.ArrayBuffer[scalatags.generic.TypedTag[org.scalajs.dom.Element, org.scalajs.dom.Element,org.scalajs.dom.Node]]
 ) extends RenderingContext[ScalaTagRC] {
 
