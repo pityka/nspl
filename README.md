@@ -1,8 +1,8 @@
 
-[![](https://img.shields.io/maven-central/v/io.github.pityka/nspl-core_2.12.svg)](https://search.maven.org/search?q=g:io.github.pityka%20nspl)
+[![](https://img.shields.io/maven-central/v/io.github.pityka/nspl-core_2.13.svg)](https://search.maven.org/search?q=g:io.github.pityka%20nspl)
 [![documentation](https://img.shields.io/badge/docs-green)](https://pityka.github.io/nspl/)
 
-# 2d Plotting Library for Scala (including scala-js)
+# 2d Plotting Library for Scala and Scala.js
 
 Creates scatter, line, contour, raster, barplots and boxplots, histograms, density plots. Composite figure of multiple plots. 
 
@@ -15,6 +15,8 @@ Renders to
 ## Usage
 
 See the documentation website at [https://pityka.github.io/nspl/](https://pityka.github.io/nspl/) .
+
+This library is built for Scala 2.13 and Scala 3.1.
 
 Maven coordinates: 
 
