@@ -18,19 +18,21 @@ case class Bounds(
 }
 
 sealed trait Cap
-case object CapButt extends Cap
-case object CapSquare extends Cap
-case object CapRound extends Cap
+object Cap {
+  case object Butt extends Cap
+  case object Square extends Cap
+  case object Round extends Cap
+}
 
 case class StrokeConf(
     width: RelFontSize,
-    cap: Cap = CapButt,
-    dash: Seq[RelFontSize] = Nil
+    cap: Cap = Cap.Butt,
+    dash: Seq[RelFontSize] = Seq.empty
 ) {
   def value(implicit fc: FontConfiguration) =
     Stroke(width.value, cap, dash.map(_.value))
 }
-case class Stroke(width: Double, cap: Cap = CapButt, dash: Seq[Double] = Nil)
+case class Stroke(width: Double, cap: Cap = Cap.Butt, dash: Seq[Double] = Seq.empty)
 
 case class Point(x: Double, y: Double) {
   def translate(dx: Double, dy: Double) = Point(x + dx, y + dy)
@@ -68,18 +70,18 @@ trait Renderer[E, R <: RenderingContext[R]] {
 
 /* Basic unit of the scene graph.*/
 trait Renderable[K] { self: K =>
-  def transform(v: (Bounds,AffineTransform) => AffineTransform): K
-  def transform(v:AffineTransform) : K
+  def transform(v: (Bounds, AffineTransform) => AffineTransform): K
+  def transform(v: AffineTransform): K
   def bounds: Bounds
 
   def translate(x: Double, y: Double) =
-    transform((_,old) => old.translate(x, y))
-  def scale(x: Double, y: Double) = transform((_,old) => old.scale(x, y))
+    transform((_, old) => old.translate(x, y))
+  def scale(x: Double, y: Double) = transform((_, old) => old.scale(x, y))
   def rotate(rad: Double, x: Double, y: Double) =
-    transform((_,old) => old.rotate(rad, x, y))
-  def rotate(rad: Double) = transform((_,old) => old.rotate(rad))
+    transform((_, old) => old.rotate(rad, x, y))
+  def rotate(rad: Double) = transform((_, old) => old.rotate(rad))
   def rotateCenter(rad: Double) =
-    transform((b,old) => old.rotate(rad, b.centerX, b.centerY) )
+    transform((b, old) => old.rotate(rad, b.centerX, b.centerY))
 
 }
 
@@ -88,14 +90,12 @@ trait Layout {
   def apply[F: FC](s: Seq[Bounds]): Seq[Bounds]
 }
 
-case class RelFontSize(private val v: Double) extends AnyVal {
-  def *(t: Double) = RelFontSize(v * t)
-  def value(implicit fc: FontConfiguration) = v * fc.font.size
-  def factor = v
+class RelFontSize(val factor: Double) extends AnyVal {
+  def *(t: Double) = new RelFontSize(factor * t)
+  def value(implicit fc: FontConfiguration) = factor * fc.font.size
 }
-case class BaseFontSize(v: Int) extends AnyVal
 
-class PlotId 
+class PlotId
 
 trait Identifier
 case object EmptyIdentifier extends Identifier

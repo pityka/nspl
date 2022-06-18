@@ -3,13 +3,12 @@ import java.awt.{Font => JFont}
 
 private[nspl] object JavaFontConversion {
   def font2font(myFont: Font): JFont = myFont match {
-    case Monospace => new JFont(JFont.MONOSPACED, JFont.PLAIN, Monospace.size)
-    case NamedFont(name, size) => new JFont(name, JFont.PLAIN, size)
+    case Font.Named(name, size) => new JFont(name, JFont.PLAIN, size)
   }
 
 }
 
-private[nspl] object AwtGlyphMeasurer extends GlyphMeasurer[Font] {
+private[nspl] object AwtGlyphMeasurer extends Font.GlyphMeasurer[Font] {
   import JavaFontConversion._
   import java.awt.image.BufferedImage
   val bimage = new BufferedImage(50, 50, BufferedImage.TYPE_BYTE_BINARY)
@@ -19,8 +18,8 @@ private[nspl] object AwtGlyphMeasurer extends GlyphMeasurer[Font] {
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPRQRSTUVWXYZ0123456789%,./][()]"
   def advance(s: Char, f: Font): Double =
     font2font(f).getStringBounds(s.toString, frc).getWidth
-  def lineMetrics(f: Font): LineMetrics = {
+  def lineMetrics(f: Font): Font.LineMetrics = {
     val lm = font2font(f).getLineMetrics(abc, frc)
-    LineMetrics(lm.getAscent, lm.getDescent, lm.getLeading)
+    Font.LineMetrics(lm.getAscent, lm.getDescent, lm.getLeading)
   }
 }

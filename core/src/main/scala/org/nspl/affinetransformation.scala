@@ -2,13 +2,13 @@ package org.nspl
 
 /** 2D Affine Transformation Matrix in row major order
   */
-case class AffineTransform(
-    m0: Double,
-    m1: Double,
-    m2: Double,
-    m3: Double,
-    m4: Double,
-    m5: Double
+class AffineTransform(
+    val m0: Double,
+    val m1: Double,
+    val m2: Double,
+    val m3: Double,
+    val m4: Double,
+    val m5: Double
 ) {
 
   def inverse = {
@@ -203,6 +203,15 @@ case class AffineTransform(
 }
 
 object AffineTransform {
+
+  def apply(
+    m0: Double,
+    m1: Double,
+    m2: Double,
+    m3: Double,
+    m4: Double,
+    m5: Double
+) : AffineTransform = new AffineTransform(m0,m1,m2,m3,m4,m5)
 
   def rotateCenter(rad: Double) =
     (b: Bounds) => rotate(rad, b.centerX, b.centerY)

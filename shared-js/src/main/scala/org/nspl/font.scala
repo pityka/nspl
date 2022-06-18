@@ -7,20 +7,18 @@ import org.w3c
 
 object svgFont {
   def apply(f: Font) = f match {
-    case Monospace => s"font-family: monospace;font-size: ${Monospace.size}"
-    case NamedFont(name, size) => s"font-family: ${name};font-size: ${size}"
+    case Font.Named(name, size) => s"font-family: ${name};font-size: ${size}"
   }
 }
 
 /* Code duplication! */
 object canvasFont {
   def apply(f: Font) = f match {
-    case Monospace             => s"${Monospace.size}px monospace"
-    case NamedFont(name, size) => s"${size}px $name"
+    case Font.Named(name, size) => s"${size}px $name"
   }
 }
 
-private[nspl] object CanvasGlyphMeasurer extends GlyphMeasurer[Font] {
+private[nspl] object CanvasGlyphMeasurer extends Font.GlyphMeasurer[Font] {
   val canvas = dom.document.createElement("canvas").asInstanceOf[html.Canvas]
   val ctx =
     canvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
@@ -59,10 +57,10 @@ private[nspl] object CanvasGlyphMeasurer extends GlyphMeasurer[Font] {
     }
 
   }
-  def lineMetrics(f: Font): LineMetrics = {
+  def lineMetrics(f: Font): Font.LineMetrics = {
     withFont(f) {
       val metric = ctx.measureText(abc).asInstanceOf[scalajs.js.Dynamic]
-      LineMetrics(
+      Font.LineMetrics(
         metric.actualBoundingBoxAscent.asInstanceOf[Double],
         metric.actualBoundingBoxDescent.asInstanceOf[Double],
         0

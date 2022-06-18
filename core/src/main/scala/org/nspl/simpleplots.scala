@@ -687,11 +687,14 @@ trait SimplePlots {
       else
         scala.util.Right(
           heatmapLegend(
-            zmin,
-            zmax,
-            colormap,
+            min = zmin,
+            max = zmax,
+            color = colormap,
             labelText = zlab,
-            numTicks = zNumTicks
+            numTicks = zNumTicks,
+            width = 10 fts,
+            height = 1 fts,
+            fontSize = 1.0 fts 
           )
         )
 

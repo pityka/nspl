@@ -25,21 +25,15 @@ package object nspl
 
   type FC[_] = FontConfiguration
 
-  implicit def baseFont(implicit fc: FontConfiguration): BaseFontSize =
-    BaseFontSize(fc.font.size)
-
-  implicit class ConvD(v: Double) {
-    def fts = RelFontSize(v)
+  implicit class ftsSyntaxDouble(v: Double) {
+    def fts = new RelFontSize(v)
   }
-  implicit class ConvI(v: Int) {
-    def fts = RelFontSize(v.toDouble)
-  }
-  implicit class ConvRFS(v: RelFontSize) {
-    def value(implicit bs: FontConfiguration) = v.value
+  implicit class ftsSyntaxInt(v: Int) {
+    def fts = new RelFontSize(v.toDouble)
   }
 
-  def font(name: String)(implicit gm: GlyphMeasurer[NamedFont]) =
-    GenericFontConfig(NamedFont(name, 10))(gm)
+  def font(name: String)(implicit gm: Font.GlyphMeasurer[Font.Named]) =
+    new Font.MeasuredFontConfiguration(Font.Named(name, 10), gm)
 
   /* Calculates the total bounds of the members. */
   private[nspl] def outline(members1: Iterator[Bounds], anchor: Option[Point]) = {
@@ -184,7 +178,7 @@ package object nspl
   }
 
   /* Normalized scientific notation. */
-  def scientific(x: Double) =
+  private[nspl] def scientific(x: Double) =
     x / math.pow(10d, math.log10(x).round.toDouble) -> math
       .log10(x)
       .round
@@ -202,7 +196,7 @@ package object nspl
       )
     }
 
-  val lineWidth = 0.08 fts
+  val lineWidth : RelFontSize = 0.08 fts
 
   private[nspl] val defaultTickFormatter: Seq[Double] => Seq[String] =
     (worldCoordinates: Seq[Double]) => {

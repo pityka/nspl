@@ -1,49 +1,34 @@
 package org.nspl
 
-sealed trait Font { self : Font => 
-  def advance(c: Char, size: Int)(implicit fm: GlyphMeasurer[self.type]) =
+sealed trait Font { self: Font =>
+  def advance(c: Char, size: Int)(implicit fm: Font.GlyphMeasurer[self.type]) =
     fm.advance(c, this)
   def size: Int
-}
-
-trait GlyphMeasurer[-F <: Font] {
-  def advance(s: Char, f: F): Double
-  def lineMetrics(f: F): LineMetrics
 }
 
 trait FontConfiguration {
   def font: Font
   def advance(c: Char): Double
-  val lineMetrics: LineMetrics
+  val lineMetrics: Font.LineMetrics
 }
 
-case object Monospace extends Font with FontConfiguration {
-  val font = this
-  val size = 10
-  def advance(c: Char) = FixGlyphMeasurer.advance(c, font)
-  val lineMetrics = FixGlyphMeasurer.lineMetrics(font)
-}
+object Font {
 
-case class NamedFont(name: String, size: Int) extends Font
+  trait GlyphMeasurer[-F <: Font] {
+    def advance(s: Char, f: F): Double
+    def lineMetrics(f: F): LineMetrics
+  }
 
-/* https://docs.oracle.com/javase/tutorial/2d/text/fontconcepts.html */
-case class LineMetrics(ascent: Double, descent: Double, leading: Double)
+  class MeasuredFontConfiguration[F <: Font](val font: F, measure: GlyphMeasurer[F])
+      extends FontConfiguration {
+    def advance(c: Char) = measure.advance(c, font)
+    val lineMetrics = measure.lineMetrics(font)
+  }
 
-object FixGlyphMeasurer extends GlyphMeasurer[Font] {
-  def advance(s: Char, f: Font) = f.size.toDouble * 0.6
-  def lineMetrics(f: Font) =
-    LineMetrics(
-      ascent = f.size.toDouble * 0.78,
-      descent = f.size.toDouble * 0.22,
-      leading = 0d
-    )
-}
+  case class Named(name: String, size: Int) extends Font
 
-case class GenericFontConfig[F <: Font](font: F)(implicit
-    val measure: GlyphMeasurer[F]
-) extends FontConfiguration {
-  def advance(c: Char) = measure.advance(c, font)
-  val lineMetrics = measure.lineMetrics(font)
+  /* https://docs.oracle.com/javase/tutorial/2d/text/fontconcepts.html */
+  case class LineMetrics(ascent: Double, descent: Double, leading: Double)
 }
 
 case class TextLayout(lines: Seq[(String, AffineTransform)], bounds: Bounds) {
@@ -84,7 +69,7 @@ object TextLayout {
 
       if (maxWidth.isEmpty) {
         val bounds = measureLine(chars)
-        
+
         val tx = AffineTransform.translateThenScale(
           tx = bounds.x,
           ty = bounds.y + ascent,

@@ -31,11 +31,11 @@ trait JavaAWTUtil {
     case Path(ops, tx) => {
       val path = new java.awt.geom.GeneralPath()
       ops foreach {
-        case MoveTo(Point(x, y)) => path.moveTo(x, y)
-        case LineTo(Point(x, y)) => path.lineTo(x, y)
-        case QuadTo(Point(x2, y2), Point(x1, y1)) =>
+        case PathOperation.MoveTo(Point(x, y)) => path.moveTo(x, y)
+        case PathOperation.LineTo(Point(x, y)) => path.lineTo(x, y)
+        case PathOperation.QuadTo(Point(x2, y2), Point(x1, y1)) =>
           path.quadTo(x1, y1, x2, y2)
-        case CubicTo(Point(x3, y3), Point(x1, y1), Point(x2, y2)) =>
+        case PathOperation.CubicTo(Point(x3, y3), Point(x1, y1), Point(x2, y2)) =>
           path.curveTo(x1, y1, x2, y2, x3, y3)
       }
       path.closePath
@@ -50,9 +50,9 @@ trait JavaAWTUtil {
     new java.awt.BasicStroke(
       s.width.toFloat,
       s.cap match {
-        case CapButt   => java.awt.BasicStroke.CAP_BUTT
-        case CapSquare => java.awt.BasicStroke.CAP_SQUARE
-        case CapRound  => java.awt.BasicStroke.CAP_ROUND
+        case Cap.Butt   => java.awt.BasicStroke.CAP_BUTT
+        case Cap.Square => java.awt.BasicStroke.CAP_SQUARE
+        case Cap.Round  => java.awt.BasicStroke.CAP_ROUND
       },
       java.awt.BasicStroke.JOIN_MITER,
       1f,
@@ -99,7 +99,7 @@ trait JavaAWTUtil {
           override def paintComponent(g: Graphics) = {
             super.paintComponent(g)
             val g2 = g.asInstanceOf[Graphics2D]
-            val renderingContext = JavaRC(g2,true)
+            val renderingContext = new JavaRC(g2,true)
             val bounds = getBounds()
 
             renderingContext
@@ -138,7 +138,7 @@ trait JavaAWTUtil {
     val aspect = elem.bounds.h / elem.bounds.w
     val height = (width * aspect).toInt
     val g2d = new VectorGraphics2D()
-    val renderingContext = JavaRC(g2d,true)
+    val renderingContext = new JavaRC(g2d,true)
 
     val processor =
       format match {
@@ -197,7 +197,7 @@ trait JavaAWTUtil {
     );
 
     val g2d = bimage.createGraphics();
-    val renderingContext = JavaRC(g2d, true)
+    val renderingContext = new JavaRC(g2d, true)
 
     g2d.setRenderingHint(
       RenderingHints.KEY_ANTIALIASING,
@@ -252,7 +252,7 @@ trait JavaAWTUtil {
     );
 
     val g2d = bimage.createGraphics();
-    val renderingContext = JavaRC(g2d,render)
+    val renderingContext = new JavaRC(g2d,render)
 
     g2d.setRenderingHint(
       RenderingHints.KEY_ANTIALIASING,

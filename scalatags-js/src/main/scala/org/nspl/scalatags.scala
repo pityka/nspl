@@ -14,8 +14,8 @@ import org.scalajs.dom.raw._
 import org.scalajs.dom.ext._
 import scalatags.JsDom
 
-case class ScalaTagRC private[nspl] (
-    elems: scala.collection.mutable.ArrayBuffer[scalatags.generic.TypedTag[org.scalajs.dom.Element, org.scalajs.dom.Element,org.scalajs.dom.Node]]
+class ScalaTagRC private[nspl] (
+   private[nspl] val elems: scala.collection.mutable.ArrayBuffer[scalatags.generic.TypedTag[org.scalajs.dom.Element, org.scalajs.dom.Element,org.scalajs.dom.Node]]
 ) extends RenderingContext[ScalaTagRC] {
 
   private[nspl] var transform: AffineTransform = AffineTransform.identity
@@ -59,7 +59,7 @@ object scalatagrenderer {
       er: Renderer[K, ScalaTagRC]
   ) = {
 
-    val ctx = ScalaTagRC(scala.collection.mutable.ArrayBuffer.empty)
+    val ctx = new ScalaTagRC(scala.collection.mutable.ArrayBuffer.empty)
 
     val rootElem = svg(
       svgAttrs.width := width,
@@ -147,10 +147,10 @@ object scalatagrenderer {
           case Path(ops, _) => {
             path(
               d := ops map {
-                case MoveTo(Point(x, y))                  => s"M$x,$y"
-                case LineTo(Point(x, y))                  => s"L$x,$y"
-                case QuadTo(Point(x2, y2), Point(x1, y1)) => s"Q$x1,$y1,$x2,$y2"
-                case CubicTo(Point(x3, y3), Point(x1, y1), Point(x2, y2)) =>
+                case PathOperation.MoveTo(Point(x, y))                  => s"M$x,$y"
+                case PathOperation.LineTo(Point(x, y))                  => s"L$x,$y"
+                case PathOperation.QuadTo(Point(x2, y2), Point(x1, y1)) => s"Q$x1,$y1,$x2,$y2"
+                case PathOperation.CubicTo(Point(x3, y3), Point(x1, y1), Point(x2, y2)) =>
                   s"C$x1,$y1,$x2,$y2,$x3,$y3"
               } mkString (" "),
               svgAttrs.transform := tx.svg
@@ -170,9 +170,9 @@ object scalatagrenderer {
               strokeWidth := elem.stroke.get.width,
               strokeDasharray := elem.stroke.get.dash.mkString(" "),
               strokeLinecap := (elem.stroke.get.cap match {
-                case CapRound  => "round"
-                case CapButt   => "butt"
-                case CapSquare => "square"
+                case Cap.Round  => "round"
+                case Cap.Butt   => "butt"
+                case Cap.Square => "square"
               })
             )
           else filled

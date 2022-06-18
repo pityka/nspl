@@ -647,8 +647,8 @@ trait Plots {
 
   def legend[F: FC](
       entries: List[(String, Seq[LegendElem])],
-      fontSize: RelFontSize = 1.0 fts,
-      width: RelFontSize = 30 fts,
+      fontSize: RelFontSize ,
+      width: RelFontSize ,
       layout: Layout
   ): Legend = {
     val lineHeight =
@@ -695,12 +695,12 @@ trait Plots {
   def heatmapLegend[F: FC](
       min: Double,
       max: Double,
-      color: Colormap = HeatMapColors(0d, 1d),
-      fontSize: RelFontSize = 1.0 fts,
-      width: RelFontSize = 10 fts,
-      height: RelFontSize = 1 fts,
-      labelText: String = "",
-      numTicks: Int = 2
+      color: Colormap,// = HeatMapColors(0d, 1d),
+      fontSize: RelFontSize,// = 1.0 fts,
+      width: RelFontSize,// = 10 fts,
+      height: RelFontSize,// = 1 fts,
+      labelText: String,// = "",
+      numTicks: Int,// = 2
   ): HeatmapLegend = {
 
     val color1 = color.withRange(min, max)

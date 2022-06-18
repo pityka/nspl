@@ -24,9 +24,9 @@ private[nspl] class RunningAvg {
   def currentN = n
 }
 
-case class CanvasRC private[nspl] (
-    graphics: CanvasRenderingContext2D,
-    cick: Identifier => Unit
+class CanvasRC private[nspl] (
+   private[nspl] val graphics: CanvasRenderingContext2D,
+   private[nspl] val cick: Identifier => Unit
 ) extends RenderingContext[CanvasRC] {
 
   private[nspl] var transform: AffineTransform = AffineTransform.identity
@@ -159,7 +159,7 @@ case class CanvasRC private[nspl] (
 
 object canvasrenderer {
 
-  implicit val defaultGlyphMeasurer: GlyphMeasurer[Font] = CanvasGlyphMeasurer
+  implicit val defaultGlyphMeasurer: Font.GlyphMeasurer[Font] = CanvasGlyphMeasurer
 
   implicit val defaultFont: FontConfiguration = font("Arial")
 
@@ -196,7 +196,7 @@ object canvasrenderer {
     canvas.height = (height * devicePixelRatio).toInt
 
     val ctx =
-      CanvasRC(
+      new CanvasRC(
         canvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D],
         click
       )
@@ -359,11 +359,11 @@ object canvasrenderer {
       case sh: Path =>
         graphics.beginPath()
         sh.path foreach {
-          case cm: MoveTo => graphics.moveTo(cm.p.x, cm.p.y)
-          case cm: LineTo => graphics.lineTo(cm.p.x, cm.p.y)
-          case cm: QuadTo =>
+          case cm: PathOperation.MoveTo => graphics.moveTo(cm.p.x, cm.p.y)
+          case cm: PathOperation.LineTo => graphics.lineTo(cm.p.x, cm.p.y)
+          case cm: PathOperation.QuadTo =>
             graphics.quadraticCurveTo(cm.p1.x, cm.p1.y, cm.p2.x, cm.p2.y)
-          case cm: CubicTo =>
+          case cm: PathOperation.CubicTo =>
             graphics.bezierCurveTo(
               cm.p1.x,
               cm.p1.y,
@@ -414,11 +414,11 @@ object canvasrenderer {
       case sh: Path => {
         graphics.beginPath()
         sh.path foreach {
-          case cm: MoveTo => graphics.moveTo(cm.p.x, cm.p.y)
-          case cm: LineTo => graphics.lineTo(cm.p.x, cm.p.y)
-          case cm: QuadTo =>
+          case cm: PathOperation.MoveTo => graphics.moveTo(cm.p.x, cm.p.y)
+          case cm: PathOperation.LineTo => graphics.lineTo(cm.p.x, cm.p.y)
+          case cm: PathOperation.QuadTo =>
             graphics.quadraticCurveTo(cm.p1.x, cm.p1.y, cm.p2.x, cm.p2.y)
-          case cm: CubicTo =>
+          case cm: PathOperation.CubicTo =>
             graphics.bezierCurveTo(
               cm.p1.x,
               cm.p1.y,

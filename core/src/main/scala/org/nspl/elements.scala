@@ -20,7 +20,7 @@ object ElemList {
     R
   ]](implicit
       r: Renderer[T, R]
-  ) : Renderer[ElemList[T], R] =
+  ): Renderer[ElemList[T], R] =
     new Renderer[ElemList[T], R] {
       def render(ctx: R, elem: ElemList[T]): Unit = {
         ctx.withTransform(elem.tx) {
@@ -99,7 +99,7 @@ object ElemEither {
   ], R <: RenderingContext[R]](implicit
       r1: Renderer[T1, R],
       r2: Renderer[T2, R]
-  ) : Renderer[ElemEither[T1, T2], R]= new Renderer[ElemEither[T1, T2], R] {
+  ): Renderer[ElemEither[T1, T2], R] = new Renderer[ElemEither[T1, T2], R] {
     def render(ctx: R, elem: ElemEither[T1, T2]): Unit =
       ctx.withTransform(elem.tx) {
         elem.either.fold(
@@ -132,23 +132,23 @@ case class ShapeElem(
 
 }
 
-case class TextBox(
-    layout: TextLayout,
-    color: Color,
-    tx: AffineTransform
+class TextBox(
+    val layout: TextLayout,
+    val color: Color,
+    val tx: AffineTransform
 )(implicit fc: FontConfiguration)
     extends Renderable[TextBox] {
 
   val font = fc.font
-
 
   val bounds =
     if (layout.isEmpty) Bounds(0, 0, 0, 0)
     else tx.transform(layout.bounds)
 
   def transform(tx: (Bounds, AffineTransform) => AffineTransform) =
-    this.copy(tx = tx(bounds, this.tx))
-  def transform(tx: AffineTransform) = this.copy(tx = tx.applyBefore(this.tx))
+    new TextBox(layout = layout, color = color, tx = tx(bounds, this.tx))
+  def transform(tx: AffineTransform) =
+    new TextBox(layout = layout, color = color, tx = tx.applyBefore(this.tx))
 }
 
 object TextBox {
@@ -159,5 +159,5 @@ object TextBox {
       color: Color = Color.black,
       tx: AffineTransform = AffineTransform.identity
   )(implicit fc: FontConfiguration): TextBox =
-    TextBox(TextLayout(width, text, fontSize),  color, tx)
+    new TextBox(TextLayout(width, text, fontSize), color, tx)
 }

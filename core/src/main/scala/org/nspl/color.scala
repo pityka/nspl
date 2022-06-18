@@ -56,13 +56,13 @@ object Color {
 
 }
 
-case class ManualColor(map: Map[Double, Color]) extends Colormap {
+case class TableColormap(map: Map[Double, Color]) extends Colormap {
   def apply(v: Double) = map.get(v).getOrElse(Color.gray5)
   def withRange(min: Double, max: Double) = this
 }
 
-object ManualColor {
-  def apply(colors: Color*): ManualColor = ManualColor(
+object TableColormap {
+  def apply(colors: Color*): TableColormap = TableColormap(
     colors.zipWithIndex.map(x => x._2.toDouble -> x._1).toMap
   )
 }
@@ -189,7 +189,10 @@ case class DiscreteColors(
 
   def apply(value: Double): Color = if (value.isNaN) Color.transparent
   else {
-    val v : Double = if (value > numColors) numColors.toDouble else if (value < 0) 0d else value
+    val v: Double =
+      if (value > numColors) numColors.toDouble
+      else if (value < 0) 0d
+      else value
     colorPick(v.toInt, numColors, saturation, lighting)
   }
 
@@ -198,7 +201,7 @@ case class DiscreteColors(
 
 trait Colors {
 
-  def fromRBGHexString(s: String) = {
+  def colorFromHexString(s: String): Color = {
     import java.lang.Integer.parseInt
 
     Color(
@@ -210,17 +213,22 @@ trait Colors {
 
   def colorPick(
       idx: Int,
+      numColors: Int
+  ): Color = colorPick(idx, numColors, 1d, 0.5)
+
+  def colorPick(
+      idx: Int,
       numColors: Int,
-      saturation: Double = 1d,
-      lighting: Double = 0.5
-  ) = {
+      saturation: Double,
+      lighting: Double
+  ): Color = {
     if (idx >= numColors) hslCircle(idx, idx, saturation, lighting)
-    else if (numColors <= shortList.size) shortList(idx)
-    else if (numColors <= longList.size) longList(idx)
+    else if (numColors <= shortColorList.size) shortColorList(idx)
+    else if (numColors <= longColorList.size) longColorList(idx)
     else hslCircle(idx, math.max(0, numColors - 1), saturation, lighting)
   }
 
-  def hslCircle(idx: Int, max: Int, saturation: Double, lighting: Double) = {
+  private[nspl] def hslCircle(idx: Int, max: Int, saturation: Double, lighting: Double) = {
     val (r, g, b) = hsl2rgb2(idx.toDouble / max.toDouble, saturation, lighting)
     val color = Color((r * 255).toInt, (g * 255).toInt, (b * 255).toInt)
     color
@@ -245,7 +253,7 @@ trait Colors {
     (r1 + m, g1 + m, b1 + m)
   }
 
-  private val shortList = Vector(
+  private val shortColorList = Vector(
     Color(0, 0, 0, 255),
     Color(230, 50, 0, 255),
     Color(86, 180, 233, 255),
@@ -255,7 +263,7 @@ trait Colors {
     Color(20, 4121, 167, 255)
   )
 
-  private val longList = Vector(
+  private val longColorList = Vector(
     Color(230, 26, 75),
     Color(60, 180, 75),
     Color(255, 225, 25),

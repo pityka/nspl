@@ -9,7 +9,6 @@ object Build {
     val pf: PartialFunction[Event, A] = { case _ => f }
     withoutState(pf)
   }
-  def withState[A](pf: PartialFunction[(Option[A], Event), A]): Build[A] = pf
   def withoutState[A](pf: PartialFunction[Event, A]): Build[A] = {
     case (o, e) => pf(e)
   }

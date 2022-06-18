@@ -26,7 +26,7 @@ trait Renderers3D {
       y2Col: Int = 4,
       z2Col: Int = 5,
       colorCol: Int = 6,
-      stroke: StrokeConf = StrokeConf(lineWidth * 0.01, CapRound),
+      stroke: StrokeConf = StrokeConf(lineWidth * 0.01, Cap.Round),
       color: Colormap = HeatMapColors(0, 1)
   ) = new DataRenderer3D {
 
@@ -85,7 +85,7 @@ trait Renderers3D {
       colorCol: Int = 3,
       sizeCol: Int = 4,
       size: Double = 0.5d,
-      stroke: StrokeConf = StrokeConf(lineWidth, CapRound),
+      stroke: StrokeConf = StrokeConf(lineWidth, Cap.Round),
       color: Colormap = HeatMapColors(0, 1),
       shape: Shape = shapeList(0),
       keepPointShapeAspectRatio: Boolean = true

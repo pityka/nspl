@@ -67,25 +67,73 @@ object Log10AxisFactory extends AxisFactory {
   }
 }
 
-case class AxisSettings(
-    axisFactory: AxisFactory,
-    numTicks: Int = 4,
-    tickSpace: Option[Double] = None,
-    baseTick: Option[Double] = None,
-    numMinorTicksFactor: Int = 5,
-    tickLength: RelFontSize = .35 fts,
-    tickLabelDistance: RelFontSize = 0.5 fts,
-    customTicks: Seq[(Double, String)] = Nil,
-    labelRotation: Double = 0,
-    width: RelFontSize = 20 fts,
-    fontSize: RelFontSize = 1 fts,
-    tickAlignment: Double = -1.0,
-    lineWidth: RelFontSize = lineWidth,
-    lineLengthFraction: Double = 1d,
-    lineStartFraction: Double = 0.0,
-    tickFormatter: Seq[Double] => Seq[String] = defaultTickFormatter,
-    forceMajorTickOnMin: Boolean = false,
-    forceMajorTickOnMax: Boolean = false
+object AxisSettings {
+
+  def apply(
+      axisFactory: AxisFactory) : AxisSettings = apply(axisFactory)
+      
+  private[nspl] def apply(
+      axisFactory: AxisFactory,
+      numTicks: Int = 4,
+      tickSpace: Option[Double] = None,
+      baseTick: Option[Double] = None,
+      numMinorTicksFactor: Int = 5,
+      tickLength: RelFontSize = .35 fts,
+      tickLabelDistance: RelFontSize = 0.5 fts,
+      customTicks: Seq[(Double, String)] = Nil,
+      labelRotation: Double = 0,
+      width: RelFontSize = 20 fts,
+      fontSize: RelFontSize = 1 fts,
+      tickAlignment: Double = -1.0,
+      lineWidth: RelFontSize = lineWidth,
+      lineLengthFraction: Double = 1d,
+      lineStartFraction: Double = 0.0,
+      tickFormatter: Seq[Double] => Seq[String] = defaultTickFormatter,
+      forceMajorTickOnMin: Boolean = false,
+      forceMajorTickOnMax: Boolean = false
+  )(implicit fc: FontConfiguration): AxisSettings =
+    new AxisSettings(
+      axisFactory = axisFactory,
+      numTicks = numTicks,
+      tickSpace = tickSpace,
+      baseTick = baseTick,
+      numMinorTicksFactor = numMinorTicksFactor,
+      tickLabelDistance = tickLabelDistance,
+      tickLength = tickLength,
+      customTicks = customTicks,
+      labelRotation = labelRotation,
+      width = width,
+      fontSize = fontSize,
+      tickAlignment = tickAlignment,
+      lineWidth = lineWidth,
+      lineLengthFraction = lineLengthFraction,
+      lineStartFraction = lineStartFraction,
+      tickFormatter = tickFormatter,
+      forceMajorTickOnMin = forceMajorTickOnMin,
+      forceMajorTickOnMax = forceMajorTickOnMax
+    )
+
+}
+
+class AxisSettings(
+    val axisFactory: AxisFactory,
+    numTicks: Int,
+    tickSpace: Option[Double],
+    baseTick: Option[Double],
+    numMinorTicksFactor: Int,
+    tickLength: RelFontSize, 
+    tickLabelDistance: RelFontSize, 
+    customTicks: Seq[(Double, String)], 
+    labelRotation: Double, 
+    val width: RelFontSize, 
+    fontSize: RelFontSize, 
+    tickAlignment: Double, 
+    lineWidth: RelFontSize, 
+    val lineLengthFraction: Double, 
+    val lineStartFraction: Double, 
+    tickFormatter: Seq[Double] => Seq[String],
+    forceMajorTickOnMin: Boolean, 
+    forceMajorTickOnMax: Boolean 
 )(implicit fc: FontConfiguration) {
 
   def renderable(

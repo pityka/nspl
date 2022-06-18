@@ -302,7 +302,7 @@ trait Renderers {
             Shape.line(currentPoint.get, p),
             fill = Color.transparent,
             strokeColor = color1,
-            stroke = Some(stroke.value.copy(cap = CapRound)),
+            stroke = Some(stroke.value.copy(cap = Cap.Round)),
             tx = tx
           )
 
@@ -748,7 +748,7 @@ trait Renderers {
       x2Col: Int = 2,
       y2Col: Int = 3,
       colorCol: Int = 4,
-      stroke: StrokeConf = StrokeConf(lineWidth, CapRound),
+      stroke: StrokeConf = StrokeConf(lineWidth, Cap.Round),
       color: Colormap = HeatMapColors(0, 1),
       labelText: Boolean = false,
       labelColor: Color = Color.black,

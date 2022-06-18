@@ -7,13 +7,16 @@ import java.awt.font.LineBreakMeasurer
 
 import JavaFontConversion._
 
-case class JavaRC private[nspl] (graphics: Graphics2D, doRender: Boolean)
-    extends RenderingContext[JavaRC] {
+class JavaRC private[nspl] (
+    private[nspl] val graphics: Graphics2D,
+    private[nspl] val doRender: Boolean
+) extends RenderingContext[JavaRC] {
 
   private[nspl] var paintColor: Color = Color.black
   private[nspl] var stroke: Stroke = Stroke(1d)
   private[nspl] var transform: AffineTransform = AffineTransform.identity
-  private[nspl] var transformInGraphics: AffineTransform = AffineTransform.identity
+  private[nspl] var transformInGraphics: AffineTransform =
+    AffineTransform.identity
 
   private[nspl] def withPaint[T](color: Color)(f: => T) = {
     val current = paintColor
@@ -55,7 +58,7 @@ case class JavaRC private[nspl] (graphics: Graphics2D, doRender: Boolean)
 
 object awtrenderer extends JavaAWTUtil {
 
-  implicit val defaultGlyphMeasurer: GlyphMeasurer[Font] = AwtGlyphMeasurer
+  implicit val defaultGlyphMeasurer: Font.GlyphMeasurer[Font] = AwtGlyphMeasurer
 
   implicit val defaultAWTFont: FontConfiguration = font("Arial")
 
@@ -87,37 +90,38 @@ object awtrenderer extends JavaAWTUtil {
       }
       def render(ctx: JavaRC, elem: ShapeElem): Unit = {
 
-      ctx.withTransform(elem.tx applyBefore elem.shape.currentTransform) {
-        if (ctx.doRender) {
-          drawAndFill(ctx, elem)
-        }
-
-        }
-
-      }
-    }
-
-  implicit val textRenderer : Renderer[TextBox, JavaRC] = new Renderer[TextBox, JavaRC] {
-
-    def render(ctx: JavaRC, elem: TextBox): Unit = {
-      if (!elem.layout.isEmpty && elem.color.a > 0) {
-        ctx.withTransform(elem.tx) {
-          ctx.withPaint(elem.color) {
-            ctx.graphics.setFont(font2font(elem.font))
-            elem.layout.lines.foreach { case (line, lineTx) =>
-              ctx.withTransform(lineTx) {
-                if (ctx.doRender) {
-                  ctx.setTransformInGraphics()
-                  ctx.graphics.drawString(line, 0, 0)
-                }
-              }
-            }
-
+        ctx.withTransform(elem.tx applyBefore elem.shape.currentTransform) {
+          if (ctx.doRender) {
+            drawAndFill(ctx, elem)
           }
 
         }
+
       }
     }
 
-}
+  implicit val textRenderer: Renderer[TextBox, JavaRC] =
+    new Renderer[TextBox, JavaRC] {
+
+      def render(ctx: JavaRC, elem: TextBox): Unit = {
+        if (!elem.layout.isEmpty && elem.color.a > 0) {
+          ctx.withTransform(elem.tx) {
+            ctx.withPaint(elem.color) {
+              ctx.graphics.setFont(font2font(elem.font))
+              elem.layout.lines.foreach { case (line, lineTx) =>
+                ctx.withTransform(lineTx) {
+                  if (ctx.doRender) {
+                    ctx.setTransformInGraphics()
+                    ctx.graphics.drawString(line, 0, 0)
+                  }
+                }
+              }
+
+            }
+
+          }
+        }
+      }
+
+    }
 }
