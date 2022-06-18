@@ -7,15 +7,15 @@ import java.awt.font.LineBreakMeasurer
 
 import JavaFontConversion._
 
-private[nspl] case class JavaRC(graphics: Graphics2D, doRender: Boolean)
+case class JavaRC private[nspl] (graphics: Graphics2D, doRender: Boolean)
     extends RenderingContext[JavaRC] {
 
-  var paintColor: Color = Color.black
-  var stroke: Stroke = Stroke(1d)
-  var transform: AffineTransform = AffineTransform.identity
-  var transformInGraphics: AffineTransform = AffineTransform.identity
+  private[nspl] var paintColor: Color = Color.black
+  private[nspl] var stroke: Stroke = Stroke(1d)
+  private[nspl] var transform: AffineTransform = AffineTransform.identity
+  private[nspl] var transformInGraphics: AffineTransform = AffineTransform.identity
 
-  def withPaint[T](color: Color)(f: => T) = {
+  private[nspl] def withPaint[T](color: Color)(f: => T) = {
     val current = paintColor
     if (current != color) {
       paintColor = color
@@ -23,7 +23,7 @@ private[nspl] case class JavaRC(graphics: Graphics2D, doRender: Boolean)
     }
     f
   }
-  def withStroke[T](str: Stroke)(f: => T) = {
+  private[nspl] def withStroke[T](str: Stroke)(f: => T) = {
     val current = stroke
     if (current != str) {
       stroke = str

@@ -1,4 +1,4 @@
-// This code id derived from https://github.com/gfxfundamentals/webgl-fundamentals
+// This code is derived from https://github.com/gfxfundamentals/webgl-fundamentals
 //
 // The original javascript code comes with this license:
 //  Copyright 2021 GFXFundamentals.
@@ -33,7 +33,7 @@ package org.nspl
 
 import scala.{math => Math}
 
-object Math3D {
+private[nspl] object Math3D {
 
   def degToRad(d: Double) =
     (d * math.Pi / 180).toFloat

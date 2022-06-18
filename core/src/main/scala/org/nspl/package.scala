@@ -41,18 +41,8 @@ package object nspl
   def font(name: String)(implicit gm: GlyphMeasurer[NamedFont]) =
     GenericFontConfig(NamedFont(name, 10))(gm)
 
-  def mapEvent[A <: Renderable[A], B <: Renderable[B]](
-      old: (Option[A], Event)
-  )(f: A => B): (Option[B], Event) = old match {
-    case (None, BuildEvent) => None -> BuildEvent
-    case (Some(old), e) =>
-      val b = f(old)
-      Some(b) -> e
-    case _ => throw new RuntimeException("should not happen")
-  }
-
   /* Calculates the total bounds of the members. */
-  def outline(members1: Iterator[Bounds], anchor: Option[Point]) = {
+  private[nspl] def outline(members1: Iterator[Bounds], anchor: Option[Point]) = {
     var empty = true
     var minX = Double.MaxValue
     var minY = Double.MaxValue
@@ -200,7 +190,7 @@ package object nspl
       .round
       .toDouble
 
-  def mapPoint(p: Point, from: Bounds, to: Bounds, invertY: Boolean): Point =
+  private[nspl] def mapPoint(p: Point, from: Bounds, to: Bounds, invertY: Boolean): Point =
     if (from.w == 0 || from.h == 0) Point(0d, 0d)
     else {
       val xF = to.w / from.w
@@ -214,7 +204,7 @@ package object nspl
 
   val lineWidth = 0.08 fts
 
-  val defaultTickFormatter: Seq[Double] => Seq[String] =
+  private[nspl] val defaultTickFormatter: Seq[Double] => Seq[String] =
     (worldCoordinates: Seq[Double]) => {
       if (worldCoordinates.isEmpty) Nil
       else {

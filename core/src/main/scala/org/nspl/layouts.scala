@@ -118,7 +118,7 @@ case class HorizontalStack(alignment: Alignment, gap: RelFontSize = 0.0 fts)
   }
 }
 
-object LayoutHelper {
+private[nspl] object LayoutHelper {
 
   def transpose[A](a: Seq[Seq[A]]) = {
     if (a.isEmpty) a

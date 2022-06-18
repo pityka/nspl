@@ -1,23 +1,23 @@
 package org.nspl
 
 sealed trait PathOperation {
-  def extremities(last: Point): Seq[Point]
-  def last: Point
-  def transform(tx: AffineTransform): PathOperation
+  private[nspl] def extremities(last: Point): Seq[Point]
+  private[nspl] def last: Point
+  private[nspl] def transform(tx: AffineTransform): PathOperation
 }
 case class MoveTo(p: Point) extends PathOperation {
-  def extremities(last: Point) = Nil
-  def last = p
-  def transform(tx: AffineTransform) = MoveTo(tx.transform(p))
+  private[nspl] def extremities(last: Point) = Nil
+  private[nspl] def last = p
+  private[nspl] def transform(tx: AffineTransform) = MoveTo(tx.transform(p))
 }
 case class LineTo(p: Point) extends PathOperation {
-  def extremities(last: Point) = List(last, p)
-  def last = p
-  def transform(tx: AffineTransform) = LineTo(tx.transform(p))
+  private[nspl] def extremities(last: Point) = List(last, p)
+  private[nspl] def last = p
+  private[nspl] def transform(tx: AffineTransform) = LineTo(tx.transform(p))
 }
 case class QuadTo(p2: Point, p1: Point) extends PathOperation {
-  def last = p2
-  def extremities(p0: Point) = {
+  private[nspl] def last = p2
+  private[nspl] def extremities(p0: Point) = {
     // x'(t) = 2 * (1-t) * (p0-p1) + 2*t(p2-p1) = 0
     // t = (p0-p1)/(p0-p2)
     val tx = (p0.x - p1.x) / (p0.x - p2.x)
@@ -34,13 +34,13 @@ case class QuadTo(p2: Point, p1: Point) extends PathOperation {
         )
     )
   }
-  def transform(tx: AffineTransform) =
+  private[nspl] def transform(tx: AffineTransform) =
     QuadTo(tx.transform(p1), tx.transform(p2))
 
 }
 case class CubicTo(p3: Point, p1: Point, p2: Point) extends PathOperation {
-  def last = p3
-  def extremities(p0: Point) = {
+  private[nspl] def last = p3
+  private[nspl] def extremities(p0: Point) = {
     val t1x = (math.sqrt(
       -1 * p0.x * p2.x + p0.x * p3.x + p1.x * p1.x - p1.x * p2.x - p1.x * p3.x + p2.x * p2.x
     ) - p0.x + 2 * p1.x - p2.x) / (-1 * p0.x + 3 * p1.x - 3 * p2.x + p3.x)
@@ -71,7 +71,7 @@ case class CubicTo(p3: Point, p1: Point, p2: Point) extends PathOperation {
       .filterNot(p => p.x.isNaN() || p.y.isNaN())
 
   }
-  def transform(tx: AffineTransform) =
+  private[nspl] def transform(tx: AffineTransform) =
     CubicTo(tx.transform(p3), tx.transform(p1), tx.transform(p2))
 }
 

@@ -1,7 +1,7 @@
 package org.nspl
 import java.awt.{Font => JFont}
 
-object JavaFontConversion {
+private[nspl] object JavaFontConversion {
   def font2font(myFont: Font): JFont = myFont match {
     case Monospace => new JFont(JFont.MONOSPACED, JFont.PLAIN, Monospace.size)
     case NamedFont(name, size) => new JFont(name, JFont.PLAIN, size)
@@ -9,7 +9,7 @@ object JavaFontConversion {
 
 }
 
-object AwtGlyphMeasurer extends GlyphMeasurer[Font] {
+private[nspl] object AwtGlyphMeasurer extends GlyphMeasurer[Font] {
   import JavaFontConversion._
   import java.awt.image.BufferedImage
   val bimage = new BufferedImage(50, 50, BufferedImage.TYPE_BYTE_BINARY)

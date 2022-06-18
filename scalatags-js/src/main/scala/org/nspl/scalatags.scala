@@ -14,11 +14,11 @@ import org.scalajs.dom.raw._
 import org.scalajs.dom.ext._
 import scalatags.JsDom
 
-private[nspl] case class ScalaTagRC(
+case class ScalaTagRC private (
     elems: scala.collection.mutable.ArrayBuffer[scalatags.generic.TypedTag[org.scalajs.dom.Element, org.scalajs.dom.Element,org.scalajs.dom.Node]]
 ) extends RenderingContext[ScalaTagRC] {
 
-  var transform: AffineTransform = AffineTransform.identity
+  private[nspl] var transform: AffineTransform = AffineTransform.identity
 
   def getTransform: AffineTransform = transform
 
@@ -41,10 +41,10 @@ object scalatagrenderer {
 
   implicit val defaultAWTFont: FontConfiguration = org.nspl.font("Arial")
 
-  def rec2bounds(r: DOMRect) =
+  private[nspl] def rec2bounds(r: DOMRect) =
     Bounds(r.left, r.top, r.width, r.height)
 
-  def cssColor(c: org.nspl.Color) = f"#${c.r}%02x${c.g}%02x${c.b}%02x"
+  private[nspl] def cssColor(c: org.nspl.Color) = f"#${c.r}%02x${c.g}%02x${c.b}%02x"
 
   private[nspl] implicit class PimpedTx(tx: AffineTransform) {
     def svg = {

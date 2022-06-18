@@ -6,10 +6,10 @@ import scalatags.Text.svgAttrs._
 import scalatags.Text.svgAttrs
 import scalatags.Text.svgTags
 
-private[nspl] case class ScalaTagRC(
+case class ScalaTagRC private[nspl] (
     elems: scala.collection.mutable.ArrayBuffer[Modifier]
 ) extends RenderingContext[ScalaTagRC] {
-  var transform: AffineTransform = AffineTransform.identity
+  private[nspl] var transform: AffineTransform = AffineTransform.identity
 
   def getTransform: AffineTransform = transform
 

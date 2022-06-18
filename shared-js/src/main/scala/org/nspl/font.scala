@@ -20,7 +20,7 @@ object canvasFont {
   }
 }
 
-object CanvasGlyphMeasurer extends GlyphMeasurer[Font] {
+private[nspl] object CanvasGlyphMeasurer extends GlyphMeasurer[Font] {
   val canvas = dom.document.createElement("canvas").asInstanceOf[html.Canvas]
   val ctx =
     canvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]

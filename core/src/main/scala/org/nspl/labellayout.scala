@@ -1,6 +1,6 @@
 package org.nspl
 
-object LabelLayout {
+private[nspl] object LabelLayout {
   def intersection(p1: Point, p2: Point, p3: Point, p4: Point) = {
     val x1 = p1.x
     val y1 = p1.y

@@ -24,19 +24,20 @@ private[nspl] class RunningAvg {
   def currentN = n
 }
 
-private[nspl] case class CanvasRC(
+case class CanvasRC private[nspl] (
     graphics: CanvasRenderingContext2D,
     cick: Identifier => Unit
 ) extends RenderingContext[CanvasRC] {
 
-  var transform: AffineTransform = AffineTransform.identity
-  var fillColor: Color = Color.black
-  var strokeColor: Color = Color.black
-  var dash: Seq[Double] = Nil
-  var transformInGraphics: AffineTransform = AffineTransform.identity
-  val bench = new RunningAvg
+  private[nspl] var transform: AffineTransform = AffineTransform.identity
+  private[nspl] var fillColor: Color = Color.black
+  private[nspl] var strokeColor: Color = Color.black
+  private[nspl] var dash: Seq[Double] = Nil
+  private[nspl] var transformInGraphics: AffineTransform =
+    AffineTransform.identity
+  private[nspl] val bench = new RunningAvg
 
-  def withDash[T](d: Seq[Double])(f: => T) = {
+  private[nspl] def withDash[T](d: Seq[Double])(f: => T) = {
     val current = dash
     if (current != d) {
       dash = d
@@ -44,7 +45,7 @@ private[nspl] case class CanvasRC(
     }
     f
   }
-  def withFill[T](color: Color)(f: => T) = {
+  private[nspl] def withFill[T](color: Color)(f: => T) = {
     val current = fillColor
     if (current != color) {
       fillColor = color
@@ -52,7 +53,7 @@ private[nspl] case class CanvasRC(
     }
     f
   }
-  def withStroke[T](color: Color)(f: => T) = {
+  private[nspl] def withStroke[T](color: Color)(f: => T) = {
     val current = strokeColor
     if (current != color) {
       strokeColor = color
@@ -88,13 +89,13 @@ private[nspl] case class CanvasRC(
 
   def getTransform: LocalTx = transform
 
-  var mousedown = false
-  val plotAreaShapes = ArrayBuffer[(Shape, PlotAreaIdentifier)]()
+  private[nspl] var mousedown = false
+  private[nspl] val plotAreaShapes = ArrayBuffer[(Shape, PlotAreaIdentifier)]()
 
-  def registerPlotArea(shape: Shape, id: PlotAreaIdentifier) =
+  private[nspl] def registerPlotArea(shape: Shape, id: PlotAreaIdentifier) =
     plotAreaShapes.append((shape, id))
 
-  def processPlotArea(e: MouseEvent, p: Point)(
+  private[nspl] def processPlotArea(e: MouseEvent, p: Point)(
       cb: PlotAreaIdentifier => Unit
   ) = {
     hitTest[PlotAreaIdentifier](
@@ -162,7 +163,7 @@ object canvasrenderer {
 
   implicit val defaultFont: FontConfiguration = font("Arial")
 
-  private[nspl] def rec2bounds(r: DOMRect) : org.nspl.Bounds =
+  private[nspl] def rec2bounds(r: DOMRect): org.nspl.Bounds =
     Bounds(r.left, r.top, r.width, r.height)
 
   private[nspl] def cssColor(c: Color) = s"rgba(${c.r},${c.g},${c.b},${c.a}"
@@ -208,7 +209,8 @@ object canvasrenderer {
     def paintBounds = {
       val aspect = paintableElem.bounds.h / paintableElem.bounds.w
 
-      val paintWidth = if (aspect > 1) (canvas.height / aspect).toInt else canvas.width
+      val paintWidth =
+        if (aspect > 1) (canvas.height / aspect).toInt else canvas.width
       val paintHeight =
         if (aspect <= 1) (canvas.width * aspect).toInt else canvas.height
       Bounds(0, 0, paintWidth, paintHeight)
@@ -431,87 +433,89 @@ object canvasrenderer {
     }
   }
 
-  implicit val shapeRenderer: Renderer[ShapeElem, CanvasRC] = new Renderer[ShapeElem, CanvasRC] {
+  implicit val shapeRenderer: Renderer[ShapeElem, CanvasRC] =
+    new Renderer[ShapeElem, CanvasRC] {
 
-    private def drawAndFill(ctx: CanvasRC, elem: ShapeElem) = {
+      private def drawAndFill(ctx: CanvasRC, elem: ShapeElem) = {
 
-      if (
-        elem.fill.a > 0 || (elem.stroke.isDefined && elem.strokeColor.a > 0)
-      ) {
-        ctx.setTransformInGraphics()
+        if (
+          elem.fill.a > 0 || (elem.stroke.isDefined && elem.strokeColor.a > 0)
+        ) {
+          ctx.setTransformInGraphics()
 
-        val shape = elem.shape
+          val shape = elem.shape
 
-        if (elem.fill.a > 0) {
-          ctx.withFill(elem.fill) {
-            fill(shape, ctx.graphics)
-          }
-        }
-        if (elem.stroke.isDefined && elem.strokeColor.a > 0) {
-          ctx.withStroke(elem.strokeColor) {
-
-            ctx.withDash(elem.stroke.get.dash) {
-
-              if (ctx.graphics.lineWidth != elem.stroke.get.width) {
-                ctx.graphics.lineWidth = elem.stroke.get.width
-              }
-
-              draw(shape, ctx.graphics, elem.stroke.get)
+          if (elem.fill.a > 0) {
+            ctx.withFill(elem.fill) {
+              fill(shape, ctx.graphics)
             }
           }
-        }
-      }
-    }
+          if (elem.stroke.isDefined && elem.strokeColor.a > 0) {
+            ctx.withStroke(elem.strokeColor) {
 
-    def render(ctx: CanvasRC, elem: ShapeElem): Unit = {
-      ctx.withTransform(elem.tx applyBefore elem.shape.currentTransform) {
+              ctx.withDash(elem.stroke.get.dash) {
 
-        drawAndFill(ctx, elem)
+                if (ctx.graphics.lineWidth != elem.stroke.get.width) {
+                  ctx.graphics.lineWidth = elem.stroke.get.width
+                }
 
-        elem.identifier match {
-          case pa: PlotAreaIdentifier =>
-            ctx.registerPlotArea(
-              elem.shape.transform((_, old) =>
-                ctx.getAffineTransform.applyBefore(old)
-              ),
-              pa.copy(bounds = Some(elem.bounds))
-            )
-          case _ =>
-        }
-      }
-
-    }
-  }
-
-  def asCss(c: Color) = s"rgba(${c.r},${c.g},${c.b}, ${c.a})"
-
-  implicit val textRenderer : Renderer[TextBox, CanvasRC] = new Renderer[TextBox, CanvasRC] {
-
-    def render(ctx: CanvasRC, elem: TextBox): Unit = {
-      if (!elem.layout.isEmpty) {
-        ctx.withTransform(elem.tx) {
-
-          ctx.withFill(elem.color) {
-            ctx.graphics.font = canvasFont(elem.font)
-            /* debug */
-            // ctx.setTransformInGraphics()
-            // ctx.graphics.strokeStyle = asCss(elem.color)
-            // ctx.graphics.strokeRect(
-            //   elem.layout.bounds.x,
-            //   elem.layout.bounds.y,
-            //   elem.layout.bounds.w,
-            //   elem.layout.bounds.h
-            // )
-            /* debug off */
-            elem.layout.lines.foreach { case (line, lineTx) =>
-              ctx.withTransform(lineTx) {
-                ctx.setTransformInGraphics()
-                ctx.graphics.fillText(line, 0, 0)
+                draw(shape, ctx.graphics, elem.stroke.get)
               }
             }
           }
         }
       }
+
+      def render(ctx: CanvasRC, elem: ShapeElem): Unit = {
+        ctx.withTransform(elem.tx applyBefore elem.shape.currentTransform) {
+
+          drawAndFill(ctx, elem)
+
+          elem.identifier match {
+            case pa: PlotAreaIdentifier =>
+              ctx.registerPlotArea(
+                elem.shape.transform((_, old) =>
+                  ctx.getAffineTransform.applyBefore(old)
+                ),
+                pa.copy(bounds = Some(elem.bounds))
+              )
+            case _ =>
+          }
+        }
+
+      }
     }
-  }
+
+  private[nspl] def asCss(c: Color) = s"rgba(${c.r},${c.g},${c.b}, ${c.a})"
+
+  implicit val textRenderer: Renderer[TextBox, CanvasRC] =
+    new Renderer[TextBox, CanvasRC] {
+
+      def render(ctx: CanvasRC, elem: TextBox): Unit = {
+        if (!elem.layout.isEmpty) {
+          ctx.withTransform(elem.tx) {
+
+            ctx.withFill(elem.color) {
+              ctx.graphics.font = canvasFont(elem.font)
+              /* debug */
+              // ctx.setTransformInGraphics()
+              // ctx.graphics.strokeStyle = asCss(elem.color)
+              // ctx.graphics.strokeRect(
+              //   elem.layout.bounds.x,
+              //   elem.layout.bounds.y,
+              //   elem.layout.bounds.w,
+              //   elem.layout.bounds.h
+              // )
+              /* debug off */
+              elem.layout.lines.foreach { case (line, lineTx) =>
+                ctx.withTransform(lineTx) {
+                  ctx.setTransformInGraphics()
+                  ctx.graphics.fillText(line, 0, 0)
+                }
+              }
+            }
+          }
+        }
+      }
+    }
 }
