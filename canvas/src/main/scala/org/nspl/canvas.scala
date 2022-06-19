@@ -159,7 +159,7 @@ class CanvasRC private[nspl] (
 
 object canvasrenderer {
 
-  implicit val defaultGlyphMeasurer: Font.GlyphMeasurer[Font] = CanvasGlyphMeasurer
+  implicit val defaultGlyphMeasurer: Font.GlyphMeasurer = CanvasGlyphMeasurer
 
   implicit val defaultFont: FontConfiguration = font("Arial")
 

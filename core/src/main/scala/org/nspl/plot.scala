@@ -1,7 +1,15 @@
 package org.nspl
 
 import data._
+import Align._
 
+/** A Renderable element for data sources
+  *
+  * Unlike most other Renderable's DataElem is a placeholder in the scene graph.
+  * nspl does not insert the individual data rows into the scene graph but
+  * represent them with a DataElem. The data source will be enumerated at the
+  * time when the rendering context renders the DataElem.
+  */
 case class DataElem(
     data: DataSource,
     xAxis: Axis,
@@ -36,7 +44,7 @@ object DataElem {
   }
 }
 
-trait Plots {
+private[nspl] trait Plots {
   // format: off
   type XYPlotAreaType = Elems5[Elems2[Elems2[Elems2[Elems5[ElemList[ShapeElem],ElemList[ShapeElem],ElemList[DataElem],Elems2[Elems3[ShapeElem,ElemList[Elems2[ShapeElem,TextBox]],ElemList[ShapeElem]],Elems3[ShapeElem,ElemList[Elems2[ShapeElem,TextBox]],ElemList[ShapeElem]]],ShapeElem],TextBox],TextBox],TextBox],ShapeElem,ShapeElem,ShapeElem,ShapeElem]
   // format: on
@@ -64,6 +72,15 @@ trait Plots {
     }
   }
 
+  /** Helper method to create a scene graph for a plot area.
+   * Thsi method create a Build, thus an object which can respond to events
+    *
+    * The plot area is the complete area of a single 2D plot :
+    *   - x and y axes (Cartesian coordinate system)
+    *   - the area defined by those axes
+    *   - x and y axis labels
+    *   - a main label (title)
+    */
   def xyplotareaBuild[F: FC](
       data: Seq[(DataSource, List[DataRenderer])],
       xAxisSetting: AxisSettings,
@@ -282,6 +299,14 @@ trait Plots {
     }
   }
 
+    /** Helper method to create a scene graph for a plot area
+    *
+    * The plot area is the complete area of a single 2D plot :
+    *   - x and y axes (Cartesian coordinate system)
+    *   - the area defined by those axes
+    *   - x and y axis labels
+    *   - a main label (title)
+    */
   def xyplotarea[F: FC](
       id: PlotId,
       data: Seq[(DataSource, List[DataRenderer])],
@@ -466,8 +491,8 @@ trait Plots {
     val originY = yAxis.worldToView(originWY1)
 
     val axes = group(
-      xAxisElem.translate( 0, originY),
-      yAxisElem.translate( originX, 0),
+      xAxisElem.translate(0, originY),
+      yAxisElem.translate(originX, 0),
       FreeLayout
     )
 
@@ -537,8 +562,8 @@ trait Plots {
         zgroup(
           (renderedPlot, 1),
           (
-            AlignTo.verticalGapBeforeReference(
-              AlignTo.horizontalCenter(mainBox, frameElem.bounds),
+            Align.verticalGapBeforeReference(
+              Align.horizontalCenter(mainBox, frameElem.bounds),
               frameElem.bounds,
               mainDistance.value
             ),
@@ -548,7 +573,7 @@ trait Plots {
         ),
         0
       ),
-      (AlignTo.horizontal(xlabBox, frameElem.bounds, xlabAlignment), 1),
+      (Align.horizontal(xlabBox, frameElem.bounds, xlabAlignment), 1),
       VerticalStack(NoAlignment, xlabDistance)
     )
 
@@ -558,8 +583,8 @@ trait Plots {
       zgroup(
         (withHorizontalLabels, 1),
         (
-          AlignTo.vertical(
-            ylabBox.rotate( 0.5 * math.Pi),
+          Align.vertical(
+            ylabBox.rotate(0.5 * math.Pi),
             movedFrame.bounds,
             ylabAlignment
           ),
@@ -570,8 +595,8 @@ trait Plots {
 
     val movedFrame2 = plotWithAxisLabels.m1.m1.m1.m5
 
-    val padTop = AlignTo.verticalGapBeforeReference(
-      AlignTo.horizontalCenter(
+    val padTop = Align.verticalGapBeforeReference(
+      Align.horizontalCenter(
         ShapeElem(
           shape = Shape.line(Point(0d, 0d), Point(0d, topPadding.value)),
           fill = Color.transparent,
@@ -584,8 +609,8 @@ trait Plots {
       0d
     )
 
-    val padBottom = AlignTo.verticalGapAfterReference(
-      AlignTo.horizontalCenter(
+    val padBottom = Align.verticalGapAfterReference(
+      Align.horizontalCenter(
         ShapeElem(
           shape = Shape.line(Point(0d, 0d), Point(0d, bottomPadding.value)),
           fill = Color.transparent,
@@ -598,8 +623,8 @@ trait Plots {
       0d
     )
 
-    val padLeft = AlignTo.horizontalGapBeforeReference(
-      AlignTo.verticalCenter(
+    val padLeft = Align.horizontalGapBeforeReference(
+      Align.verticalCenter(
         ShapeElem(
           shape = Shape.line(Point(0d, 0d), Point(leftPadding.value, 0d)),
           fill = Color.transparent,
@@ -612,8 +637,8 @@ trait Plots {
       0d
     )
 
-    val padRight = AlignTo.horizontalGapAfterReference(
-      AlignTo.verticalCenter(
+    val padRight = Align.horizontalGapAfterReference(
+      Align.verticalCenter(
         ShapeElem(
           shape = Shape.line(Point(0d, 0d), Point(rightPadding.value, 0d)),
           fill = Color.transparent,
@@ -639,16 +664,24 @@ trait Plots {
 
   }
 
+  /** Describes a plot legend */
   sealed trait LegendElem
+  /** Represents a plot legend drawn with a point (circle) */
   case class PointLegend(shape: Shape, color: Color) extends LegendElem
+  /** Represents a plot legend drawn with a line */
   case class LineLegend(stroke: Stroke, color: Color) extends LegendElem
 
   type Legend = ElemList[Elems2[ElemList[ShapeElem], TextBox]]
 
+  /** Helper method to create a scene graph for a plot legend
+    *
+    * A plot legend is a small table with text label and some visual
+    * representation which matches the visual representatin in the plot area
+    */
   def legend[F: FC](
       entries: List[(String, Seq[LegendElem])],
-      fontSize: RelFontSize ,
-      width: RelFontSize ,
+      fontSize: RelFontSize,
+      width: RelFontSize,
       layout: Layout
   ): Legend = {
     val lineHeight =
@@ -692,15 +725,20 @@ trait Plots {
 
   type HeatmapLegend = Elems2[Elems2[ElemList[ShapeElem], AxisElem], TextBox]
 
+  /** Helper method to create a scene graph for a heat map legend
+    *
+    * A heat map legend is a band with different color values to help read off a
+    * color scale
+    */
   def heatmapLegend[F: FC](
       min: Double,
       max: Double,
-      color: Colormap,// = HeatMapColors(0d, 1d),
-      fontSize: RelFontSize,// = 1.0 fts,
-      width: RelFontSize,// = 10 fts,
-      height: RelFontSize,// = 1 fts,
-      labelText: String,// = "",
-      numTicks: Int,// = 2
+      color: Colormap, // = HeatMapColors(0d, 1d),
+      fontSize: RelFontSize, // = 1.0 fts,
+      width: RelFontSize, // = 10 fts,
+      height: RelFontSize, // = 1 fts,
+      labelText: String, // = "",
+      numTicks: Int // = 2
   ): HeatmapLegend = {
 
     val color1 = color.withRange(min, max)
@@ -726,7 +764,7 @@ trait Plots {
     val axisLabel = {
       val box =
         TextBox(labelText, fontSize = fontSize, width = Some(width.value))
-      box.rotate( -0.5 * math.Pi)
+      box.rotate(-0.5 * math.Pi)
     }
 
     val n = 500

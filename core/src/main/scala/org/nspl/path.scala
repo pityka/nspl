@@ -77,6 +77,14 @@ object PathOperation {
   }
 }
 
+/** A shape built up by a path
+* 
+* A path is a sequence of of path operations:
+* - move to point
+* - line to point (from last point)
+* - quadratic to (from last point)
+* - cubic to (from last point)
+*/
 case class Path(path: Seq[PathOperation], currentTransform: AffineTransform)
     extends Shape {
   val bounds: Bounds = {

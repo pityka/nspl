@@ -1,8 +1,8 @@
 package org.nspl
 
-trait Shapes {
+private[nspl] trait Shapes {
 
-  /* Collection of various shapes. */
+  /** Collection of various shapes. */
   val shapeList = Vector(
     Ellipse(-5, -5, 10, 10),
     Rectangle(-5, -5, 10, 10),

@@ -199,7 +199,7 @@ case class DiscreteColors(
   def withRange(min: Double, max: Double) = DiscreteColors(max.toInt)
 }
 
-trait Colors {
+private[nspl] trait Colors {
 
   def colorFromHexString(s: String): Color = {
     import java.lang.Integer.parseInt

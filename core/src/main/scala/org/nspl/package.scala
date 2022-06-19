@@ -1,5 +1,80 @@
 package org
 
+/** nspl plotting library
+  * =====================
+  *
+  * nspl is a Scala library to describe and render scientific plots.
+  *
+  * Entry points into the API:
+  *
+  *   - [[org.nspl.xyplot]] is the most important method to define a plot in
+  *     Cartesian coordinate systems,
+  *   - [[org.nspl.data.DataSource]]. All data must be supplied as a DataSource.
+  *     Its main abstraction is an iterator over rows ([[org.nspl.data.Row]])
+  *     where a row is an indexed sequence of doubles. Each row has the same
+  *     length in a DataSource. A DataSource may be lazy (e.g. load data from
+  *     disk on demand).
+  *   - [[org.nspl.par.apply]] describe settings governing most plots (axis
+  *     labels, plot titles, ticks, etc),
+  *   - [[org.nspl.awtrenderer]] for methods to render the plot with Java AWT
+  *     into PNG, JPG, PDF or a Java Graphics2D context,
+  *   - [[org.nspl.canvasrenderer]] for methods to render the plot with Html5
+  *     Canvas in the browser.
+  *
+  * Premade plot factories for various types of plots:
+  *
+  *   - [[org.nspl.xyplot]]
+  *   - [[org.nspl.xyzplot]] Experimental 3D plot of a points and line segments
+  *     mesh
+  *   - [[org.nspl.boxplot]]
+  *   - [[org.nspl.rasterplot]] Draws data as a bitmap / raster.
+  *
+  * Data renderers:
+  *
+  *   - [[org.nspl.point]] for scatter plots
+  *   - [[org.nspl.line]] for line plots
+  *   - [[org.nspl.lineSegment]] for line or graph plots
+  *   - [[org.nspl.bar]] for bar plots
+  *   - [[org.nspl.area]]
+  *   - [[org.nspl.boxwhisker]] for box plots
+  *   - [[org.nspl.polynom]]
+  *
+  * Data sources:
+  *   - [[org.nspl.data.DataTable]] Generic tabular data source on a row major
+  *     double array
+  *   - There exist implicit conversion methods to provide DataSource views on tuples of
+  *     Doubles or other types from the standard library. Most of these are not
+  *     copying. They are imported with `import org.nspl._` import.
+  *   - [[org.nspl.data.DataMatrix]] Data is viewed as a bitmap/raster: first dimension is
+  *     x, second is y coordinates, third is color value
+  *   - [[org.nspl.saddle]] provides interface from Saddle types.
+  *
+  * The more general scene graph and layout functionality of the library is
+  * exposed via:
+  *   - [[org.nspl.ShapeElem]] to describe a shape,
+  *   - [[org.nspl.TextBox]] to describe a text box,
+  *   - the `sequence()` method groups multiple elements in a sequence together
+  *     e.g. `sequence(List(elem1,elem2),VerticalStack)`,
+  *   - the `group` methods group multiple elements together e.g.
+  *     `group(elem1,elem2,VerticalStack)` , one for each arity
+  *   - Implementations of the [[org.nspl.Layout]] trait e.g.
+  *     [[org.nspl.TableLayout]]
+  *   - Alignment helpers in [[org.nspl.Align]]
+  *   - Subclasses of [[org.nspl.Shape]] eg. [[org.nspl.Rectangle]] ,
+  *     [[org.nspl.Ellipse]], [[org.nspl.SimplePath]], [[org.nspl.Path]]
+  *   - [[org.nspl.fitToBounds]], [[org.nspl.fitToWidth]],
+  *     [[org.nspl.fitToHeight]] methods
+  *
+  * Rendering contexts:
+  *
+  *   - [[org.nspl.canvasrenderer]] for Html5 Canvas. This context is
+  *     interactive with support for panning and zooming. See
+  *     [[org.nspl.canvasrenderer.render]]
+  *   - [[org.nspl.awtrenderer]] for various format on the JVM. e.g see methods
+  *     like `org.nspl.awtrenderer.pdfToFile`
+  *   - [[org.nspl.scalatagrenderer]] for SVG plots (Scala.js and JVM). See
+  *     [[org.nspl.scalatagrenderer.renderToScalaTag]]
+  */
 package object nspl
     extends Tuples1
     with Tuples2
@@ -14,6 +89,9 @@ package object nspl
     with Renderers3D
     with Events {
 
+  /** A build describes how to create a new instance of a type from an event and
+    * an old instance of that type
+    */
   type Build[A] = ((Option[A], Event)) => A // Option[A]
 
   implicit class defaultBuild[T](b: Build[T]) {
@@ -32,11 +110,14 @@ package object nspl
     def fts = new RelFontSize(v.toDouble)
   }
 
-  def font(name: String)(implicit gm: Font.GlyphMeasurer[Font.Named]) =
-    new Font.MeasuredFontConfiguration(Font.Named(name, 10), gm)
+  def font(name: String)(implicit gm: Font.GlyphMeasurer) =
+    new FontConfiguration(new Font(name, 10), gm)
 
   /* Calculates the total bounds of the members. */
-  private[nspl] def outline(members1: Iterator[Bounds], anchor: Option[Point]) = {
+  private[nspl] def outline(
+      members1: Iterator[Bounds],
+      anchor: Option[Point]
+  ) = {
     var empty = true
     var minX = Double.MaxValue
     var minY = Double.MaxValue
@@ -70,6 +151,7 @@ package object nspl
     }
   }
 
+  /** Resizes member to fit into bounds. Keeps aspect ratio. */
   def fitToBounds[T <: Renderable[T]](member: T, bounds: Bounds) = {
     val current = member.bounds
     member.transform(
@@ -85,12 +167,15 @@ package object nspl
   implicit def renderable2build[T <: Renderable[T]](elem: T): Build[T] =
     Build.const(elem)
 
+  /* Resizes member to fit into width. Keeps aspect ratio. */
   def fitToWidth[T <: Renderable[T]](elem: T, width: Double) = {
     val aspect = elem.bounds.h / elem.bounds.w
     val height = (width * aspect).toInt
     val bounds = Bounds(0, 0, width, height)
     fitToBounds(elem, bounds)
   }
+
+  /** Resizes member to fit into height. Keeps aspect ratio. */
   def fitToHeight[T <: Renderable[T]](elem: T, height: Double) = {
     if (elem.bounds.h != 0) {
       val aspect = elem.bounds.w / elem.bounds.h
@@ -100,6 +185,9 @@ package object nspl
     } else elem
   }
 
+  /** Turns a Seq of Renderables into a Renderable where the elements are laid
+    * out according to the given layout
+    */
   def sequence[T <: Renderable[T], F: FC](
       members: Seq[T],
       layout: Layout
@@ -110,9 +198,15 @@ package object nspl
     ElemList(transformed.toList)
   }
 
+  /** Turns a Seq of Renderables into a Renderable while the layout is not
+    * changed
+    */
   def sequence[T <: Renderable[T], F: FC](members: Seq[T]): ElemList[T] =
     sequence(members, FreeLayout)
 
+  /** Turns a Seq of Renderables into a Renderable while the layout is not
+    * changed
+    */
   def sequence[T <: Renderable[T], F: FC](
       members: Seq[Build[T]],
       layout: Layout
@@ -127,11 +221,17 @@ package object nspl
     case _ => throw new RuntimeException("should not happen")
   }
 
+  /** Turns a Seq of Renderables into a Renderable while the layout is not
+    * changed
+    */
   def sequence[T <: Renderable[T], F: FC](
       members: Seq[Build[T]]
   ): Build[ElemList[T]] =
     sequence(members, FreeLayout)
 
+  /** Turns a Seq of Eithers of Renderables into a Renderable while the layout
+    * is not changed
+    */
   def sequence2[T1 <: Renderable[T1], T2 <: Renderable[T2], F: FC](
       members: Seq[Either[T1, T2]],
       layout: Layout
@@ -177,14 +277,19 @@ package object nspl
     case _ => throw new RuntimeException("should not happen")
   }
 
-  /* Normalized scientific notation. */
+  /** Normalized scientific notation. */
   private[nspl] def scientific(x: Double) =
     x / math.pow(10d, math.log10(x).round.toDouble) -> math
       .log10(x)
       .round
       .toDouble
 
-  private[nspl] def mapPoint(p: Point, from: Bounds, to: Bounds, invertY: Boolean): Point =
+  private[nspl] def mapPoint(
+      p: Point,
+      from: Bounds,
+      to: Bounds,
+      invertY: Boolean
+  ): Point =
     if (from.w == 0 || from.h == 0) Point(0d, 0d)
     else {
       val xF = to.w / from.w
@@ -196,7 +301,8 @@ package object nspl
       )
     }
 
-  val lineWidth : RelFontSize = 0.08 fts
+  /** The default line width. */
+  val lineWidth: RelFontSize = 0.08 fts
 
   private[nspl] val defaultTickFormatter: Seq[Double] => Seq[String] =
     (worldCoordinates: Seq[Double]) => {

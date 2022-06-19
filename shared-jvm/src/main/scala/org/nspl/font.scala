@@ -2,13 +2,12 @@ package org.nspl
 import java.awt.{Font => JFont}
 
 private[nspl] object JavaFontConversion {
-  def font2font(myFont: Font): JFont = myFont match {
-    case Font.Named(name, size) => new JFont(name, JFont.PLAIN, size)
-  }
+  def font2font(myFont: Font): JFont =  new JFont(myFont.name, JFont.PLAIN, myFont.size)
+  
 
 }
 
-private[nspl] object AwtGlyphMeasurer extends Font.GlyphMeasurer[Font] {
+private[nspl] object AwtGlyphMeasurer extends Font.GlyphMeasurer {
   import JavaFontConversion._
   import java.awt.image.BufferedImage
   val bimage = new BufferedImage(50, 50, BufferedImage.TYPE_BYTE_BINARY)

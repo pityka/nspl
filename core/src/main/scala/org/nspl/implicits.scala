@@ -2,7 +2,7 @@ package org.nspl
 import org.nspl.data._
 
 /* Provided various implicit conversions to PlotData */
-trait ImplicitConversions {
+private[nspl] trait ImplicitConversions {
   type PlotData = (DataSource, List[DataRenderer], LegendConfig)
   type PlotData3D = (DataSource, List[DataRenderer3D], LegendConfig)
   implicit def dsToTuple1[T, F: FC](

@@ -3,6 +3,22 @@ package org.nspl
 import data._
 import scala.util.Try
 
+/** A DataRenderer can render a datum a a side effect
+  *
+  * DataRenderers describe the visual representations of single data rows.
+  * DataRenderers operate in a side effect with the provided context specific
+  * shape and textbox renderer.
+  *
+  * It is guaranteed that the render method is called in a loop on all rows of a
+  * data source, after which the clear method is called exactly once.
+  *
+  * Data renderers interpret the data rows as it is applicable for their
+  * function e.g. the point renderer takes 2 numbers for the x, y coordinates
+  * and potentially numbers for the color value, and the top and bottom error
+  * bars. In contrast the box and whiskes renderer takes 5 numbers for the
+  * min/max/median/mean and the horizontal coordinate. If the data row is too
+  * short for the given data renderer then an error is thrown.
+  */
 trait DataRenderer {
   def render[R <: RenderingContext[R]](
       data: Row,
@@ -20,8 +36,9 @@ trait DataRenderer {
   def yMinMax(ds: DataSource): Option[MinMax]
 }
 
-trait Renderers {
+private[nspl] trait Renderers {
 
+  /** A renderer which renders a data row as a point on a scatter plot */
   def point[T: FC](
       xCol: Int = 0,
       yCol: Int = 1,
@@ -250,6 +267,11 @@ trait Renderers {
     }
   }
 
+  /** A renderer which renders a data row as a sequence of joined line segments
+    *
+    * Each data row is connected with a line segment in the order they are
+    * supplied in the data source
+    */
   def line[F: FC](
       xCol: Int = 0,
       yCol: Int = 1,
@@ -410,6 +432,11 @@ trait Renderers {
     }
   }
 
+  /** A renderer which renders a data row as a polynom
+    *
+    * It numerically evaluates the polynom sum(a_i x^i) and draws the resulting
+    * curve
+    */
   def polynom(
       renderer: () => DataRenderer
   ) = new DataRenderer {
@@ -447,6 +474,7 @@ trait Renderers {
     }
   }
 
+  /** A renderer which renders a data row as a horizontal or vertical bar */
   def bar[F: FC](
       xCol: Int = 0,
       yCol: Int = 1,
@@ -625,6 +653,7 @@ trait Renderers {
     }
   }
 
+  /** A renderer which renders a data row a single parameterized line (y=a+b*x) */
   def abline(
       a: Double,
       b: Double,
@@ -632,6 +661,10 @@ trait Renderers {
   ) =
     (dataSourceFromRows(Seq(a -> b)), List(renderer))
 
+  /** A renderer which renders a data row as a box and whiskers plot
+   *
+   * The minimum, maximum, median and mean are rendered.
+   */
   def boxwhisker[F: FC](
       xCol: Int = 0,
       medianCol: Int = 1,
@@ -742,6 +775,10 @@ trait Renderers {
     }
   }
 
+  /** A renderer which renders a data row as series of potentially disconnected line segments
+   *
+   * Each data row must provide both endpoints of the line segment
+   */
   def lineSegment[F: FC](
       xCol: Int = 0,
       yCol: Int = 1,

@@ -1,5 +1,6 @@
 package org.nspl
 
+/** Description of a 2D shape */
 trait Shape {
   def bounds: Bounds
   def transform(tx: (Bounds, AffineTransform) => AffineTransform): Shape
@@ -35,6 +36,7 @@ case class Ellipse(
     this.copy(tx = tx(bounds, this.tx))
 }
 
+/** Describes a line segment with the two end points */
 case class Line(
     x1: Double,
     y1: Double,
@@ -57,7 +59,7 @@ case class Line(
   }
 }
 
-/* Path without curves. */
+/** Path without curves. Points are joined by line segments. */
 case class SimplePath(
     ps: Seq[Point],
     currentTransform: AffineTransform = AffineTransform.identity

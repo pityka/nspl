@@ -1,5 +1,6 @@
 package org.nspl
 
+/** A Renderable of a sequence of Renderables */
 case class ElemList[T <: Renderable[T]](
     members: Seq[T],
     tx: AffineTransform = AffineTransform.identity
@@ -30,6 +31,7 @@ object ElemList {
     }
 }
 
+/** A Renderable of a sequence of Eithers of Renderables */
 case class ElemList2[T1 <: Renderable[T1], T2 <: Renderable[T2]](
     members: Seq[Either[T1, T2]],
     tx: AffineTransform = AffineTransform.identity
@@ -67,6 +69,7 @@ object ElemList2 {
 
 }
 
+/** A Renderable of a sequence of Options of Renderables */
 case class ElemOption[A <: Renderable[A]](option: Option[A])
     extends Renderable[ElemOption[A]] {
   def transform(tx: (Bounds, AffineTransform) => AffineTransform) = ElemOption(
@@ -84,6 +87,8 @@ object ElemOption {
       elem.option.fold(())(r1.render(ctx, _))
   }
 }
+
+/** A Renderable of an Either of Renderables */
 case class ElemEither[A <: Renderable[A], B <: Renderable[B]](
     either: Either[A, B],
     tx: AffineTransform = AffineTransform.identity
@@ -110,6 +115,7 @@ object ElemEither {
   }
 }
 
+/** A Renderable describing a shape */
 case class ShapeElem(
     shape: Shape,
     fill: Color = Color.black,
@@ -132,6 +138,10 @@ case class ShapeElem(
 
 }
 
+/** A Renderable describing a text box
+*
+* See the apply factory method in its companion object on how to construct one
+ */
 class TextBox(
     val layout: TextLayout,
     val color: Color,

@@ -28,7 +28,7 @@ jobs:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
       - name: website
         run: |
-          sbt clean docs/mdoc docs/unidoc
+          sbt clean +docs/mdoc +docs/unidoc
           cd website
           hugo
           cd public

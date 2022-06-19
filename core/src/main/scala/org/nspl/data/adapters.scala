@@ -3,7 +3,7 @@ package org.nspl.data
 import scala.collection.mutable.ArrayBuffer
 import org.nspl._
 
-trait DataAdaptors extends DataTuples {
+private[nspl] trait DataAdaptors extends DataTuples {
 
   def dataSourceFrom1DSeq(vec: Seq[Double]): DataTable =
     new DataTable(vec.toArray, 1)

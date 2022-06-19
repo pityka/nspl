@@ -1,6 +1,6 @@
 package org.nspl
 
-trait Tuples1 {
+private[nspl] trait Tuples1 {
 
   [#case class Elems1[[#T1<:Renderable[T1]#]]([#m1:T1#], anchor: Option[Point] = None, tx: AffineTransform = AffineTransform.identity) extends Renderable[Elems1[[#T1#]]] {
     private def effectiveAnchor = anchor.orElse{ 
@@ -16,7 +16,7 @@ trait Tuples1 {
 
 }
 
-trait Tuples2 {
+private[nspl] trait Tuples2 {
 
   [#def group[[#T1<:Renderable[T1]#],F:FC]([#m1:T1#],layout:Layout) : org.nspl.Elems1[[#T1#]] =  {
       val n = layout(List([#m1.bounds#]))

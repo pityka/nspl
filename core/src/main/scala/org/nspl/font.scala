@@ -1,42 +1,68 @@
 package org.nspl
 
-sealed trait Font { self: Font =>
-  def advance(c: Char, size: Int)(implicit fm: Font.GlyphMeasurer[self.type]) =
+/** Describes the name and size of the font set used to draw letters
+  *
+  * This description is independent of the rendering context. Each rendering
+  * context has to provide a GlyphMeasurer to compute the concrete space
+  * occupied by the given Font (font name and font size)
+  */
+class Font(val name: String, val size: Int) { self: Font =>
+  def advance(c: Char, size: Int)(implicit fm: Font.GlyphMeasurer): Double =
     fm.advance(c, this)
-  def size: Int
 }
 
-trait FontConfiguration {
-  def font: Font
-  def advance(c: Char): Double
-  val lineMetrics: Font.LineMetrics
+/** A Font paired with a GlyphMeasurer forms a FontConfiguration */
+class FontConfiguration(val font: Font, measure: Font.GlyphMeasurer) {
+  def advance(c: Char) = measure.advance(c, font)
+  val lineMetrics = measure.lineMetrics(font)
 }
 
 object Font {
 
-  trait GlyphMeasurer[-F <: Font] {
-    def advance(s: Char, f: F): Double
-    def lineMetrics(f: F): LineMetrics
+  /** A GlyphMeasurer can compute line metrics from a font Implementations of
+    * this trait are specific to a rendering context
+    */
+  trait GlyphMeasurer {
+    def advance(s: Char, f: Font): Double
+    def lineMetrics(f: Font): LineMetrics
   }
 
-  class MeasuredFontConfiguration[F <: Font](val font: F, measure: GlyphMeasurer[F])
-      extends FontConfiguration {
-    def advance(c: Char) = measure.advance(c, font)
-    val lineMetrics = measure.lineMetrics(font)
-  }
-
-  case class Named(name: String, size: Int) extends Font
-
-  /* https://docs.oracle.com/javase/tutorial/2d/text/fontconcepts.html */
+  /** Holds line metrics data
+    *
+    * For the meaning of the members see
+    * https://docs.oracle.com/javase/tutorial/2d/text/fontconcepts.html
+    *
+    * Ascent is the distance from the baseline to the typical highest point of
+    * the letter (ascender line). Descent is the distance from the baseline to
+    * the typical lowest point of the letter (descender line). Leading is the
+    * gap between lines, i.e. distance from the descender line to the next
+    * line's ascender line.
+    */
   case class LineMetrics(ascent: Double, descent: Double, leading: Double)
 }
 
+/** Holds a text layout
+  *
+  * @param lines
+  *   a sequence of lines. Each line is a string with the characters of the line
+  *   and an AffineTransformation with the line's displacement.
+  * @param bounds
+  *   outer bounding box of the layout
+  */
 case class TextLayout(lines: Seq[(String, AffineTransform)], bounds: Bounds) {
   def isEmpty = lines.isEmpty || lines.forall(_._1.isEmpty)
 }
 
 object TextLayout {
 
+  /** factory method for text layouts
+    *
+    * Given an optional max width, complete text and a font size it computes the
+    * text layout,
+    * i.e. breaks the text into lines
+    * 
+    * It breaks lines on space, tab and newline characters.
+    */
   def apply(
       maxWidth: Option[Double],
       text: String,

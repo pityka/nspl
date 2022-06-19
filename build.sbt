@@ -191,6 +191,7 @@ lazy val docs = project
     commonSettings: _*
   )
   .settings(
+    crossScalaVersions := List("3.1.1"),
     Compile / doc / sources := Seq.empty
   )
   .settings(

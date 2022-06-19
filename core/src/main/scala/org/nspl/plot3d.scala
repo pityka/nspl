@@ -1,6 +1,7 @@
 package org.nspl
 
 import data._
+import Align._
 
 case class DataElem3D(
     data: DataSource,
@@ -33,7 +34,7 @@ object DataElem3D {
   }
 }
 
-trait Plots3D {
+private[nspl] trait Plots3D {
   import Math3D._
 
   type T =

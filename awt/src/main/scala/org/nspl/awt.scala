@@ -58,7 +58,7 @@ class JavaRC private[nspl] (
 
 object awtrenderer extends JavaAWTUtil {
 
-  implicit val defaultGlyphMeasurer: Font.GlyphMeasurer[Font] = AwtGlyphMeasurer
+  implicit val defaultGlyphMeasurer: Font.GlyphMeasurer= AwtGlyphMeasurer
 
   implicit val defaultAWTFont: FontConfiguration = font("Arial")
 

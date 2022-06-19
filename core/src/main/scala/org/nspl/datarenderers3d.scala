@@ -17,7 +17,7 @@ trait DataRenderer3D {
   def asLegend: Option[LegendElem] = None
 }
 
-trait Renderers3D {
+private[nspl] trait Renderers3D {
   def lineSegment3D[F: FC](
       xCol: Int = 0,
       yCol: Int = 1,
