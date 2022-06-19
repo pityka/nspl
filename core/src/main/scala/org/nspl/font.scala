@@ -6,10 +6,7 @@ package org.nspl
   * context has to provide a GlyphMeasurer to compute the concrete space
   * occupied by the given Font (font name and font size)
   */
-class Font(val name: String, val size: Int) { self: Font =>
-  def advance(c: Char)(implicit fm: Font.GlyphMeasurer): Double =
-    fm.advance(c, this)
-}
+class Font(val name: String, val size: Int)
 
 /** A Font paired with a GlyphMeasurer forms a FontConfiguration */
 class FontConfiguration(val font: Font, measure: Font.GlyphMeasurer) {
