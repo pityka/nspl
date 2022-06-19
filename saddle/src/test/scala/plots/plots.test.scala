@@ -182,8 +182,8 @@ class SaddlePlotSpec extends munit.FunSuite {
         xyplotarea(
           id = new PlotId,
           Nil,
-          AxisSettings(LinearAxisFactory),
-          AxisSettings(LinearAxisFactory),
+          AxisSettings.simple(LinearAxisFactory),
+          AxisSettings.simple(LinearAxisFactory),
           origin = Some(Point(0.0, 0.0)),
           xlim = Some(-1d -> 1d),
           ylim = Some(-1d -> 1d)

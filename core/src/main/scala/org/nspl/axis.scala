@@ -69,9 +69,9 @@ object Log10AxisFactory extends AxisFactory {
 
 object AxisSettings {
 
-  def apply(
-      axisFactory: AxisFactory) : AxisSettings = apply(axisFactory)
-      
+  def simple(
+      axisFactory: AxisFactory)(implicit fc: FontConfiguration) : AxisSettings = apply(axisFactory)
+
   private[nspl] def apply(
       axisFactory: AxisFactory,
       numTicks: Int = 4,
