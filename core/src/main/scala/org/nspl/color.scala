@@ -1,7 +1,6 @@
 package org.nspl
 
 import scala.language.existentials
-import scala.collection.compat._
 
 trait Colormap { self =>
   def apply(v: Double): Color
