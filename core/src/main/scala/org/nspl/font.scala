@@ -16,7 +16,7 @@ class FontConfiguration(val font: Font, measure: Font.GlyphMeasurer) {
 
 object Font {
 
-  /** A GlyphMeasurer can compute line metrics from a font Implementations of
+  /** A GlyphMeasurer can compute line metrics from a font. Implementations of
     * this trait are specific to a rendering context
     */
   trait GlyphMeasurer {
