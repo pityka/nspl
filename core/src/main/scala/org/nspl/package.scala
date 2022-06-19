@@ -1,9 +1,6 @@
 package org
 
-/** nspl plotting library
-  * =====================
-  *
-  * nspl is a Scala library to describe and render scientific plots.
+/** nspl is a Scala library to describe and render scientific plots.
   *
   * Entry points into the API:
   *

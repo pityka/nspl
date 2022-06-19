@@ -56,6 +56,12 @@ lazy val commonSettings = Seq(
       )
     case _ => ???
   }),
+  Compile / doc / scalacOptions ++= Seq(
+    "-no-link-warnings", // Suppresses problems with Scaladoc
+  ),
+  Compile / doc / scalacOptions --= Seq(
+    "-Xfatal-warnings"
+  ),
   licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
   fork := false
 )
