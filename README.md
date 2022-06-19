@@ -1,5 +1,6 @@
 
 [![](https://img.shields.io/maven-central/v/io.github.pityka/nspl-core_2.13.svg)](https://search.maven.org/search?q=g:io.github.pityka%20nspl)
+[![](https://index.scala-lang.org/pityka/nspl/nspl-core/latest-by-scala-version.svg?platform=jvm)](https://index.scala-lang.org/pityka/nspl/nspl-core)
 [![documentation](https://img.shields.io/badge/docs-green)](https://pityka.github.io/nspl/)
 
 # 2d Plotting Library for Scala and Scala.js
