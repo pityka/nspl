@@ -1,7 +1,6 @@
 package org.nspl
 
 import org.nspl.data._
-import scala.jdk.CollectionConverters._
 import org.saddle._
 
 object saddle {
@@ -69,7 +68,8 @@ object saddle {
       valueText = valueText,
       valueColor = valueColor,
       valueFontSize = valueFontSize,
-      zlim = zlim
+      zlim = zlim,
+      transparentPixels = transparentPixels
     )(
       parameters.copy(
         xLabFontSize = xLabFontSize.getOrElse(

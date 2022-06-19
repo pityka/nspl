@@ -1,21 +1,14 @@
 package org.nspl
 
-import org.nspl.data._
 import org.nspl.awtrenderer._
 
 class BenchSpec extends munit.FunSuite {
 
   test("a".ignore) {
 
-    def random = 1 to 10 map (i => scala.util.Random.nextDouble())
-    def random2 = 1 to 10 map (i => scala.util.Random.nextGaussian())
+    def random = 1 to 10 map (_ => scala.util.Random.nextDouble())
 
     val x = random
-    val y = random
-    val z = x zip y map (x => x._1 * x._2)
-    val z2 = random2
-    val z3 = random2
-    val idx = 0 until x.size map (_.toDouble)
 
     def p1 = xyplot(
       (

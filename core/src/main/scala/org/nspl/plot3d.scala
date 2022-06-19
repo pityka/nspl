@@ -37,7 +37,7 @@ object DataElem3D {
 private[nspl] trait Plots3D {
   import Math3D._
 
-  type T =
+  private type T =
     org.nspl.Elems3[org.nspl.ShapeElem, org.nspl.Elems3[
       org.nspl.ShapeElem,
       org.nspl.Elems2[org.nspl.ShapeElem, org.nspl.ElemList[
@@ -101,24 +101,7 @@ private[nspl] trait Plots3D {
         yHeight
       )
     ) {
-      case (Some(old), BuildEvent) =>
-        xyzplotarea(
-          id,
-          data,
-          aspect,
-          zNear,
-          zFar,
-          fieldOfViewAngles,
-          old.cameraPosition,
-          old.cameraTarget,
-          topPadding,
-          bottomPadding,
-          leftPadding,
-          rightPadding,
-          xWidth,
-          yHeight
-        )
-      case (Some(old), Scroll(v1, p, plotAreaId)) if plotAreaId.id == id =>
+      case (Some(old), Scroll(v1, _, plotAreaId)) if plotAreaId.id == id =>
         val speed = math.abs(zFar - zNear) / 500
         val v = (if (v1 > 0) speed else if (v1 < 0) -speed else 0.0)
 

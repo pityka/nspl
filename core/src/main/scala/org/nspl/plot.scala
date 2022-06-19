@@ -72,8 +72,8 @@ private[nspl] trait Plots {
     }
   }
 
-  /** Helper method to create a scene graph for a plot area.
-   * Thsi method create a Build, thus an object which can respond to events
+  /** Helper method to create a scene graph for a plot area. Thsi method create
+    * a Build, thus an object which can respond to events
     *
     * The plot area is the complete area of a single 2D plot :
     *   - x and y axes (Cartesian coordinate system)
@@ -149,41 +149,6 @@ private[nspl] trait Plots {
         yNoTickLabel
       )
     ) {
-      case (Some(old), BuildEvent) =>
-        import old._
-        xyplotarea(
-          id,
-          data,
-          xAxisSetting,
-          yAxisSetting,
-          origin,
-          xlim,
-          ylim,
-          xAxisMargin,
-          yAxisMargin,
-          xgrid,
-          ygrid,
-          frame,
-          xCustomGrid,
-          yCustomGrid,
-          main,
-          mainFontSize,
-          mainDistance,
-          xlab,
-          xlabFontSize,
-          xlabDistance,
-          xlabAlignment,
-          ylab,
-          ylabFontSize,
-          ylabDistance,
-          ylabAlignment,
-          topPadding,
-          bottomPadding,
-          leftPadding,
-          rightPadding,
-          xNoTickLabel,
-          yNoTickLabel
-        )
       case (Some(old), Scroll(v1, p, plotAreaId)) if plotAreaId.id == id =>
         import old._
         val v = if (v1 > 0) 1.05 else if (v1 < 0) 0.95 else 1.0
@@ -299,7 +264,7 @@ private[nspl] trait Plots {
     }
   }
 
-    /** Helper method to create a scene graph for a plot area
+  /** Helper method to create a scene graph for a plot area
     *
     * The plot area is the complete area of a single 2D plot :
     *   - x and y axes (Cartesian coordinate system)
@@ -666,8 +631,10 @@ private[nspl] trait Plots {
 
   /** Describes a plot legend */
   sealed trait LegendElem
+
   /** Represents a plot legend drawn with a point (circle) */
   case class PointLegend(shape: Shape, color: Color) extends LegendElem
+
   /** Represents a plot legend drawn with a line */
   case class LineLegend(stroke: Stroke, color: Color) extends LegendElem
 
@@ -709,9 +676,6 @@ private[nspl] trait Plots {
 
         // needs centering on the vertical axis
         val aligned = sequence(renderables, HorizontalStack(Center))
-
-        val textbox =
-          TextBox(text, fontSize = fontSize, width = Some(width.value))
 
         group(
           aligned,

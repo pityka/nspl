@@ -11,7 +11,7 @@ object Build {
     withoutState(pf)
   }
   def withoutState[A](pf: PartialFunction[Event, A]): Build[A] = {
-    case (o, e) => pf(e)
+    case (_, e) => pf(e)
   }
 }
 

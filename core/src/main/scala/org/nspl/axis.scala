@@ -69,14 +69,14 @@ object Log10AxisFactory extends AxisFactory {
 
 object AxisSettings {
 
-  def simple(
-      axisFactory: AxisFactory)(implicit fc: FontConfiguration) : AxisSettings = apply(axisFactory)
+  def simple(axisFactory: AxisFactory)(implicit
+      fc: FontConfiguration
+  ): AxisSettings = apply(axisFactory)
 
   private[nspl] def apply(
       axisFactory: AxisFactory,
       numTicks: Int = 4,
       tickSpace: Option[Double] = None,
-      baseTick: Option[Double] = None,
       numMinorTicksFactor: Int = 5,
       tickLength: RelFontSize = .35 fts,
       tickLabelDistance: RelFontSize = 0.5 fts,
@@ -96,7 +96,6 @@ object AxisSettings {
       axisFactory = axisFactory,
       numTicks = numTicks,
       tickSpace = tickSpace,
-      baseTick = baseTick,
       numMinorTicksFactor = numMinorTicksFactor,
       tickLabelDistance = tickLabelDistance,
       tickLength = tickLength,
@@ -119,21 +118,20 @@ class AxisSettings(
     val axisFactory: AxisFactory,
     numTicks: Int,
     tickSpace: Option[Double],
-    baseTick: Option[Double],
     numMinorTicksFactor: Int,
-    tickLength: RelFontSize, 
-    tickLabelDistance: RelFontSize, 
-    customTicks: Seq[(Double, String)], 
-    labelRotation: Double, 
-    val width: RelFontSize, 
-    fontSize: RelFontSize, 
-    tickAlignment: Double, 
-    lineWidth: RelFontSize, 
-    val lineLengthFraction: Double, 
-    val lineStartFraction: Double, 
+    tickLength: RelFontSize,
+    tickLabelDistance: RelFontSize,
+    customTicks: Seq[(Double, String)],
+    labelRotation: Double,
+    val width: RelFontSize,
+    fontSize: RelFontSize,
+    tickAlignment: Double,
+    lineWidth: RelFontSize,
+    val lineLengthFraction: Double,
+    val lineStartFraction: Double,
     tickFormatter: Seq[Double] => Seq[String],
-    forceMajorTickOnMin: Boolean, 
-    forceMajorTickOnMax: Boolean 
+    forceMajorTickOnMin: Boolean,
+    forceMajorTickOnMax: Boolean
 )(implicit fc: FontConfiguration) {
 
   def renderable(
@@ -314,7 +312,6 @@ class AxisSettings(
             if (group.find(_.isRight).isEmpty) Nil
             else {
               val leftWorld = group(0).fold(identity, _._1)
-              val centerWorld = group(1).toOption.get._1
               val rightWorld = group(2).fold(identity, _._1)
               val (world, tick) = group(1).toOption.get
               val leftV = axis.worldToView(leftWorld)

@@ -39,11 +39,12 @@ package org
   * Data sources:
   *   - [[org.nspl.data.DataTable]] Generic tabular data source on a row major
   *     double array
-  *   - There exist implicit conversion methods to provide DataSource views on tuples of
-  *     Doubles or other types from the standard library. Most of these are not
-  *     copying. They are imported with `import org.nspl._` import.
-  *   - [[org.nspl.data.DataMatrix]] Data is viewed as a bitmap/raster: first dimension is
-  *     x, second is y coordinates, third is color value
+  *   - There exist implicit conversion methods to provide DataSource views on
+  *     tuples of Doubles or other types from the standard library. Most of
+  *     these are not copying. They are imported with `import org.nspl._`
+  *     import.
+  *   - [[org.nspl.data.DataMatrix]] Data is viewed as a bitmap/raster: first
+  *     dimension is x, second is y coordinates, third is color value
   *   - [[org.nspl.saddle]] provides interface from Saddle types.
   *
   * The more general scene graph and layout functionality of the library is
@@ -210,7 +211,7 @@ package object nspl
   ): Build[ElemList[T]] = {
     case (Some(old), e: Event) =>
       val members1 = (old.members zip members) map { case (old, build) =>
-        build(Some(old), e)
+        build((Some(old), e))
       }
       sequence(members1, layout)
     case (None, BuildEvent) =>
@@ -305,7 +306,6 @@ package object nspl
     (worldCoordinates: Seq[Double]) => {
       if (worldCoordinates.isEmpty) Nil
       else {
-        val range = worldCoordinates.max - worldCoordinates.min
         val precision = 4
         val r = worldCoordinates.map { w =>
           if ((math.abs(w) <= 1e-4 || math.abs(w) >= 1e4) && w != 0.0) {

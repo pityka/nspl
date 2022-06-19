@@ -1,25 +1,22 @@
 package org.nspl
 
-import java.awt.{Graphics2D, Font => JFont}
-import java.awt.event._
-import javax.swing.event.MouseInputAdapter
+import java.awt.{Graphics2D}
 import java.io._
 
 trait JavaAWTUtil {
 
-  import org.nspl.JavaFontConversion._
 
   private[nspl] def shape2awt(s: Shape): java.awt.Shape = s match {
-    case Rectangle(x, y, w, h, tx, _) =>
+    case Rectangle(x, y, w, h, _, _) =>
       new java.awt.geom.Rectangle2D.Double(x, y, w, h)
 
-    case Ellipse(x, y, w, h, tx) =>
+    case Ellipse(x, y, w, h, _) =>
       new java.awt.geom.Ellipse2D.Double(x, y, w, h)
 
-    case Line(x1, y1, x2, y2, tx) =>
+    case Line(x1, y1, x2, y2, _) =>
       new java.awt.geom.Line2D.Double(x1, y1, x2, y2)
 
-    case SimplePath(points, tx) => {
+    case SimplePath(points, _) => {
       val path = new java.awt.geom.GeneralPath()
       path.moveTo(points.head.x, points.head.y)
       points.drop(1).foreach { p =>
@@ -28,7 +25,7 @@ trait JavaAWTUtil {
       path.closePath
       path
     }
-    case Path(ops, tx) => {
+    case Path(ops, _) => {
       val path = new java.awt.geom.GeneralPath()
       ops foreach {
         case PathOperation.MoveTo(Point(x, y)) => path.moveTo(x, y)
@@ -80,7 +77,7 @@ trait JavaAWTUtil {
       er: Renderer[K, JavaRC]
   ) = {
     import javax.swing._
-    import java.awt.{Graphics, RenderingHints}
+    import java.awt.Graphics
     val frame = new JFrame("");
     var paintableElem = elem.build
 
@@ -181,9 +178,7 @@ trait JavaAWTUtil {
     import java.awt.image.BufferedImage
 
     import javax.imageio.ImageIO;
-    import javax.imageio.ImageWriter;
-    import javax.imageio.stream.ImageOutputStream;
-    import java.awt.{Graphics, RenderingHints}
+    import java.awt.RenderingHints
 
     val elem = build.build
 
@@ -235,10 +230,7 @@ trait JavaAWTUtil {
   ) = {
     import java.awt.image.BufferedImage
 
-    import javax.imageio.ImageIO;
-    import javax.imageio.ImageWriter;
-    import javax.imageio.stream.ImageOutputStream;
-    import java.awt.{Graphics, RenderingHints}
+    import java.awt.RenderingHints
 
     var elem = build
 
@@ -281,15 +273,6 @@ trait JavaAWTUtil {
     }
     println((System.nanoTime - t1).toDouble / N * 1e-9)
 
-  }
-
-  private def writeBinaryToFile(f: File, data: Array[Byte]): Unit = {
-    val os = new BufferedOutputStream(new FileOutputStream(f))
-    try {
-      os.write(data)
-    } finally {
-      os.close
-    }
   }
 
   def renderToByteArray[K <: Renderable[K]](

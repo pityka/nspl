@@ -1,7 +1,7 @@
 import org.nspl._
 import org.nspl.saddle._
 import org.nspl.data._
-import org.nspl.awtrenderer._
+import org.nspl.awtrenderer.{defaultAWTFont => _,_}
 import org.saddle._
 import org.saddle.order._
 
@@ -12,7 +12,7 @@ import org.saddle.index.InnerJoin
 class SaddlePlotSpec extends munit.FunSuite {
   
   override val munitTimeout = scala.concurrent.duration.Duration(300, "s")
-  implicit val myfont = font("Hasklig")
+  implicit val myfont : FontConfiguration = font("Hasklig")
 
   def readFrameFromClasspath(s: String) =
     CsvParser
@@ -29,9 +29,9 @@ class SaddlePlotSpec extends munit.FunSuite {
       
   test("plot gallery") {
     {
-      val evec =
-        readFrameFromClasspath("/evec.csv")
-          .mapValues(ScalarTagDouble.parse)
+      // val evec =
+        // readFrameFromClasspath("/evec.csv")
+          // .mapValues(ScalarTagDouble.parse)
       val rotated =
         readFrameFromClasspath("/rotated.csv").mapValues(ScalarTagDouble.parse)
       val data = readFrameFromClasspath("/data.csv")
@@ -65,7 +65,7 @@ class SaddlePlotSpec extends munit.FunSuite {
        par( xlab = "PC1",
         ylab = "freq.",
         main = "Loading distribution",
-        ylim = Some(0d, Double.NaN))
+        ylim = Some((0d, Double.NaN)))
       )
 
       val bar1 = barplotVertical(
@@ -190,7 +190,7 @@ class SaddlePlotSpec extends munit.FunSuite {
         )
 
       val rs =
-        (1 to 99 map (i => scala.util.Random.nextGaussian())).toSeq :+ 1e3
+        (1 to 99 map (_ => scala.util.Random.nextGaussian())).toSeq :+ 1e3
 
       val p6 = rasterplot(
         rasterFromSeq(rs, 10, 10),
@@ -359,6 +359,8 @@ class SaddlePlotSpec extends munit.FunSuite {
 
       val gallery = group(
         group(
+          scree,
+          density2,
           rotations,
           ticktest,
           ticktest2,
@@ -426,6 +428,7 @@ class SaddlePlotSpec extends munit.FunSuite {
         // show(gallery)
         println(pngToFile(gallery.build, width = 10000))
         println(pdfToFile(gallery.build))
+        println(pdfToFile(text))
         while (false) {
           gallery.build
         }
@@ -433,7 +436,7 @@ class SaddlePlotSpec extends munit.FunSuite {
         // println(renderToFile(gallery, 1000, "image/svg"))
       }
       {
-        import scalatagrenderer._
+        // import scalatagrenderer._
         // println(svgToFile(gallery))
       }
     }

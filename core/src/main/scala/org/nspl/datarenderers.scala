@@ -1,7 +1,6 @@
 package org.nspl
 
 import data._
-import scala.util.Try
 
 /** A DataRenderer can render a datum a a side effect
   *
@@ -28,6 +27,7 @@ trait DataRenderer {
       tx: AffineTransform
   )(implicit re: Renderer[ShapeElem, R], rt: Renderer[TextBox, R]): Unit
   def asLegend: Option[LegendElem]
+  @scala.annotation.nowarn
   def clear[R <: RenderingContext[R]](ctx: R)(implicit
       re: Renderer[ShapeElem, R],
       rt: Renderer[TextBox, R]
@@ -193,7 +193,8 @@ private[nspl] trait Renderers {
                     Point(vX, yAxis.worldToView(errorTop))
                   ),
                   stroke = Some(errorBarStroke.value),
-                  tx = tx
+                  tx = tx,
+                  fill = errorBarColor
                 )
                 re.render(ctx, shape1)
               }
@@ -205,7 +206,8 @@ private[nspl] trait Renderers {
                     Point(vX, yAxis.worldToView(errorBottom))
                   ),
                   stroke = Some(errorBarStroke.value),
-                  tx = tx
+                  tx = tx,
+                  fill = errorBarColor
                 )
                 re.render(ctx, shape1)
               }
@@ -653,7 +655,8 @@ private[nspl] trait Renderers {
     }
   }
 
-  /** A renderer which renders a data row a single parameterized line (y=a+b*x) */
+  /** A renderer which renders a data row a single parameterized line (y=a+b*x)
+    */
   def abline(
       a: Double,
       b: Double,
@@ -662,9 +665,9 @@ private[nspl] trait Renderers {
     (dataSourceFromRows(Seq(a -> b)), List(renderer))
 
   /** A renderer which renders a data row as a box and whiskers plot
-   *
-   * The minimum, maximum, median and mean are rendered.
-   */
+    *
+    * The minimum, maximum, median and mean are rendered.
+    */
   def boxwhisker[F: FC](
       xCol: Int = 0,
       medianCol: Int = 1,
@@ -775,10 +778,11 @@ private[nspl] trait Renderers {
     }
   }
 
-  /** A renderer which renders a data row as series of potentially disconnected line segments
-   *
-   * Each data row must provide both endpoints of the line segment
-   */
+  /** A renderer which renders a data row as series of potentially disconnected
+    * line segments
+    *
+    * Each data row must provide both endpoints of the line segment
+    */
   def lineSegment[F: FC](
       xCol: Int = 0,
       yCol: Int = 1,

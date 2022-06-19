@@ -309,8 +309,6 @@ private[nspl] trait DataAdaptors extends DataTuples {
     val max1 = data.map(_._1).max
     val min2 = data.map(_._2).min
     val max2 = data.map(_._2).max
-    val w1 = (max1 - min1) / n
-    val w2 = (max2 - min2) / n
 
     linesegments(
       contour(

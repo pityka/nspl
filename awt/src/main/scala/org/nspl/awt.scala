@@ -1,9 +1,6 @@
 package org.nspl
 
 import java.awt.Graphics2D
-import java.awt.{Font => JFont}
-import java.text.AttributedString
-import java.awt.font.LineBreakMeasurer
 
 import JavaFontConversion._
 

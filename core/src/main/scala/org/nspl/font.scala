@@ -7,7 +7,7 @@ package org.nspl
   * occupied by the given Font (font name and font size)
   */
 class Font(val name: String, val size: Int) { self: Font =>
-  def advance(c: Char, size: Int)(implicit fm: Font.GlyphMeasurer): Double =
+  def advance(c: Char)(implicit fm: Font.GlyphMeasurer): Double =
     fm.advance(c, this)
 }
 
@@ -60,7 +60,7 @@ object TextLayout {
     * Given an optional max width, complete text and a font size it computes the
     * text layout,
     * i.e. breaks the text into lines
-    * 
+    *
     * It breaks lines on space, tab and newline characters.
     */
   def apply(

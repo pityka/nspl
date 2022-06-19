@@ -1,19 +1,17 @@
 package org.nspl
 
 import org.scalajs.dom
-import org.scalajs.dom._
 import org.scalajs.dom.html
-import org.w3c
 
 object svgFont {
   def apply(f: Font) = s"font-family: ${f.name};font-size: ${f.size}"
-  
+
 }
 
 /* Code duplication! */
 object canvasFont {
   def apply(f: Font) = s"${f.size}px ${f.name}"
-  
+
 }
 
 private[nspl] object CanvasGlyphMeasurer extends Font.GlyphMeasurer {

@@ -93,9 +93,9 @@ private[nspl] object Math3D {
     )
 
   def lookAt(cameraPosition: Vec3, target: Vec3, up: Vec3) = {
-    var zAxis = normalize(subtractVectors(cameraPosition, target));
-    var xAxis = normalize(cross(up, zAxis));
-    var yAxis = normalize(cross(zAxis, xAxis));
+    val zAxis = normalize(subtractVectors(cameraPosition, target));
+    val xAxis = normalize(cross(up, zAxis));
+    val yAxis = normalize(cross(zAxis, xAxis));
 
     Mat4(
       xAxis(0),

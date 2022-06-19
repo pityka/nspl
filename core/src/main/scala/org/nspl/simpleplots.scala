@@ -9,7 +9,6 @@ case class InLegend(text: String) extends LegendConfig
 /* Factory methods for common plots. */
 private[nspl] trait SimplePlots {
 
-  
   /** Factory method to create the scene graph of a plot in a Cartesian
     * coordinate system.
     *
@@ -45,9 +44,6 @@ private[nspl] trait SimplePlots {
     val xFac = if (xlog) Log10AxisFactory else LinearAxisFactory
     val yFac = if (ylog) Log10AxisFactory else LinearAxisFactory
 
-    val originX = if (xlog) 1.0 else 0.0
-    val originY = if (ylog) 1.0 else 0.0
-
     val data1 =
       if (draw1Line)
         (
@@ -60,7 +56,7 @@ private[nspl] trait SimplePlots {
     val legend1 =
       legend(
         entries = ((data
-          .map { case (ds, render, conf) =>
+          .map { case (_, render, conf) =>
             conf match {
               case NotInLegend => None
               case InLegend(name1) =>
@@ -167,7 +163,7 @@ private[nspl] trait SimplePlots {
         entries = (
           (
             data
-              .map { case (ds, render, conf) =>
+              .map { case (_, render, conf) =>
                 conf match {
                   case NotInLegend => None
                   case InLegend(name) =>
@@ -217,7 +213,6 @@ private[nspl] trait SimplePlots {
       relative: Boolean = false
   )(parameters: Parameters) = {
     {
-      import parameters._
       val data1: Seq[Seq[VectorRow]] = data.iterator
         .map { row =>
           val x = row(xCol)
@@ -239,7 +234,7 @@ private[nspl] trait SimplePlots {
       val legend1 = legend.zipWithIndex.map(x => (x._2, x._1._2, x._1._3))
 
       val renderers =
-        legend1.zip(data1).map { case ((idx, label, color), data) =>
+        legend1.zip(data1).map { case ((_, label, color), data) =>
           val ds: DataSource = data
           (
             ds,
@@ -341,7 +336,6 @@ private[nspl] trait SimplePlots {
       boxColor: Colormap = Color.gray4,
       useLabels: Boolean = true
   )(parameters: Parameters) = {
-    import parameters._
     val bxdata = boxplotData(data.toSeq)
 
     boxplotImpl(
@@ -354,7 +348,6 @@ private[nspl] trait SimplePlots {
   def binnedboxplot[F: FC](
       dim1: Seq[Double],
       dim2: Seq[Double],
-      xnames: Seq[String] = Nil,
       bins: Int = 10,
       boxColor: Colormap = Color.gray4,
       xgrid: Boolean = false

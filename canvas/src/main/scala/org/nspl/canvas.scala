@@ -4,7 +4,6 @@ import org.scalajs.dom._
 import org.scalajs.dom
 import org.scalajs.dom.html
 import scala.collection.mutable.ArrayBuffer
-import scala.scalajs.js
 import java.util.ConcurrentModificationException
 
 private[nspl] class RunningAvg {
@@ -25,8 +24,8 @@ private[nspl] class RunningAvg {
 }
 
 class CanvasRC private[nspl] (
-   private[nspl] val graphics: CanvasRenderingContext2D,
-   private[nspl] val cick: Identifier => Unit
+    private[nspl] val graphics: CanvasRenderingContext2D,
+    private[nspl] val cick: Identifier => Unit
 ) extends RenderingContext[CanvasRC] {
 
   private[nspl] var transform: AffineTransform = AffineTransform.identity
@@ -95,11 +94,10 @@ class CanvasRC private[nspl] (
   private[nspl] def registerPlotArea(shape: Shape, id: PlotAreaIdentifier) =
     plotAreaShapes.append((shape, id))
 
-  private[nspl] def processPlotArea(e: MouseEvent, p: Point)(
+  private[nspl] def processPlotArea(p: Point)(
       cb: PlotAreaIdentifier => Unit
   ) = {
     hitTest[PlotAreaIdentifier](
-      e,
       p,
       true,
       plotAreaShapes,
@@ -108,20 +106,18 @@ class CanvasRC private[nspl] (
   }
 
   private def hitTest[T](
-      e: MouseEvent,
       p: Point,
       needsTransformedBounds: Boolean,
       shapes: collection.Seq[(Shape, T)],
       callback: (T, Option[Bounds]) => Unit
   ) = {
-    import canvasrenderer._
     val ctx = graphics
 
     shapes.foreach { case (shape, id) =>
       val (hit, transformedBounds) = withTransform(shape.currentTransform) {
         setTransformInGraphics()
         shape match {
-          case Rectangle(x, y, w, h, tx, _) =>
+          case Rectangle(x, y, w, h, _, _) =>
             ctx.beginPath()
             ctx.rect(x, y, w, h)
             val r =
@@ -259,7 +255,7 @@ object canvasrenderer {
       if (e.button == 0) {
         e.preventDefault()
         val p = getCanvasCoordinate(canvas, e, devicePixelRatio)
-        ctx.processPlotArea(e, p) { identifier =>
+        ctx.processPlotArea(p) { identifier =>
           ctx.mousedown = true
           dragStart = p
           click(identifier)
@@ -276,7 +272,7 @@ object canvasrenderer {
           val v = Point(dragStart.x - p.x, dragStart.y - p.y)
           val l = math.sqrt(v.x * v.x + v.y * v.y)
           if (l > 0) {
-            ctx.processPlotArea(e, p) { id =>
+            ctx.processPlotArea(p) { id =>
               paintableElem =
                 build(Some(paintableElem) -> Drag(dragStart, p, id))
               dragStart = p
@@ -290,9 +286,8 @@ object canvasrenderer {
     def onwheel(e: MouseEvent) = {
       e.preventDefault()
       queueAnimationFrame { _ =>
-        val cb = canvas.getBoundingClientRect()
         val p = getCanvasCoordinate(canvas, e, devicePixelRatio)
-        ctx.processPlotArea(e, p) { id =>
+        ctx.processPlotArea( p) { id =>
           paintableElem = build(
             Some(paintableElem) -> Scroll(
               e.asInstanceOf[scala.scalajs.js.Dynamic]
@@ -348,7 +343,7 @@ object canvasrenderer {
           .ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI)
         graphics.fill()
       }
-      case sh: Line => ()
+      case _: Line => ()
       case sh: SimplePath =>
         graphics.beginPath()
         sh.ps.foreach { p =>
@@ -379,8 +374,7 @@ object canvasrenderer {
 
   private[nspl] def draw(
       sh: Shape,
-      graphics: CanvasRenderingContext2D,
-      stroke: Stroke
+      graphics: CanvasRenderingContext2D
   ) = {
     sh match {
       case sh: Rectangle => {
@@ -459,7 +453,7 @@ object canvasrenderer {
                   ctx.graphics.lineWidth = elem.stroke.get.width
                 }
 
-                draw(shape, ctx.graphics, elem.stroke.get)
+                draw(shape, ctx.graphics)
               }
             }
           }

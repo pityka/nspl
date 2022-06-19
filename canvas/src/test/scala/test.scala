@@ -2,8 +2,6 @@ import org.nspl._
 import org.nspl.data._
 import canvasrenderer._
 import org.scalajs.dom._
-import org.scalajs.dom
-import org.scalajs.dom.html
 
 import scala.scalajs.js
 import js.annotation._
@@ -14,15 +12,14 @@ object nsplcanvastest {
   def bind(n: Node): Unit = {
     println("Hi")
 
-    def random = 1 to 1000 map (i => scala.util.Random.nextDouble())
-    def random2 = 1 to 1000 map (i => scala.util.Random.nextGaussian())
+    def random = 1 to 1000 map (_ => scala.util.Random.nextDouble())
+    def random2 = 1 to 1000 map (_ => scala.util.Random.nextGaussian())
 
     val x = random
     val y = random
     val z = x zip y map (x => x._1 * x._2)
     val z2 = random2
     val z3 = random2
-    val idx = 0 until x.size map (_.toDouble)
 
     val p1 = xyplot(
       (
@@ -133,19 +130,19 @@ object nsplcanvastest {
     )()
 
     val gallery = group(
-      // xyzp,
+      xyzp,
       p1,
-      // p2,
-      // p2,
-      // p3,
-      // p4,
-      // p5,
-      // p6,
-      // text,
-      VerticalStack(Anchor)
+      p2,
+      p2,
+      p3,
+      p4,
+      p5,
+      p6,
+      text,
+      VerticalStack(Align.Anchor)
     )
 
-    val (canv, update) = render(gallery, 800, 800, println)
+    val (canv, _) = render(gallery, 800, 800, println)
 
     n.appendChild(canv)
 
