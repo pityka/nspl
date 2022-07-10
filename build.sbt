@@ -162,7 +162,7 @@ lazy val scalatagsJvm = project
   .settings(commonSettings)
   .settings(
     name := "nspl-scalatags-jvm",
-    libraryDependencies += "com.lihaoyi" %% "scalatags" % "0.11.0"
+    libraryDependencies += "com.lihaoyi" %% "scalatags" % "0.11.1"
   )
   .dependsOn(core, sharedJvm)
 
