@@ -7,284 +7,42 @@ case object NotInLegend extends LegendConfig
 case class InLegend(text: String) extends LegendConfig
 
 /* Factory methods for common plots. */
-trait SimplePlots {
+private[nspl] trait SimplePlots {
 
-  class Parameters(
-      val xlog: Boolean,
-      val ylog: Boolean,
-      val main: String,
-      val xlab: String,
-      val ylab: String,
-      val xnames: Seq[(Double, String)],
-      val ynames: Seq[(Double, String)],
-      val xlim: Option[(Double, Double)],
-      val ylim: Option[(Double, Double)],
-      val draw1Line: Boolean,
-      val extraLegend: Seq[(String, LegendElem)],
-      val xLabFontSize: RelFontSize,
-      val yLabFontSize: RelFontSize,
-      val mainFontSize: RelFontSize,
-      val xNumTicks: Int,
-      val yNumTicks: Int,
-      val xAxisMargin: Double,
-      val yAxisMargin: Double,
-      val legendFontSize: RelFontSize,
-      val legendWidth: RelFontSize,
-      val xgrid: Boolean,
-      val ygrid: Boolean,
-      val xWidth: RelFontSize,
-      val yHeight: RelFontSize,
-      val frame: Boolean,
-      val xLabelRotation: Double,
-      val yLabelRotation: Double,
-      val origin: Option[(Double, Double)],
-      val xCustomGrid: Boolean,
-      val yCustomGrid: Boolean,
-      val legendLayout: Layout,
-      val legendDistance: RelFontSize,
-      val xTickLength: RelFontSize,
-      val yTickLength: RelFontSize,
-      val xLineWidthFraction: Double,
-      val yLineWidthFraction: Double,
-      val xLineStartFraction: Double,
-      val yLineStartFraction: Double,
-      val topPadding: RelFontSize,
-      val bottomPadding: RelFontSize,
-      val leftPadding: RelFontSize,
-      val rightPadding: RelFontSize,
-      val xLabDistance: RelFontSize,
-      val yLabDistance: RelFontSize,
-      val mainLabDistance: RelFontSize,
-      val xTickSpace: Option[Double],
-      val yTickSpace: Option[Double],
-      val noLegend: Boolean,
-      val xNoTickLabel: Boolean,
-      val yNoTickLabel: Boolean
-  ) {
-    def copy(
-        yNoTickLabel: Boolean = yNoTickLabel,
-        xNoTickLabel: Boolean = xNoTickLabel,
-        noLegend: Boolean = noLegend,
-        yTickSpace: Option[Double] = yTickSpace,
-        xTickSpace: Option[Double] = xTickSpace,
-        mainLabDistance: RelFontSize = mainLabDistance,
-        yLabDistance: RelFontSize = yLabDistance,
-        xLabDistance: RelFontSize = xLabDistance,
-        rightPadding: RelFontSize = rightPadding,
-        leftPadding: RelFontSize = leftPadding,
-        bottomPadding: RelFontSize = bottomPadding,
-        topPadding: RelFontSize = topPadding,
-        yLineStartFraction: Double = yLineStartFraction,
-        xLineStartFraction: Double = xLineStartFraction,
-        yLineWidthFraction: Double = yLineWidthFraction,
-        xLineWidthFraction: Double = xLineWidthFraction,
-        yTickLength: RelFontSize = yTickLength,
-        xTickLength: RelFontSize = xTickLength,
-        legendDistance: RelFontSize = legendDistance,
-        legendLayout: Layout = legendLayout,
-        yCustomGrid: Boolean = yCustomGrid,
-        xCustomGrid: Boolean = xCustomGrid,
-        origin: Option[(Double, Double)] = origin,
-        yLabelRotation: Double = yLabelRotation,
-        xLabelRotation: Double = xLabelRotation,
-        frame: Boolean = frame,
-        yHeight: RelFontSize = yHeight,
-        xWidth: RelFontSize = xWidth,
-        ygrid: Boolean = ygrid,
-        xgrid: Boolean = xgrid,
-        legendWidth: RelFontSize = legendWidth,
-        legendFontSize: RelFontSize = legendFontSize,
-        yAxisMargin: Double = yAxisMargin,
-        xAxisMargin: Double = xAxisMargin,
-        yNumTicks: Int = yNumTicks,
-        xNumTicks: Int = xNumTicks,
-        mainFontSize: RelFontSize = mainFontSize,
-        yLabFontSize: RelFontSize = yLabFontSize,
-        xLabFontSize: RelFontSize = xLabFontSize,
-        extraLegend: Seq[(String, LegendElem)] = extraLegend,
-        draw1Line: Boolean = draw1Line,
-        ylim: Option[(Double, Double)] = ylim,
-        xlim: Option[(Double, Double)] = xlim,
-        ynames: Seq[(Double, String)] = ynames,
-        xnames: Seq[(Double, String)] = xnames,
-        ylab: String = ylab,
-        xlab: String = xlab,
-        main: String = main,
-        ylog: Boolean = ylog,
-        xlog: Boolean = xlog
-    ) = new Parameters(
-      xlog = xlog,
-      ylog = ylog,
-      main = main,
-      xlab = xlab,
-      ylab = ylab,
-      xnames = xnames,
-      ynames = ynames,
-      xlim = xlim,
-      ylim = ylim,
-      draw1Line = draw1Line,
-      extraLegend = extraLegend,
-      xLabFontSize = xLabFontSize,
-      yLabFontSize = yLabFontSize,
-      mainFontSize = mainFontSize,
-      xNumTicks = xNumTicks,
-      yNumTicks = yNumTicks,
-      xAxisMargin = xAxisMargin,
-      yAxisMargin = yAxisMargin,
-      legendFontSize = legendFontSize,
-      legendWidth = legendWidth,
-      xgrid = xgrid,
-      ygrid = ygrid,
-      xWidth = xWidth,
-      yHeight = yHeight,
-      frame = frame,
-      xLabelRotation = xLabelRotation,
-      yLabelRotation = yLabelRotation,
-      origin = origin,
-      xCustomGrid = xCustomGrid,
-      yCustomGrid = yCustomGrid,
-      legendLayout = legendLayout,
-      legendDistance = legendDistance,
-      xTickLength = xTickLength,
-      yTickLength = yTickLength,
-      xLineWidthFraction = xLineWidthFraction,
-      yLineWidthFraction = yLineWidthFraction,
-      xLineStartFraction = xLineStartFraction,
-      yLineStartFraction = yLineStartFraction,
-      topPadding = topPadding,
-      bottomPadding = bottomPadding,
-      leftPadding = leftPadding,
-      rightPadding = rightPadding,
-      xLabDistance = xLabDistance,
-      yLabDistance = yLabDistance,
-      mainLabDistance = mainLabDistance,
-      xTickSpace = xTickSpace,
-      yTickSpace = yTickSpace,
-      noLegend = noLegend,
-      xNoTickLabel = xNoTickLabel,
-      yNoTickLabel = yNoTickLabel
-    )
-  }
-
-  object par {
-    def apply(
-        noLegend: Boolean = false,
-        yTickSpace: Option[Double] = None,
-        xTickSpace: Option[Double] = None,
-        mainLabDistance: RelFontSize = 0.75 fts,
-        yLabDistance: RelFontSize = 0.5 fts,
-        xLabDistance: RelFontSize = 0.5 fts,
-        rightPadding: RelFontSize = 5d fts,
-        leftPadding: RelFontSize = 5d fts,
-        bottomPadding: RelFontSize = 3d fts,
-        topPadding: RelFontSize = 3d fts,
-        yLineStartFraction: Double = 0d,
-        xLineStartFraction: Double = 0d,
-        yLineWidthFraction: Double = 1d,
-        xLineWidthFraction: Double = 1d,
-        yTickLength: RelFontSize = 0.4 fts,
-        xTickLength: RelFontSize = 0.4 fts,
-        legendDistance: RelFontSize = 0.5 fts,
-        legendLayout: Layout = ColumnLayout(
-          numRows = 10,
-          horizontalGap = 0.75 fts,
-          verticalGap = 0.4 fts
-        ),
-        yCustomGrid: Boolean = false,
-        xCustomGrid: Boolean = false,
-        origin: Option[(Double, Double)] = None,
-        yLabelRotation: Double = 0d,
-        xLabelRotation: Double = 0d,
-        frame: Boolean = true,
-        yHeight: RelFontSize = 20 fts,
-        xWidth: RelFontSize = 20 fts,
-        ygrid: Boolean = true,
-        xgrid: Boolean = true,
-        legendWidth: RelFontSize = 30 fts,
-        legendFontSize: RelFontSize = 1 fts,
-        yAxisMargin: Double = 0.05,
-        xAxisMargin: Double = 0.05,
-        yNumTicks: Int = 6,
-        xNumTicks: Int = 6,
-        mainFontSize: RelFontSize = 1 fts,
-        yLabFontSize: RelFontSize = 1 fts,
-        xLabFontSize: RelFontSize = 1 fts,
-        extraLegend: Seq[(String, LegendElem)] = Nil,
-        draw1Line: Boolean = false,
-        ylim: Option[(Double, Double)] = None,
-        xlim: Option[(Double, Double)] = None,
-        ynames: Seq[(Double, String)] = Nil,
-        xnames: Seq[(Double, String)] = Nil,
-        ylab: String = "",
-        xlab: String = "",
-        main: String = "",
-        ylog: Boolean = false,
-        xlog: Boolean = false,
-        xNoTickLabel: Boolean = false,
-        yNoTickLabel: Boolean = false
-    ) = new Parameters(
-      xlog = xlog,
-      ylog = ylog,
-      main = main,
-      xlab = xlab,
-      ylab = ylab,
-      xnames = xnames,
-      ynames = ynames,
-      xlim = xlim,
-      ylim = ylim,
-      draw1Line = draw1Line,
-      extraLegend = extraLegend,
-      xLabFontSize = xLabFontSize,
-      yLabFontSize = yLabFontSize,
-      mainFontSize = mainFontSize,
-      xNumTicks = xNumTicks,
-      yNumTicks = yNumTicks,
-      xAxisMargin = xAxisMargin,
-      yAxisMargin = yAxisMargin,
-      legendFontSize = legendFontSize,
-      legendWidth = legendWidth,
-      xgrid = xgrid,
-      ygrid = ygrid,
-      xWidth = xWidth,
-      yHeight = yHeight,
-      frame = frame,
-      xLabelRotation = xLabelRotation,
-      yLabelRotation = yLabelRotation,
-      origin = origin,
-      xCustomGrid = xCustomGrid,
-      yCustomGrid = yCustomGrid,
-      legendLayout = legendLayout,
-      legendDistance = legendDistance,
-      xTickLength = xTickLength,
-      yTickLength = yTickLength,
-      xLineWidthFraction = xLineWidthFraction,
-      yLineWidthFraction = yLineWidthFraction,
-      xLineStartFraction = xLineStartFraction,
-      yLineStartFraction = yLineStartFraction,
-      topPadding = topPadding,
-      bottomPadding = bottomPadding,
-      leftPadding = leftPadding,
-      rightPadding = rightPadding,
-      xLabDistance = xLabDistance,
-      yLabDistance = yLabDistance,
-      mainLabDistance = mainLabDistance,
-      xTickSpace = xTickSpace,
-      yTickSpace = yTickSpace,
-      noLegend = noLegend,
-      xNoTickLabel = xNoTickLabel,
-      yNoTickLabel = yNoTickLabel
-    )
-  }
-
+  /** Factory method to create the scene graph of a plot in a Cartesian
+    * coordinate system.
+    *
+    * Example a plot of a scatter plot of dots connected with lines:
+    *
+    * ```scala
+    * val someData =
+    * 0 until 10 map (i => (i.toDouble, (i * i).toDouble))
+    *
+    * val plot = xyplot((someData, List(point(),line()),InLegend("some"))(
+    *         par(
+    *           main="Main label",
+    *           xlab="x axis label",
+    *           ylab="y axis label"
+    *         )
+    *       )
+    * ```
+    *
+    * @param data
+    *   Triplets of data source, data renderers, legend configuration. Each
+    *   triplet describes what data (DataSource) to be drawn and how to
+    *   represent them (by the DataRenderers), and whether to include them in
+    *   the legend. A single data source may have multiple visual
+    *   representations e.g. a point and a line.
+    *
+    * @param parameters
+    *   Generic characteristics of the plot. see [[org.nspl.par.apply]].
+    */
   def xyplot[F: FC](data: (DataSource, List[DataRenderer], LegendConfig)*)(
       parameters: Parameters = par()
   ) = {
     import parameters._
     val xFac = if (xlog) Log10AxisFactory else LinearAxisFactory
     val yFac = if (ylog) Log10AxisFactory else LinearAxisFactory
-
-    val originX = if (xlog) 1.0 else 0.0
-    val originY = if (ylog) 1.0 else 0.0
 
     val data1 =
       if (draw1Line)
@@ -298,7 +56,7 @@ trait SimplePlots {
     val legend1 =
       legend(
         entries = ((data
-          .map { case (ds, render, conf) =>
+          .map { case (_, render, conf) =>
             conf match {
               case NotInLegend => None
               case InLegend(name1) =>
@@ -368,7 +126,7 @@ trait SimplePlots {
     group(
       plotArea,
       legend1,
-      HorizontalStack(Anchor, legendDistance)
+      HorizontalStack(Align.Anchor, legendDistance)
     )
   }
   def xyzplot[F: FC](data: (DataSource, List[DataRenderer3D], LegendConfig)*)(
@@ -405,7 +163,7 @@ trait SimplePlots {
         entries = (
           (
             data
-              .map { case (ds, render, conf) =>
+              .map { case (_, render, conf) =>
                 conf match {
                   case NotInLegend => None
                   case InLegend(name) =>
@@ -444,7 +202,7 @@ trait SimplePlots {
     group(
       plotArea,
       legend1,
-      HorizontalStack(Anchor, legendDistance)
+      HorizontalStack(Align.Anchor, legendDistance)
     )
   }
 
@@ -455,7 +213,6 @@ trait SimplePlots {
       relative: Boolean = false
   )(parameters: Parameters) = {
     {
-      import parameters._
       val data1: Seq[Seq[VectorRow]] = data.iterator
         .map { row =>
           val x = row(xCol)
@@ -477,7 +234,7 @@ trait SimplePlots {
       val legend1 = legend.zipWithIndex.map(x => (x._2, x._1._2, x._1._3))
 
       val renderers =
-        legend1.zip(data1).map { case ((idx, label, color), data) =>
+        legend1.zip(data1).map { case ((_, label, color), data) =>
           val ds: DataSource = data
           (
             ds,
@@ -579,7 +336,6 @@ trait SimplePlots {
       boxColor: Colormap = Color.gray4,
       useLabels: Boolean = true
   )(parameters: Parameters) = {
-    import parameters._
     val bxdata = boxplotData(data.toSeq)
 
     boxplotImpl(
@@ -592,7 +348,6 @@ trait SimplePlots {
   def binnedboxplot[F: FC](
       dim1: Seq[Double],
       dim2: Seq[Double],
-      xnames: Seq[String] = Nil,
       bins: Int = 10,
       boxColor: Colormap = Color.gray4,
       xgrid: Boolean = false
@@ -687,11 +442,14 @@ trait SimplePlots {
       else
         scala.util.Right(
           heatmapLegend(
-            zmin,
-            zmax,
-            colormap,
+            min = zmin,
+            max = zmax,
+            color = colormap,
             labelText = zlab,
-            numTicks = zNumTicks
+            numTicks = zNumTicks,
+            width = 10 fts,
+            height = 1 fts,
+            fontSize = 1.0 fts
           )
         )
 
@@ -750,7 +508,7 @@ trait SimplePlots {
         ygrid = ygrid
       ),
       ElemEither(eitherLegend),
-      HorizontalStack(Anchor, 1d fts)
+      HorizontalStack(Align.Anchor, 1d fts)
     )
 
   }

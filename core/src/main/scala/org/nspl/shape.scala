@@ -1,8 +1,9 @@
 package org.nspl
 
+/** Description of a 2D shape */
 trait Shape {
   def bounds: Bounds
-  def transform(tx: Bounds => AffineTransform): Shape
+  def transform(tx: (Bounds, AffineTransform) => AffineTransform): Shape
   def currentTransform: AffineTransform
 }
 
@@ -16,9 +17,9 @@ case class Rectangle(
 ) extends Shape {
 
   def currentTransform = tx
-  def bounds = tx.transform(Bounds(x, y, w, h, anchor))
-  def transform(tx: Bounds => AffineTransform) =
-    this.copy(tx = tx(bounds).concat(this.tx))
+  def bounds = tx.transformBounds(x, y, w, h, anchor)
+  def transform(tx: (Bounds, AffineTransform) => AffineTransform) =
+    this.copy(tx = tx(bounds, this.tx))
 }
 
 case class Ellipse(
@@ -30,11 +31,12 @@ case class Ellipse(
 ) extends Shape {
 
   def currentTransform = tx
-  def bounds = tx.transform(Bounds(x, y, w, h))
-  def transform(tx: Bounds => AffineTransform) =
-    this.copy(tx = tx(bounds).concat(this.tx))
+  def bounds = tx.transformBounds(x, y, w, h, None)
+  def transform(tx: (Bounds, AffineTransform) => AffineTransform) =
+    this.copy(tx = tx(bounds, this.tx))
 }
 
+/** Describes a line segment with the two end points */
 case class Line(
     x1: Double,
     y1: Double,
@@ -45,20 +47,19 @@ case class Line(
 
   def currentTransform = tx
   def bounds =
-    tx.transform(
-      Bounds(
-        math.min(x1, x2),
-        math.min(y1, y2),
-        math.abs(x1 - x2),
-        math.abs(y1 - y2)
-      )
+    tx.transformBounds(
+      math.min(x1, x2),
+      math.min(y1, y2),
+      math.abs(x1 - x2),
+      math.abs(y1 - y2),
+      None
     )
-  def transform(tx: Bounds => AffineTransform) = {
-    this.copy(tx = tx(bounds).concat(this.tx))
+  def transform(tx: (Bounds, AffineTransform) => AffineTransform) = {
+    this.copy(tx = tx(bounds, this.tx))
   }
 }
 
-/* Path without curves. */
+/** Path without curves. Points are joined by line segments. */
 case class SimplePath(
     ps: Seq[Point],
     currentTransform: AffineTransform = AffineTransform.identity
@@ -71,11 +72,11 @@ case class SimplePath(
     val miny = ps.map(_.y).min
     val maxy = ps.map(_.y).max
 
-    Bounds(minx, miny, maxx - minx, maxy - miny)
+    currentTransform.transformBounds(minx, miny, maxx - minx, maxy - miny,None)
   }
 
-  def transform(tx: Bounds => AffineTransform) = {
-    this.copy(currentTransform = tx(bounds).concat(this.currentTransform))
+  def transform(tx: (Bounds, AffineTransform) => AffineTransform) = {
+    this.copy(currentTransform = tx(bounds, this.currentTransform))
   }
 
 }

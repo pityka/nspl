@@ -1,7 +1,15 @@
 package org.nspl
 
 import data._
+import Align._
 
+/** A Renderable element for data sources
+  *
+  * Unlike most other Renderable's DataElem is a placeholder in the scene graph.
+  * nspl does not insert the individual data rows into the scene graph but
+  * represent them with a DataElem. The data source will be enumerated at the
+  * time when the rendering context renders the DataElem.
+  */
 case class DataElem(
     data: DataSource,
     xAxis: Axis,
@@ -10,8 +18,11 @@ case class DataElem(
     originalBounds: Bounds,
     tx: AffineTransform = AffineTransform.identity
 ) extends Renderable[DataElem] {
-  def transform(tx: Bounds => AffineTransform) = {
-    val ntx = tx(bounds).concat(this.tx)
+  def transform(tx: AffineTransform) =
+    copy(tx = tx.applyBefore(this.tx))
+
+  def transform(tx: (Bounds, AffineTransform) => AffineTransform) = {
+    val ntx = tx(bounds, this.tx)
     this.copy(tx = ntx)
   }
   def bounds = tx.transform(originalBounds)
@@ -21,7 +32,7 @@ object DataElem {
   implicit def dataElemRenderer[RC <: RenderingContext[RC]](implicit
       re: Renderer[ShapeElem, RC],
       rt: Renderer[TextBox, RC]
-  ) = new Renderer[DataElem, RC] {
+  ): Renderer[DataElem, RC] = new Renderer[DataElem, RC] {
     def render(r: RC, e: DataElem): Unit = {
       e.data.iterator.foreach { row =>
         e.renderers.foreach { dr =>
@@ -33,7 +44,7 @@ object DataElem {
   }
 }
 
-trait Plots {
+private[nspl] trait Plots {
   // format: off
   type XYPlotAreaType = Elems5[Elems2[Elems2[Elems2[Elems5[ElemList[ShapeElem],ElemList[ShapeElem],ElemList[DataElem],Elems2[Elems3[ShapeElem,ElemList[Elems2[ShapeElem,TextBox]],ElemList[ShapeElem]],Elems3[ShapeElem,ElemList[Elems2[ShapeElem,TextBox]],ElemList[ShapeElem]]],ShapeElem],TextBox],TextBox],TextBox],ShapeElem,ShapeElem,ShapeElem,ShapeElem]
   // format: on
@@ -44,8 +55,9 @@ trait Plots {
       yMin: Double,
       yMax: Double
   ) extends Renderable[XYPlotArea] {
-    def transform(v: Bounds => AffineTransform) =
+    def transform(v: (Bounds, AffineTransform) => AffineTransform) =
       this.copy(elem = elem.transform(v))
+    def transform(v: AffineTransform) = this.copy(elem = elem.transform(v))
     def bounds: Bounds = elem.bounds
     def frameElem = elem.m1.m1.m1.m1.m5
   }
@@ -54,12 +66,21 @@ trait Plots {
     implicit def renderer[RC <: RenderingContext[RC]](implicit
         re: Renderer[ShapeElem, RC],
         rt: Renderer[TextBox, RC]
-    ) = new Renderer[XYPlotArea, RC] {
+    ): Renderer[XYPlotArea, RC] = new Renderer[XYPlotArea, RC] {
       def render(r: RC, e: XYPlotArea): Unit =
         implicitly[Renderer[XYPlotAreaType, RC]].render(r, e.elem)
     }
   }
 
+  /** Helper method to create a scene graph for a plot area. Thsi method create
+    * a Build, thus an object which can respond to events
+    *
+    * The plot area is the complete area of a single 2D plot :
+    *   - x and y axes (Cartesian coordinate system)
+    *   - the area defined by those axes
+    *   - x and y axis labels
+    *   - a main label (title)
+    */
   def xyplotareaBuild[F: FC](
       data: Seq[(DataSource, List[DataRenderer])],
       xAxisSetting: AxisSettings,
@@ -92,7 +113,7 @@ trait Plots {
       xNoTickLabel: Boolean = false,
       yNoTickLabel: Boolean = false
   ) = {
-    val id = java.util.UUID.randomUUID.toString
+    val id = new PlotId
     Build(
       xyplotarea(
         id,
@@ -128,41 +149,6 @@ trait Plots {
         yNoTickLabel
       )
     ) {
-      case (Some(old), BuildEvent) =>
-        import old._
-        xyplotarea(
-          id,
-          data,
-          xAxisSetting,
-          yAxisSetting,
-          origin,
-          xlim,
-          ylim,
-          xAxisMargin,
-          yAxisMargin,
-          xgrid,
-          ygrid,
-          frame,
-          xCustomGrid,
-          yCustomGrid,
-          main,
-          mainFontSize,
-          mainDistance,
-          xlab,
-          xlabFontSize,
-          xlabDistance,
-          xlabAlignment,
-          ylab,
-          ylabFontSize,
-          ylabDistance,
-          ylabAlignment,
-          topPadding,
-          bottomPadding,
-          leftPadding,
-          rightPadding,
-          xNoTickLabel,
-          yNoTickLabel
-        )
       case (Some(old), Scroll(v1, p, plotAreaId)) if plotAreaId.id == id =>
         import old._
         val v = if (v1 > 0) 1.05 else if (v1 < 0) 0.95 else 1.0
@@ -278,8 +264,16 @@ trait Plots {
     }
   }
 
+  /** Helper method to create a scene graph for a plot area
+    *
+    * The plot area is the complete area of a single 2D plot :
+    *   - x and y axes (Cartesian coordinate system)
+    *   - the area defined by those axes
+    *   - x and y axis labels
+    *   - a main label (title)
+    */
   def xyplotarea[F: FC](
-      id: String,
+      id: PlotId,
       data: Seq[(DataSource, List[DataRenderer])],
       xAxisSetting: AxisSettings,
       yAxisSetting: AxisSettings,
@@ -462,8 +456,8 @@ trait Plots {
     val originY = yAxis.worldToView(originWY1)
 
     val axes = group(
-      translate(xAxisElem, 0, originY),
-      translate(yAxisElem, originX, 0),
+      xAxisElem.translate(0, originY),
+      yAxisElem.translate(originX, 0),
       FreeLayout
     )
 
@@ -533,8 +527,8 @@ trait Plots {
         zgroup(
           (renderedPlot, 1),
           (
-            AlignTo.verticalGapBeforeReference(
-              AlignTo.horizontalCenter(mainBox, frameElem.bounds),
+            Align.verticalGapBeforeReference(
+              Align.horizontalCenter(mainBox, frameElem.bounds),
               frameElem.bounds,
               mainDistance.value
             ),
@@ -544,7 +538,7 @@ trait Plots {
         ),
         0
       ),
-      (AlignTo.horizontal(xlabBox, frameElem.bounds, xlabAlignment), 1),
+      (Align.horizontal(xlabBox, frameElem.bounds, xlabAlignment), 1),
       VerticalStack(NoAlignment, xlabDistance)
     )
 
@@ -554,8 +548,8 @@ trait Plots {
       zgroup(
         (withHorizontalLabels, 1),
         (
-          AlignTo.vertical(
-            rotate(ylabBox, 0.5 * math.Pi),
+          Align.vertical(
+            ylabBox.rotate(0.5 * math.Pi),
             movedFrame.bounds,
             ylabAlignment
           ),
@@ -566,8 +560,8 @@ trait Plots {
 
     val movedFrame2 = plotWithAxisLabels.m1.m1.m1.m5
 
-    val padTop = AlignTo.verticalGapBeforeReference(
-      AlignTo.horizontalCenter(
+    val padTop = Align.verticalGapBeforeReference(
+      Align.horizontalCenter(
         ShapeElem(
           shape = Shape.line(Point(0d, 0d), Point(0d, topPadding.value)),
           fill = Color.transparent,
@@ -580,8 +574,8 @@ trait Plots {
       0d
     )
 
-    val padBottom = AlignTo.verticalGapAfterReference(
-      AlignTo.horizontalCenter(
+    val padBottom = Align.verticalGapAfterReference(
+      Align.horizontalCenter(
         ShapeElem(
           shape = Shape.line(Point(0d, 0d), Point(0d, bottomPadding.value)),
           fill = Color.transparent,
@@ -594,8 +588,8 @@ trait Plots {
       0d
     )
 
-    val padLeft = AlignTo.horizontalGapBeforeReference(
-      AlignTo.verticalCenter(
+    val padLeft = Align.horizontalGapBeforeReference(
+      Align.verticalCenter(
         ShapeElem(
           shape = Shape.line(Point(0d, 0d), Point(leftPadding.value, 0d)),
           fill = Color.transparent,
@@ -608,8 +602,8 @@ trait Plots {
       0d
     )
 
-    val padRight = AlignTo.horizontalGapAfterReference(
-      AlignTo.verticalCenter(
+    val padRight = Align.horizontalGapAfterReference(
+      Align.verticalCenter(
         ShapeElem(
           shape = Shape.line(Point(0d, 0d), Point(rightPadding.value, 0d)),
           fill = Color.transparent,
@@ -635,16 +629,26 @@ trait Plots {
 
   }
 
+  /** Describes a plot legend */
   sealed trait LegendElem
+
+  /** Represents a plot legend drawn with a point (circle) */
   case class PointLegend(shape: Shape, color: Color) extends LegendElem
+
+  /** Represents a plot legend drawn with a line */
   case class LineLegend(stroke: Stroke, color: Color) extends LegendElem
 
   type Legend = ElemList[Elems2[ElemList[ShapeElem], TextBox]]
 
+  /** Helper method to create a scene graph for a plot legend
+    *
+    * A plot legend is a small table with text label and some visual
+    * representation which matches the visual representatin in the plot area
+    */
   def legend[F: FC](
       entries: List[(String, Seq[LegendElem])],
-      fontSize: RelFontSize = 1.0 fts,
-      width: RelFontSize = 30 fts,
+      fontSize: RelFontSize,
+      width: RelFontSize,
       layout: Layout
   ): Legend = {
     val lineHeight =
@@ -673,9 +677,6 @@ trait Plots {
         // needs centering on the vertical axis
         val aligned = sequence(renderables, HorizontalStack(Center))
 
-        val textbox =
-          TextBox(text, fontSize = fontSize, width = Some(width.value))
-
         group(
           aligned,
           TextBox(text, fontSize = fontSize, width = Some(width.value)),
@@ -688,15 +689,20 @@ trait Plots {
 
   type HeatmapLegend = Elems2[Elems2[ElemList[ShapeElem], AxisElem], TextBox]
 
+  /** Helper method to create a scene graph for a heat map legend
+    *
+    * A heat map legend is a band with different color values to help read off a
+    * color scale
+    */
   def heatmapLegend[F: FC](
       min: Double,
       max: Double,
-      color: Colormap = HeatMapColors(0d, 1d),
-      fontSize: RelFontSize = 1.0 fts,
-      width: RelFontSize = 10 fts,
-      height: RelFontSize = 1 fts,
-      labelText: String = "",
-      numTicks: Int = 2
+      color: Colormap, // = HeatMapColors(0d, 1d),
+      fontSize: RelFontSize, // = 1.0 fts,
+      width: RelFontSize, // = 10 fts,
+      height: RelFontSize, // = 1 fts,
+      labelText: String, // = "",
+      numTicks: Int // = 2
   ): HeatmapLegend = {
 
     val color1 = color.withRange(min, max)
@@ -722,7 +728,7 @@ trait Plots {
     val axisLabel = {
       val box =
         TextBox(labelText, fontSize = fontSize, width = Some(width.value))
-      rotate(box, -0.5 * math.Pi)
+      box.rotate(-0.5 * math.Pi)
     }
 
     val n = 500

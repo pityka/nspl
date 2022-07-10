@@ -207,7 +207,7 @@ object HistogramData {
     val bins: Seq[Map[(Double, Double), Double]] = data2
       .map { stratum =>
         baseBins ++ stratum.zipWithIndex
-          .map { case (value, idx) =>
+          .map { case (value, _) =>
             val i = ((value - min) / step).toInt
             val bin = i * step + min
             bin -> value
@@ -221,7 +221,7 @@ object HistogramData {
           if (acc.isEmpty) Seq(binOfStratum)
           else {
             val head = acc.head
-            val updatedBin = binOfStratum.map { case ((x, y), dens) =>
+            val updatedBin = binOfStratum.map { case ((x, _), dens) =>
               (
                 x,
                 head.filter(_._1._1 == x).headOption.map(_._2).getOrElse(0.0) +

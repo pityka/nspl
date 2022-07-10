@@ -2,13 +2,13 @@ package org.nspl
 
 package object data {
 
-  def linspace(min: Double, max: Double, n: Int) = 0 until n map { i =>
+  private[nspl] def linspace(min: Double, max: Double, n: Int) = 0 until n map { i =>
     min + (max - min) / n * i
   }
 
-  def mean(s: Seq[Double]) = s.sum / s.size
+  private[nspl] def mean(s: Seq[Double]) = s.sum / s.size
 
-  def sampleVariance(s: Seq[Double]) = {
+  private[nspl] def sampleVariance(s: Seq[Double]) = {
     val m = mean(s)
     val n = s.size
     (s.foldLeft(0.0)((s, i) => (i - m) * (i - m) + s)) / (n - 1)
@@ -29,7 +29,7 @@ package object data {
     * under the License.
     */
   // Adapted from Saddle
-  def percentile(v: Seq[Double], percentiles: Seq[Double]): Seq[Double] = {
+  private[nspl] def percentile(v: Seq[Double], percentiles: Seq[Double]): Seq[Double] = {
     val vf = v.filterNot(_.isNaN)
     assert(percentiles.forall(x => x >= 0.0 && x <= 1d), percentiles)
     if (vf.length == 0)

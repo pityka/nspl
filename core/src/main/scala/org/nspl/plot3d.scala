@@ -1,6 +1,7 @@
 package org.nspl
 
 import data._
+import Align._
 
 case class DataElem3D(
     data: DataSource,
@@ -9,8 +10,9 @@ case class DataElem3D(
     originalBounds: Bounds = Bounds(-1, -1, 2, 2),
     tx: AffineTransform = AffineTransform.identity
 ) extends Renderable[DataElem3D] {
-  def transform(tx: Bounds => AffineTransform) = {
-    val ntx = tx(bounds).concat(this.tx)
+  def transform(tx: AffineTransform) = this.copy(tx = tx.applyBefore(this.tx))
+  def transform(tx: (Bounds, AffineTransform) => AffineTransform) = {
+    val ntx = tx(bounds, this.tx)
     this.copy(tx = ntx)
   }
   def bounds = tx.transform(originalBounds)
@@ -20,7 +22,7 @@ object DataElem3D {
   implicit def dataElemRenderer[RC <: RenderingContext[RC]](implicit
       re: Renderer[ShapeElem, RC],
       rt: Renderer[TextBox, RC]
-  ) = new Renderer[DataElem3D, RC] {
+  ): Renderer[DataElem3D, RC] = new Renderer[DataElem3D, RC] {
     def render(r: RC, e: DataElem3D): Unit = {
       e.data.iterator.foreach { row =>
         e.renderers.foreach { dr =>
@@ -32,10 +34,10 @@ object DataElem3D {
   }
 }
 
-trait Plots3D {
+private[nspl] trait Plots3D {
   import Math3D._
 
-  type T =
+  private type T =
     org.nspl.Elems3[org.nspl.ShapeElem, org.nspl.Elems3[
       org.nspl.ShapeElem,
       org.nspl.Elems2[org.nspl.ShapeElem, org.nspl.ElemList[
@@ -46,7 +48,8 @@ trait Plots3D {
 
   case class XYZPlotArea(elem: T, cameraPosition: Vec3, cameraTarget: Vec3)
       extends Renderable[XYZPlotArea] {
-    def transform(v: Bounds => AffineTransform) =
+    def transform(v: AffineTransform) = copy(elem = elem.transform(v))
+    def transform(v: (Bounds, AffineTransform) => AffineTransform) =
       this.copy(elem = elem.transform(v))
     def bounds: Bounds = elem.bounds
   }
@@ -55,7 +58,7 @@ trait Plots3D {
     implicit def renderer[RC <: RenderingContext[RC]](implicit
         re: Renderer[ShapeElem, RC],
         rt: Renderer[TextBox, RC]
-    ) = new Renderer[XYZPlotArea, RC] {
+    ): Renderer[XYZPlotArea, RC] = new Renderer[XYZPlotArea, RC] {
       def render(r: RC, e: XYZPlotArea): Unit =
         implicitly[Renderer[T, RC]].render(r, e.elem)
     }
@@ -79,7 +82,7 @@ trait Plots3D {
       yHeight: RelFontSize
       // mainLabDistance: RelFontSize = 0.75 fts
   ) = {
-    val id = java.util.UUID.randomUUID.toString
+    val id = new PlotId
     Build(
       xyzplotarea(
         id,
@@ -98,24 +101,7 @@ trait Plots3D {
         yHeight
       )
     ) {
-      case (Some(old), BuildEvent) =>
-        xyzplotarea(
-          id,
-          data,
-          aspect,
-          zNear,
-          zFar,
-          fieldOfViewAngles,
-          old.cameraPosition,
-          old.cameraTarget,
-          topPadding,
-          bottomPadding,
-          leftPadding,
-          rightPadding,
-          xWidth,
-          yHeight
-        )
-      case (Some(old), Scroll(v1, p, plotAreaId)) if plotAreaId.id == id =>
+      case (Some(old), Scroll(v1, _, plotAreaId)) if plotAreaId.id == id =>
         val speed = math.abs(zFar - zNear) / 500
         val v = (if (v1 > 0) speed else if (v1 < 0) -speed else 0.0)
 
@@ -183,7 +169,7 @@ trait Plots3D {
   }
 
   def xyzplotarea[F: FC](
-      id: String,
+      id: PlotId,
       data: Seq[(DataSource, List[DataRenderer3D])],
       aspect: Double,
       zNear: Double,
