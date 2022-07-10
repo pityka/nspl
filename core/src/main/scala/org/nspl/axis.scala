@@ -67,25 +67,71 @@ object Log10AxisFactory extends AxisFactory {
   }
 }
 
-case class AxisSettings(
-    axisFactory: AxisFactory,
-    numTicks: Int = 4,
-    tickSpace: Option[Double] = None,
-    baseTick: Option[Double] = None,
-    numMinorTicksFactor: Int = 5,
-    tickLength: RelFontSize = .35 fts,
-    tickLabelDistance: RelFontSize = 0.5 fts,
-    customTicks: Seq[(Double, String)] = Nil,
-    labelRotation: Double = 0,
-    width: RelFontSize = 20 fts,
-    fontSize: RelFontSize = 1 fts,
-    tickAlignment: Double = -1.0,
-    lineWidth: RelFontSize = lineWidth,
-    lineLengthFraction: Double = 1d,
-    lineStartFraction: Double = 0.0,
-    tickFormatter: Seq[Double] => Seq[String] = defaultTickFormatter,
-    forceMajorTickOnMin: Boolean = false,
-    forceMajorTickOnMax: Boolean = false
+object AxisSettings {
+
+  def simple(axisFactory: AxisFactory)(implicit
+      fc: FontConfiguration
+  ): AxisSettings = apply(axisFactory)
+
+  private[nspl] def apply(
+      axisFactory: AxisFactory,
+      numTicks: Int = 4,
+      tickSpace: Option[Double] = None,
+      numMinorTicksFactor: Int = 5,
+      tickLength: RelFontSize = .35 fts,
+      tickLabelDistance: RelFontSize = 0.5 fts,
+      customTicks: Seq[(Double, String)] = Nil,
+      labelRotation: Double = 0,
+      width: RelFontSize = 20 fts,
+      fontSize: RelFontSize = 1 fts,
+      tickAlignment: Double = -1.0,
+      lineWidth: RelFontSize = lineWidth,
+      lineLengthFraction: Double = 1d,
+      lineStartFraction: Double = 0.0,
+      tickFormatter: Seq[Double] => Seq[String] = defaultTickFormatter,
+      forceMajorTickOnMin: Boolean = false,
+      forceMajorTickOnMax: Boolean = false
+  )(implicit fc: FontConfiguration): AxisSettings =
+    new AxisSettings(
+      axisFactory = axisFactory,
+      numTicks = numTicks,
+      tickSpace = tickSpace,
+      numMinorTicksFactor = numMinorTicksFactor,
+      tickLabelDistance = tickLabelDistance,
+      tickLength = tickLength,
+      customTicks = customTicks,
+      labelRotation = labelRotation,
+      width = width,
+      fontSize = fontSize,
+      tickAlignment = tickAlignment,
+      lineWidth = lineWidth,
+      lineLengthFraction = lineLengthFraction,
+      lineStartFraction = lineStartFraction,
+      tickFormatter = tickFormatter,
+      forceMajorTickOnMin = forceMajorTickOnMin,
+      forceMajorTickOnMax = forceMajorTickOnMax
+    )
+
+}
+
+class AxisSettings(
+    val axisFactory: AxisFactory,
+    numTicks: Int,
+    tickSpace: Option[Double],
+    numMinorTicksFactor: Int,
+    tickLength: RelFontSize,
+    tickLabelDistance: RelFontSize,
+    customTicks: Seq[(Double, String)],
+    labelRotation: Double,
+    val width: RelFontSize,
+    fontSize: RelFontSize,
+    tickAlignment: Double,
+    lineWidth: RelFontSize,
+    val lineLengthFraction: Double,
+    val lineStartFraction: Double,
+    tickFormatter: Seq[Double] => Seq[String],
+    forceMajorTickOnMin: Boolean,
+    forceMajorTickOnMax: Boolean
 )(implicit fc: FontConfiguration) {
 
   def renderable(
@@ -103,7 +149,8 @@ case class AxisSettings(
     }
 
     val numTicks1 =
-      if (tickSpace.isEmpty) numTicks else (axis.max - axis.min) / tickSpace1
+      if (tickSpace.isEmpty) numTicks.toDouble
+      else (axis.max - axis.min) / tickSpace1
 
     val lineStart = lineStartFraction * axis.width
     val lineEnd = lineStart + axis.width * lineLengthFraction
@@ -165,9 +212,9 @@ case class AxisSettings(
             List(axis.max)
           else Nil
         (majorTicks1 ++ addMin ++ addMax).iterator
+          .filter(w => w <= axis.max && w >= axis.min)
           .filterNot(x => customTicks.map(_._1).contains(x))
           .filterNot(x => disableTicksAt.contains(x))
-          .filter(w => w <= axis.max && w >= axis.min)
           .toList
           .distinct
       }
@@ -184,26 +231,19 @@ case class AxisSettings(
               ),
             stroke = Some(Stroke(lineWidth.value))
           ),
-          transform(
-            transform(
-              transform(
-                TextBox(
-                  text,
-                  Point(view, 0.0),
-                  fontSize = fontSize,
-                  width =
-                    if (labelRotation == 0.0) Some(availableSpace) else None
-                ),
-                (b: Bounds) =>
-                  AffineTransform.rotate(labelRotation, b.x, b.centerY)
-              ),
-              (b: Bounds) =>
-                AffineTransform.translate(0, tickLabelDistance.value)
+          TextBox(
+            text,
+            fontSize = fontSize,
+            width = if (labelRotation == 0.0) Some(availableSpace) else None
+          ).translate(view, 0)
+            .transform((b, old) =>
+              old
+                .rotate(labelRotation, b.x, b.centerY)
+                .translate(
+                  if (labelRotation == 0.0) b.w * (-0.5) else 0,
+                  tickLabelDistance.value
+                )
             ),
-            (b: Bounds) =>
-              AffineTransform
-                .translate(if (labelRotation == 0.0) b.w * (-0.5) else 0, 0)
-          ),
           FreeLayout
         )
       else
@@ -215,20 +255,16 @@ case class AxisSettings(
             ),
             stroke = Some(Stroke(lineWidth.value))
           ),
-          transform(
-            transform(
-              transform(
-                TextBox(text, Point(0.0, view), fontSize = fontSize),
-                (b: Bounds) =>
-                  AffineTransform.rotate(labelRotation, b.x + b.w, b.centerY)
-              ),
-              (b: Bounds) =>
-                AffineTransform.translate(-1 * tickLabelDistance.value - b.w, 0)
+          TextBox(text, fontSize = fontSize)
+            .translate(0, view)
+            .transform((b, old) =>
+              old
+                .rotate(labelRotation, b.x + b.w, b.centerY)
+                .translate(
+                  -1 * tickLabelDistance.value - b.w,
+                  if (labelRotation == 0.0) b.h * (-0.5) else 0
+                )
             ),
-            (b: Bounds) =>
-              AffineTransform
-                .translate(0, if (labelRotation == 0.0) b.h * (-0.5) else 0)
-          ),
           FreeLayout
         )
     }
@@ -257,8 +293,8 @@ case class AxisSettings(
       if (numTicks1 == 0 || numMinorTicksFactor <= 0) Nil
       else
         minorTicks1.iterator
-          .filterNot(x => customTicks.map(_._1).contains(x))
           .filter(w => w <= axis.max && w >= axis.min)
+          .filterNot(x => customTicks.map(_._1).contains(x))
           .filterNot(majorTicks.contains)
           .toList
           .distinct
@@ -276,11 +312,9 @@ case class AxisSettings(
             if (group.find(_.isRight).isEmpty) Nil
             else {
               val leftWorld = group(0).fold(identity, _._1)
-              val centerWorld = group(1).toOption.get._1
               val rightWorld = group(2).fold(identity, _._1)
               val (world, tick) = group(1).toOption.get
               val leftV = axis.worldToView(leftWorld)
-              val centerV = axis.worldToView(centerWorld)
               val rightV = axis.worldToView(rightWorld)
               val availableSpace = (rightV - leftV) * 0.5
               List((world, tick, availableSpace))

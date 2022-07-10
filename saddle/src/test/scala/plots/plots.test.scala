@@ -1,8 +1,7 @@
-package org.nspl
-
+import org.nspl._
 import org.nspl.saddle._
 import org.nspl.data._
-import org.nspl.awtrenderer._
+import org.nspl.awtrenderer.{defaultAWTFont => _,_}
 import org.saddle._
 import org.saddle.order._
 
@@ -12,8 +11,8 @@ import org.saddle.index.InnerJoin
 
 class SaddlePlotSpec extends munit.FunSuite {
   
-
-  implicit val myfont = font("Hasklig")
+  override val munitTimeout = scala.concurrent.duration.Duration(300, "s")
+  implicit val myfont : FontConfiguration = font("Hasklig")
 
   def readFrameFromClasspath(s: String) =
     CsvParser
@@ -27,12 +26,12 @@ class SaddlePlotSpec extends munit.FunSuite {
       .toOption
       .get
 
+      
   test("plot gallery") {
-
     {
-      val evec =
-        readFrameFromClasspath("/evec.csv")
-          .mapValues(ScalarTagDouble.parse)
+      // val evec =
+        // readFrameFromClasspath("/evec.csv")
+          // .mapValues(ScalarTagDouble.parse)
       val rotated =
         readFrameFromClasspath("/rotated.csv").mapValues(ScalarTagDouble.parse)
       val data = readFrameFromClasspath("/data.csv")
@@ -66,7 +65,7 @@ class SaddlePlotSpec extends munit.FunSuite {
        par( xlab = "PC1",
         ylab = "freq.",
         main = "Loading distribution",
-        ylim = Some(0d, Double.NaN))
+        ylim = Some((0d, Double.NaN)))
       )
 
       val bar1 = barplotVertical(
@@ -183,15 +182,15 @@ class SaddlePlotSpec extends munit.FunSuite {
         xyplotarea(
           id = new PlotId,
           Nil,
-          AxisSettings(LinearAxisFactory),
-          AxisSettings(LinearAxisFactory),
+          AxisSettings.simple(LinearAxisFactory),
+          AxisSettings.simple(LinearAxisFactory),
           origin = Some(Point(0.0, 0.0)),
           xlim = Some(-1d -> 1d),
           ylim = Some(-1d -> 1d)
         )
 
       val rs =
-        (1 to 99 map (i => scala.util.Random.nextGaussian())).toSeq :+ 1e3
+        (1 to 99 map (_ => scala.util.Random.nextGaussian())).toSeq :+ 1e3
 
       val p6 = rasterplot(
         rasterFromSeq(rs, 10, 10),
@@ -329,8 +328,40 @@ class SaddlePlotSpec extends munit.FunSuite {
         )
       }
 
+       val rotations = fitToBounds(sequence(
+      List(ShapeElem(Shape.circle(0.01d)).translate(0,0),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1),
+      ShapeElem(Shape.circle(0.01d)).translate(1,1),
+      ShapeElem(Shape.circle(0.01d)).translate(1,0),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.1),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.2),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.3),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.4),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.5),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.6),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.7),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.8),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.9),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(1),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.1,0,0.75),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.2,0,0.75),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.3,0,0.75),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.4,0,0.75),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.5,0,0.75),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.6,0,0.75),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.7,0,0.75),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.8,0,0.75),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.9,0,0.75),
+      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(1,0,0.75)
+      ),
+      FreeLayout
+    ),Bounds(0,0,100,100))
+
       val gallery = group(
         group(
+          scree,
+          density2,
+          rotations,
           ticktest,
           ticktest2,
           ticktest3,
@@ -397,6 +428,7 @@ class SaddlePlotSpec extends munit.FunSuite {
         // show(gallery)
         println(pngToFile(gallery.build, width = 10000))
         println(pdfToFile(gallery.build))
+        println(pdfToFile(text))
         while (false) {
           gallery.build
         }
@@ -404,7 +436,7 @@ class SaddlePlotSpec extends munit.FunSuite {
         // println(renderToFile(gallery, 1000, "image/svg"))
       }
       {
-        import scalatagrenderer._
+        // import scalatagrenderer._
         // println(svgToFile(gallery))
       }
     }

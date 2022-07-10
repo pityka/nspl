@@ -8,7 +8,7 @@ contentDir = "../nspl-docs/target/mdoc/content"
 
 [[menu.after]]
     name = "API"
-    url = "/api/"
+    url = "/api/org/nspl.html"
     weight = 2
 
 [[menu.after]]

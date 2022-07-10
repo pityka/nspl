@@ -6,10 +6,10 @@ import scalatags.Text.svgAttrs._
 import scalatags.Text.svgAttrs
 import scalatags.Text.svgTags
 
-private[nspl] case class ScalaTagRC(
-    elems: scala.collection.mutable.ArrayBuffer[Modifier]
+class ScalaTagRC private[nspl] (
+    private[nspl] val elems: scala.collection.mutable.ArrayBuffer[Modifier]
 ) extends RenderingContext[ScalaTagRC] {
-  var transform: AffineTransform = AffineTransform.identity
+  private[nspl] var transform: AffineTransform = AffineTransform.identity
 
   def getTransform: AffineTransform = transform
 
@@ -18,7 +18,7 @@ private[nspl] case class ScalaTagRC(
   def localToScala(tx: AffineTransform): AffineTransform = tx
 
   def concatTransform(tx: AffineTransform): Unit = {
-    transform = transform.concat(tx)
+    transform = transform.applyBefore(tx)
   }
 
   def setTransform(tx: LocalTx): Unit = {
@@ -28,7 +28,7 @@ private[nspl] case class ScalaTagRC(
 
 object scalatagrenderer {
 
-  implicit val defaultGlyphMeasurer = AwtGlyphMeasurer
+  implicit val defaultGlyphMeasurer : AwtGlyphMeasurer.type = AwtGlyphMeasurer
 
   implicit val defaultFont: FontConfiguration = org.nspl.font("Arial")
 
@@ -81,7 +81,7 @@ object scalatagrenderer {
       er: Renderer[K, ScalaTagRC]
   ) = {
 
-    val ctx = ScalaTagRC(scala.collection.mutable.ArrayBuffer[Modifier]())
+    val ctx = new ScalaTagRC(scala.collection.mutable.ArrayBuffer[Modifier]())
 
     val aspect = elem.bounds.h / elem.bounds.w
     val height = (width * aspect).toInt
@@ -96,10 +96,10 @@ object scalatagrenderer {
 
   }
 
-  implicit val shapeRenderer = new Renderer[ShapeElem, ScalaTagRC] {
+  implicit val shapeRenderer:Renderer[ShapeElem, ScalaTagRC] = new Renderer[ShapeElem, ScalaTagRC] {
     def render(ctx: ScalaTagRC, elem: ShapeElem): Unit = {
       val tx =
-        ctx.getTransform.concat(elem.tx.concat(elem.shape.currentTransform))
+        ctx.getTransform.applyBefore(elem.tx.applyBefore(elem.shape.currentTransform))
       val shape = elem.shape
       if (
         elem.fill.a > 0d || (elem.stroke.isDefined && elem.strokeColor.a > 0)
@@ -149,10 +149,10 @@ object scalatagrenderer {
           case Path(ops, _) => {
             path(
               d := ops map {
-                case MoveTo(Point(x, y))                  => s"M$x,$y"
-                case LineTo(Point(x, y))                  => s"L$x,$y"
-                case QuadTo(Point(x2, y2), Point(x1, y1)) => s"Q$x1,$y1,$x2,$y2"
-                case CubicTo(Point(x3, y3), Point(x1, y1), Point(x2, y2)) =>
+                case PathOperation.MoveTo(Point(x, y))                  => s"M$x,$y"
+                case PathOperation.LineTo(Point(x, y))                  => s"L$x,$y"
+                case PathOperation.QuadTo(Point(x2, y2), Point(x1, y1)) => s"Q$x1,$y1,$x2,$y2"
+                case PathOperation.CubicTo(Point(x3, y3), Point(x1, y1), Point(x2, y2)) =>
                   s"C$x1,$y1,$x2,$y2,$x3,$y3"
               } mkString (" "),
               svgAttrs.transform := tx.svg
@@ -172,9 +172,9 @@ object scalatagrenderer {
               strokeWidth := elem.stroke.get.width,
               strokeDasharray := elem.stroke.get.dash.mkString(" "),
               strokeLinecap := (elem.stroke.get.cap match {
-                case CapRound  => "round"
-                case CapButt   => "butt"
-                case CapSquare => "square"
+                case Cap.Round  => "round"
+                case Cap.Butt   => "butt"
+                case Cap.Square => "square"
               })
             )
           else filled
@@ -184,11 +184,11 @@ object scalatagrenderer {
     }
   }
 
-  implicit val textRenderer = new Renderer[TextBox, ScalaTagRC] {
+  implicit val textRenderer:Renderer[TextBox, ScalaTagRC]  = new Renderer[TextBox, ScalaTagRC] {
     def render(ctx: ScalaTagRC, elem: TextBox): Unit = {
       if (!elem.layout.isEmpty) {
         elem.layout.lines.foreach { case (line, lineTx) =>
-          val tx = ctx.getTransform.concat(elem.txLoc.concat(lineTx))
+          val tx = ctx.getTransform.applyBefore(elem.tx.applyBefore(lineTx))
           val svgElem = text(
             svgAttrs.x := 0,
             svgAttrs.y := 0,

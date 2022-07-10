@@ -1,11 +1,14 @@
 package org.nspl
 
+/** A Renderable of a sequence of Renderables */
 case class ElemList[T <: Renderable[T]](
     members: Seq[T],
     tx: AffineTransform = AffineTransform.identity
 ) extends Renderable[ElemList[T]] {
-  def transform(tx: Bounds => AffineTransform) =
-    this.copy(tx = tx(bounds).concat(this.tx))
+  def transform(tx: (Bounds, AffineTransform) => AffineTransform) =
+    this.copy(tx = tx(bounds, this.tx))
+
+  def transform(tx: AffineTransform) = this.copy(tx = tx.applyBefore(this.tx))
 
   val bounds =
     if (members.size > 0)
@@ -18,7 +21,7 @@ object ElemList {
     R
   ]](implicit
       r: Renderer[T, R]
-  ) =
+  ): Renderer[ElemList[T], R] =
     new Renderer[ElemList[T], R] {
       def render(ctx: R, elem: ElemList[T]): Unit = {
         ctx.withTransform(elem.tx) {
@@ -28,12 +31,15 @@ object ElemList {
     }
 }
 
+/** A Renderable of a sequence of Eithers of Renderables */
 case class ElemList2[T1 <: Renderable[T1], T2 <: Renderable[T2]](
     members: Seq[Either[T1, T2]],
     tx: AffineTransform = AffineTransform.identity
 ) extends Renderable[ElemList2[T1, T2]] {
-  def transform(tx: Bounds => AffineTransform) =
-    this.copy(tx = tx(bounds).concat(this.tx))
+  def transform(tx: (Bounds, AffineTransform) => AffineTransform) =
+    this.copy(tx = tx(bounds, this.tx))
+
+  def transform(tx: AffineTransform) = this.copy(tx = tx.applyBefore(this.tx))
 
   val bounds =
     if (members.size > 0)
@@ -47,7 +53,7 @@ object ElemList2 {
   ], R <: RenderingContext[R]](implicit
       r1: Renderer[T, R],
       r2: Renderer[T2, R]
-  ) =
+  ): Renderer[ElemList2[T, T2], R] =
     new Renderer[ElemList2[T, T2], R] {
       def render(ctx: R, elem: ElemList2[T, T2]): Unit = {
         ctx.withTransform(elem.tx) {
@@ -63,28 +69,33 @@ object ElemList2 {
 
 }
 
+/** A Renderable of a sequence of Options of Renderables */
 case class ElemOption[A <: Renderable[A]](option: Option[A])
     extends Renderable[ElemOption[A]] {
-  def transform(tx: Bounds => AffineTransform) = ElemOption(
+  def transform(tx: (Bounds, AffineTransform) => AffineTransform) = ElemOption(
     option.map(_.transform(tx))
   )
+  def transform(tx: AffineTransform) = ElemOption(option.map(_.transform(tx)))
   def bounds = option.fold(Bounds(0, 0, 0, 0))(_.bounds)
   def map[K <: Renderable[K]](f: A => K) = ElemOption(option.map(f))
 }
 object ElemOption {
   implicit def renderer[T1 <: Renderable[T1], R <: RenderingContext[R]](implicit
       r1: Renderer[T1, R]
-  ) = new Renderer[ElemOption[T1], R] {
+  ): Renderer[ElemOption[T1], R] = new Renderer[ElemOption[T1], R] {
     def render(ctx: R, elem: ElemOption[T1]): Unit =
       elem.option.fold(())(r1.render(ctx, _))
   }
 }
+
+/** A Renderable of an Either of Renderables */
 case class ElemEither[A <: Renderable[A], B <: Renderable[B]](
     either: Either[A, B],
     tx: AffineTransform = AffineTransform.identity
 ) extends Renderable[ElemEither[A, B]] {
-  def transform(tx: Bounds => AffineTransform) =
-    this.copy(tx = tx(bounds).concat(this.tx))
+  def transform(tx: (Bounds, AffineTransform) => AffineTransform) =
+    this.copy(tx = tx(bounds, this.tx))
+  def transform(tx: AffineTransform) = this.copy(tx = tx.applyBefore(this.tx))
   def bounds = tx.transform(either.fold(_.bounds, _.bounds))
 }
 object ElemEither {
@@ -93,7 +104,7 @@ object ElemEither {
   ], R <: RenderingContext[R]](implicit
       r1: Renderer[T1, R],
       r2: Renderer[T2, R]
-  ) = new Renderer[ElemEither[T1, T2], R] {
+  ): Renderer[ElemEither[T1, T2], R] = new Renderer[ElemEither[T1, T2], R] {
     def render(ctx: R, elem: ElemEither[T1, T2]): Unit =
       ctx.withTransform(elem.tx) {
         elem.either.fold(
@@ -104,6 +115,7 @@ object ElemEither {
   }
 }
 
+/** A Renderable describing a shape */
 case class ShapeElem(
     shape: Shape,
     fill: Color = Color.black,
@@ -115,8 +127,10 @@ case class ShapeElem(
 
   def withIdentifier(id: Identifier) = copy(identifier = id)
 
-  def transform(tx: Bounds => AffineTransform) =
-    this.copy(tx = tx(bounds).concat(this.tx))
+  def transform(tx: (Bounds, AffineTransform) => AffineTransform) =
+    this.copy(tx = tx(bounds, this.tx))
+
+  def transform(tx: AffineTransform) = this.copy(tx = tx.applyBefore(this.tx))
 
   val bounds = {
     tx.transform(shape.bounds)
@@ -124,34 +138,36 @@ case class ShapeElem(
 
 }
 
-case class TextBox(
-    layout: TextLayout,
-    loc: Point,
-    color: Color,
-    tx: AffineTransform
+/** A Renderable describing a text box
+*
+* See the apply factory method in its companion object on how to construct one
+ */
+class TextBox(
+    val layout: TextLayout,
+    val color: Color,
+    val tx: AffineTransform
 )(implicit fc: FontConfiguration)
     extends Renderable[TextBox] {
 
   val font = fc.font
 
-  val txLoc = tx.concat(AffineTransform.translate(loc.x, loc.y))
-
   val bounds =
     if (layout.isEmpty) Bounds(0, 0, 0, 0)
-    else txLoc.transform(layout.bounds)
+    else tx.transform(layout.bounds)
 
-  def transform(tx: Bounds => AffineTransform) =
-    this.copy(tx = tx(bounds).concat(this.tx))
+  def transform(tx: (Bounds, AffineTransform) => AffineTransform) =
+    new TextBox(layout = layout, color = color, tx = tx(bounds, this.tx))
+  def transform(tx: AffineTransform) =
+    new TextBox(layout = layout, color = color, tx = tx.applyBefore(this.tx))
 }
 
 object TextBox {
   def apply(
       text: String,
-      loc: Point = Point(0d, 0d),
       width: Option[Double] = None,
       fontSize: RelFontSize = 1 fts,
       color: Color = Color.black,
       tx: AffineTransform = AffineTransform.identity
   )(implicit fc: FontConfiguration): TextBox =
-    TextBox(TextLayout(width, text, fontSize), loc, color, tx)
+    new TextBox(TextLayout(width, text, fontSize), color, tx)
 }

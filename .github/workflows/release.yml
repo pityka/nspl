@@ -11,13 +11,16 @@ jobs:
         with:
           fetch-depth: 0
           submodules: recursive
-      - uses: olafurpg/setup-scala@v10
+      - uses: actions/setup-java@v2
+        with:
+          distribution: temurin
+          java-version: 17
       - uses: olafurpg/setup-gpg@v3
       - uses: peaceiris/actions-hugo@v2.4.13
         with: 
           hugo-version: '0.89.4'
           extended: true      
-      - run: sbt versionCheck ci-release
+      - run: sbt -J-Xmx3000m versionCheck ci-release
         env:
           PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
           PGP_SECRET: ${{ secrets.PGP_SECRET }}
@@ -25,7 +28,7 @@ jobs:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
       - name: website
         run: |
-          sbt clean docs/mdoc docs/unidoc
+          sbt clean +docs/mdoc +docs/unidoc
           cd website
           hugo
           cd public

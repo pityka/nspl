@@ -12,7 +12,7 @@ case class DataTable(rows: Array[Double], numCols: Int)
     else
       new Iterator[Row] {
         var j = 0;
-        var n = rows.length / numCols;
+        val n = rows.length / numCols;
         def hasNext = j < n
         def next() = {
           val row = new Row {
@@ -30,7 +30,7 @@ case class DataTable(rows: Array[Double], numCols: Int)
         }
       }
 
-  def columnMinMax(i: Int) = {
+  private def computeMinMax(i: Int) = {
     var j = i;
     var min = Double.MaxValue;
     var max = Double.MinValue;
@@ -48,11 +48,12 @@ case class DataTable(rows: Array[Double], numCols: Int)
     val min1 = min;
     val max1 = max;
 
-    Some(new MinMax {
-      val min = min1
-      val max = max1
-    })
+    MinMaxImpl(min = min1, max = max1)
   }
+
+  private val minMaxes = 0 until numCols map (computeMinMax) toVector
+
+  def columnMinMax(i: Int) = Some(minMaxes(i))
 
   def quantilesOfColumn(i: Int, qs: Vector[Double]) = {
     val v = iterator.map(_(i)).toSeq

@@ -1,6 +1,6 @@
 package org.nspl.data
 
-trait DataTuples {
+private[nspl] trait DataTuples {
 
  [#implicit def productsToRow(t: Tuple1[[#Double#]]): Row = new Row {
   def apply(i: Int) = t.productElement(i).asInstanceOf[Double]

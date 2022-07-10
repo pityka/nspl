@@ -1,6 +1,6 @@
 package org.nspl
 
-object Ticks {
+private[nspl] object Ticks {
 
   /** Modified Heckbert's algorithm Translated and modified from the source of
     * R's labeling package.

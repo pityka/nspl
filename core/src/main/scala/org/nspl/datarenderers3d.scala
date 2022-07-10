@@ -1,7 +1,6 @@
 package org.nspl
 
 import data._
-import scala.util.Try
 
 trait DataRenderer3D {
   def render[R <: RenderingContext[R]](
@@ -10,6 +9,7 @@ trait DataRenderer3D {
       viewProjectionMatrix: Math3D.Mat4,
       tx: AffineTransform
   )(implicit re: Renderer[ShapeElem, R], rt: Renderer[TextBox, R]): Unit
+  @scala.annotation.nowarn
   def clear[R <: RenderingContext[R]](ctx: R)(implicit
       re: Renderer[ShapeElem, R],
       rt: Renderer[TextBox, R]
@@ -17,7 +17,7 @@ trait DataRenderer3D {
   def asLegend: Option[LegendElem] = None
 }
 
-trait Renderers3D {
+private[nspl] trait Renderers3D {
   def lineSegment3D[F: FC](
       xCol: Int = 0,
       yCol: Int = 1,
@@ -26,7 +26,7 @@ trait Renderers3D {
       y2Col: Int = 4,
       z2Col: Int = 5,
       colorCol: Int = 6,
-      stroke: StrokeConf = StrokeConf(lineWidth * 0.01, CapRound),
+      stroke: StrokeConf = StrokeConf(lineWidth * 0.01, Cap.Round),
       color: Colormap = HeatMapColors(0, 1)
   ) = new DataRenderer3D {
 
@@ -71,21 +71,20 @@ trait Renderers3D {
           Shape.line(clip1.toPoint, clip2.toPoint),
           strokeColor = color1,
           stroke = Some(stroke.value)
-        ).transform(_ => tx)
+        ).transform(tx)
 
         re.render(ctx, shape1)
       }
 
     }
   }
-  def point3D[F: FC](
+  def point3D(
       xCol: Int = 0,
       yCol: Int = 1,
       zCol: Int = 2,
       colorCol: Int = 3,
       sizeCol: Int = 4,
       size: Double = 0.5d,
-      stroke: StrokeConf = StrokeConf(lineWidth, CapRound),
       color: Colormap = HeatMapColors(0, 1),
       shape: Shape = shapeList(0),
       keepPointShapeAspectRatio: Boolean = true
@@ -139,21 +138,20 @@ trait Renderers3D {
         val perspectivFactorY = size1 * shapeAspectRatio * math
           .abs(clip1(0) - clip2(0)) / shapeBounds.h
 
-        val vX = clip1(0)
         val vY = clip1(1)
         val shape1PreTransform: ShapeElem = ShapeElem(
-          shape.transform(_ =>
-            AffineTransform
-              .translate(clip1(0), vY)
-              .concatScale(
-                perspectivFactorX,
-                perspectivFactorY
-              )
+          shape.transform((_, old) =>
+            old.scaleThenTranslate(
+              tx = clip1(0),
+              ty = vY,
+              sx = perspectivFactorX,
+              sy = perspectivFactorY
+            )
           ),
           fill = color1
         )
 
-        val shape1 = shape1PreTransform.transform(b => tx)
+        val shape1 = shape1PreTransform.transform(tx)
 
         re.render(ctx, shape1)
       }

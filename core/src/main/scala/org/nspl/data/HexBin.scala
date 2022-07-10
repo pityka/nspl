@@ -44,11 +44,11 @@ object HexBin {
       val x2 = (x - xOrigin2) / width
       val y2 = (y - yOrigin2) / height
 
-      def transformBack1(pair: (Double, Double)) =
-        (pair._1 * width + xOrigin1, pair._2 * height + yOrigin1)
+      def transformBack1(a: Double, b: Double) =
+        (a * width + xOrigin1, b * height + yOrigin1)
 
-      def transformBack2(pair: (Double, Double)) =
-        (pair._1 * width + xOrigin2, pair._2 * height + yOrigin2)
+      def transformBack2(a: Double, b: Double) =
+        (a * width + xOrigin2, b * height + yOrigin2)
 
       val candidates = List(
         transformBack1(x1.floor, y1.floor),

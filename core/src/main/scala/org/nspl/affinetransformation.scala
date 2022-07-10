@@ -2,13 +2,13 @@ package org.nspl
 
 /** 2D Affine Transformation Matrix in row major order
   */
-case class AffineTransform(
-    m0: Double,
-    m1: Double,
-    m2: Double,
-    m3: Double,
-    m4: Double,
-    m5: Double
+class AffineTransform(
+    val m0: Double,
+    val m1: Double,
+    val m2: Double,
+    val m3: Double,
+    val m4: Double,
+    val m5: Double
 ) {
 
   def inverse = {
@@ -51,49 +51,67 @@ case class AffineTransform(
   // 0  1  2  3  4  5  6  7  8
   // 00 01 02 10 11 12 20 21 22
   def transform(p: Point): Point = {
-    val bx = m2
-    val by = m5
-    val a00 = m0
-    val a01 = m1
-    val a10 = m3
-    val a11 = m4
+    if (this eq AffineTransform.identity) p
+    else {
+      val bx = m2
+      val by = m5
+      val a00 = m0
+      val a01 = m1
+      val a10 = m3
+      val a11 = m4
 
-    val nx = bx + a00 * p.x + a01 * p.y
-    val ny = by + a10 * p.x + a11 * p.y
+      val nx = bx + a00 * p.x + a01 * p.y
+      val ny = by + a10 * p.x + a11 * p.y
 
-    Point(nx, ny)
+      Point(nx, ny)
+    }
   }
   def transform(b: Bounds): Bounds = {
-    val topLeft = transform(b.x, b.y)
-    val topRight = transform(b.x + b.w, b.y)
-    val bottomRight = transform(b.x + b.w, b.y + b.h)
-    val bottomLeft = transform(b.x, b.y + b.h)
-    val transformedAnchor = b.anchor.map(p => transform(p))
+    transformBounds(b.x, b.y, b.w, b.h, b.anchor)
+  }
+  def transformBounds(
+      x: Double,
+      y: Double,
+      w: Double,
+      h: Double,
+      anchor: Option[Point]
+  ): Bounds = {
+    if (this eq AffineTransform.identity) Bounds(x, y, w, h, anchor)
+    else {
+      val topLeft = transform(x, y)
+      val topRight = transform(x + w, y)
+      val bottomRight = transform(x + w, y + h)
+      val bottomLeft = transform(x, y + h)
+      val transformedAnchor = anchor.map(transform)
 
-    val nx = math.min(
-      topLeft.x,
-      math.min(topRight.x, math.min(bottomRight.x, bottomLeft.x))
-    )
-    val nx2 = math.max(
-      topLeft.x,
-      math.max(topRight.x, math.max(bottomRight.x, bottomLeft.x))
-    )
-    val ny = math.min(
-      topLeft.y,
-      math.min(topRight.y, math.min(bottomRight.y, bottomLeft.y))
-    )
-    val ny2 = math.max(
-      topLeft.y,
-      math.max(topRight.y, math.max(bottomRight.y, bottomLeft.y))
-    )
+      val nx = math.min(
+        topLeft.x,
+        math.min(topRight.x, math.min(bottomRight.x, bottomLeft.x))
+      )
+      val nx2 = math.max(
+        topLeft.x,
+        math.max(topRight.x, math.max(bottomRight.x, bottomLeft.x))
+      )
+      val ny = math.min(
+        topLeft.y,
+        math.min(topRight.y, math.min(bottomRight.y, bottomLeft.y))
+      )
+      val ny2 = math.max(
+        topLeft.y,
+        math.max(topRight.y, math.max(bottomRight.y, bottomLeft.y))
+      )
 
-    val width = math.abs(nx2 - nx)
-    val height = math.abs(ny2 - ny)
-    Bounds(nx, ny, width, height, transformedAnchor)
+      val width = math.abs(nx2 - nx)
+      val height = math.abs(ny2 - ny)
+      Bounds(nx, ny, width, height, transformedAnchor)
+    }
   }
 
-  def concat(tx: AffineTransform) =
-    if (tx == AffineTransform.identity) this
+  /** returns (this mm tx) in terms of transformations returns a transformation
+    * which first applies tx then applies this
+    */
+  def applyBefore(tx: AffineTransform) =
+    if (tx eq AffineTransform.identity) this
     else
       AffineTransform(
         m0 * tx.m0 + m1 * tx.m3,
@@ -104,33 +122,96 @@ case class AffineTransform(
         m3 * tx.m2 + m4 * tx.m5 + m5
       )
 
-  def concatTranslate(x: Double, y: Double) = AffineTransform(
+  /** returns (tx mm this) in terms of transformations returns a transformation
+    * which first applies this then applies tx
+    */
+  def andThen(tx: AffineTransform) =
+    if (tx eq AffineTransform.identity) this
+    else
+      tx.applyBefore(this)
+
+  /** returns a transformation which applies this then rotates around (x,y) with
+    * rad
+    */
+  def rotate(rad: Double, x: Double, y: Double) = {
+    val tm0 = math.cos(rad)
+    val tm1 = math.sin(rad)
+    val tm2 = x - tm0 * x - tm1 * y
+    val tm3 = -1 * tm1
+    val tm4 = tm0
+    val tm5 = y + tm1 * x - tm0 * y
+    AffineTransform(
+      tm0 * m0 + tm1 * m3,
+      tm0 * m1 + tm1 * m4,
+      tm0 * m2 + tm1 * m5 + tm2,
+      tm3 * m0 + tm4 * m3,
+      tm3 * m1 + tm4 * m4,
+      tm3 * m2 + tm4 * m5 + tm5
+    )
+  }
+
+  /** returns a transformation which applies this then rotates around (0,0) with
+    * rad
+    */
+  def rotate(rad: Double) = {
+    val tm0 = math.cos(rad)
+    val tm1 = math.sin(rad)
+    val tm3 = -1 * tm1
+    val tm4 = tm0
+    AffineTransform(
+      tm0 * m0 + tm1 * m3,
+      tm0 * m1 + tm1 * m4,
+      tm0 * m2 + tm1 * m5,
+      tm3 * m0 + tm4 * m3,
+      tm3 * m1 + tm4 * m4,
+      tm3 * m2 + tm4 * m5
+    )
+  }
+
+  /** Returns a transformation which applies this then scales then translates
+    */
+  def scaleThenTranslate(tx: Double, ty: Double, sx: Double, sy: Double) =
+    AffineTransform(
+      m0 * sx,
+      m1 * sx,
+      m2 * sx + tx,
+      m3 * sy,
+      m4 * sy,
+      m5 * sy + ty
+    )
+
+  /** Returns a tranformation which applies this then translates */
+  def translate(x: Double, y: Double) = AffineTransform(
     m0,
     m1,
-    m0 * x + m1 * y + m2,
+    m2 + x,
     m3,
     m4,
-    m3 * x + m4 * y + m5
+    m5 + y
   )
 
-  def concatScale(x: Double, y: Double) =
+  /** Returns a tranformation which applies this then scales */
+  def scale(x: Double, y: Double) =
     AffineTransform(
       m0 * x,
-      m1 * y,
-      m2,
-      m3 * x,
+      m1 * x,
+      m2 * x,
+      m3 * y,
       m4 * y,
-      m5
+      m5 * y
     )
 }
 
 object AffineTransform {
 
-  val reflectXCenter = (b: Bounds) =>
-    reflectX.concat(translate(0, b.h * (-1) - b.y))
-
-  val reflectYCenter = (b: Bounds) =>
-    reflectY.concat(translate(b.w * (-1) - b.x, 0))
+  def apply(
+    m0: Double,
+    m1: Double,
+    m2: Double,
+    m3: Double,
+    m4: Double,
+    m5: Double
+) : AffineTransform = new AffineTransform(m0,m1,m2,m3,m4,m5)
 
   def rotateCenter(rad: Double) =
     (b: Bounds) => rotate(rad, b.centerX, b.centerY)
@@ -149,8 +230,12 @@ object AffineTransform {
   def scale(x: Double, y: Double) =
     AffineTransform(x, 0d, 0d, 0d, y, 0)
 
-  def translateAndScale(tx: Double, ty: Double, sx: Double, sy: Double) =
+  /** Returns a transformation which first scales then translates */
+  def scaleThenTranslate(tx: Double, ty: Double, sx: Double, sy: Double) =
     AffineTransform(sx, 0d, tx, 0d, sy, ty)
+
+  def translateThenScale(tx: Double, ty: Double, sx: Double, sy: Double) =
+    AffineTransform(sx, 0d, sx * tx, 0d, sy, sy * ty)
 
   def rotate(rad: Double) =
     AffineTransform(
@@ -166,9 +251,9 @@ object AffineTransform {
     AffineTransform(
       math.cos(rad),
       math.sin(rad),
-      x - math.cos(rad) * x - math.sin(rad) * y,
+      -math.cos(rad) * x - math.sin(rad) * y + x,
       -1 * math.sin(rad),
       math.cos(rad),
-      y + math.sin(rad) * x - math.cos(rad) * y
+      -math.cos(rad) * y + math.sin(rad) * x + y
     )
 }

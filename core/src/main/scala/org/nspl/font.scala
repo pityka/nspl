@@ -1,58 +1,65 @@
 package org.nspl
 
-sealed trait Font {
-  type F >: this.type <: Font
-  def advance(c: Char, size: Int)(implicit fm: GlyphMeasurer[F]) =
-    fm.advance(c, this)
-  def size: Int
-}
+/** Describes the name and size of the font set used to draw letters
+  *
+  * This description is independent of the rendering context. Each rendering
+  * context has to provide a GlyphMeasurer to compute the concrete space
+  * occupied by the given Font (font name and font size)
+  */
+class Font(val name: String, val size: Int)
 
-trait GlyphMeasurer[-F <: Font] {
-  def advance(s: Char, f: F): Double
-  def lineMetrics(f: F): LineMetrics
-}
-
-trait FontConfiguration {
-  def font: Font
-  def advance(c: Char): Double
-  val lineMetrics: LineMetrics
-}
-
-case object Monospace extends Font with FontConfiguration {
-  val font = this
-  val size = 10
-  def advance(c: Char) = FixGlyphMeasurer.advance(c, font)
-  val lineMetrics = FixGlyphMeasurer.lineMetrics(font)
-}
-
-case class NamedFont(name: String, size: Int) extends Font
-
-/* https://docs.oracle.com/javase/tutorial/2d/text/fontconcepts.html */
-case class LineMetrics(ascent: Double, descent: Double, leading: Double)
-
-object FixGlyphMeasurer extends GlyphMeasurer[Font#F] {
-  def advance(s: Char, f: Font#F) = f.size.toDouble * 0.6
-  def lineMetrics(f: Font#F) =
-    LineMetrics(
-      ascent = f.size.toDouble * 0.78,
-      descent = f.size.toDouble * 0.22,
-      leading = 0d
-    )
-}
-
-case class GenericFontConfig[F <: Font](font: F)(implicit
-    val measure: GlyphMeasurer[F#F]
-) extends FontConfiguration {
+/** A Font paired with a GlyphMeasurer forms a FontConfiguration */
+class FontConfiguration(val font: Font, measure: Font.GlyphMeasurer) {
   def advance(c: Char) = measure.advance(c, font)
   val lineMetrics = measure.lineMetrics(font)
 }
 
+object Font {
+
+  /** A GlyphMeasurer can compute line metrics from a font. Implementations of
+    * this trait are specific to a rendering context
+    */
+  trait GlyphMeasurer {
+    def advance(s: Char, f: Font): Double
+    def lineMetrics(f: Font): LineMetrics
+  }
+
+  /** Holds line metrics data
+    *
+    * For the meaning of the members see
+    * https://docs.oracle.com/javase/tutorial/2d/text/fontconcepts.html
+    *
+    * Ascent is the distance from the baseline to the typical highest point of
+    * the letter (ascender line). Descent is the distance from the baseline to
+    * the typical lowest point of the letter (descender line). Leading is the
+    * gap between lines, i.e. distance from the descender line to the next
+    * line's ascender line.
+    */
+  case class LineMetrics(ascent: Double, descent: Double, leading: Double)
+}
+
+/** Holds a text layout
+  *
+  * @param lines
+  *   a sequence of lines. Each line is a string with the characters of the line
+  *   and an AffineTransformation with the line's displacement.
+  * @param bounds
+  *   outer bounding box of the layout
+  */
 case class TextLayout(lines: Seq[(String, AffineTransform)], bounds: Bounds) {
   def isEmpty = lines.isEmpty || lines.forall(_._1.isEmpty)
 }
 
 object TextLayout {
 
+  /** factory method for text layouts
+    *
+    * Given an optional max width, complete text and a font size it computes the
+    * text layout,
+    * i.e. breaks the text into lines
+    *
+    * It breaks lines on space, tab and newline characters.
+    */
   def apply(
       maxWidth: Option[Double],
       text: String,
@@ -85,9 +92,13 @@ object TextLayout {
 
       if (maxWidth.isEmpty) {
         val bounds = measureLine(chars)
-        val tx = AffineTransform
-          .scale(fontSizeFactor, fontSizeFactor)
-          .concat(AffineTransform.translate(bounds.x, bounds.y + ascent))
+
+        val tx = AffineTransform.translateThenScale(
+          tx = bounds.x,
+          ty = bounds.y + ascent,
+          sx = fontSizeFactor,
+          sy = fontSizeFactor
+        )
 
         TextLayout(List(chars.mkString -> tx), scale.transform(bounds))
       } else {
@@ -120,11 +131,12 @@ object TextLayout {
         val outerBounds = outline(lines.iterator.map(_._2), anchor = None)
 
         val transformations = lines.map { case (text, bounds) =>
-          val tx = AffineTransform
-            .scale(fontSizeFactor, fontSizeFactor)
-            .concat(
-              AffineTransform.translate(bounds.x, bounds.y + ascent)
-            )
+          val tx = AffineTransform.translateThenScale(
+            tx = bounds.x,
+            ty = bounds.y + ascent,
+            sx = fontSizeFactor,
+            sy = fontSizeFactor
+          )
           (text, tx)
         }
 

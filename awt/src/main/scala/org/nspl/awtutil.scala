@@ -1,25 +1,22 @@
 package org.nspl
 
-import java.awt.{Graphics2D, Font => JFont}
-import java.awt.event._
-import javax.swing.event.MouseInputAdapter
+import java.awt.{Graphics2D}
 import java.io._
 
 trait JavaAWTUtil {
 
-  import org.nspl.JavaFontConversion._
 
   private[nspl] def shape2awt(s: Shape): java.awt.Shape = s match {
-    case Rectangle(x, y, w, h, tx, _) =>
+    case Rectangle(x, y, w, h, _, _) =>
       new java.awt.geom.Rectangle2D.Double(x, y, w, h)
 
-    case Ellipse(x, y, w, h, tx) =>
+    case Ellipse(x, y, w, h, _) =>
       new java.awt.geom.Ellipse2D.Double(x, y, w, h)
 
-    case Line(x1, y1, x2, y2, tx) =>
+    case Line(x1, y1, x2, y2, _) =>
       new java.awt.geom.Line2D.Double(x1, y1, x2, y2)
 
-    case SimplePath(points, tx) => {
+    case SimplePath(points, _) => {
       val path = new java.awt.geom.GeneralPath()
       path.moveTo(points.head.x, points.head.y)
       points.drop(1).foreach { p =>
@@ -28,14 +25,14 @@ trait JavaAWTUtil {
       path.closePath
       path
     }
-    case Path(ops, tx) => {
+    case Path(ops, _) => {
       val path = new java.awt.geom.GeneralPath()
       ops foreach {
-        case MoveTo(Point(x, y)) => path.moveTo(x, y)
-        case LineTo(Point(x, y)) => path.lineTo(x, y)
-        case QuadTo(Point(x2, y2), Point(x1, y1)) =>
+        case PathOperation.MoveTo(Point(x, y)) => path.moveTo(x, y)
+        case PathOperation.LineTo(Point(x, y)) => path.lineTo(x, y)
+        case PathOperation.QuadTo(Point(x2, y2), Point(x1, y1)) =>
           path.quadTo(x1, y1, x2, y2)
-        case CubicTo(Point(x3, y3), Point(x1, y1), Point(x2, y2)) =>
+        case PathOperation.CubicTo(Point(x3, y3), Point(x1, y1), Point(x2, y2)) =>
           path.curveTo(x1, y1, x2, y2, x3, y3)
       }
       path.closePath
@@ -46,13 +43,13 @@ trait JavaAWTUtil {
   private[nspl] def col2col(c: Color): java.awt.Paint =
     new java.awt.Color(c.r, c.g, c.b, c.a)
 
-  private[nspl] def str2str(s: Stroke) =
+  private[nspl] def str2str(s: Stroke): java.awt.BasicStroke =
     new java.awt.BasicStroke(
       s.width.toFloat,
       s.cap match {
-        case CapButt   => java.awt.BasicStroke.CAP_BUTT
-        case CapSquare => java.awt.BasicStroke.CAP_SQUARE
-        case CapRound  => java.awt.BasicStroke.CAP_ROUND
+        case Cap.Butt   => java.awt.BasicStroke.CAP_BUTT
+        case Cap.Square => java.awt.BasicStroke.CAP_SQUARE
+        case Cap.Round  => java.awt.BasicStroke.CAP_ROUND
       },
       java.awt.BasicStroke.JOIN_MITER,
       1f,
@@ -60,10 +57,10 @@ trait JavaAWTUtil {
       0f
     )
 
-  private[nspl] def rec2bounds(r: java.awt.geom.Rectangle2D) =
+  private[nspl] def rec2bounds(r: java.awt.geom.Rectangle2D): Bounds =
     Bounds(r.getX, r.getY, r.getWidth, r.getHeight)
 
-  private[nspl] def bounds2rec(r: Bounds) =
+  private[nspl] def bounds2rec(r: Bounds): java.awt.geom.Rectangle2D.Double =
     new java.awt.geom.Rectangle2D.Double(r.x, r.y, r.w, r.h)
 
   private[nspl] def tx2tx(tx: AffineTransform): java.awt.geom.AffineTransform =
@@ -80,7 +77,7 @@ trait JavaAWTUtil {
       er: Renderer[K, JavaRC]
   ) = {
     import javax.swing._
-    import java.awt.{Graphics, RenderingHints}
+    import java.awt.Graphics
     val frame = new JFrame("");
     var paintableElem = elem.build
 
@@ -99,7 +96,7 @@ trait JavaAWTUtil {
           override def paintComponent(g: Graphics) = {
             super.paintComponent(g)
             val g2 = g.asInstanceOf[Graphics2D]
-            val renderingContext = JavaRC(g2)
+            val renderingContext = new JavaRC(g2,true)
             val bounds = getBounds()
 
             renderingContext
@@ -138,7 +135,7 @@ trait JavaAWTUtil {
     val aspect = elem.bounds.h / elem.bounds.w
     val height = (width * aspect).toInt
     val g2d = new VectorGraphics2D()
-    val renderingContext = JavaRC(g2d)
+    val renderingContext = new JavaRC(g2d,true)
 
     val processor =
       format match {
@@ -181,9 +178,7 @@ trait JavaAWTUtil {
     import java.awt.image.BufferedImage
 
     import javax.imageio.ImageIO;
-    import javax.imageio.ImageWriter;
-    import javax.imageio.stream.ImageOutputStream;
-    import java.awt.{Graphics, RenderingHints}
+    import java.awt.RenderingHints
 
     val elem = build.build
 
@@ -197,7 +192,7 @@ trait JavaAWTUtil {
     );
 
     val g2d = bimage.createGraphics();
-    val renderingContext = JavaRC(g2d)
+    val renderingContext = new JavaRC(g2d, true)
 
     g2d.setRenderingHint(
       RenderingHints.KEY_ANTIALIASING,
@@ -226,13 +221,58 @@ trait JavaAWTUtil {
 
   }
 
-  private def writeBinaryToFile(f: File, data: Array[Byte]): Unit = {
-    val os = new BufferedOutputStream(new FileOutputStream(f))
-    try {
-      os.write(data)
-    } finally {
-      os.close
+  private[nspl] def bench[K <: Renderable[K]](
+      build: => K,
+      width: Int = 1000,
+      render: Boolean = true
+  )(implicit
+      er: Renderer[K, JavaRC]
+  ) = {
+    import java.awt.image.BufferedImage
+
+    import java.awt.RenderingHints
+
+    var elem = build
+
+    val aspect = elem.bounds.h / elem.bounds.w
+    val height = math.max((width * aspect).toInt, 1)
+
+    val bimage = new BufferedImage(
+      width,
+      height,
+      BufferedImage.TYPE_INT_ARGB
+    );
+
+    val g2d = bimage.createGraphics();
+    val renderingContext = new JavaRC(g2d,render)
+
+    g2d.setRenderingHint(
+      RenderingHints.KEY_ANTIALIASING,
+      RenderingHints.VALUE_ANTIALIAS_ON
+    );
+    g2d.setRenderingHint(
+      RenderingHints.KEY_TEXT_ANTIALIASING,
+      RenderingHints.VALUE_TEXT_ANTIALIAS_ON
+    );
+
+    val bounds = Bounds(0, 0, width, height)
+
+    var i = 0
+    val N = 50000
+    while (i <= N) {
+      elem = build
+      renderingContext.render(fitToBounds(elem, bounds))
+      i += 1
     }
+    i = 0
+    val t1 = System.nanoTime()
+    while (i <= N) {
+      elem = build
+      renderingContext.render(fitToBounds(elem, bounds))
+      i += 1
+    }
+    println((System.nanoTime - t1).toDouble / N * 1e-9)
+
   }
 
   def renderToByteArray[K <: Renderable[K]](

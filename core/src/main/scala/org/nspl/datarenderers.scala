@@ -1,8 +1,23 @@
 package org.nspl
 
 import data._
-import scala.util.Try
 
+/** A DataRenderer can render a datum a a side effect
+  *
+  * DataRenderers describe the visual representations of single data rows.
+  * DataRenderers operate in a side effect with the provided context specific
+  * shape and textbox renderer.
+  *
+  * It is guaranteed that the render method is called in a loop on all rows of a
+  * data source, after which the clear method is called exactly once.
+  *
+  * Data renderers interpret the data rows as it is applicable for their
+  * function e.g. the point renderer takes 2 numbers for the x, y coordinates
+  * and potentially numbers for the color value, and the top and bottom error
+  * bars. In contrast the box and whiskes renderer takes 5 numbers for the
+  * min/max/median/mean and the horizontal coordinate. If the data row is too
+  * short for the given data renderer then an error is thrown.
+  */
 trait DataRenderer {
   def render[R <: RenderingContext[R]](
       data: Row,
@@ -12,6 +27,7 @@ trait DataRenderer {
       tx: AffineTransform
   )(implicit re: Renderer[ShapeElem, R], rt: Renderer[TextBox, R]): Unit
   def asLegend: Option[LegendElem]
+  @scala.annotation.nowarn
   def clear[R <: RenderingContext[R]](ctx: R)(implicit
       re: Renderer[ShapeElem, R],
       rt: Renderer[TextBox, R]
@@ -20,8 +36,9 @@ trait DataRenderer {
   def yMinMax(ds: DataSource): Option[MinMax]
 }
 
-trait Renderers {
+private[nspl] trait Renderers {
 
+  /** A renderer which renders a data row as a point on a scatter plot */
   def point[T: FC](
       xCol: Int = 0,
       yCol: Int = 1,
@@ -71,7 +88,7 @@ trait Renderers {
               updatedBound.x - label.bounds.x,
               updatedBound.y - label.bounds.y
             )
-            .transform(_ => tx)
+            .transform(tx)
 
           rt.render(ctx, labelUpdated)
           connectionLine match {
@@ -81,12 +98,14 @@ trait Renderers {
               val lineElem = ShapeElem(
                 Shape.line(p1, p2),
                 strokeColor = labelColor,
-                stroke = Some(Stroke(lineWidth.value * 0.3))
-              ).transform(_ => tx)
+                stroke = Some(Stroke(lineWidth.value * 0.3)),
+                tx = tx
+              )
               re.render(ctx, lineElem)
           }
 
       }
+      shapesAndTextLabels.clear()
     }
 
     def render[R <: RenderingContext[R]](
@@ -149,14 +168,23 @@ trait Renderers {
               val vX = xAxis.worldToView(wX + translate._1 + noiseValueX)
               val vY = yAxis.worldToView(wY + translate._2 + noiseValueY)
 
-              val shape1PreTransform: ShapeElem = ShapeElem(
-                shape.transform(_ =>
-                  AffineTransform
-                    .translateAndScale(vX, vY, factorX, factorY)
-                ),
-                fill = color1
-              )
-              val shape1 = shape1PreTransform.transform(b => tx)
+              val shape1PreTransform: ShapeElem =
+                if (valueText || labelText)
+                  ShapeElem(
+                    shape,
+                    fill = color1,
+                    tx = AffineTransform
+                      .scaleThenTranslate(vX, vY, factorX, factorY)
+                  )
+                else null
+              val shape1 =
+                if (valueText || labelText) shape1PreTransform.transform(tx)
+                else
+                  ShapeElem(
+                    shape,
+                    fill = color1,
+                    tx = tx.scaleThenTranslate(vX, vY, factorX, factorY)
+                  )
               if (data.dimension > errorTopCol) {
                 val errorTop = data(errorTopCol)
                 val shape1: ShapeElem = ShapeElem(
@@ -164,8 +192,10 @@ trait Renderers {
                     Point(vX, vY),
                     Point(vX, yAxis.worldToView(errorTop))
                   ),
-                  stroke = Some(errorBarStroke.value)
-                ).transform(_ => tx)
+                  stroke = Some(errorBarStroke.value),
+                  tx = tx,
+                  fill = errorBarColor
+                )
                 re.render(ctx, shape1)
               }
               if (data.dimension > errorBottomCol) {
@@ -175,21 +205,25 @@ trait Renderers {
                     Point(vX, vY),
                     Point(vX, yAxis.worldToView(errorBottom))
                   ),
-                  stroke = Some(errorBarStroke.value)
-                ).transform(_ => tx)
+                  stroke = Some(errorBarStroke.value),
+                  tx = tx,
+                  fill = errorBarColor
+                )
                 re.render(ctx, shape1)
               }
               re.render(ctx, shape1)
 
-              if (valueText) {
+              if (valueText && data.dimension > colorCol) {
                 val tbPreTransform = TextBox(
                   f"${data(colorCol)}%.2g",
                   color = labelColor,
                   fontSize = labelFontSize
-                ).translate(vX, vY)
-                  .transform(b =>
-                    AffineTransform
-                      .translate(0, -1 * b.h - shape.bounds.h * factorY * 0.5)
+                )
+                  .transform((b, old) =>
+                    old.translate(
+                      vX,
+                      vY + -1 * b.h - shape.bounds.h * factorY * 0.5
+                    )
                   )
 
                 shapesAndTextLabels += (
@@ -207,11 +241,11 @@ trait Renderers {
                   label(data.label),
                   color = labelColor,
                   fontSize = labelFontSize
-                ).translate(vX, vY)
-                  .transform(b =>
-                    AffineTransform.translate(
-                      -0.2 * b.w,
-                      -1 * b.h - shape.bounds.h * factorY * 0.5
+                )
+                  .transform((b, old) =>
+                    old.translate(
+                      -0.2 * b.w + vX,
+                      -1 * b.h - shape.bounds.h * factorY * 0.5 + vY
                     )
                   )
 
@@ -235,6 +269,11 @@ trait Renderers {
     }
   }
 
+  /** A renderer which renders a data row as a sequence of joined line segments
+    *
+    * Each data row is connected with a line segment in the order they are
+    * supplied in the data source
+    */
   def line[F: FC](
       xCol: Int = 0,
       yCol: Int = 1,
@@ -287,8 +326,9 @@ trait Renderers {
             Shape.line(currentPoint.get, p),
             fill = Color.transparent,
             strokeColor = color1,
-            stroke = Some(stroke.value.copy(cap = CapRound))
-          ).transform(_ => tx)
+            stroke = Some(stroke.value.copy(cap = Cap.Round)),
+            tx = tx
+          )
 
           re.render(ctx, shape1)
 
@@ -380,8 +420,9 @@ trait Renderers {
 
           val shape1 = ShapeElem(
             shape,
-            fill = color1
-          ).transform(_ => tx)
+            fill = color1,
+            tx = tx
+          )
 
           re.render(ctx, shape1)
 
@@ -393,6 +434,11 @@ trait Renderers {
     }
   }
 
+  /** A renderer which renders a data row as a polynom
+    *
+    * It numerically evaluates the polynom sum(a_i x^i) and draws the resulting
+    * curve
+    */
   def polynom(
       renderer: () => DataRenderer
   ) = new DataRenderer {
@@ -430,6 +476,7 @@ trait Renderers {
     }
   }
 
+  /** A renderer which renders a data row as a horizontal or vertical bar */
   def bar[F: FC](
       xCol: Int = 0,
       yCol: Int = 1,
@@ -539,8 +586,9 @@ trait Renderers {
             rectangle,
             fill = color1,
             stroke = if (stroke.width.value == 0d) None else Some(stroke.value),
-            strokeColor = strokeColor
-          ).transform(_ => tx)
+            strokeColor = strokeColor,
+            tx = tx
+          )
 
           re.render(ctx, shape1)
 
@@ -595,8 +643,9 @@ trait Renderers {
             rectangle,
             fill = color1,
             stroke = if (stroke.width.value == 0d) None else Some(stroke.value),
-            strokeColor = strokeColor
-          ).transform(_ => tx)
+            strokeColor = strokeColor,
+            tx = tx
+          )
 
           re.render(ctx, shape1)
 
@@ -606,6 +655,8 @@ trait Renderers {
     }
   }
 
+  /** A renderer which renders a data row a single parameterized line (y=a+b*x)
+    */
   def abline(
       a: Double,
       b: Double,
@@ -613,6 +664,10 @@ trait Renderers {
   ) =
     (dataSourceFromRows(Seq(a -> b)), List(renderer))
 
+  /** A renderer which renders a data row as a box and whiskers plot
+    *
+    * The minimum, maximum, median and mean are rendered.
+    */
   def boxwhisker[F: FC](
       xCol: Int = 0,
       medianCol: Int = 1,
@@ -682,8 +737,9 @@ trait Renderers {
           Shape.rectangle(vX - vWidth * 0.5, vQ3, vWidth, vHeight),
           fill = color1,
           stroke = Some(stroke.value),
-          strokeColor = strokeColor
-        ).transform(_ => tx)
+          strokeColor = strokeColor,
+          tx = tx
+        )
 
         re.render(ctx, shape1)
 
@@ -692,8 +748,9 @@ trait Renderers {
             .line(Point(vX - vWidth * 0.5, vQ2), Point(vX + vWidth * 0.5, vQ2)),
           fill = color1,
           stroke = Some(stroke.value),
-          strokeColor = strokeColor
-        ).transform(_ => tx)
+          strokeColor = strokeColor,
+          tx = tx
+        )
 
         re.render(ctx, shape2)
 
@@ -701,8 +758,9 @@ trait Renderers {
           Shape.line(Point(vX, vQ1), Point(vX, vMin)),
           fill = color1,
           stroke = Some(stroke.value),
-          strokeColor = strokeColor
-        ).transform(_ => tx)
+          strokeColor = strokeColor,
+          tx = tx
+        )
 
         re.render(ctx, shape3)
 
@@ -710,8 +768,9 @@ trait Renderers {
           Shape.line(Point(vX, vQ3), Point(vX, vMax)),
           fill = color1,
           stroke = Some(stroke.value),
-          strokeColor = strokeColor
-        ).transform(_ => tx)
+          strokeColor = strokeColor,
+          tx = tx
+        )
 
         re.render(ctx, shape4)
 
@@ -719,13 +778,18 @@ trait Renderers {
     }
   }
 
+  /** A renderer which renders a data row as series of potentially disconnected
+    * line segments
+    *
+    * Each data row must provide both endpoints of the line segment
+    */
   def lineSegment[F: FC](
       xCol: Int = 0,
       yCol: Int = 1,
       x2Col: Int = 2,
       y2Col: Int = 3,
       colorCol: Int = 4,
-      stroke: StrokeConf = StrokeConf(lineWidth, CapRound),
+      stroke: StrokeConf = StrokeConf(lineWidth, Cap.Round),
       color: Colormap = HeatMapColors(0, 1),
       labelText: Boolean = false,
       labelColor: Color = Color.black,
@@ -786,8 +850,9 @@ trait Renderers {
         val shape1 = ShapeElem(
           Shape.line(p, p2),
           strokeColor = color1,
-          stroke = Some(stroke.value)
-        ).transform(_ => tx)
+          stroke = Some(stroke.value),
+          tx = tx
+        )
 
         re.render(ctx, shape1)
 
@@ -808,8 +873,8 @@ trait Renderers {
             color = labelColor,
             fontSize = labelFontSize
           ).translate(lX, lY)
-            .transform(b =>
-              tx.concat(AffineTransform.translate(-1 * b.w * 0.5, 0d))
+            .transform((b, old) =>
+              old.andThen(tx.translate(-1 * b.w * 0.5, 0d))
             )
           rt.render(ctx, textBox)
         }
