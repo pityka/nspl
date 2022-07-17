@@ -25,7 +25,7 @@ inThisBuild(
 
 lazy val commonSettings = Seq(
   scalaVersion := "2.13.8",
-  crossScalaVersions := Seq("2.13.8", "3.1.1"),
+  crossScalaVersions := Seq("2.13.8", "3.1.3"),
   javacOptions ++= Seq("-Xdoclint:none"),
   scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((3, _)) =>
@@ -172,7 +172,7 @@ lazy val saddle = (project in file("saddle"))
     name := "nspl-saddle",
     libraryDependencies ++= Seq(
       "io.github.pityka" %% "saddle-core" % "3.4.0",
-      "org.scalameta" %% "munit" % "1.0.0-M3" % Test
+      "org.scalameta" %% "munit" % "1.0.0-M6" % Test
     )
   )
   .dependsOn(core, awt, scalatagsJvm)
@@ -215,7 +215,7 @@ lazy val docs = project
     commonSettings: _*
   )
   .settings(
-    crossScalaVersions := List("3.1.1"),
+    crossScalaVersions := List("3.1.3"),
     Compile / doc / sources := Seq.empty
   )
   .settings(
