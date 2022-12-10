@@ -25,7 +25,7 @@ inThisBuild(
 
 lazy val commonSettings = Seq(
   scalaVersion := "2.13.8",
-  crossScalaVersions := Seq("2.13.8", "3.1.3"),
+  crossScalaVersions := Seq("2.13.8", "3.2.1"),
   javacOptions ++= Seq("-Xdoclint:none"),
   scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((3, _)) =>
@@ -110,7 +110,7 @@ lazy val sharedJs = project
   .settings(commonSettings)
   .settings(
     name := "nspl-shared-js",
-    libraryDependencies += ("org.scala-js") %%% "scalajs-dom" % "2.1.0"
+    libraryDependencies += ("org.scala-js") %%% "scalajs-dom" % "2.3.0"
   )
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(coreJS)
@@ -172,7 +172,7 @@ lazy val saddle = (project in file("saddle"))
     name := "nspl-saddle",
     libraryDependencies ++= Seq(
       "io.github.pityka" %% "saddle-core" % "3.4.0",
-      "org.scalameta" %% "munit" % "1.0.0-M6" % Test
+      "org.scalameta" %% "munit" % "1.0.0-M7" % Test
     )
   )
   .dependsOn(core, awt, scalatagsJvm)
@@ -215,7 +215,7 @@ lazy val docs = project
     commonSettings: _*
   )
   .settings(
-    crossScalaVersions := List("3.1.3"),
+    crossScalaVersions := List("3.2.1"),
     Compile / doc / sources := Seq.empty
   )
   .settings(
