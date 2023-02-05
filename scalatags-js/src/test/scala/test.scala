@@ -22,10 +22,10 @@ object nsplTestSvg {
     val z2 = random2
     val z3 = random2
 
-    val p1 = xyplot(indexed(x))(par(ylab = "x", xlab = "index", main = "main"))
+    val p1 = xyplot(indexed(x))(par.ylab("x"). xlab ( "index"). main  ("main"))
     val p2 = xyplot(
       density(x) -> line()
-    )(par(xlab = "x", ylab = "dens."))
+    )(par.ylab("y"). xlab ( "x"))
     val p3 = xyplot(
       z2 -> z3 -> point(size = 1d, color = Color(200, 200, 200, 255)),
       density2d(z2 zip z3, n = 100, levels = 10)
@@ -38,11 +38,11 @@ object nsplTestSvg {
       )
     )()
 
-    val p5 = binnedboxplot(x, y)(par(xlab = "PC2", ylab = "PC3"))
+    val p5 = binnedboxplot(x, y)(par.ylab("x"). xlab ( "x"))
 
     val p6 = rasterplot(
       rasterFromStream(z3.iterator, 30, 30, MinMaxImpl(0.0, 1.0))
-    )(par())
+    )(par)
 
     val text = fitToWidth(
       group(

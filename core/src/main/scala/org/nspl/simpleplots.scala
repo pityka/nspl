@@ -9,6 +9,7 @@ case class InLegend(text: String) extends LegendConfig
 /* Factory methods for common plots. */
 private[nspl] trait SimplePlots {
 
+
   /** Factory method to create the scene graph of a plot in a Cartesian
     * coordinate system.
     *
@@ -38,7 +39,7 @@ private[nspl] trait SimplePlots {
     *   Generic characteristics of the plot. see [[org.nspl.par.apply]].
     */
   def xyplot[F: FC](data: (DataSource, List[DataRenderer], LegendConfig)*)(
-      parameters: Parameters = par()
+      parameters: Parameters = par
   ) = {
     import parameters._
     val xFac = if (xlog) Log10AxisFactory else LinearAxisFactory

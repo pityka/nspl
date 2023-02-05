@@ -20,12 +20,8 @@ class BenchSpec extends munit.FunSuite {
         InLegend("dsf")
       )
     )(
-      par(
-        ylab = "x",
-        xlab = "index",
-        main =
-          "main\nsdfsd\nasdfsdfd fasd fds fds fds fds fda fdsa fd d ds fds ds df asdf asdf sad sd fsad fsda sda fdsaf "
-      )
+      par.ylab("x").xlab("index").main("main\nsdfsd\nasdfsdfd fasd fds fds fds fds fda fdsa fd d ds fds ds df asdf asdf sad sd fsad fsda sda fdsaf ")
+        
     ).build
 
     bench(p1,render=false)
