@@ -1,7 +1,7 @@
 import org.nspl._
 import org.nspl.saddle._
 import org.nspl.data._
-import org.nspl.awtrenderer.{defaultAWTFont => _,_}
+import org.nspl.awtrenderer.{defaultAWTFont => _, _}
 import org.saddle._
 import org.saddle.order._
 
@@ -10,9 +10,9 @@ import org.saddle.scalar.ScalarTagDouble
 import org.saddle.index.InnerJoin
 
 class SaddlePlotSpec extends munit.FunSuite {
-  
+
   override val munitTimeout = scala.concurrent.duration.Duration(300, "s")
-  implicit val myfont : FontConfiguration = font("Hasklig")
+  implicit val myfont: FontConfiguration = font("Hasklig")
 
   def readFrameFromClasspath(s: String) =
     CsvParser
@@ -26,12 +26,11 @@ class SaddlePlotSpec extends munit.FunSuite {
       .toOption
       .get
 
-      
   test("plot gallery") {
     {
       // val evec =
-        // readFrameFromClasspath("/evec.csv")
-          // .mapValues(ScalarTagDouble.parse)
+      // readFrameFromClasspath("/evec.csv")
+      // .mapValues(ScalarTagDouble.parse)
       val rotated =
         readFrameFromClasspath("/rotated.csv").mapValues(ScalarTagDouble.parse)
       val data = readFrameFromClasspath("/data.csv")
@@ -47,55 +46,59 @@ class SaddlePlotSpec extends munit.FunSuite {
         .mapValues(ScalarTagDouble.parse)
         .mapValues(x => x * x)
 
-
       val data2 = data.addCol(spec, "spec", InnerJoin)
 
       val scree = xyplot(
         indexed(eval.firstCol("x").toVec.toSeq.sorted.reverse) -> line()
       )(
-        par(xAxisMargin = 0,
-        xlab = "Order",
-        ylab = "Eval",
-        main = "Scree")
+        par
+          .withXAxisMargin(0)
+          .withXLab("Order")
+          .withYLab("Eval")
+          .withMain("Scree")
       )
 
       val hist1 = xyplot(
         HistogramData(rotated.firstCol("PC1").toVec.toSeq, 10) -> bar()
       )(
-       par( xlab = "PC1",
-        ylab = "freq.",
-        main = "Loading distribution",
-        ylim = Some((0d, Double.NaN)))
+        par
+          .withXLab("PC1")
+          .withYLab("freq.")
+          .withMain("Loading distribution")
+          .withYLim(Some((0d, Double.NaN)))
       )
 
       val bar1 = barplotVertical(
         Series("a" -> (-2d), "b" -> (-1d), "c" -> 0d, "d" -> 1d, "e" -> 2d),
         color = RedBlue(-2, 2)
-      )(par())
+      )(par)
       val bar2 = barplotHorizontal(
         Series("a" -> (-2d), "b" -> (-1d), "c" -> 0d, "d" -> 1d, "e" -> 2d)
-      )(par())
+      )(par)
 
       val density1 = xyplot(
         density(rotated.firstCol("PC1").toVec.toSeq) -> line(
           stroke = StrokeConf(1 fts)
         )
-      )(par(xlab = "PC1", ylab = "dens.", main = "Loading distribution"))
+      )(par.xlab("PC1").ylab("dens.").main("Loading distribution"))
 
-      val r1 = rasterplotFromFrame(rotated )(par(yLabFontSize = 0.1 fts))
+      val r1 = rasterplotFromFrame(rotated)(par.yLabFontSize(0.1 fts))
 
       val fig0 = xyplot(
         data2.col("Sepal.Length", "Sepal.Width", "spec")
       )(
-        par(extraLegend = spec2Num.toSeq.map(x =>
-          x._1 -> PointLegend(
-            shape = Shape.rectangle(0, 0, 1, 1),
-            color = DiscreteColors(spec2Num.size)(x._2)
+        par
+          .extraLegend(
+            spec2Num.toSeq.map(x =>
+              x._1 -> PointLegend(
+                shape = Shape.rectangle(0, 0, 1, 1),
+                color = DiscreteColors(spec2Num.size)(x._2)
+              )
+            )
           )
-        ),
-        xlab = "Sepal.Length",
-        ylab = "Sepal.Width",
-        main = "Iris data")
+          .xlab("Sepal.Length")
+          .ylab("Sepal.Width")
+          .main("Iris data")
       )
 
       val fig1 = xyplot(
@@ -111,15 +114,18 @@ class SaddlePlotSpec extends munit.FunSuite {
             .toSeq
         )
       )(
-        par(extraLegend = spec2Num.toSeq.map(x =>
-          x._1 -> PointLegend(
-            shape = Shape.rectangle(0, 0, 1, 1),
-            color = DiscreteColors(spec2Num.size)(x._2)
+        par
+          .extraLegend(
+            spec2Num.toSeq.map(x =>
+              x._1 -> PointLegend(
+                shape = Shape.rectangle(0, 0, 1, 1),
+                color = DiscreteColors(spec2Num.size)(x._2)
+              )
+            )
           )
-        ),
-        xlab = "PC1",
-        ylab = "PC2",
-        main = "PC1 vs PC2")
+          .xlab("PC1")
+          .ylab("PC2")
+          .main("PC1 vs PC2")
       )
 
       // println(pdfToFile(fig1.build))
@@ -131,40 +137,42 @@ class SaddlePlotSpec extends munit.FunSuite {
             .toVec
             .toSeq
         )
-      )(par())
+      )(par)
 
       val fig2 = xyplot(
         Frame((rotated.col("PC2", "PC3").toColSeq :+ ("spec" -> spec)): _*)
       )(
-        par(extraLegend = spec2Num.toSeq.map(x =>
-          x._1 -> PointLegend(
-            shape = Shape.rectangle(0, 0, 1, 1),
-            color = DiscreteColors(spec2Num.size)(x._2)
+        par
+          .extraLegend(
+            spec2Num.toSeq.map(x =>
+              x._1 -> PointLegend(
+                shape = Shape.rectangle(0, 0, 1, 1),
+                color = DiscreteColors(spec2Num.size)(x._2)
+              )
+            )
           )
-        ),
-        xlab = "PC2",
-        ylab = "PC3",
-        main = "PC2 vs PC3")
+          .xlab("PC2")
+          .ylab("PC3")
+          .main("PC2 vs PC3")
       )
 
       val pc3 = rotated.firstCol("PC3").toVec.toSeq
       val pc2 = rotated.firstCol("PC2").toVec.toSeq
 
-      val fig3 = binnedboxplot(pc3, pc2)(par(xlab = "PC2", ylab = "PC3"))
+      val fig3 = binnedboxplot(pc3, pc2)(par.xlab("PC2").ylab("PC3"))
 
       val fig4 = boxplot(
         data2
           .firstCol("Sepal.Length")
           .toVec
           .toSeq -> data2.firstCol("Sepal.Width").toVec.toSeq,
-          xnames = Seq("Sepal Length", "Sepal Width"),
-      )(par(
-        ylab = "Sepal Length",
-        xLabelRotation = -0.3)
-      )
+        xnames = Seq("Sepal Length", "Sepal Width")
+      )(par.ylab("Sepal Length").xLabelRotation(-0.3))
 
       val boxpl2 =
-        boxplotFromLabels(List("a" -> 0d, "a" -> 1d, "b" -> 3d, "b" -> 4d))(par())
+        boxplotFromLabels(List("a" -> 0d, "a" -> 1d, "b" -> 3d, "b" -> 4d))(
+          par
+        )
 
       val contour = contourplot(
         xlim = -2d -> 2d,
@@ -172,11 +180,11 @@ class SaddlePlotSpec extends munit.FunSuite {
         f = (x, y) => (x * x + y * y - 0.5 + x * y),
         n = 50,
         levels = 10
-      )(par())
+      )(par)
 
       val density2 = xyplot(
         density(rotated.firstCol("PC1").toVec.toSeq) -> line()
-      )(par(xlab = "PC1", ylab = "dens.", main = "Loading distribution"))
+      )(par.xlab("PC1").ylab("dens.").main("Loading distribution"))
 
       val empty2 =
         xyplotarea(
@@ -196,29 +204,32 @@ class SaddlePlotSpec extends munit.FunSuite {
         rasterFromSeq(rs, 10, 10),
         valueText = true,
         valueColor = Color.white,
-        valueFontSize = 0.3 fts,
-      )(par(
-        xLabFontSize = 0.5 fts,
-        yLabFontSize = 0.1 fts,
-        xnames = Seq(0.0 -> "sdfsf", 1.0 -> "dsfds adfdf adfs f"),
-        ynames = Seq(0.0 -> "dsfsdf", 2.0 -> "dfsdf asdfdf asdfds sdfadsf"),
-        main = "1main 2main main3 m4ain m5ain m6ain 7mian 8mian 9main ",
-        mainFontSize = 1 fts
-      ))
+        valueFontSize = 0.3 fts
+      )(
+        par
+          .xLabFontSize(0.5 fts)
+          .yLabFontSize(0.1 fts)
+          .xnames(Seq(0.0 -> "sdfsf", 1.0 -> "dsfds adfdf adfs f"))
+          .ynames(Seq(0.0 -> "dsfsdf", 2.0 -> "dfsdf asdfdf asdfds sdfadsf"))
+          .main("1main 2main main3 m4ain m5ain m6ain 7mian 8mian 9main ")
+          .mainFontSize(1 fts)
+      )
 
       val p6b = rasterplot(
         rasterFromSeq(rs, 10, 10),
         valueText = true,
         colormap = LogHeatMapColors(),
         valueColor = Color.white,
-        valueFontSize = 0.3 fts)(par(
-        xLabFontSize = 0.5 fts,
-        yLabFontSize = 0.1 fts,
-        xnames = Seq(0.0 -> "sdfsf", 1.0 -> "dsfds adfdf adfs f"),
-        ynames = Seq(0.0 -> "dsfsdf", 2.0 -> "dfsdf asdfdf asdfds sdfadsf"),
-        main = "1main 2main main3 m4ain m5ain m6ain 7mian 8mian 9main ",
-        mainFontSize = 1 fts
-      ))
+        valueFontSize = 0.3 fts
+      )(
+        par
+          .xLabFontSize(0.5 fts)
+          .yLabFontSize(0.1 fts)
+          .xnames(Seq(0.0 -> "sdfsf", 1.0 -> "dsfds adfdf adfs f"))
+          .ynames(Seq(0.0 -> "dsfsdf", 2.0 -> "dfsdf asdfdf asdfds sdfadsf"))
+          .main("1main 2main main3 m4ain m5ain m6ain 7mian 8mian 9main ")
+          .mainFontSize(1 fts)
+      )
 
       val barplot2 = {
         val dataraw: IndexedSeq[(Double, Double, Double, Double)] =
@@ -239,7 +250,7 @@ class SaddlePlotSpec extends munit.FunSuite {
             (3, "green", Color.green)
           ),
           relative = true
-        )(par())
+        )(par)
       }
 
       val colortest = xyplot(
@@ -284,19 +295,19 @@ class SaddlePlotSpec extends munit.FunSuite {
             1e6 -> 1e6,
             1e7 -> 1e7
           ) -> point()
-        )(par(ylog = true, xlog = true))
+        )(par.ylog(true).xlog(true))
       val logaxistest2 =
         xyplot(
           Seq(1.123e-6 -> 1e-6, 1e-5 -> 1e-5, 1e-4 -> 3.132e-4) -> point()
-        )(par(ylog = true, xlog = true))
+        )(par.ylog(true).xlog(true))
       val logaxistest3 =
         xyplot(
           Seq(0.92 -> 1d, 10d -> 10d, 1e2 -> 100d, 1e3 -> 1324d) -> point()
-        )(par(ylog = true, xlog = true))
+        )(par.ylog(true).xlog(true))
       val logaxistest4 =
         xyplot(
           Seq(0.92 -> 1d, 10d -> 10d, 1e2 -> 100d, 1e3 -> 1324d) -> point()
-        )(par(ylog = true, xlog = true, xlim = Some(0.5 -> 1500d)))
+        )(par.ylog(true).xlog(true).xlim(Some(0.5 -> 1500d)))
 
       val hexbinTest = {
         val binning =
@@ -316,46 +327,53 @@ class SaddlePlotSpec extends munit.FunSuite {
             size = 1
           )
         )(
-          par(extraLegend = spec2Num.toSeq.map(x =>
-            x._1 -> PointLegend(
-              shape = Shape.rectangle(0, 0, 1, 1),
-              color = DiscreteColors(spec2Num.size)(x._2)
+          par
+            .extraLegend(
+              spec2Num.toSeq.map(x =>
+                x._1 -> PointLegend(
+                  shape = Shape.rectangle(0, 0, 1, 1),
+                  color = DiscreteColors(spec2Num.size)(x._2)
+                )
+              )
             )
-          ),
-          xlab = "PC1",
-          ylab = "PC2",
-          main = "PC1 vs PC2")
+            .xlab("PC1")
+            .ylab("PC2")
+            main ("PC1 vs PC2")
         )
       }
 
-       val rotations = fitToBounds(sequence(
-      List(ShapeElem(Shape.circle(0.01d)).translate(0,0),
-      ShapeElem(Shape.circle(0.01d)).translate(0,1),
-      ShapeElem(Shape.circle(0.01d)).translate(1,1),
-      ShapeElem(Shape.circle(0.01d)).translate(1,0),
-      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.1),
-      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.2),
-      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.3),
-      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.4),
-      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.5),
-      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.6),
-      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.7),
-      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.8),
-      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.9),
-      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(1),
-      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.1,0,0.75),
-      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.2,0,0.75),
-      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.3,0,0.75),
-      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.4,0,0.75),
-      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.5,0,0.75),
-      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.6,0,0.75),
-      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.7,0,0.75),
-      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.8,0,0.75),
-      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(0.9,0,0.75),
-      ShapeElem(Shape.circle(0.01d)).translate(0,1).rotate(1,0,0.75)
-      ),
-      FreeLayout
-    ),Bounds(0,0,100,100))
+      val rotations = fitToBounds(
+        sequence(
+          List(
+            ShapeElem(Shape.circle(0.01d)).translate(0, 0),
+            ShapeElem(Shape.circle(0.01d)).translate(0, 1),
+            ShapeElem(Shape.circle(0.01d)).translate(1, 1),
+            ShapeElem(Shape.circle(0.01d)).translate(1, 0),
+            ShapeElem(Shape.circle(0.01d)).translate(0, 1).rotate(0.1),
+            ShapeElem(Shape.circle(0.01d)).translate(0, 1).rotate(0.2),
+            ShapeElem(Shape.circle(0.01d)).translate(0, 1).rotate(0.3),
+            ShapeElem(Shape.circle(0.01d)).translate(0, 1).rotate(0.4),
+            ShapeElem(Shape.circle(0.01d)).translate(0, 1).rotate(0.5),
+            ShapeElem(Shape.circle(0.01d)).translate(0, 1).rotate(0.6),
+            ShapeElem(Shape.circle(0.01d)).translate(0, 1).rotate(0.7),
+            ShapeElem(Shape.circle(0.01d)).translate(0, 1).rotate(0.8),
+            ShapeElem(Shape.circle(0.01d)).translate(0, 1).rotate(0.9),
+            ShapeElem(Shape.circle(0.01d)).translate(0, 1).rotate(1),
+            ShapeElem(Shape.circle(0.01d)).translate(0, 1).rotate(0.1, 0, 0.75),
+            ShapeElem(Shape.circle(0.01d)).translate(0, 1).rotate(0.2, 0, 0.75),
+            ShapeElem(Shape.circle(0.01d)).translate(0, 1).rotate(0.3, 0, 0.75),
+            ShapeElem(Shape.circle(0.01d)).translate(0, 1).rotate(0.4, 0, 0.75),
+            ShapeElem(Shape.circle(0.01d)).translate(0, 1).rotate(0.5, 0, 0.75),
+            ShapeElem(Shape.circle(0.01d)).translate(0, 1).rotate(0.6, 0, 0.75),
+            ShapeElem(Shape.circle(0.01d)).translate(0, 1).rotate(0.7, 0, 0.75),
+            ShapeElem(Shape.circle(0.01d)).translate(0, 1).rotate(0.8, 0, 0.75),
+            ShapeElem(Shape.circle(0.01d)).translate(0, 1).rotate(0.9, 0, 0.75),
+            ShapeElem(Shape.circle(0.01d)).translate(0, 1).rotate(1, 0, 0.75)
+          ),
+          FreeLayout
+        ),
+        Bounds(0, 0, 100, 100)
+      )
 
       val gallery = group(
         group(
@@ -381,7 +399,7 @@ class SaddlePlotSpec extends munit.FunSuite {
         p6,
         p6b,
         empty2,
-        xyplot(Seq(0d -> 0d, 1d -> 1d, 2d -> 2d))(par()),
+        xyplot(Seq(0d -> 0d, 1d -> 1d, 2d -> 2d))(par),
         r1,
         hist1,
         contour,

@@ -31,17 +31,17 @@ object nsplcanvastest {
         InLegend("dsf")
       )
     )(
-      par(
-        ylab = "x",
-        xlab = "index",
-        main =
-          "main\nsdfsd\nasdfsdfd fasd fds fds fds fds fda fdsa fd d ds fds ds df asdf asdf sad sd fsad fsda sda fdsaf "
+      par.
+        ylab ("x")
+        .xlab ("index")
+        .main(
+          "main\nsdfsd\nasdfsdfd fasd fds fds fds fds fda fdsa fd d ds fds ds df asdf asdf sad sd fsad fsda sda fdsaf ")
       )
-    )
+    
 
     val p2 = xyplot(
       density(x) -> line()
-    )(par(xlab = "x", ylab = "dens."))
+    )(par.xlab("x").ylab("dens"))
     val p3 = xyplot(
       z2 -> z3 -> point(size = 1d, color = Color(200, 200, 200, 255)),
       density2d(z2 zip z3, n = 100, levels = 10)
@@ -54,11 +54,11 @@ object nsplcanvastest {
       )
     )()
 
-    val p5 = binnedboxplot(x, y)(par(xlab = "PC2", ylab = "PC3"))
+    val p5 = binnedboxplot(x, y)(par.xlab("PC2").ylab ("PC3"))
 
     val p6 = rasterplot(
       rasterFromStream(z3.iterator, 30, 30, MinMaxImpl(0.0, 1.0))
-    )(par(xLabFontSize = 0.5 fts, yLabFontSize = 0.5 fts))
+    )(par.xLabFontSize(0.5 fts).yLabFontSize(0.5 fts))
 
     val text: Elems7[
       ShapeElem,

@@ -2,6 +2,7 @@ package org.nspl
 
 /* */
 object Build {
+
   def apply[A](f: A)(pf: PartialFunction[(Option[A], Event), A]): Build[A] = {
     case x => pf.applyOrElse(x, (x: (Option[A], Event)) => x._1.getOrElse(f))
   }

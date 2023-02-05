@@ -87,6 +87,8 @@ package object nspl
     with Renderers3D
     with Events {
 
+  val par = Parameters()
+
   /** A build describes how to create a new instance of a type from an event and
     * an old instance of that type
     */
