@@ -1,4 +1,4 @@
-scalaVersion := "2.13.8"
+scalaVersion := "2.13.10"
 
 ThisBuild / versionScheme := Some("early-semver")
 
@@ -24,8 +24,8 @@ inThisBuild(
 )
 
 lazy val commonSettings = Seq(
-  scalaVersion := "2.13.8",
-  crossScalaVersions := Seq("2.13.8", "3.2.1"),
+  scalaVersion := "2.13.10",
+  crossScalaVersions := Seq("2.13.10", "3.2.2"),
   javacOptions ++= Seq("-Xdoclint:none"),
   scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((3, _)) =>
@@ -171,7 +171,7 @@ lazy val saddle = (project in file("saddle"))
   .settings(
     name := "nspl-saddle",
     libraryDependencies ++= Seq(
-      "io.github.pityka" %% "saddle-core" % "3.4.0",
+      "io.github.pityka" %% "saddle-core" % "3.5.0",
       "org.scalameta" %% "munit" % "1.0.0-M7" % Test
     )
   )
