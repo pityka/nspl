@@ -9,7 +9,6 @@ case class InLegend(text: String) extends LegendConfig
 /* Factory methods for common plots. */
 private[nspl] trait SimplePlots {
 
-
   /** Factory method to create the scene graph of a plot in a Cartesian
     * coordinate system.
     *
@@ -353,11 +352,10 @@ private[nspl] trait SimplePlots {
       boxColor: Colormap = Color.gray4,
       xgrid: Boolean = false
   )(parameters: Parameters) = {
-    val overriden = parameters.copy(
-      xgrid = xgrid,
-      xlim = Some(dim2.min -> dim2.max),
-      ylim = Some(dim1.min -> dim1.max)
-    )
+    val overriden = parameters
+      .xgrid(xgrid)
+      .xlim(Some(dim2.min -> dim2.max))
+      .ylim(Some(dim1.min -> dim1.max))
 
     xyplot(
       boxplotData(
