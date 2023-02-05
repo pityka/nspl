@@ -20,7 +20,7 @@ object saddle {
         fillCol = 0
       )
     )(
-      parameters.copy(yLabFontSize =
+      parameters.yLabFontSize(
         yLabFontSize.getOrElse(
           math.min(2d, parameters.yHeight.value / series.length) fts
         )
@@ -39,16 +39,19 @@ object saddle {
         .map(x => x._1 -> x._2.toDouble)
         .map(_.swap) -> bar(horizontal = false, fill = color, fillCol = 1)
     )(
-      parameters.copy(
-        xLabFontSize = xLabFontSize.getOrElse(
-          math.min(2d, parameters.xWidth.value / series.length) fts
-        ),
-        xnames = series.toSeq
-          .map(_._1.toString)
-          .zipWithIndex
-          .map(x => x._1 -> x._2.toDouble)
-          .map(_.swap)
-      )
+      parameters
+        .xLabFontSize(
+          xLabFontSize.getOrElse(
+            math.min(2d, parameters.xWidth.value / series.length) fts
+          )
+        )
+        .xnames(
+          series.toSeq
+            .map(_._1.toString)
+            .zipWithIndex
+            .map(x => x._1 -> x._2.toDouble)
+            .map(_.swap)
+        )
     )
 
   def rasterplotFromFrame[RX, CX, F: FC](
@@ -71,26 +74,33 @@ object saddle {
       zlim = zlim,
       transparentPixels = transparentPixels
     )(
-      parameters.copy(
-        xLabFontSize = xLabFontSize.getOrElse(
-          math.min(2d, parameters.xWidth.value / dataFrame.numCols) fts
-        ),
-        yLabFontSize = yLabFontSize.getOrElse(
-          math.min(2d, parameters.yHeight.value / dataFrame.numRows) fts
-        ),
-        xnames = dataFrame.colIx.toSeq
-          .map(_.toString)
-          .zipWithIndex
-          .map(x => x._2.toDouble + 0.5 -> x._1),
-        ynames = dataFrame.rowIx.toSeq
-          .map(_.toString)
-          .zipWithIndex
-          .map(x => x._2.toDouble + 0.5 -> x._1),
-        yNumTicks = 0,
-        xNumTicks = 0,
-        xTickLength = 0d fts,
-        yTickLength = 0d fts
-      )
+      parameters
+        .xLabFontSize(
+          xLabFontSize.getOrElse(
+            math.min(2d, parameters.xWidth.value / dataFrame.numCols) fts
+          )
+        )
+        .yLabFontSize(
+          yLabFontSize.getOrElse(
+            math.min(2d, parameters.yHeight.value / dataFrame.numRows) fts
+          )
+        )
+        .xnames(
+          dataFrame.colIx.toSeq
+            .map(_.toString)
+            .zipWithIndex
+            .map(x => x._2.toDouble + 0.5 -> x._1)
+        )
+        .ynames(
+          dataFrame.rowIx.toSeq
+            .map(_.toString)
+            .zipWithIndex
+            .map(x => x._2.toDouble + 0.5 -> x._1)
+        )
+        .yNumTicks(0)
+        .xNumTicks(0)
+        .xTickLength(0d fts)
+        .yTickLength(0d fts)
     )
 
   def asRaster(mat: Mat[Double]): DataMatrix =
