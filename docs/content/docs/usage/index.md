@@ -117,10 +117,7 @@ import scala.util.Random.nextDouble
 val denseMatrix = new DataMatrix(
             rows = Array.fill(12)(nextDouble()), numCols = 4, numRows = 3)
   
-val plot3 = rasterplot(denseMatrix)(par(
-            xlab="x axis label",
-            ylab="y axis label"
-          ))
+val plot3 = rasterplot(denseMatrix)(par.withXLab("x axis label").withYLab("y axis label"))
 
 renderToByteArray(plot3.build, width=2000)
 ```
@@ -142,7 +139,7 @@ val randomData1 = 0 until 10 map (_ => nextDouble())
 val randomData2 = 0 until 10 map (_ => nextDouble())
 val randomData = randomData1 zip randomData2
   
-val plotBx = boxplot(randomData)(par())
+val plotBx = boxplot(randomData)(par)
 
 renderToByteArray(plotBx.build, width=2000)
 ```

@@ -57,7 +57,7 @@ import org.scalajs.dom.MouseEvent
 def someData() = 
   0 until 100 map (_ => nextDouble() -> nextDouble())
 
-def makePlot() = xyplot(someData())(par())
+def makePlot() = xyplot(someData())(par)
 
 val logDiv = document.getElementById("log")
 val button = document.getElementById("button")
@@ -65,7 +65,7 @@ val button = document.getElementById("button")
 
 val (canvas, updatePlotCallback) = render(makePlot(),
                              width = 600, height = 600,
-                             click = { clickedPlotElement => 
+                             click = { _ => 
                                 logDiv.textContent = "Plot clicked"
                               }
                             )

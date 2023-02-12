@@ -11,7 +11,7 @@ package org
   *     where a row is an indexed sequence of doubles. Each row has the same
   *     length in a DataSource. A DataSource may be lazy (e.g. load data from
   *     disk on demand).
-  *   - [[org.nspl.par.apply]] describe settings governing most plots (axis
+  *   - [[org.nspl.Parameters]] holds common settings governing most plots (axis
   *     labels, plot titles, ticks, etc),
   *   - [[org.nspl.awtrenderer]] for methods to render the plot with Java AWT
   *     into PNG, JPG, PDF or a Java Graphics2D context,

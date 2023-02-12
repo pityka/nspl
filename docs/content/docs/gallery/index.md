@@ -142,10 +142,10 @@ val data2 = data.addCol(spec, "spec", InnerJoin)
       val bar1 = barplotVertical(
         Series("a" -> (-2d), "b" -> (-1d), "c" -> 0d, "d" -> 1d, "e" -> 2d),
         color = RedBlue(-2, 2)
-      )(par())
+      )(par)
       val bar2 = barplotHorizontal(
         Series("a" -> (-2d), "b" -> (-1d), "c" -> 0d, "d" -> 1d, "e" -> 2d)
-      )(par())
+      )(par)
 
       renderToByteArray((group(bar1,bar2,TableLayout(2))).build,width=2000)
 ```
@@ -158,7 +158,7 @@ val data2 = data.addCol(spec, "spec", InnerJoin)
         density(rotated.firstCol("PC1").toVec.toSeq) -> line(
           stroke = StrokeConf(1 fts)
         )
-      )(par(xlab = "PC1", ylab = "dens.", main = "Loading distribution"))
+      )(par.withXLab("PC1").withYLab("dens.").withMain("Loading distribution"))
 
       renderToByteArray(density1.build,width=2000)
 
@@ -170,7 +170,7 @@ val data2 = data.addCol(spec, "spec", InnerJoin)
       import org.nspl.saddle.rasterplotFromFrame
       val raster1 = rasterplotFromFrame(
         rotated.rowAt(0 -> 10), 
-        yLabFontSize = Some(0.5 fts))(par())
+        yLabFontSize = Some(0.5 fts))(par)
 
       renderToByteArray(raster1.build,width=2000)
 ```
@@ -186,7 +186,7 @@ val data2 = data.addCol(spec, "spec", InnerJoin)
             .toVec
             .toSeq
         )
-      )(par())
+      )(par)
 
       renderToByteArray(densmap.build,width=2000)
 ```
@@ -201,11 +201,10 @@ val data2 = data.addCol(spec, "spec", InnerJoin)
           .toSeq -> data2.firstCol("Sepal.Width").toVec.toSeq,
         xnames = Seq("Sepal Length", "Sepal Width"),
         
-      )(par(ylab = "Sepal Length",
-        xLabelRotation = -0.3))
+      )(par.withYLab("Sepal Length").withXLabelRotation(-0.3))
 
       val boxpl2 =
-        boxplotFromLabels(List("a" -> 0d, "a" -> 1d, "b" -> 3d, "b" -> 4d))(par())
+        boxplotFromLabels(List("a" -> 0d, "a" -> 1d, "b" -> 3d, "b" -> 4d))(par)
 
       renderToByteArray(group(fig4,boxpl2,TableLayout(2)).build,width=2000)
 ```      
@@ -232,7 +231,7 @@ val data2 = data.addCol(spec, "spec", InnerJoin)
             1e6 -> 1e6,
             1e7 -> 1e7
           ) -> point()
-        )(par(ylog = true, xlog = true))
+        )(par.withYLog(true).withXLog(true))
      renderToByteArray(logaxis.build,width=2000)
 ```     
 

@@ -4,7 +4,6 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import mdoc._
 import scala.meta.inputs.Position
-import org.nspl.awtrenderer._
 
 class BytesModifier extends PostModifier {
   val name = "bytes"
