@@ -32,14 +32,14 @@ val sparseMatrix =
   )
 
 val plot1 = rasterplot(sparseMatrix,
-          )(par())
+          )(par)
 
 
 val denseMatrix = new DataMatrix(
             rows = Array.fill(12)(nextDouble()), numCols = 4, numRows = 3)
   
 val plot2 = rasterplot(denseMatrix,
-          )(par())
+          )(par)
 
 val complexPlot = group(plot1,plot2,TableLayout(2))
 

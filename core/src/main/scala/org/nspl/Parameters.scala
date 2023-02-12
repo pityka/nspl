@@ -1,6 +1,23 @@
 package org.nspl
 
-/* Common settings, configurations, parameters of plots. */
+/** Class which holds common settings of plots.
+  *
+  * This class is immmutable.
+  *
+  * The intended use of this class is to call the specialized copy methods on
+  * the default instance in `org.nspl.par` e.g.
+  *
+  * {{{org.nspl.par.withXLog(true).withMain("some text")}}} or equivalently
+  *
+  * {{{org.nspl.par.xlog(true).main("some text")}}}
+  *
+  * For each member of this class there are two copy methods:
+  *
+  *   - One following the naming convention `withX..` e.g. `def
+  *     withXLog(v:Boolean) : Parameters`
+  *   - the other omitting the `with` prefix, e.g. `def xlog(v:Boolean) :
+  *     Parameters`
+  */
 case class Parameters private (
     xlog: Boolean,
     ylog: Boolean,

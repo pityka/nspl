@@ -45,11 +45,9 @@ val someData =
   0 until 100 map (_ => nextDouble() -> nextDouble())
 
 val plot = xyplot(someData)(
-            par(
-              main="Main label", 
-              xlab="x axis label",
-              ylab="y axis label"
-            )
+            par.withMain("Main label")
+            .withXLab("x axis label")
+            .withYLab("y axis label")
           )
 
 renderToByteArray(plot.build, width=2000)
@@ -78,11 +76,10 @@ val someData =
   0 until 100 map (_ => nextDouble() -> nextDouble())
 
 val plot = xyplot(someData)(
-            par(
-              main="Main label", 
-              xlab="x axis label",
-              ylab="y axis label"
-            )
+            par.withMain(
+              "Main label")
+              .withXLab("x axis label")
+              .withYLab("y axis label")            
           )
 
 val (canvas, _) = render(plot, width = 600, height = 600)
