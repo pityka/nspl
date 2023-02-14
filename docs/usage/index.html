@@ -21,7 +21,7 @@ trait DataSource { def iterator: Iterator[Row] } trait Row { def apply(i: Int): 
 <link rel="icon" href="/nspl/favicon.png" type="image/x-icon">
 <link rel="stylesheet" href="/nspl/book.min.82c5dbd23447cee0b4c2aa3ed08ce0961faa40e1fa370eee4f8c9f02e0d46b5f.css" integrity="sha256-gsXb0jRHzuC0wqo&#43;0Izglh&#43;qQOH6Nw7uT4yfAuDUa18=" crossorigin="anonymous">
   <script defer src="/nspl/flexsearch.min.js"></script>
-  <script defer src="/nspl/en.search.min.f9f3e1e504e2d8e547710a33edef6a207dde90e068b8a6d810832a12e0c6bc36.js" integrity="sha256-&#43;fPh5QTi2OVHcQoz7e9qIH3ekOBouKbYEIMqEuDGvDY=" crossorigin="anonymous"></script>
+  <script defer src="/nspl/en.search.min.72ad15eaf272a0214d7ee1fa7fcd015a3f5f98895fcf199b0125c47da2557a7d.js" integrity="sha256-cq0V6vJyoCFNfuH6f80BWj9fmIlfzxmbASXEfaJVen0=" crossorigin="anonymous"></script>
 
   <script defer src="/nspl/sw.min.011b5f154e1d57a76fc75aaed4be4a07813108b2b19df910b069bb242d17785c.js" integrity="sha256-ARtfFU4dV6dvx1qu1L5KB4ExCLKxnfkQsGm7JC0XeFw=" crossorigin="anonymous"></script>
 <!--
@@ -271,12 +271,7 @@ First a data structures is created which describes the plot, then that structure
 <p>The most important method in nspl&rsquo;s API is the <code>xyplot()()</code> method, a factory for descriptions of 2D plots in a Cartesian coordinate system. It takes two parameter lists: the first parameter list is for data sources and data renderers, the second parameter list is for global plot parameters.
 Its signature is roughly:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala"><span style="color:#66d9ef">def</span> xyplot<span style="color:#f92672">[</span><span style="color:#66d9ef">F:</span> <span style="color:#66d9ef">FC</span><span style="color:#f92672">](</span>data<span style="color:#66d9ef">:</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">DataSource</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">List</span><span style="color:#f92672">[</span><span style="color:#66d9ef">DataRenderer</span><span style="color:#f92672">],</span> <span style="color:#a6e22e">LegendConfig</span><span style="color:#f92672">)*)(</span>
-      xlog<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Boolean</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">,</span>
-      ylog<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Boolean</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">,</span>
-      main<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">String</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span><span style="color:#f92672">,</span>
-      xlab<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">String</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span><span style="color:#f92672">,</span>
-      ylab<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">String</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span><span style="color:#f92672">,</span>
-      <span style="color:#f92672">..</span> many other global plot parameters <span style="color:#f92672">..)</span>
+      parameters<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Parameters</span><span style="color:#f92672">)</span>
 </code></pre></div><p>In the first parameter list of <code>xyplot</code> we give one or more data sources each with zero or more <code>DataRenderer</code>.</p>
 <p>A <code>DataRenderer</code> is visual representation of a row or rows e.g. a point, a line segment, a horizontal or vertical bar, a boxplot, etc. A single data source may have multiple data renderes e.g. both a point and a line segment.
 For the full list of data renderers see the methods in the 
@@ -284,6 +279,7 @@ For the full list of data renderers see the methods in the
 
 /api/org/nspl/Renderers.html">Renderers trait</a>.</p>
 <p>The third element of the triple controls whether the data source is included in the legend or not.</p>
+<p>Finally, <code>Parameters</code> is an immutable holder of commont plot settings. There is a default instance of it named <code>par</code> at <code>org.nspl.par</code> . The class defines specialized copy methods following a builder like pattern e.g. one can write <code>par.withXLab(&quot;some label&quot;)</code>.</p>
 <p>In the below example we have a single data source, each row is plotted as a series of consecutive line segments and also as a point. Finally, the data source is included in the legend.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala"><span style="color:#66d9ef">import</span> org.nspl._ 
 <span style="color:#66d9ef">import</span> org.nspl.awtrenderer._ 
@@ -297,8 +293,9 @@ For the full list of data renderers see the methods in the
   <span style="color:#f92672">)</span>
 
 <span style="color:#66d9ef">val</span> plot <span style="color:#66d9ef">=</span> xyplot<span style="color:#f92672">((</span>someData <span style="color:#f92672">,</span> <span style="color:#a6e22e">List</span><span style="color:#f92672">(</span>point<span style="color:#f92672">(),</span>line<span style="color:#f92672">()),</span> <span style="color:#a6e22e">InLegend</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;series 1&#34;</span><span style="color:#f92672">)))(</span>
-            par<span style="color:#f92672">(</span>xlab<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;x axis label&#34;</span><span style="color:#f92672">,</span>
-            ylab<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;y axis label&#34;</span><span style="color:#f92672">)</span>
+             par
+            <span style="color:#f92672">.</span>withXLab<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;x axis label&#34;</span><span style="color:#f92672">)</span>
+            <span style="color:#f92672">.</span>withYLab<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;y axis label&#34;</span><span style="color:#f92672">)</span>
           <span style="color:#f92672">)</span>
 
 renderToByteArray<span style="color:#f92672">(</span>plot<span style="color:#f92672">,</span> width<span style="color:#66d9ef">=</span><span style="color:#ae81ff">2000</span><span style="color:#f92672">)</span>
@@ -320,10 +317,11 @@ renderToByteArray<span style="color:#f92672">(</span>plot<span style="color:#f92
     <span style="color:#f92672">(</span><span style="color:#ae81ff">2</span>d<span style="color:#f92672">,</span> <span style="color:#ae81ff">2</span>d<span style="color:#f92672">,</span> <span style="color:#ae81ff">1</span>d<span style="color:#f92672">),</span>
   <span style="color:#f92672">)</span>
 
-<span style="color:#66d9ef">val</span> plot2 <span style="color:#66d9ef">=</span> rasterplot<span style="color:#f92672">(</span>sparseMatrix<span style="color:#f92672">)(</span>par<span style="color:#f92672">(</span>
-            xlab<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;x axis label&#34;</span><span style="color:#f92672">,</span>
-            ylab<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;y axis label&#34;</span>
-          <span style="color:#f92672">))</span>
+<span style="color:#66d9ef">val</span> plot2 <span style="color:#66d9ef">=</span> rasterplot<span style="color:#f92672">(</span>sparseMatrix<span style="color:#f92672">)(</span>
+            par
+            <span style="color:#f92672">.</span>withXLab<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;x axis label&#34;</span><span style="color:#f92672">)</span>
+            <span style="color:#f92672">.</span>withYLab<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;y axis label&#34;</span><span style="color:#f92672">)</span>
+            <span style="color:#f92672">)</span>
 
 renderToByteArray<span style="color:#f92672">(</span>plot2<span style="color:#f92672">.</span>build<span style="color:#f92672">,</span> width<span style="color:#66d9ef">=</span><span style="color:#ae81ff">2000</span><span style="color:#f92672">)</span>
 </code></pre></div><p>The above code block produces this plot: 
@@ -337,10 +335,7 @@ An example with a dense matrix:</p>
 <span style="color:#66d9ef">val</span> denseMatrix <span style="color:#66d9ef">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">DataMatrix</span><span style="color:#f92672">(</span>
             rows <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">Array</span><span style="color:#f92672">.</span>fill<span style="color:#f92672">(</span><span style="color:#ae81ff">12</span><span style="color:#f92672">)(</span>nextDouble<span style="color:#f92672">()),</span> numCols <span style="color:#66d9ef">=</span> <span style="color:#ae81ff">4</span><span style="color:#f92672">,</span> numRows <span style="color:#66d9ef">=</span> <span style="color:#ae81ff">3</span><span style="color:#f92672">)</span>
   
-<span style="color:#66d9ef">val</span> plot3 <span style="color:#66d9ef">=</span> rasterplot<span style="color:#f92672">(</span>denseMatrix<span style="color:#f92672">)(</span>par<span style="color:#f92672">(</span>
-            xlab<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;x axis label&#34;</span><span style="color:#f92672">,</span>
-            ylab<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;y axis label&#34;</span>
-          <span style="color:#f92672">))</span>
+<span style="color:#66d9ef">val</span> plot3 <span style="color:#66d9ef">=</span> rasterplot<span style="color:#f92672">(</span>denseMatrix<span style="color:#f92672">)(</span>par<span style="color:#f92672">.</span>withXLab<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;x axis label&#34;</span><span style="color:#f92672">).</span>withYLab<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;y axis label&#34;</span><span style="color:#f92672">))</span>
 
 renderToByteArray<span style="color:#f92672">(</span>plot3<span style="color:#f92672">.</span>build<span style="color:#f92672">,</span> width<span style="color:#66d9ef">=</span><span style="color:#ae81ff">2000</span><span style="color:#f92672">)</span>
 </code></pre></div><p>The above code block produces this plot: 
@@ -354,14 +349,13 @@ nspl has helper methods to achieve that summary and has a a <code>boxwhisker()</
 <p>There is also a factory method which does all these in one call:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala"><span style="color:#66d9ef">import</span> org.nspl._ 
 <span style="color:#66d9ef">import</span> org.nspl.awtrenderer._ 
-<span style="color:#66d9ef">import</span> org.nspl.data.DataMatrix 
 <span style="color:#66d9ef">import</span> scala.util.Random.nextDouble
 
 <span style="color:#66d9ef">val</span> randomData1 <span style="color:#66d9ef">=</span> <span style="color:#ae81ff">0</span> until <span style="color:#ae81ff">10</span> map <span style="color:#f92672">(</span><span style="color:#66d9ef">_</span> <span style="color:#66d9ef">=&gt;</span> nextDouble<span style="color:#f92672">())</span>
 <span style="color:#66d9ef">val</span> randomData2 <span style="color:#66d9ef">=</span> <span style="color:#ae81ff">0</span> until <span style="color:#ae81ff">10</span> map <span style="color:#f92672">(</span><span style="color:#66d9ef">_</span> <span style="color:#66d9ef">=&gt;</span> nextDouble<span style="color:#f92672">())</span>
 <span style="color:#66d9ef">val</span> randomData <span style="color:#66d9ef">=</span> randomData1 zip randomData2
   
-<span style="color:#66d9ef">val</span> plotBx <span style="color:#66d9ef">=</span> boxplot<span style="color:#f92672">(</span>randomData<span style="color:#f92672">)(</span>par<span style="color:#f92672">())</span>
+<span style="color:#66d9ef">val</span> plotBx <span style="color:#66d9ef">=</span> boxplot<span style="color:#f92672">(</span>randomData<span style="color:#f92672">)(</span>par<span style="color:#f92672">)</span>
 
 renderToByteArray<span style="color:#f92672">(</span>plotBx<span style="color:#f92672">.</span>build<span style="color:#f92672">,</span> width<span style="color:#66d9ef">=</span><span style="color:#ae81ff">2000</span><span style="color:#f92672">)</span>
 </code></pre></div><p>The above code block produces this plot: 

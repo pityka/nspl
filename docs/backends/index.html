@@ -19,7 +19,7 @@
 <link rel="icon" href="/nspl/favicon.png" type="image/x-icon">
 <link rel="stylesheet" href="/nspl/book.min.82c5dbd23447cee0b4c2aa3ed08ce0961faa40e1fa370eee4f8c9f02e0d46b5f.css" integrity="sha256-gsXb0jRHzuC0wqo&#43;0Izglh&#43;qQOH6Nw7uT4yfAuDUa18=" crossorigin="anonymous">
   <script defer src="/nspl/flexsearch.min.js"></script>
-  <script defer src="/nspl/en.search.min.f9f3e1e504e2d8e547710a33edef6a207dde90e068b8a6d810832a12e0c6bc36.js" integrity="sha256-&#43;fPh5QTi2OVHcQoz7e9qIH3ekOBouKbYEIMqEuDGvDY=" crossorigin="anonymous"></script>
+  <script defer src="/nspl/en.search.min.72ad15eaf272a0214d7ee1fa7fcd015a3f5f98895fcf199b0125c47da2557a7d.js" integrity="sha256-cq0V6vJyoCFNfuH6f80BWj9fmIlfzxmbASXEfaJVen0=" crossorigin="anonymous"></script>
 
   <script defer src="/nspl/sw.min.011b5f154e1d57a76fc75aaed4be4a07813108b2b19df910b069bb242d17785c.js" integrity="sha256-ARtfFU4dV6dvx1qu1L5KB4ExCLKxnfkQsGm7JC0XeFw=" crossorigin="anonymous"></script>
 <!--
@@ -267,7 +267,7 @@ Furthermore the <code>render</code> method returns a 2-tuple: the first element 
 <span style="color:#66d9ef">def</span> someData<span style="color:#f92672">()</span> <span style="color:#66d9ef">=</span> 
   <span style="color:#ae81ff">0</span> until <span style="color:#ae81ff">100</span> map <span style="color:#f92672">(</span><span style="color:#66d9ef">_</span> <span style="color:#66d9ef">=&gt;</span> nextDouble<span style="color:#f92672">()</span> <span style="color:#f92672">-&gt;</span> nextDouble<span style="color:#f92672">())</span>
 
-<span style="color:#66d9ef">def</span> makePlot<span style="color:#f92672">()</span> <span style="color:#66d9ef">=</span> xyplot<span style="color:#f92672">(</span>someData<span style="color:#f92672">())(</span>par<span style="color:#f92672">())</span>
+<span style="color:#66d9ef">def</span> makePlot<span style="color:#f92672">()</span> <span style="color:#66d9ef">=</span> xyplot<span style="color:#f92672">(</span>someData<span style="color:#f92672">())(</span>par<span style="color:#f92672">)</span>
 
 <span style="color:#66d9ef">val</span> logDiv <span style="color:#66d9ef">=</span> document<span style="color:#f92672">.</span>getElementById<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;log&#34;</span><span style="color:#f92672">)</span>
 <span style="color:#66d9ef">val</span> button <span style="color:#66d9ef">=</span> document<span style="color:#f92672">.</span>getElementById<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;button&#34;</span><span style="color:#f92672">)</span>
@@ -275,7 +275,7 @@ Furthermore the <code>render</code> method returns a 2-tuple: the first element 
 
 <span style="color:#66d9ef">val</span> <span style="color:#f92672">(</span>canvas<span style="color:#f92672">,</span> updatePlotCallback<span style="color:#f92672">)</span> <span style="color:#66d9ef">=</span> render<span style="color:#f92672">(</span>makePlot<span style="color:#f92672">(),</span>
                              width <span style="color:#66d9ef">=</span> <span style="color:#ae81ff">600</span><span style="color:#f92672">,</span> height <span style="color:#66d9ef">=</span> <span style="color:#ae81ff">600</span><span style="color:#f92672">,</span>
-                             click <span style="color:#66d9ef">=</span> <span style="color:#f92672">{</span> clickedPlotElement <span style="color:#66d9ef">=&gt;</span> 
+                             click <span style="color:#66d9ef">=</span> <span style="color:#f92672">{</span> <span style="color:#66d9ef">_</span> <span style="color:#66d9ef">=&gt;</span> 
                                 logDiv<span style="color:#f92672">.</span>textContent <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;Plot clicked&#34;</span>
                               <span style="color:#f92672">}</span>
                             <span style="color:#f92672">)</span>
