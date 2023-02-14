@@ -29,7 +29,7 @@ import org.nspl.awtrenderer._
 
 If you don't want to pollute the namespace then you can import only the `FontConfiguration` implicit instance, and prefix every call with its package e.g.
 
-```scala mdoc
+```scala
 import org.nspl
 import org.nspl.awtrenderer.{defaultGlyphMeasurer, defaultAWTFont}
 ```

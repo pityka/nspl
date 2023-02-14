@@ -50,8 +50,6 @@ Or the same with `sequence()`:
 ```scala mdoc:bytes:assets/layout2.png
 import org.nspl._ 
 import org.nspl.awtrenderer._ 
-import org.nspl.data.DataMatrix
-import scala.util.Random.nextDouble
 
 val sequencedPlot = sequence(List(plot1,plot2),TableLayout(2))
 

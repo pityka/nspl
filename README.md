@@ -17,7 +17,7 @@ Renders to
 
 See the documentation website at [https://pityka.github.io/nspl/](https://pityka.github.io/nspl/) .
 
-This library is built for Scala 2.13 and Scala 3.1.
+This library is built for Scala 2.13 and Scala 3.2.
 
 Maven coordinates: 
 

@@ -69,15 +69,14 @@ val data2 = data.addCol(spec, "spec", InnerJoin)
       val fig0 = xyplot(
         data2.col("Sepal.Length", "Sepal.Width", "spec")
       )(
-        par(extraLegend = spec2Num.toSeq.map(x =>
+        par.extraLegend(spec2Num.toSeq.map(x =>
           x._1 -> PointLegend(
             shape = Shape.rectangle(0, 0, 1, 1),
             color = DiscreteColors(spec2Num.size)(x._2)
           )
-        ),
-        xlab = "Sepal.Length",
-        ylab = "Sepal.Width",
-        main = "Iris data")
+        )).xlab("Sepal.Length")
+        .ylab("Sepal.Width")
+        .main("Iris data")
       )
 
       val fig1 = xyplot(
@@ -93,15 +92,17 @@ val data2 = data.addCol(spec, "spec", InnerJoin)
             .toSeq
         )
       )(
-       par(extraLegend = spec2Num.toSeq.map(x =>
-          x._1 -> PointLegend(
-            shape = Shape.rectangle(0, 0, 1, 1),
-            color = DiscreteColors(spec2Num.size)(x._2)
+         par
+          .extraLegend(spec2Num.toSeq.map(x =>
+            x._1 -> PointLegend(
+              shape = Shape.rectangle(0, 0, 1, 1),
+              color = DiscreteColors(spec2Num.size)(x._2)
+            )
+            )
           )
-        ),
-        xlab = "PC1",
-        ylab = "PC2",
-        main = "PC1 vs PC2")
+          .xlab("PC1")
+          .ylab("PC2")
+          .main("PC1 vs PC2")
       )
 
    
@@ -109,11 +110,12 @@ val data2 = data.addCol(spec, "spec", InnerJoin)
       val scree = xyplot(
         indexed(eval.firstCol("x").toVec.toSeq.sorted.reverse) -> line()
       )(
-        par(xAxisMargin = 0,
-        xlab = "Order",
-        ylab = "Eval",
-        main = "Scree"
-      ))
+        par
+         .xAxisMargin(0)
+         .xlab("Order")
+         .ylab("Eval")
+         .main("Scree")
+      )
 
       renderToByteArray(
       group(fig0,fig1,scree,TableLayout(2)).build,
@@ -127,10 +129,11 @@ val data2 = data.addCol(spec, "spec", InnerJoin)
       val hist1 = xyplot(
         HistogramData(rotated.firstCol("PC1").toVec.toSeq, 10) -> bar()
       )(
-        par(xlab = "PC1",
-        ylab = "freq.",
-        main = "Loading distribution",
-        ylim = Some(0d, Double.NaN))
+        par
+          .xlab("PC1")
+          .ylab("freq.")
+          .main("Loading distribution")
+          .ylim(Some(0d -> Double.NaN))
       )
 
       renderToByteArray(hist1.build,width=2000)

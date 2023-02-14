@@ -47,12 +47,7 @@ The most important method in nspl's API is the `xyplot()()` method, a factory fo
 Its signature is roughly:
 ```scala
 def xyplot[F: FC](data: (DataSource, List[DataRenderer], LegendConfig)*)(
-      xlog: Boolean = false,
-      ylog: Boolean = false,
-      main: String = "",
-      xlab: String = "",
-      ylab: String = "",
-      .. many other global plot parameters ..)
+      parameters: Parameters)
 ```
 
 In the first parameter list of `xyplot` we give one or more data sources each with zero or more `DataRenderer`. 
@@ -61,6 +56,8 @@ A `DataRenderer` is visual representation of a row or rows e.g. a point, a line 
 For the full list of data renderers see the methods in the [Renderers trait]({{< baseurl >}}/api/org/nspl/Renderers.html).
 
 The third element of the triple controls whether the data source is included in the legend or not. 
+
+Finally, `Parameters` is an immutable holder of commont plot settings. There is a default instance of it named `par` at `org.nspl.par` . The class defines specialized copy methods following a builder like pattern e.g. one can write `par.withXLab("some label")`.
 
 In the below example we have a single data source, each row is plotted as a series of consecutive line segments and also as a point. Finally, the data source is included in the legend.
 ```scala mdoc:bytes:assets/usage1.png
@@ -76,8 +73,9 @@ val someData =
   )
 
 val plot = xyplot((someData , List(point(),line()), InLegend("series 1")))(
-            par(xlab="x axis label",
-            ylab="y axis label")
+             par
+            .withXLab("x axis label")
+            .withYLab("y axis label")
           )
 
 renderToByteArray(plot, width=2000)
@@ -99,10 +97,11 @@ val sparseMatrix =
     (2d, 2d, 1d),
   )
 
-val plot2 = rasterplot(sparseMatrix)(par(
-            xlab="x axis label",
-            ylab="y axis label"
-          ))
+val plot2 = rasterplot(sparseMatrix)(
+            par
+            .withXLab("x axis label")
+            .withYLab("y axis label")
+            )
 
 renderToByteArray(plot2.build, width=2000)
 ```
@@ -132,7 +131,6 @@ There is also a factory method which does all these in one call:
 ```scala mdoc:bytes:assets/usage_box.png
 import org.nspl._ 
 import org.nspl.awtrenderer._ 
-import org.nspl.data.DataMatrix 
 import scala.util.Random.nextDouble
 
 val randomData1 = 0 until 10 map (_ => nextDouble())

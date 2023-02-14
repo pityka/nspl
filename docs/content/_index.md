@@ -5,7 +5,7 @@ weight: 1
 
 # Scala plotting library
 nspl is a fast and expressive plotting library for the Scala programming language. 
-nspl can create various plots (scatter, line, bar, box etc) and complex figures.
+nspl can create various scientific plots (scatter, line, bar, box etc) and complex figures.
 
 ## Platforms and output formats
 The library supports Scala on the JVM and Scala.js in the browser.
