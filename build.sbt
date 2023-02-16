@@ -110,7 +110,7 @@ lazy val sharedJs = project
   .settings(commonSettings)
   .settings(
     name := "nspl-shared-js",
-    libraryDependencies += ("org.scala-js") %%% "scalajs-dom" % "2.3.0"
+    libraryDependencies += ("org.scala-js") %%% "scalajs-dom" % "2.4.0"
   )
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(coreJS)
