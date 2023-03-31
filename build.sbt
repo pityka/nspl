@@ -171,7 +171,7 @@ lazy val saddle = (project in file("saddle"))
   .settings(
     name := "nspl-saddle",
     libraryDependencies ++= Seq(
-      "io.github.pityka" %% "saddle-core" % "3.5.0",
+      "io.github.pityka" %% "saddle-core" % "4.0.0-M4",
       "org.scalameta" %% "munit" % "1.0.0-M7" % Test
     )
   )

@@ -6,7 +6,6 @@ import org.saddle._
 import org.saddle.order._
 
 import org.saddle.csv._
-import org.saddle.scalar.ScalarTagDouble
 import org.saddle.index.InnerJoin
 
 class SaddlePlotSpec extends munit.FunSuite {
@@ -14,13 +13,10 @@ class SaddlePlotSpec extends munit.FunSuite {
   override val munitTimeout = scala.concurrent.duration.Duration(300, "s")
   implicit val myfont: FontConfiguration = font("Hasklig")
 
-  def readFrameFromClasspath(s: String) =
+  def readFrameFromClasspath[T:ST](s: String) =
     CsvParser
-      .parseSourceWithHeader[String](
-        scala.io.Source
-          .fromInputStream(
-            getClass.getResourceAsStream(s)
-          ),
+      .parseInputStreamWithHeader[T](
+        getClass.getResourceAsStream(s),
         recordSeparator = "\n"
       )
       .toOption
@@ -32,18 +28,16 @@ class SaddlePlotSpec extends munit.FunSuite {
       // readFrameFromClasspath("/evec.csv")
       // .mapValues(ScalarTagDouble.parse)
       val rotated =
-        readFrameFromClasspath("/rotated.csv").mapValues(ScalarTagDouble.parse)
-      val data = readFrameFromClasspath("/data.csv")
-        .mapValues(ScalarTagDouble.parse)
+        readFrameFromClasspath[Double]("/rotated.csv")
+      val data = readFrameFromClasspath[Double]("/data.csv")
         .colAt(Array(0, 1, 2, 3))
 
-      val species = readFrameFromClasspath("/data.csv").colAt(4)
+      val species = readFrameFromClasspath[String]("/data.csv").colAt(4)
       val spec2Num = species.toVec.toSeq.distinct.sorted.zipWithIndex.toMap
       val spec: Series[Int, Double] =
         species.mapValues(spec2Num).mapValues(_.toDouble)
 
-      val eval = readFrameFromClasspath("/sqrteigen.csv")
-        .mapValues(ScalarTagDouble.parse)
+      val eval = readFrameFromClasspath[Double]("/sqrteigen.csv")
         .mapValues(x => x * x)
 
       val data2 = data.addCol(spec, "spec", InnerJoin)
