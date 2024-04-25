@@ -172,7 +172,7 @@ lazy val saddle = (project in file("saddle"))
     name := "nspl-saddle",
     libraryDependencies ++= Seq(
       "io.github.pityka" %% "saddle-core" % "3.5.0",
-      "org.scalameta" %% "munit" % "1.0.0-M11" % Test
+      "org.scalameta" %% "munit" % "1.0.0-RC1" % Test
     )
   )
   .dependsOn(core, awt, scalatagsJvm)
