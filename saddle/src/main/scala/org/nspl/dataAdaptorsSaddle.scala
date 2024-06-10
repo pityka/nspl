@@ -75,13 +75,13 @@ object saddle {
       transparentPixels = transparentPixels
     )(
       parameters
-        .xLabFontSize(
-          xLabFontSize.getOrElse(
+        .xTickFontSize(
+          xTickFontSize.getOrElse(
             math.min(2d, parameters.xWidth.value / dataFrame.numCols) fts
           )
         )
-        .yLabFontSize(
-          yLabFontSize.getOrElse(
+        .yTickFontSize(
+          yTickFon.getOrElse(
             math.min(2d, parameters.yHeight.value / dataFrame.numRows) fts
           )
         )
