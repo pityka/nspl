@@ -1,4 +1,4 @@
-scalaVersion := "2.13.10"
+scalaVersion := "2.13.15"
 
 ThisBuild / versionScheme := Some("early-semver")
 
@@ -24,8 +24,8 @@ inThisBuild(
 )
 
 lazy val commonSettings = Seq(
-  scalaVersion := "2.13.10",
-  crossScalaVersions := Seq("2.13.10", "3.2.2"),
+  scalaVersion := "2.13.15",
+  crossScalaVersions := Seq("2.13.15", "3.2.2"),
   javacOptions ++= Seq("-Xdoclint:none"),
   scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((3, _)) =>
