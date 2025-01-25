@@ -14,5 +14,6 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
+      - uses: sbt/setup-sbt@v1          
       - run: sbt -J-Xmx3000m +compile saddle/test versionPolicyCheck
         
