@@ -127,15 +127,19 @@ private[nspl] object LayoutHelper {
     }
   }
 
-  def alignRowsToAnchors[F: FC](
+  def alignToAnchors[F: FC](
       table: Seq[Seq[Bounds]],
       horizontalGap: RelFontSize,
-      verticalGap: RelFontSize
+      verticalGap: RelFontSize,
+      alignRows: Boolean,
+      alignCols: Boolean
   ) = {
 
     val horiz = HorizontalStack(Anchor, horizontalGap)
     val vertic = VerticalStack(Anchor, verticalGap)
-    val rows = table.map(i => horiz.apply(i))
+
+    val rowTable = if (alignCols) transpose(table) else table
+    val rows = rowTable.map(i => horiz.apply(i))
     val rowOutlines = rows.map(s => outline(s.iterator, anchor = None))
     val rowOutlines_moved = vertic.apply(rowOutlines)
     val yCoordinates = rows zip rowOutlines_moved zip rowOutlines flatMap {
@@ -146,7 +150,8 @@ private[nspl] object LayoutHelper {
         }
     }
 
-    val cols = transpose(table).map(i => vertic.apply(i))
+    val colTable = if (alignRows) transpose(table) else table
+    val cols = colTable.map(i => vertic.apply(i))
     val columnOutlines = cols.map(s => outline(s.iterator, anchor = None))
     val columnOutlines_moved = horiz.apply(columnOutlines)
     val xCoordinates = cols zip columnOutlines_moved zip columnOutlines map {
@@ -156,42 +161,9 @@ private[nspl] object LayoutHelper {
           c.x + diff
         }
     }
+
     (transpose(xCoordinates).flatten zip yCoordinates zip table.flatten).map {
       case ((c, r), b) =>
-        Bounds(c, r, b.w, b.h, b.anchor)
-    }
-  }
-  def alignColumnsToAnchors[F: FC](
-      table: Seq[Seq[Bounds]],
-      horizontalGap: RelFontSize,
-      verticalGap: RelFontSize
-  ) = {
-
-    val horiz = HorizontalStack(Anchor, horizontalGap)
-    val vertic = VerticalStack(Anchor, verticalGap)
-    val cols = table.map(i => vertic.apply(i))
-    val colOutlines = cols.map(s => outline(s.iterator, anchor = None))
-    val colOutlines_moved = horiz.apply(colOutlines)
-    val xCoordinates = cols zip colOutlines_moved zip colOutlines flatMap {
-      case ((col, colbound), colOutline) =>
-        val diff = colbound.x - colOutline.x
-        col.map { c =>
-          c.x + diff
-        }
-    }
-
-    val rows = transpose(table).map(i => horiz.apply(i))
-    val rowOutlines = rows.map(s => outline(s.iterator, anchor = None))
-    val rowOutlines_moved = vertic.apply(rowOutlines)
-    val yCoordinates = rows zip rowOutlines_moved zip rowOutlines map {
-      case ((row, rowbound), rowOutline) =>
-        val diff = rowbound.y - rowOutline.y
-        row.map { r =>
-          r.y + diff
-        }
-    }
-    (transpose(yCoordinates).flatten zip xCoordinates zip table.flatten).map {
-      case ((r, c), b) =>
         Bounds(c, r, b.w, b.h, b.anchor)
     }
   }
@@ -207,10 +179,12 @@ case class TableLayout(
   def apply[F: FC](s: Seq[Bounds]) = {
     if (s.isEmpty) s
     else
-      LayoutHelper.alignRowsToAnchors(
+      LayoutHelper.alignToAnchors(
         s.grouped(columns).toList,
         horizontalGap,
-        verticalGap
+        verticalGap,
+        true,
+        false
       )
   }
 }
@@ -224,10 +198,12 @@ case class ColumnLayout(
   def apply[F: FC](s: Seq[Bounds]) = {
     if (s.isEmpty) s
     else
-      LayoutHelper.alignColumnsToAnchors(
+      LayoutHelper.alignToAnchors(
         s.grouped(numRows).toList,
         horizontalGap,
-        verticalGap
+        verticalGap,
+        false,
+        true
       )
   }
 }
