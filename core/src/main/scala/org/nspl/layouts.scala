@@ -207,3 +207,11 @@ case class ColumnLayout(
       )
   }
 }
+
+/** A Layout which stacks elements on top of each other.*/
+case class StackLayout() extends Layout {
+  def apply[F: FC](s: Seq[Bounds]) = {
+    if (s.isEmpty) s
+    else LayoutHelper.alignToAnchors(Seq(s), 0 fts, 0 fts, false, false)
+  }
+}
