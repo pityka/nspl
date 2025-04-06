@@ -22,11 +22,11 @@ import org.saddle.index.InnerJoin
 
   def readFrameFromClasspath(s: String) =
     CsvParser
-      .parseSourceWithHeader[String](
+      .parseStringWithHeader[String](
         scala.io.Source
           .fromInputStream(
             getClass.getResourceAsStream(s)
-          ),
+          ).mkString,
         recordSeparator = "\n"
       )
       .toOption
@@ -37,13 +37,13 @@ Next read and parse some data:
 
 ```scala mdoc:silent
 
-val evec = readFrameFromClasspath("/evec.csv").mapValues(ScalarTagDouble.parse)
+val evec = readFrameFromClasspath("/evec.csv").mapValues(str => ScalarTagDouble.parse(str.toCharArray, 0, str.size))
 
 val rotated =
-        readFrameFromClasspath("/rotated.csv").mapValues(ScalarTagDouble.parse)
+        readFrameFromClasspath("/rotated.csv").mapValues(str => ScalarTagDouble.parse(str.toCharArray, 0, str.size))
 
 val data = readFrameFromClasspath("/data.csv")
-        .mapValues(ScalarTagDouble.parse)
+        .mapValues(str => ScalarTagDouble.parse(str.toCharArray, 0, str.size))
         .colAt(Array(0, 1, 2, 3))
 
 val species = readFrameFromClasspath("/data.csv").colAt(4)
@@ -53,7 +53,7 @@ val spec: Series[Int, Double] =
         species.mapValues(spec2Num).mapValues(_.toDouble)
 
 val eval = readFrameFromClasspath("/sqrteigen.csv")
-        .mapValues(ScalarTagDouble.parse)
+        .mapValues(str => ScalarTagDouble.parse(str.toCharArray, 0, str.size))
         .mapValues(x => x * x)
 
 val data2 = data.addCol(spec, "spec", InnerJoin)
@@ -173,7 +173,7 @@ val data2 = data.addCol(spec, "spec", InnerJoin)
       import org.nspl.saddle.rasterplotFromFrame
       val raster1 = rasterplotFromFrame(
         rotated.rowAt(0 -> 10), 
-        yLabFontSize = Some(0.5 fts))(par)
+        yTickFontSize = Some(0.5 fts))(par)
 
       renderToByteArray(raster1.build,width=2000)
 ```

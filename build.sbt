@@ -157,15 +157,6 @@ lazy val awt = project
   )
   .dependsOn(core, sharedJvm)
 
-lazy val scalatagsJvm = project
-  .in(file("scalatags-jvm"))
-  .settings(commonSettings)
-  .settings(
-    name := "nspl-scalatags-jvm",
-    libraryDependencies += "com.lihaoyi" %% "scalatags" % "0.11.0"
-  )
-  .dependsOn(core, sharedJvm)
-
 lazy val saddle = (project in file("saddle"))
   .settings(commonSettings)
   .settings(
@@ -175,7 +166,7 @@ lazy val saddle = (project in file("saddle"))
       "org.scalameta" %% "munit" % "1.0.0" % Test
     )
   )
-  .dependsOn(core, awt, scalatagsJvm)
+  .dependsOn(core, awt)
 
 lazy val saddleJS = (project in file("saddle"))
   .settings(commonSettings)
@@ -215,12 +206,12 @@ lazy val docs = project
     commonSettings: _*
   )
   .settings(
-    crossScalaVersions := List("3.2.2"),
+    crossScalaVersions := List("3.3.5"),
     Compile / doc / sources := Seq.empty
   )
   .settings(
     ScalaUnidoc / unidoc / unidocProjectFilter :=
-      inProjects(core, awt, saddle, scalatagsJvm, sharedJs, sharedJvm, canvas),
+      inProjects(core, awt, saddle, sharedJs, sharedJvm, canvas),
     // (inAnyProject -- inProjects(
     //   coreJS,
     //   saddleJS,
@@ -245,8 +236,6 @@ lazy val root = (project in file("."))
   .aggregate(
     saddle,
     saddleJS,
-    scalatagsJvm,
-    scalatagsJs,
     awt,
     canvas,
     sharedJs,
