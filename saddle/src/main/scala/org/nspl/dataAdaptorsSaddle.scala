@@ -62,8 +62,8 @@ object saddle {
       valueFontSize: RelFontSize = 0.4 fts,
       zlim: Option[(Double, Double)] = None,
       transparentPixels: Option[Double] = None,
-      xLabFontSize: Option[RelFontSize] = None,
-      yLabFontSize: Option[RelFontSize] = None
+      xTickFontSize: Option[RelFontSize] = None,
+      yTickFontSize: Option[RelFontSize] = None
   )(parameters: Parameters) =
     rasterplot(
       asRaster(dataFrame.toMat),
@@ -81,7 +81,7 @@ object saddle {
           )
         )
         .yTickFontSize(
-          yTickFon.getOrElse(
+          yTickFontSize.getOrElse(
             math.min(2d, parameters.yHeight.value / dataFrame.numRows) fts
           )
         )

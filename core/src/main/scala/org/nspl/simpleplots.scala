@@ -77,7 +77,7 @@ private[nspl] trait SimplePlots {
         AxisSettings(
           xFac,
           customTicks = xnames,
-          fontSize = xLabFontSize,
+          fontSize = xTickFontSize,
           numTicks = xNumTicks,
           width = xWidth,
           labelRotation = xLabelRotation,
@@ -88,7 +88,7 @@ private[nspl] trait SimplePlots {
         AxisSettings(
           yFac,
           customTicks = ynames,
-          fontSize = yLabFontSize,
+          fontSize = yTickFontSize,
           numTicks = yNumTicks,
           width = yHeight,
           labelRotation = yLabelRotation,

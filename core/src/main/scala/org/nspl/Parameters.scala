@@ -32,6 +32,8 @@ case class Parameters private (
     extraLegend: Seq[(String, LegendElem)],
     xLabFontSize: RelFontSize,
     yLabFontSize: RelFontSize,
+    xTickFontSize: RelFontSize,
+    yTickFontSize: RelFontSize,
     mainFontSize: RelFontSize,
     xNumTicks: Int,
     yNumTicks: Int,
@@ -137,6 +139,16 @@ case class Parameters private (
     *   font size of ylab
     */
   def yLabFontSize(v: RelFontSize): Parameters = copy(yLabFontSize = v)
+
+  /** @param xLabFontSize
+    *   font size of x ticks
+    */
+  def xTickFontSize(v: RelFontSize): Parameters = copy(xTickFontSize = v)
+
+  /** @param yLabFontSize
+    *   font size of y ticks
+    */
+  def yTickFontSize(v: RelFontSize): Parameters = copy(yTickFontSize = v)
 
   /** @param mainFontSize
     *   font size of main
@@ -371,6 +383,12 @@ case class Parameters private (
   /*@param yLabFontSize  font size of ylab */
   def withYLabFontSize(v: RelFontSize) = copy(yLabFontSize = v)
 
+  /*@param xTickFontSize  font size of xlab */
+  def withXTickFontSize(v: RelFontSize) = copy(xTickFontSize = v)
+
+  /*@param yTickFontSize  font size of ylab */
+  def withYTickFontSize(v: RelFontSize) = copy(yTickFontSize = v)
+
   /*@param mainFontSize  font size of main */
   def withMainFontSize(v: RelFontSize) = copy(mainFontSize = v)
 
@@ -554,6 +572,8 @@ object Parameters {
     mainFontSize = 1 fts,
     yLabFontSize = 1 fts,
     xLabFontSize = 1 fts,
+    yTickFontSize = 1 fts,
+    xTickFontSize = 1 fts,
     extraLegend = Nil,
     draw1Line = false,
     ylim = None,
