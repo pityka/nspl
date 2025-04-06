@@ -19,7 +19,7 @@
 <link rel="icon" href="/nspl/favicon.png" type="image/x-icon">
 <link rel="stylesheet" href="/nspl/book.min.82c5dbd23447cee0b4c2aa3ed08ce0961faa40e1fa370eee4f8c9f02e0d46b5f.css" integrity="sha256-gsXb0jRHzuC0wqo&#43;0Izglh&#43;qQOH6Nw7uT4yfAuDUa18=" crossorigin="anonymous">
   <script defer src="/nspl/flexsearch.min.js"></script>
-  <script defer src="/nspl/en.search.min.96ca02a21c68aa051844a793e4abd5e6260c546508f4833ddb39292cb08205d0.js" integrity="sha256-lsoCohxoqgUYRKeT5KvV5iYMVGUI9IM92zkpLLCCBdA=" crossorigin="anonymous"></script>
+  <script defer src="/nspl/en.search.min.131cfb896d1e0dc38d5160f37b8d1baa9a440586be050163ac524d67a4464359.js" integrity="sha256-Exz7iW0eDcONUWDze40bqppEBYa&#43;BQFjrFJNZ6RGQ1k=" crossorigin="anonymous"></script>
 
   <script defer src="/nspl/sw.min.011b5f154e1d57a76fc75aaed4be4a07813108b2b19df910b069bb242d17785c.js" integrity="sha256-ARtfFU4dV6dvx1qu1L5KB4ExCLKxnfkQsGm7JC0XeFw=" crossorigin="anonymous"></script>
 <!--
@@ -232,7 +232,7 @@ https://github.com/alex-shpak/hugo-book
   <a class="anchor" href="#awt-backend-jvm">#</a>
 </h1>
 <p>Add this to your build.sbt:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala">libraryDependencies <span style="color:#f92672">+=</span> <span style="color:#e6db74">&#34;io.github.pityka&#34;</span> <span style="color:#f92672">%%</span> <span style="color:#e6db74">&#34;nspl-awt&#34;</span> <span style="color:#f92672">%</span> <span style="color:#e6db74">&#34;0.10.0&#34;</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala">libraryDependencies <span style="color:#f92672">+=</span> <span style="color:#e6db74">&#34;io.github.pityka&#34;</span> <span style="color:#f92672">%%</span> <span style="color:#e6db74">&#34;nspl-awt&#34;</span> <span style="color:#f92672">%</span> <span style="color:#e6db74">&#34;0.11.0&#34;</span>
 </code></pre></div><p>You can use the methods in <code>org.nspl.awtrenderer</code> to produce plots, e.g.
 <code>pdfToFile</code>, <code>pngToFile</code>, <code>pngToByteArray</code> etc. See this section of the API documentation: 
   <a href="https://pityka.github.io/nspl
@@ -247,7 +247,7 @@ It can deliver smooth framerates up to several thousand data points.
 It also has good visual quality, e.g. on high DPI screens we render to an appropriately oversized raster.</p>
 <p>The rendered plot receives and reacts to mouse events which makes it suitable for interactive use.</p>
 <p>Add this to your build.sbt:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala">libraryDependencies <span style="color:#f92672">+=</span> <span style="color:#e6db74">&#34;io.github.pityka&#34;</span> <span style="color:#f92672">%%%</span> <span style="color:#e6db74">&#34;nspl-canvas-js&#34;</span> <span style="color:#f92672">%</span> <span style="color:#e6db74">&#34;0.10.0&#34;</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala">libraryDependencies <span style="color:#f92672">+=</span> <span style="color:#e6db74">&#34;io.github.pityka&#34;</span> <span style="color:#f92672">%%%</span> <span style="color:#e6db74">&#34;nspl-canvas-js&#34;</span> <span style="color:#f92672">%</span> <span style="color:#e6db74">&#34;0.11.0&#34;</span>
 </code></pre></div><p>You can use the <code>org.nspl.canvasrenderer.render</code> method to create a new canvas which you can then add to your DOM tree.</p>
 <h2 id="interactive-use-callbacks">
   Interactive use (callbacks)
@@ -296,9 +296,9 @@ node<span style="color:#f92672">.</span>appendChild<span style="color:#f92672">(
 <p>The JVM and Scala.js scalatags backends work similarly: you can use the <code>org.nspl.scalatagrenderer.renderToScalaTag</code> method to turn the nspl renderable element into a ScalaTag tree.</p>
 <p>Add one of these to your build.sbt:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:2;-o-tab-size:2;tab-size:2"><code class="language-scala" data-lang="scala"><span style="color:#75715e">// for scala.js
-</span><span style="color:#75715e"></span>libraryDependencies <span style="color:#f92672">+=</span> <span style="color:#e6db74">&#34;io.github.pityka&#34;</span> <span style="color:#f92672">%%%</span> <span style="color:#e6db74">&#34;nspl-scalatags-js&#34;</span> <span style="color:#f92672">%</span> <span style="color:#e6db74">&#34;0.10.0&#34;</span>
+</span><span style="color:#75715e"></span>libraryDependencies <span style="color:#f92672">+=</span> <span style="color:#e6db74">&#34;io.github.pityka&#34;</span> <span style="color:#f92672">%%%</span> <span style="color:#e6db74">&#34;nspl-scalatags-js&#34;</span> <span style="color:#f92672">%</span> <span style="color:#e6db74">&#34;0.11.0&#34;</span>
 <span style="color:#75715e">// or for the jvm
-</span><span style="color:#75715e"></span>libraryDependencies <span style="color:#f92672">+=</span> <span style="color:#e6db74">&#34;io.github.pityka&#34;</span> <span style="color:#f92672">%%</span> <span style="color:#e6db74">&#34;nspl-scalatags-jvm&#34;</span> <span style="color:#f92672">%</span> <span style="color:#e6db74">&#34;0.10.0&#34;</span>
+</span><span style="color:#75715e"></span>libraryDependencies <span style="color:#f92672">+=</span> <span style="color:#e6db74">&#34;io.github.pityka&#34;</span> <span style="color:#f92672">%%</span> <span style="color:#e6db74">&#34;nspl-scalatags-jvm&#34;</span> <span style="color:#f92672">%</span> <span style="color:#e6db74">&#34;0.11.0&#34;</span>
 </code></pre></div><script type="text/javascript" src="index.md.js" defer></script>
 <script type="text/javascript" src="mdoc.js" defer></script>
 </article>
