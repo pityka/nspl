@@ -57,7 +57,7 @@ Both group() and sequence() take multiple arguments and the last argument is an 
       <guid>https://pityka.github.io/nspl/docs/gallery/</guid>
       <description>This page lists a diverse collection of plots. They use the PCA of the classical Iris dataset as demo data. To facilitate data manipulation these examples use the Saddle data frame library.
 First some utilities and imports:
-import org.nspl._ import org.nspl.data.HistogramData import org.nspl.saddle._ import org.nspl.awtrenderer._ import org.saddle._ import org.saddle.order._ import org.saddle.csv._ import org.saddle.scalar.ScalarTagDouble import org.saddle.index.InnerJoin def readFrameFromClasspath(s: String) = CsvParser .parseSourceWithHeader[String]( scala.io.Source .fromInputStream( getClass.getResourceAsStream(s) ), recordSeparator = &amp;#34;\n&amp;#34; ) .toOption .</description>
+import org.nspl._ import org.nspl.data.HistogramData import org.nspl.saddle._ import org.nspl.awtrenderer._ import org.saddle._ import org.saddle.order._ import org.saddle.csv._ import org.saddle.scalar.ScalarTagDouble import org.saddle.index.InnerJoin def readFrameFromClasspath(s: String) = CsvParser .parseStringWithHeader[String]( scala.io.Source .fromInputStream( getClass.getResourceAsStream(s) ).mkString, recordSeparator = &amp;#34;\n&amp;#34; ) .toOption .</description>
     </item>
     
   </channel>
