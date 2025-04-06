@@ -2,7 +2,10 @@ package org.nspl
 
 import Align._
 
-/** A Layout which does nothing. */
+/** A Layout which does nothing, i.e. overlay elements without alignment
+ * 
+ * For a layout which overlay elements aligning to anchors see ZStack
+*/
 object FreeLayout extends Layout {
   def apply[F: FC](s: Seq[Bounds]) = s
 }
@@ -208,8 +211,11 @@ case class ColumnLayout(
   }
 }
 
-/** A Layout which stacks elements on top of each other.*/
-case class StackLayout() extends Layout {
+/** A Layout which stacks elements on top of each other, aligning anchors.
+ * 
+ * For a layout which stacks elements without alignment, see FreeLayout
+*/
+object ZStack extends Layout {
   def apply[F: FC](s: Seq[Bounds]) = {
     if (s.isEmpty) s
     else LayoutHelper.alignToAnchors(Seq(s), 0 fts, 0 fts, false, false)

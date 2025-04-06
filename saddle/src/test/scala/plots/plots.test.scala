@@ -375,6 +375,12 @@ class SaddlePlotSpec extends munit.FunSuite {
         Bounds(0, 0, 100, 100)
       )
 
+       val overlay = {
+        val s1 = ShapeElem(Shape.circle(100))
+        val s2 = ShapeElem(Shape.circle(200)).transform(AffineTransform.translate(100d,0d))
+        group(s1,s2,ZStack)
+      }
+
       val gallery = group(
         group(
           scree,
@@ -413,6 +419,7 @@ class SaddlePlotSpec extends munit.FunSuite {
         fig4,
         barplot2,
         group(
+          overlay,
           barplot2,
           TextBox(
             "aabcd fafafafabcd fafafafabcd faafafafabcd fafafafabcafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd ffafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafabcd fafafafbcd fafafaf"
@@ -422,8 +429,11 @@ class SaddlePlotSpec extends munit.FunSuite {
         ColumnLayout(4)
       )
 
+     
+
       val text = fitToWidth(
         group(
+          
           ShapeElem(Shape.circle(1)),
           TextBox("ABC abc def ghijklmn opqrstvuwxyz"),
           TextBox("abc def ghijklmn opqrstvuwxyz", width = Some(30d))
