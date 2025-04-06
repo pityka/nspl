@@ -16,11 +16,11 @@ class SaddlePlotSpec extends munit.FunSuite {
 
   def readFrameFromClasspath(s: String) =
     CsvParser
-      .parseSourceWithHeader[String](
+      .parseStringWithHeader[String](
         scala.io.Source
           .fromInputStream(
             getClass.getResourceAsStream(s)
-          ),
+          ).mkString,
         recordSeparator = "\n"
       )
       .toOption
@@ -32,9 +32,9 @@ class SaddlePlotSpec extends munit.FunSuite {
       // readFrameFromClasspath("/evec.csv")
       // .mapValues(ScalarTagDouble.parse)
       val rotated =
-        readFrameFromClasspath("/rotated.csv").mapValues(ScalarTagDouble.parse)
+        readFrameFromClasspath("/rotated.csv").mapValues(str => ScalarTagDouble.parse(str.toCharArray(),0,str.length))
       val data = readFrameFromClasspath("/data.csv")
-        .mapValues(ScalarTagDouble.parse)
+        .mapValues(str => ScalarTagDouble.parse(str.toCharArray(),0,str.length))
         .colAt(Array(0, 1, 2, 3))
 
       val species = readFrameFromClasspath("/data.csv").colAt(4)
@@ -43,7 +43,7 @@ class SaddlePlotSpec extends munit.FunSuite {
         species.mapValues(spec2Num).mapValues(_.toDouble)
 
       val eval = readFrameFromClasspath("/sqrteigen.csv")
-        .mapValues(ScalarTagDouble.parse)
+        .mapValues(str => ScalarTagDouble.parse(str.toCharArray(),0,str.length))
         .mapValues(x => x * x)
 
       val data2 = data.addCol(spec, "spec", InnerJoin)
