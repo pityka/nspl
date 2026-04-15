@@ -162,7 +162,7 @@ lazy val saddle = (project in file("saddle"))
   .settings(
     name := "nspl-saddle",
     libraryDependencies ++= Seq(
-      "io.github.pityka" %% "saddle-core" % "4.0.0-M11",
+      "io.github.pityka" %% "saddle-core" % "4.0.0-M12",
       "org.scalameta" %% "munit" % "1.0.0" % Test
     )
   )
@@ -174,7 +174,7 @@ lazy val saddleJS = (project in file("saddle"))
     name := "nspl-saddle-js",
     target := file("saddle/targetJS"),
     libraryDependencies ++= Seq(
-      "io.github.pityka" %%% "saddle-core" % "4.0.0-M11"
+      "io.github.pityka" %%% "saddle-core" % "4.0.0-M12"
     ),
     Test / sources := Nil
   )
