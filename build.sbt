@@ -24,8 +24,8 @@ inThisBuild(
 )
 
 lazy val commonSettings = Seq(
-  scalaVersion := "2.13.10",
-  crossScalaVersions := Seq("2.13.10", "3.3.5"),
+  scalaVersion := "2.13.11",
+  crossScalaVersions := Seq("2.13.11", "3.3.5"),
   javacOptions ++= Seq("-Xdoclint:none"),
   scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((3, _)) =>
@@ -162,7 +162,7 @@ lazy val saddle = (project in file("saddle"))
   .settings(
     name := "nspl-saddle",
     libraryDependencies ++= Seq(
-      "io.github.pityka" %% "saddle-core" % "4.0.0-M11",
+      "io.github.pityka" %% "saddle-core" % "4.0.0-M14",
       "org.scalameta" %% "munit" % "1.0.0" % Test
     )
   )
@@ -174,7 +174,7 @@ lazy val saddleJS = (project in file("saddle"))
     name := "nspl-saddle-js",
     target := file("saddle/targetJS"),
     libraryDependencies ++= Seq(
-      "io.github.pityka" %%% "saddle-core" % "4.0.0-M11"
+      "io.github.pityka" %%% "saddle-core" % "4.0.0-M14"
     ),
     Test / sources := Nil
   )
