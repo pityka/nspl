@@ -1,6 +1,8 @@
 package org.nspl
 
-import org.scalajs.dom._
+// Exclude `Event` and `Selection` from the wildcard import — they would
+// shadow our `org.nspl.Event` and `org.nspl.Selection` under Scala 3.
+import org.scalajs.dom.{Event => _, Selection => _, _}
 import org.scalajs.dom
 import org.scalajs.dom.html
 import scala.collection.mutable.ArrayBuffer
@@ -23,9 +25,17 @@ private[nspl] class RunningAvg {
   def currentN = n
 }
 
+/** Rendering context for the HTML5 canvas backend. The optional callbacks
+  * are wired up by [[canvasrenderer.render]]; user code constructs instances
+  * indirectly through that entry point.
+  */
 class CanvasRC private[nspl] (
     private[nspl] val graphics: CanvasRenderingContext2D,
-    private[nspl] val cick: Identifier => Unit
+    private[nspl] val cick: Identifier => Unit,
+    private[nspl] val onHover: Option[(Identifier, MouseEvent) => Unit],
+    private[nspl] val onUnhover: Option[(Identifier, MouseEvent) => Unit],
+    private[nspl] val onShapeClick: Option[(Identifier, MouseEvent) => Unit],
+    private[nspl] val onSelection: Option[collection.Seq[Identifier] => Unit]
 ) extends RenderingContext[CanvasRC] {
 
   private[nspl] var transform: AffineTransform = AffineTransform.identity
@@ -89,10 +99,22 @@ class CanvasRC private[nspl] (
   def getTransform: LocalTx = transform
 
   private[nspl] var mousedown = false
+  private[nspl] var dragShift = false
   private[nspl] val plotAreaShapes = ArrayBuffer[(Shape, PlotAreaIdentifier)]()
+  private[nspl] val clickShapes = ArrayBuffer[(Shape, Identifier)]()
+  private[nspl] val hoverShapes = ArrayBuffer[(Shape, Identifier)]()
+  private[nspl] val selectionShapes = ArrayBuffer[(Shape, Identifier)]()
+  private[nspl] var lastHovered: collection.Seq[Int] = Vector.empty
 
   private[nspl] def registerPlotArea(shape: Shape, id: PlotAreaIdentifier) =
     plotAreaShapes.append((shape, id))
+
+  private[nspl] def registerOnClick(shape: Shape, id: Identifier) =
+    clickShapes.append((shape, id))
+  private[nspl] def registerOnHover(shape: Shape, id: Identifier) =
+    hoverShapes.append((shape, id))
+  private[nspl] def registerOnSelection(shape: Shape, id: Identifier) =
+    selectionShapes.append((shape, id))
 
   private[nspl] def processPlotArea(p: Point)(
       cb: PlotAreaIdentifier => Unit
@@ -105,50 +127,97 @@ class CanvasRC private[nspl] (
     )
   }
 
+  /** Hit-test the registered hover shapes at point `p`, invoke `onHover` for
+    * each hit, and invoke `onUnhover` for shapes that were hit on the
+    * previous call but are not hit this call.
+    */
+  private[nspl] def callHoverCallbackOnHit(e: MouseEvent, p: Point): Unit =
+    onHover.foreach { hover =>
+      val previous = lastHovered
+      val current = hitTest[Identifier](
+        p,
+        false,
+        hoverShapes,
+        (id, _) => hover(id, e)
+      )
+      lastHovered = current
+      val gone = previous.filterNot(current.contains)
+      onUnhover.foreach { unhover =>
+        gone.foreach { idx =>
+          if (idx >= 0 && idx < hoverShapes.size)
+            unhover(hoverShapes(idx)._2, e)
+        }
+      }
+    }
+
+  private[nspl] def callClickCallbackOnHit(e: MouseEvent, p: Point): Unit =
+    onShapeClick.foreach { click =>
+      hitTest[Identifier](
+        p,
+        false,
+        clickShapes,
+        (id, _) => click(id, e)
+      )
+    }
+
+  private[nspl] def callSelectionCallback(p1: Point, p2: Point): Unit =
+    onSelection.foreach { sel =>
+      val rect = Bounds.fromPoints(p1, p2)
+      val hits = selectionShapes
+        .filter { case (sh, _) =>
+          val b = sh.bounds
+          rect.contains(Point(b.centerX, b.centerY))
+        }
+        .map(_._2)
+      sel(hits)
+    }
+
+  /** Iterate shapes, hit-test each, fire callback on hits, return the
+    * indices of shapes that were hit. Indices are useful so the caller
+    * can compare against a previous call's hit set (for unhover).
+    */
   private def hitTest[T](
       p: Point,
       needsTransformedBounds: Boolean,
       shapes: collection.Seq[(Shape, T)],
       callback: (T, Option[Bounds]) => Unit
-  ) = {
+  ): collection.Seq[Int] = {
     val ctx = graphics
-
-    shapes.foreach { case (shape, id) =>
+    val out = ArrayBuffer.empty[Int]
+    var idx = 0
+    val n = shapes.size
+    while (idx < n) {
+      val (shape, id) = shapes(idx)
       val (hit, transformedBounds) = withTransform(shape.currentTransform) {
         setTransformInGraphics()
-        shape match {
-          case Rectangle(x, y, w, h, _, _) =>
-            ctx.beginPath()
-            ctx.rect(x, y, w, h)
-            val r =
-              ctx.isPointInPath(p.x, p.y)
-
-            val transformedBounds =
-              if (needsTransformedBounds)
-                id match {
-                  case pl: PlotAreaIdentifier =>
-                    pl.bounds.map(transform.transform)
-                  case _ => None
-                }
-              else None
-            r -> transformedBounds
-
-          case _ => ???
-        }
-
+        val tb =
+          if (needsTransformedBounds)
+            id match {
+              case pl: PlotAreaIdentifier =>
+                pl.bounds.map(transform.transform)
+              case _ => None
+            }
+          else None
+        val isHit = canvasrenderer.shapeContains(ctx, shape, p)
+        (isHit, tb)
       }
-
       if (hit) {
         callback(id, transformedBounds)
+        out.append(idx)
       }
-
+      idx += 1
     }
+    out
   }
 
   def clear() = {
     graphics.setTransform(1, 0, 0, 1, 0, 0)
     transformInGraphics = AffineTransform.identity
     graphics.clearRect(0, 0, graphics.canvas.width, graphics.canvas.height)
+    plotAreaShapes.clear()
+    clickShapes.clear()
+    hoverShapes.clear()
+    selectionShapes.clear()
   }
 
 }
@@ -175,14 +244,113 @@ object canvasrenderer {
     Point(x * devicePixelRatio, y * devicePixelRatio)
   }
 
+  /** Hit-test using the 2D canvas Path API. Builds the path matching the
+    * shape's geometry then calls `isPointInPath`. Supports every Shape
+    * subtype — previously only Rectangle was handled and the rest fell
+    * into `???`.
+    */
+  private[nspl] def shapeContains(
+      ctx: CanvasRenderingContext2D,
+      shape: Shape,
+      p: Point
+  ): Boolean = shape match {
+    case Rectangle(x, y, w, h, _, _) =>
+      ctx.beginPath()
+      ctx.rect(x, y, w, h)
+      ctx.isPointInPath(p.x, p.y)
+    case Ellipse(x, y, w, h, _) =>
+      val cx = x + 0.5 * w
+      val cy = y + 0.5 * h
+      val rx = 0.5 * w
+      val ry = 0.5 * h
+      ctx.beginPath()
+      ctx
+        .asInstanceOf[scala.scalajs.js.Dynamic]
+        .ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI)
+      ctx.isPointInPath(p.x, p.y)
+    case ln: Line =>
+      // A 1D line in the path API has zero area; treat as containing the
+      // point if it is within a small tolerance of the segment.
+      val dx = ln.x2 - ln.x1
+      val dy = ln.y2 - ln.y1
+      val len2 = dx * dx + dy * dy
+      if (len2 == 0d) {
+        val ex = p.x - ln.x1
+        val ey = p.y - ln.y1
+        ex * ex + ey * ey <= 4d
+      } else {
+        val t =
+          ((p.x - ln.x1) * dx + (p.y - ln.y1) * dy) / len2
+        val tc = if (t < 0d) 0d else if (t > 1d) 1d else t
+        val px = ln.x1 + tc * dx
+        val py = ln.y1 + tc * dy
+        val ex = p.x - px
+        val ey = p.y - py
+        ex * ex + ey * ey <= 4d
+      }
+    case sp: SimplePath =>
+      ctx.beginPath()
+      sp.ps.foreach(pt => ctx.lineTo(pt.x, pt.y))
+      ctx.isPointInPath(p.x, p.y)
+    case path: Path =>
+      ctx.beginPath()
+      path.path.foreach {
+        case op: PathOperation.MoveTo => ctx.moveTo(op.p.x, op.p.y)
+        case op: PathOperation.LineTo => ctx.lineTo(op.p.x, op.p.y)
+        case op: PathOperation.QuadTo =>
+          ctx.quadraticCurveTo(op.p1.x, op.p1.y, op.p2.x, op.p2.y)
+        case op: PathOperation.CubicTo =>
+          ctx.bezierCurveTo(
+            op.p1.x,
+            op.p1.y,
+            op.p2.x,
+            op.p2.y,
+            op.p3.x,
+            op.p3.y
+          )
+      }
+      ctx.isPointInPath(p.x, p.y)
+  }
+
+  /** Render a `Build[K]` into a fresh canvas element and return the
+    * element plus an updater function. Optional callbacks let user code
+    * react to hover/click/selection on shapes that were registered with
+    * a non-empty [[Identifier]].
+    *
+    * @param click
+    *   plot-area click callback (fires on mousedown over a plot area).
+    *   Preserved for backward compatibility.
+    * @param onHover
+    *   fires when the mouse moves over any shape carrying a non-empty
+    *   identifier.
+    * @param onUnhover
+    *   fires when a previously-hovered shape is no longer under the mouse.
+    * @param onShapeClick
+    *   fires on click (mouseup without drag) on any shape with a non-empty
+    *   identifier.
+    * @param onSelection
+    *   fires when the user finishes a shift+drag rectangle, receiving the
+    *   identifiers of all shapes whose centers fall in the rectangle.
+    * @param enableScroll
+    *   if false, wheel events are not consumed.
+    * @param enableDrag
+    *   if false, plain drags do not produce Drag events. Shift+drag still
+    *   produces Selection events when `onSelection` is set.
+    */
   def render[K <: Renderable[K]](
       build0: Build[K],
       width: Int,
       height: Int,
-      click: Identifier => Unit = (_ => ())
+      click: Identifier => Unit = (_ => ()),
+      onHover: Option[(Identifier, MouseEvent) => Unit] = None,
+      onUnhover: Option[(Identifier, MouseEvent) => Unit] = None,
+      onShapeClick: Option[(Identifier, MouseEvent) => Unit] = None,
+      onSelection: Option[collection.Seq[Identifier] => Unit] = None,
+      enableScroll: Boolean = true,
+      enableDrag: Boolean = true
   )(implicit
       er: Renderer[K, CanvasRC]
-  ) = {
+  ): (html.Canvas, Build[K] => Unit) = {
 
     val canvas = dom.document.createElement("canvas").asInstanceOf[html.Canvas]
     canvas.style.width = s"${width}px"
@@ -194,22 +362,37 @@ object canvasrenderer {
     val ctx =
       new CanvasRC(
         canvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D],
-        click
+        click,
+        onHover,
+        onUnhover,
+        onShapeClick,
+        onSelection
       )
 
     var build = build0
     var paintableElem = build.build
     var dragStart = Point(0, 0)
     var queuedCallback: Double => Unit = null
+    val eventStore = new EventFusionHelper
 
     def paintBounds = {
-      val aspect = paintableElem.bounds.h / paintableElem.bounds.w
-
-      val paintWidth =
-        if (aspect > 1) (canvas.height / aspect).toInt else canvas.width
-      val paintHeight =
-        if (aspect <= 1) (canvas.width * aspect).toInt else canvas.height
-      Bounds(0, 0, paintWidth, paintHeight)
+      // Fit-inside: scale the plot so it fits entirely within the canvas
+      // without distorting its aspect. The previous version compared the
+      // plot aspect to `1` rather than to the *canvas* aspect, which
+      // overflowed the canvas height when the canvas was wider than tall
+      // (e.g. 600×200) but the plot was still taller than the canvas in
+      // proportion (e.g. plot aspect 0.7 on a canvas aspect 0.33).
+      val plotAspect = paintableElem.bounds.h / paintableElem.bounds.w
+      val canvasAspect = canvas.height.toDouble / canvas.width.toDouble
+      if (plotAspect > canvasAspect) {
+        // plot is taller (relative) than canvas → fit to height
+        val w = (canvas.height / plotAspect).toInt
+        Bounds(0, 0, w, canvas.height)
+      } else {
+        // plot is wider (relative) than canvas → fit to width
+        val h = (canvas.width * plotAspect).toInt
+        Bounds(0, 0, canvas.width, h)
+      }
     }
 
     def queueAnimationFrame(body: Double => Unit) = {
@@ -244,8 +427,6 @@ object canvasrenderer {
 
       ctx.clear()
 
-      ctx.plotAreaShapes.clear()
-
       ctx.render(
         fitToBounds(paintableElem, paintBounds)
       )
@@ -257,26 +438,63 @@ object canvasrenderer {
         val p = getCanvasCoordinate(canvas, e, devicePixelRatio)
         ctx.processPlotArea(p) { identifier =>
           ctx.mousedown = true
+          ctx.dragShift = e.shiftKey
           dragStart = p
           click(identifier)
+        }
+      }
+    }
 
+    def onmouseup(e: MouseEvent) = {
+      if (e.button == 0 && ctx.mousedown) {
+        e.preventDefault()
+        val p = getCanvasCoordinate(canvas, e, devicePixelRatio)
+        if (ctx.dragShift && onSelection.isDefined) {
+          ctx.callSelectionCallback(dragStart, p)
+        }
+      }
+      ctx.mousedown = false
+      ctx.dragShift = false
+    }
+
+    def onclickHandler(e: MouseEvent) = {
+      if (e.button == 0 && onShapeClick.isDefined) {
+        val p = getCanvasCoordinate(canvas, e, devicePixelRatio)
+        dom.window.requestAnimationFrame { _ =>
+          ctx.callClickCallbackOnHit(e, p)
         }
       }
     }
 
     def onmove(e: MouseEvent) = {
+      val p = getCanvasCoordinate(canvas, e, devicePixelRatio)
+      // hover: only when no button is pressed
+      if (e.buttons == 0 && onHover.isDefined) {
+        queueAnimationFrame { _ =>
+          ctx.callHoverCallbackOnHit(e, p)
+        }
+      }
       if (e.button == 0 && ctx.mousedown) {
         e.preventDefault()
         queueAnimationFrame { _ =>
-          val p = getCanvasCoordinate(canvas, e, devicePixelRatio)
           val v = Point(dragStart.x - p.x, dragStart.y - p.y)
           val l = math.sqrt(v.x * v.x + v.y * v.y)
           if (l > 0) {
             ctx.processPlotArea(p) { id =>
-              paintableElem =
-                build(Some(paintableElem) -> Drag(dragStart, p, id))
-              dragStart = p
-              paint()
+              val ev =
+                if (ctx.dragShift && onSelection.isDefined)
+                  Some(Selection(dragStart, p, id))
+                else if (enableDrag)
+                  Some(Drag(dragStart, p, id))
+                else None
+              ev match {
+                case Some(event) =>
+                  paintableElem = build(Some(paintableElem) -> event)
+                  if (!ctx.dragShift) dragStart = p
+                  paint()
+                  eventStore.add(event, id.canFuseEvents)
+                case None => ()
+              }
             }
           }
         }
@@ -284,36 +502,44 @@ object canvasrenderer {
     }
 
     def onwheel(e: MouseEvent) = {
-      e.preventDefault()
-      queueAnimationFrame { _ =>
-        val p = getCanvasCoordinate(canvas, e, devicePixelRatio)
-        ctx.processPlotArea( p) { id =>
-          paintableElem = build(
-            Some(paintableElem) -> Scroll(
+      if (enableScroll) {
+        e.preventDefault()
+        queueAnimationFrame { _ =>
+          val p = getCanvasCoordinate(canvas, e, devicePixelRatio)
+          ctx.processPlotArea(p) { id =>
+            val event = Scroll(
               e.asInstanceOf[scala.scalajs.js.Dynamic]
                 .deltaY
                 .asInstanceOf[Double],
               p,
               id
             )
-          )
-          paint()
+            paintableElem = build(Some(paintableElem) -> event)
+            paint()
+            eventStore.add(event, id.canFuseEvents)
+          }
         }
       }
     }
 
-    def update = (k: Build[K]) =>
+    val update: Build[K] => Unit = (k: Build[K]) =>
       queueAnimationFrame { _ =>
         build = k
         paintableElem = k.build
+        // Replay accumulated events so externally-supplied state changes
+        // don't drop the user's current zoom/pan.
+        eventStore.get.foreach { (event: org.nspl.Event) =>
+          paintableElem = build(Some(paintableElem) -> event)
+        }
         paint()
       }
 
     canvas.onmousedown = onmousedown _
-    canvas.onmouseup = { _ =>
-      ctx.mousedown = false
-    }
+    canvas.onmouseup = onmouseup _
     canvas.onmousemove = onmove _
+    if (onShapeClick.isDefined) {
+      canvas.onclick = onclickHandler _
+    }
     canvas.addEventListener("wheel", onwheel _)
 
     queueAnimationFrame { _ =>
@@ -466,6 +692,7 @@ object canvasrenderer {
           drawAndFill(ctx, elem)
 
           elem.identifier match {
+            case EmptyIdentifier => ()
             case pa: PlotAreaIdentifier =>
               ctx.registerPlotArea(
                 elem.shape.transform((_, old) =>
@@ -473,7 +700,13 @@ object canvasrenderer {
                 ),
                 pa.copy(bounds = Some(elem.bounds))
               )
-            case _ =>
+            case other =>
+              val resolved = elem.shape.transform((_, old) =>
+                ctx.getAffineTransform.applyBefore(old)
+              )
+              ctx.registerOnClick(resolved, other)
+              ctx.registerOnHover(resolved, other)
+              ctx.registerOnSelection(resolved, other)
           }
         }
 
@@ -490,23 +723,73 @@ object canvasrenderer {
           ctx.withTransform(elem.tx) {
 
             ctx.withFill(elem.color) {
-              ctx.graphics.font = canvasFont(elem.font)
-              /* debug */
-              // ctx.setTransformInGraphics()
-              // ctx.graphics.strokeStyle = asCss(elem.color)
-              // ctx.graphics.strokeRect(
-              //   elem.layout.bounds.x,
-              //   elem.layout.bounds.y,
-              //   elem.layout.bounds.w,
-              //   elem.layout.bounds.h
-              // )
-              /* debug off */
+              // Bold and oblique map directly to the canvas font string.
+              // Sub/superscript are emulated as a smaller font with a
+              // vertical offset; underline is drawn as a line after the
+              // glyphs since the 2D canvas API has no underline switch.
+              val sub = elem.subScript && !elem.superScript
+              val sup = elem.superScript && !elem.subScript
+              val scaledFont =
+                if (sub || sup)
+                  new Font(
+                    elem.font.name,
+                    math.max(1, (elem.font.size * 0.7).toInt)
+                  )
+                else elem.font
+              ctx.graphics.font =
+                canvasFont(scaledFont, bold = elem.bold, italic = elem.oblique)
+
+              val ascent =
+                if (sub || sup) elem.font.size.toDouble * 0.7 else 0d
+              val yShift =
+                if (sup) -ascent * 0.4
+                else if (sub) ascent * 0.4
+                else 0d
+
               elem.layout.lines.foreach { case (line, lineTx) =>
                 ctx.withTransform(lineTx) {
                   ctx.setTransformInGraphics()
-                  ctx.graphics.fillText(line, 0, 0)
+                  ctx.graphics.fillText(line, 0, yShift)
+                  if (elem.underline) {
+                    val w = ctx.graphics.measureText(line).width
+                    // ~10% of font size below the baseline.
+                    val uy = yShift + scaledFont.size.toDouble * 0.1
+                    ctx.graphics.fillRect(
+                      0d,
+                      uy,
+                      w,
+                      math.max(1d, scaledFont.size.toDouble * 0.05)
+                    )
+                  }
                 }
               }
+            }
+
+            // Register this text box as a hover/click/selection target if
+            // it carries a non-empty identifier. We register the bounding
+            // rectangle since `fillText` itself doesn't establish a path.
+            elem.identifier match {
+              case EmptyIdentifier => ()
+              case pa: PlotAreaIdentifier =>
+                ctx.registerPlotArea(
+                  Shape.rectangle(
+                    elem.bounds.x,
+                    elem.bounds.y,
+                    elem.bounds.w,
+                    elem.bounds.h
+                  ),
+                  pa.copy(bounds = Some(elem.bounds))
+                )
+              case other =>
+                val rect = Shape.rectangle(
+                  elem.bounds.x,
+                  elem.bounds.y,
+                  elem.bounds.w,
+                  elem.bounds.h
+                )
+                ctx.registerOnClick(rect, other)
+                ctx.registerOnHover(rect, other)
+                ctx.registerOnSelection(rect, other)
             }
           }
         }

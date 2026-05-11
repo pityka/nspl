@@ -1,151 +1,94 @@
 import org.nspl._
-import org.nspl.data._
 import canvasrenderer._
-import org.scalajs.dom._
+import org.scalajs.dom.document
 
-import scala.scalajs.js
-import js.annotation._
+import scala.scalajs.js.annotation._
 
+/** Interactive canvas demo. The DOM scaffolding (title, instructions, slots,
+  * log) lives in `canvas/index.html`; this object only attaches the rendered
+  * canvases to the placeholder elements and routes interaction callbacks to
+  * the `#event-log` `<pre>`. Build with `sbt canvas/Test/fastLinkJS` and
+  * open `canvas/index.html`.
+  */
 @JSExportTopLevel("nsplcanvastest")
 object nsplcanvastest {
-  @JSExport
-  def bind(n: Node): Unit = {
-    println("Hi")
 
-    def random = 1 to 1000 map (_ => scala.util.Random.nextDouble())
-    def random2 = 1 to 1000 map (_ => scala.util.Random.nextGaussian())
-
-    val x = random
-    val y = random
-    val z = x zip y map (x => x._1 * x._2)
-    val z2 = random2
-    val z3 = random2
-
-    val p1 = xyplot(
+  private def buildScatter() = {
+    val rng = new scala.util.Random(42)
+    val data = (1 to 200).map { i =>
+      val cluster = i / 50
       (
-        indexed(x),
-        List(
-          point(shapes = Vector(shapeList(1)))
-          // line()
-        ),
-        InLegend("dsf")
+        rng.nextGaussian() + cluster * 3d,
+        rng.nextGaussian() + cluster * 2d,
+        cluster.toDouble
       )
-    )(
-      par.
-        ylab ("x")
-        .xlab ("index")
-        .main(
-          "main\nsdfsd\nasdfsdfd fasd fds fds fds fds fda fdsa fd d ds fds ds df asdf asdf sad sd fsad fsda sda fdsaf ")
+    }
+    xyplot(
+      data -> point(
+        color = DiscreteColors(8),
+        size = 5d,
+        noIdentifier = false
       )
-    
+    )(par.xlab("x").ylab("y"))
+  }
 
-    val p2 = xyplot(
-      density(x) -> line()
-    )(par.xlab("x").ylab("dens"))
-    val p3 = xyplot(
-      z2 -> z3 -> point(size = 1d, color = Color(200, 200, 200, 255)),
-      density2d(z2 zip z3, n = 100, levels = 10)
-    )()
-    val p4 = xyplot(
-      (x zip y zip z map (x => (x._1._1, x._1._2, x._2, x._2 * 10))) -> point(
-        color = HeatMapColors(0.0, 1.0),
-        shapeCol = 3,
-        sizeCol = 5
+  private def buildLine() = xyplot(
+    (1 to 50).map(i => (i.toDouble, math.sin(i * 0.2))) -> line()
+  )(par.xlab("i").ylab("sin"))
+
+  private def fmtId(id: Identifier): String = id match {
+    case DataRowIdx(ext, ds, row) =>
+      s"DataRow(externalDS=$ext, ds=$ds, row=$row)"
+    case TextBoxIdentifier(label, idx) =>
+      s"TextBox(label=$label, index=$idx)"
+    case PlotAreaIdentifier(_, _, _) => "PlotArea"
+    case EmptyIdentifier              => "Empty"
+    case other                        => other.toString
+  }
+
+  @JSExport
+  def bind(): Unit = {
+    val scatterSlot = document.getElementById("scatter-plot")
+    val lineSlot = document.getElementById("line-plot")
+    val log = document.getElementById("event-log")
+
+    if (scatterSlot == null || lineSlot == null || log == null) {
+      // index.html shape changed and the slots aren't where we expect.
+      // Surface the mismatch loudly rather than silently doing nothing.
+      throw new RuntimeException(
+        "nsplcanvastest: expected DOM elements #scatter-plot, #line-plot, #event-log"
       )
-    )()
+    }
 
-    val p5 = binnedboxplot(x, y)(par.xlab("PC2").ylab ("PC3"))
+    def emit(line: String): Unit = {
+      val p = document.createElement("div")
+      p.textContent = line
+      log.insertBefore(p, log.firstChild)
+      while (log.childNodes.length > 200) log.removeChild(log.lastChild)
+    }
 
-    val p6 = rasterplot(
-      rasterFromStream(z3.iterator, 30, 30, MinMaxImpl(0.0, 1.0))
-    )(par.xLabFontSize(0.5 fts).yLabFontSize(0.5 fts))
-
-    val text: Elems7[
-      ShapeElem,
-      TextBox,
-      TextBox,
-      TextBox,
-      TextBox,
-      TextBox,
-      TextBox
-    ] = fitToWidth(
-      group(
-        ShapeElem(Shape.circle(1)),
-        TextBox("abc def ghijklmn opqrstvuwxyz"),
-        TextBox("abc def ghijklmn opqrstvuwxyz", width = Some(30d))
-          .translate(10, 30),
-        TextBox("abc def ghijklmn opqrstvuwxyz", width = Some(30d))
-          .translate(10, 30)
-          .rotate(math.Pi / 2, 0d, 0d),
-        TextBox("abc def ghijklmn", fontSize = 0.1 fts).rotate(1d),
-        TextBox("opqrstvuwxyz", fontSize = 0.1 fts).translate(10, 30),
-        TextBox("abc def ghijklmn opqrstvuwxyz", fontSize = 1 fts)
-          .translate(100, 30),
-        FreeLayout
-      ),
-      200
+    val (scatterCanvas, _) = render(
+      buildScatter(),
+      width = 600,
+      height = 400,
+      onShapeClick = Some { (id, _) => emit(s"click  ${fmtId(id)}") },
+      onHover = Some { (id, _) => emit(s"hover  ${fmtId(id)}") },
+      onUnhover = Some { (id, _) => emit(s"unhover ${fmtId(id)}") },
+      onSelection = Some { ids =>
+        val sample = ids.take(8).map(fmtId).mkString(", ")
+        val tail = if (ids.size > 8) " …" else ""
+        emit(s"select ${ids.size} shapes  → $sample$tail")
+      }
+    )
+    val (lineCanvas, _) = render(
+      buildLine(),
+      width = 600,
+      height = 200,
+      click = id => emit(s"plotMouseDown ${fmtId(id)}")
     )
 
-    val cubeVertex: DataSource = List(
-      (0d, 0d, 0d),
-      (100d, 0d, 0d),
-      (100d, 100d, 0d),
-      (100d, 100d, 0d),
-      (100d, 0d, 100d)
-    )
-
-    val cube: DataSource =
-      List(
-        (0d, 0d, 0d),
-        (100d, 0d, 0d),
-        (100d, 0d, 0d),
-        (100d, 100d, 0d),
-        (100d, 100d, 0d),
-        (0d, 100d, 0d),
-        (0d, 100d, 0d),
-        (0d, 0d, 0d),
-        (0d, 0d, 100d),
-        (100d, 0d, 100d),
-        (100d, 0d, 100d),
-        (100d, 100d, 100d),
-        (100d, 100d, 100d),
-        (0d, 100d, 100d),
-        (0d, 100d, 100d),
-        (0d, 0d, 100d),
-        (0d, 0d, 0d),
-        (0d, 0d, 100d),
-        (100d, 0d, 0d),
-        (100d, 0d, 100d),
-        (100d, 100d, 0d),
-        (100d, 100d, 100d),
-        (0d, 100d, 0d),
-        (0d, 100d, 100d)
-      ).grouped(2)
-        .toList
-        .map(v => (v(0)._1, v(0)._2, v(0)._3, v(1)._1, v(1)._2, v(1)._3))
-
-    val xyzp: Build[Elems2[XYZPlotArea, Legend]] = xyzplot(
-      (cube, List(lineSegment3D()), NotInLegend),
-      (cubeVertex, List(point3D()), NotInLegend)
-    )()
-
-    val gallery = group(
-      xyzp,
-      p1,
-      p2,
-      p2,
-      p3,
-      p4,
-      p5,
-      p6,
-      text,
-      VerticalStack(Align.Anchor)
-    )
-
-    val (canv, _) = render(gallery, 800, 800, println)
-
-    n.appendChild(canv)
-
-    println("Bye")
+    scatterSlot.appendChild(scatterCanvas)
+    lineSlot.appendChild(lineCanvas)
+    emit("ready")
   }
 }

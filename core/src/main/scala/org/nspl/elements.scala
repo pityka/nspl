@@ -140,12 +140,25 @@ case class ShapeElem(
 
 /** A Renderable describing a text box
 *
-* See the apply factory method in its companion object on how to construct one
+* See the apply factory method in its companion object on how to construct one.
+*
+* The five boolean style flags control attributed-string rendering. Backends
+* honor them where the underlying typography system supports it. The AWT
+* backend supports all five via `java.awt.font.TextAttribute`; the canvas
+* backend supports bold and oblique natively and emulates subscript /
+* superscript / underline with extra geometry. Defaults preserve historical
+* behavior.
  */
 class TextBox(
     val layout: TextLayout,
     val color: Color,
-    val tx: AffineTransform
+    val tx: AffineTransform,
+    val bold: Boolean = false,
+    val oblique: Boolean = false,
+    val subScript: Boolean = false,
+    val superScript: Boolean = false,
+    val underline: Boolean = false,
+    val identifier: Identifier = EmptyIdentifier
 )(implicit fc: FontConfiguration)
     extends Renderable[TextBox] {
 
@@ -155,10 +168,36 @@ class TextBox(
     if (layout.isEmpty) Bounds(0, 0, 0, 0)
     else tx.transform(layout.bounds)
 
-  def transform(tx: (Bounds, AffineTransform) => AffineTransform) =
-    new TextBox(layout = layout, color = color, tx = tx(bounds, this.tx))
-  def transform(tx: AffineTransform) =
-    new TextBox(layout = layout, color = color, tx = tx.applyBefore(this.tx))
+  private def copy(tx: AffineTransform): TextBox =
+    new TextBox(
+      layout,
+      color,
+      tx,
+      bold,
+      oblique,
+      subScript,
+      superScript,
+      underline,
+      identifier
+    )
+
+  def transform(tx: (Bounds, AffineTransform) => AffineTransform): TextBox =
+    copy(tx = tx(bounds, this.tx))
+  def transform(tx: AffineTransform): TextBox =
+    copy(tx = tx.applyBefore(this.tx))
+
+  def withIdentifier(id: Identifier): TextBox =
+    new TextBox(
+      layout,
+      color,
+      tx,
+      bold,
+      oblique,
+      subScript,
+      superScript,
+      underline,
+      id
+    )
 }
 
 object TextBox {
@@ -167,7 +206,23 @@ object TextBox {
       width: Option[Double] = None,
       fontSize: RelFontSize = 1 fts,
       color: Color = Color.black,
-      tx: AffineTransform = AffineTransform.identity
+      tx: AffineTransform = AffineTransform.identity,
+      bold: Boolean = false,
+      oblique: Boolean = false,
+      subScript: Boolean = false,
+      superScript: Boolean = false,
+      underline: Boolean = false,
+      identifier: Identifier = EmptyIdentifier
   )(implicit fc: FontConfiguration): TextBox =
-    new TextBox(TextLayout(width, text, fontSize), color, tx)
+    new TextBox(
+      TextLayout(width, text, fontSize),
+      color,
+      tx,
+      bold,
+      oblique,
+      subScript,
+      superScript,
+      underline,
+      identifier
+    )
 }

@@ -23,6 +23,18 @@ case class Bounds(
 
 }
 
+object Bounds {
+
+  /** Smallest axis-aligned bounding rectangle containing both points. */
+  def fromPoints(p1: Point, p2: Point): Bounds = {
+    val xMin = math.min(p1.x, p2.x)
+    val yMin = math.min(p1.y, p2.y)
+    val xMax = math.max(p1.x, p2.x)
+    val yMax = math.max(p1.y, p2.y)
+    Bounds(xMin, yMin, xMax - xMin, yMax - yMin)
+  }
+}
+
 /** Line cap style */
 sealed trait Cap
 object Cap {
@@ -139,7 +151,40 @@ class PlotId
 trait Identifier
 case object EmptyIdentifier extends Identifier
 
-/** Final rendered bounds (if available) and identifier of a plot area
+/** Final rendered bounds (if available) and identifier of a plot area.
+  *
+  * @param canFuseEvents
+  *   if true, the canvas event store may collapse consecutive Drag/Selection
+  *   events on this plot area into a single event when replaying.
   */
-case class PlotAreaIdentifier(id: PlotId, bounds: Option[Bounds])
-    extends Identifier
+case class PlotAreaIdentifier(
+    id: PlotId,
+    bounds: Option[Bounds],
+    canFuseEvents: Boolean = true
+) extends Identifier
+
+/** Identifies a single row in a [[data.DataSource]] within a plot.
+  *
+  * @param externalDataSourceIdx
+  *   index of the dataset among all datasets in the plot
+  * @param dataSourceIdx
+  *   index of the dataset among the datasets sharing the same renderer
+  * @param rowIdx
+  *   row index within the dataset
+  */
+case class DataRowIdx(
+    externalDataSourceIdx: Int,
+    dataSourceIdx: Int,
+    rowIdx: Int
+) extends Identifier
+
+/** Identifies a [[TextBox]] that should be interactive (clickable, hoverable,
+  * selectable). Use this on labels — legend items, axis tick labels, data
+  * labels — when you want click/hover callbacks to fire on the text itself
+  * rather than the data underneath it.
+  *
+  * The `label` is arbitrary and chosen by whoever constructed the TextBox;
+  * `index` is for the common case of "the Nth legend item" or "the Nth
+  * tick".
+  */
+case class TextBoxIdentifier(label: String, index: Int = 0) extends Identifier

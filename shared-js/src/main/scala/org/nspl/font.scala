@@ -10,8 +10,17 @@ object svgFont {
 
 /* Code duplication! */
 object canvasFont {
-  def apply(f: Font) = s"${f.size}px ${f.name}"
+  def apply(f: Font): String = apply(f, bold = false, italic = false)
 
+  /** Canvas font string with optional bold/italic style prefixes. Sub/super
+    * script and underline are emulated by the caller via geometry, not the
+    * font string.
+    */
+  def apply(f: Font, bold: Boolean, italic: Boolean): String = {
+    val styleParts =
+      (if (italic) "italic " else "") + (if (bold) "bold " else "")
+    s"${styleParts}${f.size}px ${f.name}"
+  }
 }
 
 private[nspl] object CanvasGlyphMeasurer extends Font.GlyphMeasurer {

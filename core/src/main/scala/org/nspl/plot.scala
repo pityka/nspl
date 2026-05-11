@@ -16,7 +16,9 @@ case class DataElem(
     yAxis: Axis,
     renderers: Seq[DataRenderer],
     originalBounds: Bounds,
-    tx: AffineTransform = AffineTransform.identity
+    tx: AffineTransform = AffineTransform.identity,
+    externalDataSourceIdx: Int = 0,
+    dataSourceIdx: Int = 0
 ) extends Renderable[DataElem] {
   def transform(tx: AffineTransform) =
     copy(tx = tx.applyBefore(this.tx))
@@ -34,10 +36,16 @@ object DataElem {
       rt: Renderer[TextBox, RC]
   ): Renderer[DataElem, RC] = new Renderer[DataElem, RC] {
     def render(r: RC, e: DataElem): Unit = {
-      e.data.iterator.foreach { row =>
+      var rowIdx = 0
+      val it = e.data.iterator
+      while (it.hasNext) {
+        val row = it.next()
+        val descriptor =
+          DataRowIdx(e.externalDataSourceIdx, e.dataSourceIdx, rowIdx)
         e.renderers.foreach { dr =>
-          dr.render(row, e.xAxis, e.yAxis, r, e.tx)
+          dr.render(row, e.xAxis, e.yAxis, r, e.tx, descriptor)
         }
+        rowIdx += 1
       }
       e.renderers.foreach(_.clear(r))
     }
@@ -261,6 +269,63 @@ private[nspl] trait Plots {
           xNoTickLabel,
           yNoTickLabel
         )
+
+      case (Some(old), Selection(selStart, selEnd, plotAreaId))
+          if plotAreaId.id == id =>
+        import old._
+        val startWorld = mapPoint(
+          selStart,
+          plotAreaId.bounds.get,
+          Bounds(xMin, yMin, xMax - xMin, yMax - yMin),
+          true
+        )
+        val endWorld = mapPoint(
+          selEnd,
+          plotAreaId.bounds.get,
+          Bounds(xMin, yMin, xMax - xMin, yMax - yMin),
+          true
+        )
+        val xMin1 = math.min(startWorld.x, endWorld.x)
+        val xMax1 = math.max(startWorld.x, endWorld.x)
+        val yMin1 = math.min(startWorld.y, endWorld.y)
+        val yMax1 = math.max(startWorld.y, endWorld.y)
+        // Guard against degenerate (single-point) selections that would
+        // collapse the axis range and break tick generation.
+        if (xMax1 - xMin1 <= 0 || yMax1 - yMin1 <= 0) old
+        else
+          xyplotarea(
+            id,
+            data,
+            xAxisSetting,
+            yAxisSetting,
+            origin,
+            Some(xMin1 -> xMax1),
+            Some(yMin1 -> yMax1),
+            xAxisMargin,
+            yAxisMargin,
+            xgrid,
+            ygrid,
+            frame,
+            xCustomGrid,
+            yCustomGrid,
+            main,
+            mainFontSize,
+            mainDistance,
+            xlab,
+            xlabFontSize,
+            xlabDistance,
+            xlabAlignment,
+            ylab,
+            ylabFontSize,
+            ylabDistance,
+            ylabAlignment,
+            topPadding,
+            bottomPadding,
+            leftPadding,
+            rightPadding,
+            xNoTickLabel,
+            yNoTickLabel
+          )
     }
   }
 
@@ -341,6 +406,9 @@ private[nspl] trait Plots {
       else if (yMinMax.isEmpty) 1d
       else yMinMax.map(_.max).max
 
+    val ln2 = math.log(2d)
+    def log2(x: Double) = math.log(x) / ln2
+
     val xMin = xAxisSetting.axisFactory match {
       case LinearAxisFactory =>
         math.min(
@@ -352,6 +420,11 @@ private[nspl] trait Plots {
       case Log10AxisFactory =>
         math.min(
           xLimMin.getOrElse(math.pow(10d, math.log10(dataXMin).floor)),
+          origin.map(_.x).getOrElse(Double.MaxValue)
+        )
+      case Log2AxisFactory =>
+        math.min(
+          xLimMin.getOrElse(math.pow(2d, log2(dataXMin).floor)),
           origin.map(_.x).getOrElse(Double.MaxValue)
         )
     }
@@ -372,6 +445,11 @@ private[nspl] trait Plots {
         if (xMax1 == xMin) {
           xMax1 + 1
         } else xMax1
+      case Log2AxisFactory =>
+        val xMax1 = xLimMax.getOrElse {
+          math.pow(2d, log2(dataXMax).ceil)
+        }
+        if (xMax1 == xMin) xMax1 + 1 else xMax1
 
     }
 
@@ -386,6 +464,11 @@ private[nspl] trait Plots {
       case Log10AxisFactory =>
         math.min(
           yLimMin.getOrElse(math.pow(10d, math.log10(dataYMin).floor)),
+          origin.map(_.y).getOrElse(Double.MaxValue)
+        )
+      case Log2AxisFactory =>
+        math.min(
+          yLimMin.getOrElse(math.pow(2d, log2(dataYMin).floor)),
           origin.map(_.y).getOrElse(Double.MaxValue)
         )
     }
@@ -405,6 +488,11 @@ private[nspl] trait Plots {
         if (yMax1 == yMin) {
           yMax1 + 1
         } else yMax1
+      case Log2AxisFactory =>
+        val yMax1 = yLimMax.getOrElse {
+          math.pow(2d, log2(dataYMax).ceil)
+        }
+        if (yMax1 == yMin) yMax1 + 1 else yMax1
     }
 
     val xAxis =
@@ -461,8 +549,18 @@ private[nspl] trait Plots {
       FreeLayout
     )
 
-    val dataelem = sequence(data.toList.map { case (ds, drs) =>
-      DataElem(ds, xAxis, yAxis, drs, axes.bounds, AffineTransform.identity)
+    val dataelem = sequence(data.toList.zipWithIndex.map {
+      case ((ds, drs), idx) =>
+        DataElem(
+          ds,
+          xAxis,
+          yAxis,
+          drs,
+          axes.bounds,
+          AffineTransform.identity,
+          externalDataSourceIdx = idx,
+          dataSourceIdx = idx
+        )
     })
 
     val xgridPoints =

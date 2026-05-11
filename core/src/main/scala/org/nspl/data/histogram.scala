@@ -19,6 +19,31 @@ case class HistogramData(
       lastBinUpperBound
     )
 
+  /** Normalize the histogram so the total area under the bars sums to 1.
+    *
+    * Treats each bin's height as a probability density on `(xstart, xend)`.
+    * Assumes `ystart` is `0` for every bin (i.e. the histogram hasn't been
+    * stacked).
+    */
+  def density: HistogramData = {
+    val totalArea = bins.iterator.map {
+      case ((x1, x2, _), y2) => (x2 - x1) * y2
+    }.sum
+    if (totalArea <= 0d) this
+    else
+      HistogramData(
+        bins.map { case ((x1, x2, _), y2) =>
+          val area = (x2 - x1) * y2
+          ((x1, x2, 0d), area / totalArea / (x2 - x1))
+        },
+        minX,
+        maxX,
+        maxY / n,
+        1,
+        lastBinUpperBound
+      )
+  }
+
   def filterBinsMinValue(m: Double) = this.copy(bins = bins.filter(_._2 >= m))
 
   def /(that: HistogramData): HistogramData =
@@ -52,10 +77,17 @@ case class HistogramData(
       )
     }
 
+  /** Convert the bins to scatter-plot rows `(midX, top, 0, width, ystart)`.
+    * Zero-height bins are dropped so that downstream renderers do not emit
+    * empty bars or label clutter.
+    */
   def toScatter =
-    bins.toSeq.map { case ((xstart, xend, ystart), height) =>
-      ((xstart + xend) * 0.5, (ystart + height), 0d, xend - xstart, ystart)
-    } sortBy (_._1)
+    bins.toSeq
+      .map { case ((xstart, xend, ystart), height) =>
+        ((xstart + xend) * 0.5, (ystart + height), 0d, xend - xstart, ystart)
+      }
+      .filter(_._2 > 0)
+      .sortBy(_._1)
 }
 object HistogramData {
 

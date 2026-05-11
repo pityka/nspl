@@ -2,11 +2,17 @@ package org.nspl
 
 trait Axis {
   def worldToView(v: Double): Double
+
+  /** Inverse of [[worldToView]]. View coordinates start at 0 and run to
+    * [[width]]; this maps them back to data-space.
+    */
+  def viewToWorld(v: Double): Double
   def min: Double
   def max: Double
   def width = math.abs(worldToView(max) - worldToView(min))
   def horizontal: Boolean
   def log: Boolean
+  def isLog2: Boolean = false
 }
 
 sealed trait AxisFactory {
@@ -19,6 +25,7 @@ object LinearAxisFactory extends AxisFactory {
       new Axis {
         val tmp = width1 / (max1 - min1)
         def worldToView(v: Double) = (v - min1) * tmp
+        def viewToWorld(x: Double) = x / tmp + min1
         val min = if (min1 == max1) max1 - 1d else min1
         val max = if (min1 == max1) max1 + 1d else max1
         val horizontal = true
@@ -31,6 +38,7 @@ object LinearAxisFactory extends AxisFactory {
 
         def worldToView(v: Double) =
           width1 - (v - min1) * tmp
+        def viewToWorld(x: Double) = (width1 - x) / tmp + min1
         val min = if (min1 == max1) max1 - 1d else min1
         val max = if (min1 == max1) max1 + 1d else max1
         val horizontal = false
@@ -42,12 +50,15 @@ object Log10AxisFactory extends AxisFactory {
   def make(min1: Double, max1: Double, width1: Double, horizontal: Boolean) = {
     val lMin1 = math.log10(min1)
     val lMax1 = math.log10(max1)
+    val lRange = lMax1 - lMin1
     if (horizontal)
       new Axis {
         def worldToView(v: Double) = {
           if (v <= 0d) throw new RuntimeException("<0")
-          (math.log10(v) - lMin1) / (lMax1 - lMin1) * width1
+          (math.log10(v) - lMin1) / lRange * width1
         }
+        def viewToWorld(x: Double) =
+          math.pow(10d, lMin1 + (x / width1) * lRange)
         val min = if (min1 == max1) max1 - 1d else min1
         val max = if (min1 == max1) max1 + 1d else max1
         val horizontal = true
@@ -57,12 +68,53 @@ object Log10AxisFactory extends AxisFactory {
       new Axis {
         def worldToView(v: Double) = {
           if (v <= 0d) throw new RuntimeException("<0")
-          width1 - (math.log10(v) - lMin1) / (lMax1 - lMin1) * width1
+          width1 - (math.log10(v) - lMin1) / lRange * width1
         }
+        def viewToWorld(x: Double) =
+          math.pow(10d, lMin1 + ((width1 - x) / width1) * lRange)
         val min = if (min1 == max1) max1 - 1d else min1
         val max = if (min1 == max1) max1 + 1d else max1
         val horizontal = false
         val log = true
+      }
+  }
+}
+
+object Log2AxisFactory extends AxisFactory {
+  private val ln2 = math.log(2d)
+  private def log2(x: Double) = math.log(x) / ln2
+
+  def make(min1: Double, max1: Double, width1: Double, horizontal: Boolean) = {
+    val lMin1 = log2(min1)
+    val lMax1 = log2(max1)
+    val lRange = lMax1 - lMin1
+    if (horizontal)
+      new Axis {
+        def worldToView(v: Double) = {
+          if (v <= 0d) throw new RuntimeException("<0")
+          (log2(v) - lMin1) / lRange * width1
+        }
+        def viewToWorld(x: Double) =
+          math.pow(2d, lMin1 + (x / width1) * lRange)
+        val min = if (min1 == max1) max1 - 1d else min1
+        val max = if (min1 == max1) max1 + 1d else max1
+        val horizontal = true
+        val log = true
+        override val isLog2 = true
+      }
+    else
+      new Axis {
+        def worldToView(v: Double) = {
+          if (v <= 0d) throw new RuntimeException("<0")
+          width1 - (log2(v) - lMin1) / lRange * width1
+        }
+        def viewToWorld(x: Double) =
+          math.pow(2d, lMin1 + ((width1 - x) / width1) * lRange)
+        val min = if (min1 == max1) max1 - 1d else min1
+        val max = if (min1 == max1) max1 + 1d else max1
+        val horizontal = false
+        val log = true
+        override val isLog2 = true
       }
   }
 }
@@ -171,7 +223,30 @@ class AxisSettings(
       customTicks
         .filter(i => i._1 >= axis.min && i._1 <= axis.max)
 
-    val (majorTicks1, minorTicks1) = if (axis.log) {
+    val (majorTicks1, minorTicks1) = if (axis.isLog2) {
+      val ln2 = math.log(2d)
+      def log2(x: Double) = math.log(x) / ln2
+      val lmaj1 =
+        (log2(axis.min).ceil.toInt until log2(axis.max).toInt)
+          .map(_.toDouble)
+          .filter { i =>
+            val e = math.pow(2d, i)
+            e >= axis.min - 1e-3 && e <= axis.max + 1e-3
+          }
+      val majorTicksExp =
+        axis.min +: (lmaj1.map(i => math.pow(2d, i)) :+ axis.max)
+      val minorTicksExp = majorTicksExp
+        .sliding(2)
+        .flatMap { group =>
+          val m1 = group(0)
+          val m2 = group(1)
+          val space = (m2 - m1) / numMinorTicksFactor
+          (0 to numMinorTicksFactor.toInt).map(i => m1 + i * space)
+        }
+        .filterNot(majorTicksExp.contains)
+        .toList
+      (majorTicksExp, minorTicksExp)
+    } else if (axis.log) {
       val lmaj1 =
         (math
           .log10(axis.min)

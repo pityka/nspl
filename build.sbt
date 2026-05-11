@@ -90,7 +90,8 @@ lazy val core = project
   .in(file("core"))
   .settings(commonSettings)
   .settings(
-    name := "nspl-core"
+    name := "nspl-core",
+    libraryDependencies += "org.scalameta" %% "munit" % "1.0.0" % Test
   )
   .enablePlugins(spray.boilerplate.BoilerplatePlugin)
 

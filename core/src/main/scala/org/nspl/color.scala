@@ -66,6 +66,23 @@ object TableColormap {
   )
 }
 
+/** Discrete colormap keyed by exact `Double` values. Like [[TableColormap]]
+  * but returns a configurable `default` for missing keys (rather than
+  * `Color.gray5`), and maps `NaN` to `Color.transparent`.
+  */
+case class ManualColor(map: Map[Double, Color], default: Color = Color.gray5)
+    extends Colormap {
+  def apply(v: Double): Color =
+    if (v.isNaN) Color.transparent else map.getOrElse(v, default)
+  def withRange(min: Double, max: Double) = this
+}
+
+object ManualColor {
+  def apply(colors: Color*): ManualColor = ManualColor(
+    colors.zipWithIndex.map(x => x._2.toDouble -> x._1).toMap
+  )
+}
+
 case class HeatMapColors(
     min: Double = 0.0,
     max: Double = 1.0,

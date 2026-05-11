@@ -1,16 +1,85 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+  <meta charset="utf-8" />
+  <title>nspl canvas interaction smoke test</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 16px;
+      max-width: 760px;
+      color: #222;
+    }
+    h2 { margin-top: 0; }
+    .instructions {
+      font-size: 13px;
+      color: #555;
+      background: #fafafa;
+      border: 1px solid #e5e5e5;
+      padding: 8px 12px;
+      border-radius: 4px;
+      margin-bottom: 16px;
+    }
+    .instructions ul { margin: 6px 0 0 18px; padding: 0; }
+    .instructions code { background: #eef; padding: 0 4px; border-radius: 3px; }
+    .canvas-slot { margin: 12px 0; }
+    .canvas-slot h3 {
+      font-size: 14px;
+      font-weight: 600;
+      margin: 0 0 4px 0;
+      color: #444;
+    }
+    #event-log {
+      background: #f4f4f4;
+      padding: 8px;
+      height: 200px;
+      overflow-y: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px;
+      margin: 0;
+      border: 1px solid #e5e5e5;
+      border-radius: 4px;
+    }
+    #event-log div { padding: 1px 0; }
+  </style>
 </head>
 
-<body style="padding: 0px; margin: 0px">
+<body>
 
-  <div id="plot"></div>
+  <h2>nspl canvas interaction smoke test</h2>
 
-  <script type="text/javascript" src="target/scala-2.13/nspl-canvas-js-test-fastopt.js"></script>
+  <div class="instructions">
+    Drive the plot to verify each interactive surface:
+    <ul>
+      <li><b>hover</b> — move over a point. Expect <code>hover&nbsp;DataRow(...)</code> + an
+        <code>unhover</code> when the mouse leaves it.
+      </li>
+      <li><b>click</b> — click a point. Expect <code>click&nbsp;DataRow(...)</code>.</li>
+      <li><b>shift + drag</b> — sweep a selection rectangle. Expect <code>select N shapes → ...</code>.</li>
+      <li><b>drag (without shift)</b> — pans the plot inside the axis range.</li>
+      <li><b>wheel</b> — zoom toward / away from the cursor.</li>
+    </ul>
+    The line plot below the scatter only handles drag + wheel + plot-area mousedown.
+  </div>
+
+  <div class="canvas-slot">
+    <h3>Scatter — full interaction</h3>
+    <div id="scatter-plot"></div>
+  </div>
+
+  <div class="canvas-slot">
+    <h3>Line — pan / zoom only</h3>
+    <div id="line-plot"></div>
+  </div>
+
+  <h3 style="margin-bottom: 4px;">Event log (newest first)</h3>
+  <pre id="event-log"></pre>
+
+  <script type="text/javascript"
+          src="target/scala-2.13/nspl-canvas-js-test-fastopt/main.js"></script>
   <script>
-    nsplcanvastest.bind(document.getElementById("plot"));
+    nsplcanvastest.bind();
   </script>
 </body>
 

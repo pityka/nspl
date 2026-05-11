@@ -1,6 +1,7 @@
 package org.nspl
 
 import java.awt.Graphics2D
+import java.awt.font.TextAttribute
 
 import JavaFontConversion._
 
@@ -101,11 +102,52 @@ object awtrenderer extends JavaAWTUtil {
   implicit val textRenderer: Renderer[TextBox, JavaRC] =
     new Renderer[TextBox, JavaRC] {
 
+      private def deriveFont(
+          base: java.awt.Font,
+          bold: Boolean,
+          oblique: Boolean,
+          subScript: Boolean,
+          superScript: Boolean,
+          underline: Boolean
+      ): java.awt.Font = {
+        if (!bold && !oblique && !subScript && !superScript && !underline) base
+        else {
+          val map =
+            new java.util.HashMap[
+              java.awt.font.TextAttribute,
+              java.lang.Object
+            ]()
+          if (bold) {
+            map.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_EXTRABOLD)
+          }
+          if (oblique) {
+            map.put(TextAttribute.POSTURE, TextAttribute.POSTURE_OBLIQUE)
+          }
+          if (underline) {
+            map.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON)
+          }
+          if (subScript && !superScript) {
+            map.put(TextAttribute.SUPERSCRIPT, TextAttribute.SUPERSCRIPT_SUB)
+          } else if (superScript && !subScript) {
+            map.put(TextAttribute.SUPERSCRIPT, TextAttribute.SUPERSCRIPT_SUPER)
+          }
+          base.deriveFont(map)
+        }
+      }
+
       def render(ctx: JavaRC, elem: TextBox): Unit = {
         if (!elem.layout.isEmpty && elem.color.a > 0) {
           ctx.withTransform(elem.tx) {
             ctx.withPaint(elem.color) {
-              val jfont = font2font(elem.font)
+              val baseFont = font2font(elem.font)
+              val jfont = deriveFont(
+                baseFont,
+                elem.bold,
+                elem.oblique,
+                elem.subScript,
+                elem.superScript,
+                elem.underline
+              )
               if (!ctx.textAsShapes) {
                 ctx.graphics.setFont(jfont)
               }
