@@ -87,12 +87,40 @@ node3 -> node2;
          <button class="icon-button show-content expand"></button>
          <h4 class="groupHeader h200">Concrete methods</h4>
         </div>
+        <div class="documentableElement" id="getCanvasCoordinate-474">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="canvasrenderer$.html#getCanvasCoordinate-474" t="n" class="documentableName ">getCanvasCoordinate</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">canvas</span>: <span data-unresolved-link="" t="t">Canvas</span>, <span t="k"></span><span data-unresolved-link="" t="n">e</span>: <span data-unresolved-link="" t="t">MouseEvent</span>, <span t="k"></span><span data-unresolved-link="" t="n">devicePixelRatio</span>: <span data-unresolved-link="" t="t">Double</span>): <a href="Point.html" t="t">Point</a>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Convert a DOM <code>MouseEvent</code> to canvas-space coordinates, accounting for the canvas's bounding rect offset and the device pixel ratio. Exposed so callers wiring their own listeners (e.g. a separate overlay) can reuse the same math nspl uses internally.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Convert a DOM <code>MouseEvent</code> to canvas-space coordinates, accounting for the canvas's bounding rect offset and the device pixel ratio. Exposed so callers wiring their own listeners (e.g. a separate overlay) can reuse the same math nspl uses internally.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small"></dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
         <div class="documentableElement" id="render-fffffedd">
          <div class="documentableElement-expander">
           <button class="icon-button ar show-content"></button>
           <div class="header monospace mono-medium">
            <div class="signature">
-            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="canvasrenderer$.html#render-fffffedd" t="n" class="documentableName ">render</a>[<span t="k"></span><span data-unresolved-link="" t="t">K</span><span t="k"> &lt;: </span><a href="Renderable.html" t="t">Renderable</a>[<span t="t">LazyRef(...)</span>]](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">build0</span>: ()<span t="k"> =&gt; </span><span t="t">K</span>, <span t="k"></span><span data-unresolved-link="" t="n">width</span>: <span data-unresolved-link="" t="t">Int</span>, <span t="k"></span><span data-unresolved-link="" t="n">height</span>: <span data-unresolved-link="" t="t">Int</span>, <span t="k"></span><span data-unresolved-link="" t="n">click</span>: <a href="Identifier.html" t="t">Identifier</a><span t="k"> =&gt; </span><span data-unresolved-link="" t="t">Unit</span>, <span t="k"></span><span data-unresolved-link="" t="n">onHover</span>: <span data-unresolved-link="" t="t">Option</span>[(<a href="Identifier.html" t="t">Identifier</a>, <span data-unresolved-link="" t="t">MouseEvent</span>)<span t="k"> =&gt; </span><span data-unresolved-link="" t="t">Unit</span>], <span t="k"></span><span data-unresolved-link="" t="n">onUnhover</span>: <span data-unresolved-link="" t="t">Option</span>[(<a href="Identifier.html" t="t">Identifier</a>, <span data-unresolved-link="" t="t">MouseEvent</span>)<span t="k"> =&gt; </span><span data-unresolved-link="" t="t">Unit</span>], <span t="k"></span><span data-unresolved-link="" t="n">onShapeClick</span>: <span data-unresolved-link="" t="t">Option</span>[(<a href="Identifier.html" t="t">Identifier</a>, <span data-unresolved-link="" t="t">MouseEvent</span>)<span t="k"> =&gt; </span><span data-unresolved-link="" t="t">Unit</span>], <span t="k"></span><span data-unresolved-link="" t="n">onSelection</span>: <span data-unresolved-link="" t="t">Option</span>[(<span data-unresolved-link="" t="t">Seq</span>[<a href="Identifier.html" t="t">Identifier</a>])<span t="k"> =&gt; </span><span data-unresolved-link="" t="t">Unit</span>], <span t="k"></span><span data-unresolved-link="" t="n">enableScroll</span>: <span data-unresolved-link="" t="t">Boolean</span>, <span t="k"></span><span data-unresolved-link="" t="n">enableDrag</span>: <span data-unresolved-link="" t="t">Boolean</span>, <span t="k"></span><span data-unresolved-link="" t="n">enableCrosshair</span>: <span data-unresolved-link="" t="t">Boolean</span>)(<span t="k">implicit </span><span t="k"></span><span data-unresolved-link="" t="n">er</span>: <a href="Renderer.html" t="t">Renderer</a>[<span t="t">K</span>, <a href="CanvasRC.html" t="t">CanvasRC</a>]): (<span data-unresolved-link="" t="t">Canvas</span>, (()<span t="k"> =&gt; </span><span data-unresolved-link="" t="t">K</span>)<span t="k"> =&gt; </span><span data-unresolved-link="" t="t">Unit</span>)
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="canvasrenderer$.html#render-fffffedd" t="n" class="documentableName ">render</a>[<span t="k"></span><span data-unresolved-link="" t="t">K</span><span t="k"> &lt;: </span><a href="Renderable.html" t="t">Renderable</a>[<span t="t">LazyRef(...)</span>]](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">build0</span>: ()<span t="k"> =&gt; </span><span t="t">K</span>, <span t="k"></span><span data-unresolved-link="" t="n">width</span>: <span data-unresolved-link="" t="t">Int</span>, <span t="k"></span><span data-unresolved-link="" t="n">height</span>: <span data-unresolved-link="" t="t">Int</span>, <span t="k"></span><span data-unresolved-link="" t="n">click</span>: <a href="Identifier.html" t="t">Identifier</a><span t="k"> =&gt; </span><span data-unresolved-link="" t="t">Unit</span>, <span t="k"></span><span data-unresolved-link="" t="n">onHover</span>: <span data-unresolved-link="" t="t">Option</span>[(<a href="Identifier.html" t="t">Identifier</a>, <a href="Point.html" t="t">Point</a>, <span data-unresolved-link="" t="t">MouseEvent</span>)<span t="k"> =&gt; </span><span data-unresolved-link="" t="t">Unit</span>], <span t="k"></span><span data-unresolved-link="" t="n">onUnhover</span>: <span data-unresolved-link="" t="t">Option</span>[(<a href="Identifier.html" t="t">Identifier</a>, <a href="Point.html" t="t">Point</a>, <span data-unresolved-link="" t="t">MouseEvent</span>)<span t="k"> =&gt; </span><span data-unresolved-link="" t="t">Unit</span>], <span t="k"></span><span data-unresolved-link="" t="n">onShapeClick</span>: <span data-unresolved-link="" t="t">Option</span>[(<a href="Identifier.html" t="t">Identifier</a>, <a href="Point.html" t="t">Point</a>, <span data-unresolved-link="" t="t">MouseEvent</span>)<span t="k"> =&gt; </span><span data-unresolved-link="" t="t">Unit</span>], <span t="k"></span><span data-unresolved-link="" t="n">onSelection</span>: <span data-unresolved-link="" t="t">Option</span>[(<span data-unresolved-link="" t="t">Seq</span>[<a href="Identifier.html" t="t">Identifier</a>])<span t="k"> =&gt; </span><span data-unresolved-link="" t="t">Unit</span>], <span t="k"></span><span data-unresolved-link="" t="n">enableScroll</span>: <span data-unresolved-link="" t="t">Boolean</span>, <span t="k"></span><span data-unresolved-link="" t="n">enableDrag</span>: <span data-unresolved-link="" t="t">Boolean</span>, <span t="k"></span><span data-unresolved-link="" t="n">enableCrosshair</span>: <span data-unresolved-link="" t="t">Boolean</span>)(<span t="k">implicit </span><span t="k"></span><span data-unresolved-link="" t="n">er</span>: <a href="Renderer.html" t="t">Renderer</a>[<span t="t">K</span>, <a href="CanvasRC.html" t="t">CanvasRC</a>]): (<span data-unresolved-link="" t="t">Canvas</span>, (()<span t="k"> =&gt; </span><span data-unresolved-link="" t="t">K</span>)<span t="k"> =&gt; </span><span data-unresolved-link="" t="t">Unit</span>)
            </div>
           </div>
          </div>
@@ -132,7 +160,7 @@ node3 -> node2;
                onHover
               </dt>
               <dd class="body-medium">
-               <p>fires when the mouse moves over any shape carrying a non-empty identifier.</p>
+               <p>fires when the mouse moves over any shape carrying a non-empty identifier, or over a plot area. The <code>Point</code> is the canvas-space cursor location (same coordinate space as <code>PlotAreaIdentifier.bounds</code>, so it can be fed to <code>mouseToWorld</code>). Note that this fires at the browser's mousemove rate (coalesced via <code>requestAnimationFrame</code>) — keep the callback cheap.</p>
               </dd>
               <dt class="body-small">
                onSelection
@@ -144,13 +172,13 @@ node3 -> node2;
                onShapeClick
               </dt>
               <dd class="body-medium">
-               <p>fires on click (mouseup without drag) on any shape with a non-empty identifier.</p>
+               <p>fires on click (mouseup without drag) on any shape with a non-empty identifier. The <code>Point</code> is the canvas-space click location.</p>
               </dd>
               <dt class="body-small">
                onUnhover
               </dt>
               <dd class="body-medium">
-               <p>fires when a previously-hovered shape is no longer under the mouse.</p>
+               <p>fires when a previously-hovered shape or plot area is no longer under the mouse. The <code>Point</code> is the cursor location at the time of the un-hover event.</p>
               </dd>
              </dl>
              <h2 class="h200">Attributes</h2>
