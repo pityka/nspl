@@ -370,6 +370,94 @@ private[nspl] trait SimplePlots {
     )
   }
 
+  def dotplot[F: FC](
+      data: DataSourceWithQuantiles,
+      xnames: Seq[String] = Nil,
+      color: Colormap = DiscreteColors(14),
+      width: Double = 0.8d,
+      size: Double = 3d,
+      bandwidth: Double = 0d,
+      seed: Int = 42
+  )(parameters: Parameters) = {
+    val rows = data.iterator.toVector
+    val groups = (0 until data.dimension).map { i =>
+      (i.toDouble, data.columnNames(i), rows.map(_.apply(i)))
+    }
+    dotplotImpl(groups, xnames, color, width, size, bandwidth, seed)(parameters)
+  }
+
+  def dotplotImpl[F: FC](
+      groups: Seq[(Double, String, Seq[Double])],
+      xnames: Seq[String] = Nil,
+      color: Colormap = DiscreteColors(14),
+      width: Double = 0.8d,
+      size: Double = 3d,
+      bandwidth: Double = 0d,
+      seed: Int = 42
+  )(parameters: Parameters) = {
+    import parameters.{xnames => _, _}
+    val ddata = dotplotData(groups, width, bandwidth, seed)
+
+    val xnames1 =
+      if (xnames.isEmpty)
+        groups.map(g => (g._1, g._2)).filter(_._2.nonEmpty).toList
+      else xnames.zipWithIndex.map(x => x._2.toDouble -> x._1).toList
+
+    xyplotareaBuild(
+      List(ddata -> List(point(color = color, size = size))),
+      AxisSettings(
+        LinearAxisFactory,
+        customTicks = xnames1,
+        numTicks = if (xnames1.isEmpty) 5 else 0,
+        fontSize = xLabFontSize,
+        width = xWidth,
+        labelRotation = xLabelRotation,
+        tickLength = xTickLength,
+        lineLengthFraction = xLineWidthFraction,
+        lineStartFraction = xLineStartFraction,
+        tickSpace = xTickSpace
+      ),
+      AxisSettings(
+        LinearAxisFactory,
+        fontSize = yLabFontSize,
+        width = yHeight,
+        labelRotation = yLabelRotation,
+        tickLength = yTickLength,
+        lineLengthFraction = yLineWidthFraction,
+        lineStartFraction = yLineStartFraction,
+        tickSpace = yTickSpace
+      ),
+      None,
+      xlim = xlim,
+      ylim = ylim,
+      xgrid = xgrid,
+      ygrid = ygrid,
+      frame = frame,
+      main = main,
+      xlab = xlab,
+      ylab = ylab,
+      xlabFontSize = xLabFontSize,
+      ylabFontSize = yLabFontSize,
+      mainFontSize = mainFontSize
+    )
+  }
+
+  def dotplotFromLabels[T: Ordering, F: FC](
+      data: Seq[(T, Double)],
+      color: Colormap = DiscreteColors(14),
+      width: Double = 0.8d,
+      size: Double = 3d,
+      bandwidth: Double = 0d,
+      seed: Int = 42,
+      useLabels: Boolean = true
+  )(parameters: Parameters) = {
+    val groups = data.groupBy(_._1).toSeq.sortBy(_._1).zipWithIndex.map {
+      case ((label, points), i) =>
+        (i.toDouble, if (useLabels) label.toString else "", points.map(_._2))
+    }
+    dotplotImpl(groups, Nil, color, width, size, bandwidth, seed)(parameters)
+  }
+
   def contourplot[F: FC](
       xlim: (Double, Double),
       ylim: (Double, Double),

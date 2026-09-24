@@ -278,6 +278,49 @@ private[nspl] trait DataAdaptors extends DataTuples {
     }
   }
 
+  def dotplotData(
+      groups: Seq[(Double, String, Seq[Double])],
+      width: Double = 0.8d,
+      bandwidth: Double = 0d,
+      seed: Int = 42
+  ): DataSource = {
+    val rng = new scala.util.Random(seed)
+    val halfWidth = width * 0.5
+    groups.zipWithIndex.flatMap {
+      case ((center, label, rawValues), groupIndex) =>
+        val values = rawValues.filterNot(_.isNaN)
+        if (values.isEmpty) Nil
+        else if (values.size == 1)
+          List(
+            VectorRow(Vector(center, values.head, groupIndex.toDouble), label)
+          )
+        else {
+          val ys = values.toArray
+          val h =
+            if (bandwidth > 0d) bandwidth
+            else {
+              val sd = math.sqrt(sampleVariance(values))
+              val quartiles = percentile(values, Vector(0.25, 0.75))
+              val iqr = quartiles(1) - quartiles(0)
+              val spread =
+                if (sd > 0d && iqr > 0d) math.min(sd, iqr / 1.349)
+                else if (sd > 0d) sd
+                else if (iqr > 0d) iqr / 1.349
+                else 0d
+              val estimate = 0.9 * spread * math.pow(values.size.toDouble, -0.2)
+              if (estimate > 0d) estimate else 1d
+            }
+          val densities = ys.map(y => KDE.univariate(ys, y, h))
+          val maxDensity = densities.max
+          ys.toList.zip(densities).map { case (y, d) =>
+            val relative = if (maxDensity > 0d) d / maxDensity else 0d
+            val offset = (rng.nextDouble() * 2d - 1d) * relative * halfWidth
+            VectorRow(Vector(center + offset, y, groupIndex.toDouble), label)
+          }
+        }
+    }
+  }
+
   def density(
       data: IndexedSeq[Double],
       bandwidth: Double = 0.0,

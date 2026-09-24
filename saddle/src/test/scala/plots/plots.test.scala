@@ -174,6 +174,18 @@ class SaddlePlotSpec extends munit.FunSuite {
           par
         )
 
+      val dotpl = dotplot(
+        data2
+          .firstCol("Sepal.Length")
+          .toVec
+          .toSeq -> data2.firstCol("Sepal.Width").toVec.toSeq,
+        xnames = Seq("Sepal Length", "Sepal Width")
+      )(par.ylab("cm").xLabelRotation(-0.3).main("Dotplot"))
+
+      val dotpl2 = dotplotFromLabels(
+        species.toVec.toSeq.zip(data2.firstCol("Sepal.Length").toVec.toSeq)
+      )(par.ylab("Sepal.Length").main("Dotplot by species"))
+
       val contour = contourplot(
         xlim = -2d -> 2d,
         ylim = -2d -> 2d,
@@ -400,7 +412,7 @@ class SaddlePlotSpec extends munit.FunSuite {
         ),
         bar1,
         bar2,
-        boxpl2,
+        group(boxpl2, dotpl, dotpl2, TableLayout(2)),
         colortest,
         p6,
         p6b,
