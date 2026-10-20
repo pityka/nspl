@@ -58,6 +58,7 @@ class SaddlePlotSpec extends munit.FunSuite {
           .withMain("Scree")
       )
 
+      @scala.annotation.nowarn
       val hist1 = xyplot(
         HistogramData(rotated.firstCol("PC1").toVec.toSeq, 10) -> bar()
       )(

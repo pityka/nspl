@@ -20,6 +20,10 @@ private[nspl] trait DataAdaptors extends DataTuples {
       vec1._1 zip vec1._2 zip vec1._3 map (x => (x._1._1, x._1._2, x._2))
     )
 
+  @deprecated(
+    "Histogram plots are deprecated in favor of dotplot. Use dotplot or dotplotFromLabels instead.",
+    "unreleased"
+  )
   implicit def histogram(h: HistogramData): DataSource = {
     dataSourceFromRows(h.toScatter)
   }
@@ -366,6 +370,40 @@ private[nspl] trait DataAdaptors extends DataTuples {
       color = color
     )
 
+  }
+
+  def silvermanBandwidth(data: Seq[Double]): Double = {
+    val sd = math.sqrt(sampleVariance(data))
+    val quartiles = percentile(data, Vector(0.25, 0.75))
+    val iqr = quartiles(1) - quartiles(0)
+    val spread =
+      if (sd > 0d && iqr > 0d) math.min(sd, iqr / 1.349)
+      else if (sd > 0d) sd
+      else if (iqr > 0d) iqr / 1.349
+      else 0d
+    val estimate = 1.06 * spread * math.pow(data.size.toDouble, -0.2)
+    if (estimate > 0d) estimate else 1d
+  }
+
+  def densityContours[F: FC](
+      data: IndexedSeq[(Double, Double)],
+      n: Int = 50,
+      levels: Int = 10,
+      bandwidthScale: Double = 1d,
+      stroke: StrokeConf = StrokeConf(lineWidth),
+      color: Colormap = HeatMapColors(0, 1)
+  ) = {
+    val xs = data.map(_._1)
+    val ys = data.map(_._2)
+    val bandwidthX = silvermanBandwidth(xs) * bandwidthScale
+    val bandwidthY = silvermanBandwidth(ys) * bandwidthScale
+    linesegments(
+      contour(xs.min, xs.max, ys.min, ys.max, n, levels)((x, y) =>
+        KDE.density2dAnisotropic(data, (x, y), bandwidthX, bandwidthY)
+      ),
+      stroke = stroke,
+      color = color
+    )
   }
 
   def densityMatrix(

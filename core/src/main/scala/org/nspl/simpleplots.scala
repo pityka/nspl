@@ -481,6 +481,50 @@ private[nspl] trait SimplePlots {
     )
   }
 
+  def scattercontour[F: FC](
+      data: IndexedSeq[(Double, Double)],
+      pointColor: Colormap = Color(120, 120, 120),
+      pointSize: Double = 3d,
+      contourColor: Colormap = HeatMapColors(0, 1),
+      contourStroke: StrokeConf = StrokeConf(lineWidth),
+      n: Int = 50,
+      levels: Int = 10,
+      bandwidthScale: Double = 1d
+  )(parameters: Parameters) = {
+    val (contourData, contourRenderer) =
+      densityContours(data, n, levels, bandwidthScale, contourStroke, contourColor)
+    xyplot(
+      (dataSourceFromRows(data), List(point(color = pointColor, size = pointSize)), NotInLegend),
+      (contourData, List(contourRenderer), NotInLegend)
+    )(parameters)
+  }
+
+  @deprecated(
+    "Histogram plots are deprecated in favor of dotplot. Use dotplot or dotplotFromLabels instead.",
+    "unreleased"
+  )
+  def histogramplot[F: FC](
+      series: Seq[(String, Seq[Double])],
+      breaks: Int = 30,
+      colors: Int => Color = index => DiscreteColors(10)(index.toDouble),
+      relative: Boolean = false,
+      stroke: StrokeConf = StrokeConf(lineWidth),
+      strokeColor: Color = Color.black
+  )(parameters: Parameters) = {
+    val values = series.map(_._2)
+    val step = HistogramData.getStep(values.flatten, breaks)
+    val histograms = HistogramData.fromStratifiedData(values, step, relative)
+    val triplets: Seq[(DataSource, List[DataRenderer], LegendConfig)] =
+      histograms.zipWithIndex.map { case (hist, index) =>
+        (
+          dataSourceFromRows(hist.toScatter),
+          List(bar(fill = colors(index), strokeColor = strokeColor, stroke = stroke)),
+          InLegend(series(index)._1)
+        )
+      }
+    xyplot(triplets: _*)(parameters)
+  }
+
   def rasterplot[F: FC](
       data: DataSource,
       colormap: Colormap = HeatMapColors(0, 1),
@@ -493,7 +537,7 @@ private[nspl] trait SimplePlots {
       zlim: Option[(Double, Double)] = None,
       transparentPixels: Option[Double] = None,
       zlab: String = "",
-      zNumTicks: Int = 2
+      zNumTicks: Int = 4
   )(parameters: Parameters) = {
     import parameters._
     val minmaxx = data.columnMinMax(xCol)

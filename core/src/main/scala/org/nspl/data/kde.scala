@@ -32,4 +32,20 @@ object KDE {
       math.exp(-0.5 * sqdist * rbw * rbw) + s
     }
   }
+
+  def density2dAnisotropic(
+      d: IndexedSeq[(Double, Double)],
+      x: (Double, Double),
+      bandwidthX: Double,
+      bandwidthY: Double
+  ) = {
+    val n = 1.0 / (d.size * bandwidthX * bandwidthY)
+    val rbwX = 1d / bandwidthX
+    val rbwY = 1d / bandwidthY
+    n * d.foldLeft(0.0) { (s, xi) =>
+      val dx = (x._1 - xi._1) * rbwX
+      val dy = (x._2 - xi._2) * rbwY
+      math.exp(-0.5 * (dx * dx + dy * dy)) + s
+    }
+  }
 }
