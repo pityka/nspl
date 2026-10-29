@@ -54,7 +54,7 @@ object DataElem {
 
 private[nspl] trait Plots {
   // format: off
-  type XYPlotAreaType = Elems2[Elems2[Elems2[Elems6[ElemList[ShapeElem],ElemList[ShapeElem],ElemList[DataElem],Elems2[Elems3[ShapeElem,ElemList[Elems2[ShapeElem,TextBox]],ElemList[ShapeElem]],Elems3[ShapeElem,ElemList[Elems2[ShapeElem,TextBox]],ElemList[ShapeElem]]],ShapeElem,ElemList[ShapeElem]],TextBox],TextBox],TextBox]
+  type XYPlotAreaType = Elems2[ShapeElem,Elems2[Elems2[Elems2[Elems6[ElemList[ShapeElem],ElemList[ShapeElem],ElemList[DataElem],Elems2[Elems3[ShapeElem,ElemList[Elems2[ShapeElem,TextBox]],ElemList[ShapeElem]],Elems3[ShapeElem,ElemList[Elems2[ShapeElem,TextBox]],ElemList[ShapeElem]]],ShapeElem,ElemList[ShapeElem]],TextBox],TextBox],TextBox]]
   // format: on
   case class XYPlotArea(
       elem: XYPlotAreaType,
@@ -67,7 +67,7 @@ private[nspl] trait Plots {
       this.copy(elem = elem.transform(v))
     def transform(v: AffineTransform) = this.copy(elem = elem.transform(v))
     def bounds: Bounds = elem.bounds
-    def frameElem = elem.m1.m1.m1.m5
+    def frameElem = elem.m2.m1.m1.m1.m5
   }
 
   object XYPlotArea {
@@ -759,7 +759,22 @@ private[nspl] trait Plots {
         HorizontalStack(NoAlignment, ylabDistance)
       )
 
-    XYPlotArea(plotWithAxisLabels, xMin, xMax, yMin, yMax)
+    val plotBounds = plotWithAxisLabels.bounds
+    val background = ShapeElem(
+      Shape.rectangle(
+        plotBounds.x,
+        plotBounds.y,
+        plotBounds.w,
+        plotBounds.h,
+        anchor = Some(Point(plotBounds.x + plotBounds.w * 0.5, plotBounds.y + plotBounds.h * 0.5))
+      ),
+      stroke = None,
+      fill = Color.transparent
+    )
+
+    val withBackground = group(background, plotWithAxisLabels, FreeLayout)
+
+    XYPlotArea(withBackground, xMin, xMax, yMin, yMax)
 
   }
 
