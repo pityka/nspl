@@ -7,7 +7,7 @@ object saddle {
 
   def barplotVertical[F: FC](
       series: Series[String, Double],
-      color: Colormap = Color.white,
+      color: Colormap = Color.gray4,
       yLabFontSize: Option[RelFontSize] = None
   )(parameters: Parameters) =
     xyplot(
@@ -30,7 +30,7 @@ object saddle {
   def barplotHorizontal[F: FC](
       series: Series[String, Double],
       xLabFontSize: Option[RelFontSize] = None,
-      color: Colormap = Color.white
+      color: Colormap = Color.gray4
   )(parameters: Parameters) =
     xyplot(
       series.toSeq

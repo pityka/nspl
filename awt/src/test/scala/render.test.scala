@@ -68,19 +68,13 @@ class RenderSmokeSpec extends munit.FunSuite {
     val p = xyplot(
       data -> bar(width = 0.6)
     )(par.ylog(true)).build
-    // Just exercise the render — the bug it guards against was a
-    // RuntimeException("<0") from log10(0) in bar()'s width calculation.
     val img = renderToImage(p)
     assert(hasInk(img))
   }
 
   test("error bars actually pick up the errorBarColor (regression for fill/stroke bug)") {
-    // Magenta error bars should appear as magenta-ish pixels in the
-    // output. The bug was that errorBarColor was being passed as `fill`
-    // on a stroked line (which is invisible), so the bars always rendered
-    // black. We just verify some pixels carry the requested color.
     val data = Seq(
-      (1d, 5d, 0d, 0d, 0d, 7d, 3d), // x, y, color, size, shape, errTop, errBot
+      (1d, 5d, 0d, 0d, 0d, 7d, 3d),
       (2d, 5d, 0d, 0d, 0d, 7d, 3d),
       (3d, 5d, 0d, 0d, 0d, 7d, 3d)
     )
@@ -94,7 +88,6 @@ class RenderSmokeSpec extends munit.FunSuite {
       )
     )(par.xlim(Some(0d -> 4d)).ylim(Some(0d -> 10d))).build
     val img = renderToImage(p, width = 600)
-    // Look for any pixel where R is much higher than G — magenta.
     var found = false
     val w = img.getWidth
     val h = img.getHeight
@@ -115,7 +108,6 @@ class RenderSmokeSpec extends munit.FunSuite {
   }
 
   test("rendered image dimensions are sane for an extreme aspect ratio") {
-    // Long narrow data shouldn't produce a zero-height image.
     val data = (1 to 200).map(i => (i.toDouble, math.sin(i * 0.1) * 0.001))
     val p = xyplot(data -> line())().build
     val img = renderToImage(p, width = 800)
@@ -123,10 +115,8 @@ class RenderSmokeSpec extends munit.FunSuite {
   }
 
   test("histogram of constant data does not divide by zero") {
-    // Regression check for histogram code paths.
     val hist = HistogramData(Seq.fill(20)(3.5), 1.0)
     val d = hist.density
-    // Should not throw and should return *some* HistogramData.
     assert(d.bins.nonEmpty || hist.bins.isEmpty)
   }
 }

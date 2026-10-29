@@ -580,7 +580,7 @@ object Parameters {
     origin = None,
     yLabelRotation = 0d,
     xLabelRotation = 0d,
-    frame = true,
+    frame = false,
     yHeight = 20 fts,
     xWidth = 20 fts,
     ygrid = true,

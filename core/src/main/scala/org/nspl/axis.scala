@@ -136,7 +136,7 @@ object AxisSettings {
       labelRotation: Double = 0,
       width: RelFontSize = 20 fts,
       fontSize: RelFontSize = 1 fts,
-      tickAlignment: Double = -1.0,
+      tickAlignment: Double = 1.0,
       lineWidth: RelFontSize = lineWidth,
       lineLengthFraction: Double = 1d,
       lineStartFraction: Double = 0.0,

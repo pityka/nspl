@@ -54,7 +54,7 @@ object DataElem {
 
 private[nspl] trait Plots {
   // format: off
-  type XYPlotAreaType = Elems5[Elems2[Elems2[Elems2[Elems6[ElemList[ShapeElem],ElemList[ShapeElem],ElemList[DataElem],Elems2[Elems3[ShapeElem,ElemList[Elems2[ShapeElem,TextBox]],ElemList[ShapeElem]],Elems3[ShapeElem,ElemList[Elems2[ShapeElem,TextBox]],ElemList[ShapeElem]]],ShapeElem,ElemList[ShapeElem]],TextBox],TextBox],TextBox],ShapeElem,ShapeElem,ShapeElem,ShapeElem]
+  type XYPlotAreaType = Elems2[Elems2[Elems2[Elems6[ElemList[ShapeElem],ElemList[ShapeElem],ElemList[DataElem],Elems2[Elems3[ShapeElem,ElemList[Elems2[ShapeElem,TextBox]],ElemList[ShapeElem]],Elems3[ShapeElem,ElemList[Elems2[ShapeElem,TextBox]],ElemList[ShapeElem]]],ShapeElem,ElemList[ShapeElem]],TextBox],TextBox],TextBox]
   // format: on
   case class XYPlotArea(
       elem: XYPlotAreaType,
@@ -67,7 +67,7 @@ private[nspl] trait Plots {
       this.copy(elem = elem.transform(v))
     def transform(v: AffineTransform) = this.copy(elem = elem.transform(v))
     def bounds: Bounds = elem.bounds
-    def frameElem = elem.m1.m1.m1.m1.m5
+    def frameElem = elem.m1.m1.m1.m5
   }
 
   object XYPlotArea {
@@ -114,10 +114,6 @@ private[nspl] trait Plots {
       ylabFontSize: RelFontSize = 1.0 fts,
       ylabDistance: RelFontSize = 0.5 fts,
       ylabAlignment: Alignment = Center,
-      topPadding: RelFontSize = 0.2 fts,
-      bottomPadding: RelFontSize = 0d fts,
-      leftPadding: RelFontSize = 0d fts,
-      rightPadding: RelFontSize = 0.2 fts,
       xNoTickLabel: Boolean = false,
       yNoTickLabel: Boolean = false,
       crosshairMode: CrosshairMode = CrosshairMode.Both
@@ -150,10 +146,6 @@ private[nspl] trait Plots {
         ylabFontSize,
         ylabDistance,
         ylabAlignment,
-        topPadding,
-        bottomPadding,
-        leftPadding,
-        rightPadding,
         xNoTickLabel,
         yNoTickLabel,
         crosshairMode = crosshairMode
@@ -202,10 +194,6 @@ private[nspl] trait Plots {
           ylabFontSize,
           ylabDistance,
           ylabAlignment,
-          topPadding,
-          bottomPadding,
-          leftPadding,
-          rightPadding,
           xNoTickLabel,
           yNoTickLabel,
           crosshairMode = crosshairMode
@@ -265,10 +253,6 @@ private[nspl] trait Plots {
           ylabFontSize,
           ylabDistance,
           ylabAlignment,
-          topPadding,
-          bottomPadding,
-          leftPadding,
-          rightPadding,
           xNoTickLabel,
           yNoTickLabel,
           crosshairMode = crosshairMode
@@ -323,10 +307,6 @@ private[nspl] trait Plots {
             ylabFontSize,
             ylabDistance,
             ylabAlignment,
-            topPadding,
-            bottomPadding,
-            leftPadding,
-            rightPadding,
             xNoTickLabel,
             yNoTickLabel,
             crosshairMode = crosshairMode
@@ -365,10 +345,6 @@ private[nspl] trait Plots {
           ylabFontSize,
           ylabDistance,
           ylabAlignment,
-          topPadding,
-          bottomPadding,
-          leftPadding,
-          rightPadding,
           xNoTickLabel,
           yNoTickLabel,
           crosshair = world,
@@ -403,10 +379,6 @@ private[nspl] trait Plots {
           ylabFontSize,
           ylabDistance,
           ylabAlignment,
-          topPadding,
-          bottomPadding,
-          leftPadding,
-          rightPadding,
           xNoTickLabel,
           yNoTickLabel,
           crosshair = None,
@@ -449,10 +421,6 @@ private[nspl] trait Plots {
       ylabFontSize: RelFontSize = 1.0 fts,
       ylabDistance: RelFontSize = 0.5 fts,
       ylabAlignment: Alignment = Center,
-      topPadding: RelFontSize = 0.2 fts,
-      bottomPadding: RelFontSize = 0d fts,
-      leftPadding: RelFontSize = 0d fts,
-      rightPadding: RelFontSize = 0.2 fts,
       xNoTickLabel: Boolean = false,
       yNoTickLabel: Boolean = false,
       crosshair: Option[Point] = None,
@@ -791,74 +759,7 @@ private[nspl] trait Plots {
         HorizontalStack(NoAlignment, ylabDistance)
       )
 
-    val movedFrame2 = plotWithAxisLabels.m1.m1.m1.m5
-
-    val padTop = Align.verticalGapBeforeReference(
-      Align.horizontalCenter(
-        ShapeElem(
-          shape = Shape.line(Point(0d, 0d), Point(0d, topPadding.value)),
-          fill = Color.transparent,
-          strokeColor = Color.blue,
-          stroke = None
-        ),
-        movedFrame2.bounds
-      ),
-      movedFrame2.bounds,
-      0d
-    )
-
-    val padBottom = Align.verticalGapAfterReference(
-      Align.horizontalCenter(
-        ShapeElem(
-          shape = Shape.line(Point(0d, 0d), Point(0d, bottomPadding.value)),
-          fill = Color.transparent,
-          strokeColor = Color.green,
-          stroke = None
-        ),
-        movedFrame2.bounds
-      ),
-      movedFrame2.bounds,
-      0d
-    )
-
-    val padLeft = Align.horizontalGapBeforeReference(
-      Align.verticalCenter(
-        ShapeElem(
-          shape = Shape.line(Point(0d, 0d), Point(leftPadding.value, 0d)),
-          fill = Color.transparent,
-          strokeColor = Color.red,
-          stroke = None
-        ),
-        movedFrame2.bounds
-      ),
-      movedFrame2.bounds,
-      0d
-    )
-
-    val padRight = Align.horizontalGapAfterReference(
-      Align.verticalCenter(
-        ShapeElem(
-          shape = Shape.line(Point(0d, 0d), Point(rightPadding.value, 0d)),
-          fill = Color.transparent,
-          strokeColor = Color.black,
-          stroke = None
-        ),
-        movedFrame2.bounds
-      ),
-      movedFrame2.bounds,
-      0d
-    )
-
-    val elem = group(
-      plotWithAxisLabels,
-      padLeft,
-      padBottom,
-      padTop,
-      padRight,
-      FreeLayout
-    )
-
-    XYPlotArea(elem, xMin, xMax, yMin, yMax)
+    XYPlotArea(plotWithAxisLabels, xMin, xMax, yMin, yMax)
 
   }
 

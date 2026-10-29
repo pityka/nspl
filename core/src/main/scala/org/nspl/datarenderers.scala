@@ -574,12 +574,17 @@ private[nspl] trait Renderers {
       yCol: Int = 1,
       fillCol: Int = 2,
       horizontal: Boolean = false,
-      stroke: StrokeConf = StrokeConf(lineWidth),
+      stroke: StrokeConf = StrokeConf(0d fts),
       strokeColor: Color = Color.black,
-      fill: Colormap = Color.white,
+      fill: Colormap = Color.gray4,
       width: Double = 1,
       yCol2: Option[Int] = None,
-      widthCol: Int = 3
+      widthCol: Int = 3,
+      valueText: Boolean = false,
+      labelColor: Color = Color.black,
+      labelFontSize: RelFontSize = 0.5 fts,
+      labelDistance: RelFontSize = 0.3 fts,
+      valueFormatter: Double => String = (v: Double) => f"$v%.2g"
   ) = new DataRenderer {
 
     def xMinMax(ds: DataSource): Option[MinMax] =
@@ -674,6 +679,22 @@ private[nspl] trait Renderers {
 
           re.render(ctx, shape1)
 
+          if (valueText) {
+            val tbCenterX = vLeftEdge + vWidth * 0.5
+            val labelPositioned = TextBox(
+              valueFormatter(wY),
+              color = labelColor,
+              fontSize = labelFontSize
+            ).transform { (b, old) =>
+              val x = tbCenterX - b.w * 0.5
+              val y =
+                if (vY2 > vY) vY - labelDistance.value - b.h
+                else vY + labelDistance.value
+              old.translate(x, y)
+            }
+            rt.render(ctx, labelPositioned.transform(tx))
+          }
+
         } else {
 
           val wXBottom = yCol2
@@ -718,6 +739,22 @@ private[nspl] trait Renderers {
           )
 
           re.render(ctx, shape1)
+
+          if (valueText) {
+            val tbCenterY = vTopEdge + vWidth * 0.5
+            val labelPositioned = TextBox(
+              valueFormatter(wX),
+              color = labelColor,
+              fontSize = labelFontSize
+            ).transform { (b, old) =>
+              val y = tbCenterY - b.h * 0.5
+              val x =
+                if (wX > 0) vX + labelDistance.value
+                else vX - labelDistance.value - b.w
+              old.translate(x, y)
+            }
+            rt.render(ctx, labelPositioned.transform(tx))
+          }
 
         }
 
