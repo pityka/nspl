@@ -119,4 +119,24 @@ class RenderSmokeSpec extends munit.FunSuite {
     val d = hist.density
     assert(d.bins.nonEmpty || hist.bins.isEmpty)
   }
+
+  test("TableLayout places heterogeneous items in uniform cells") {
+    val square = ShapeElem(Shape.rectangle(0, 0, 100, 100))
+    val wide   = ShapeElem(Shape.rectangle(0, 0, 200, 50))
+    val tall   = ShapeElem(Shape.rectangle(0, 0, 50, 200))
+    val small  = ShapeElem(Shape.rectangle(0, 0, 30, 30))
+    val composed = group(square, wide, tall, small, TableLayout(2))
+    val m1 = composed.m1.bounds
+    val m2 = composed.m2.bounds
+    val m3 = composed.m3.bounds
+    val _  = composed.m4.bounds
+    assert(math.abs(m1.y - m2.y) < 1e-6 || math.abs((m1.y + m1.h / 2) - (m2.y + m2.h / 2)) < 1e-6,
+      s"row 0 items vertically aligned by center: $m1 vs $m2")
+    assert(math.abs(m1.x + m1.w / 2 - (m3.x + m3.w / 2)) < 1e-6,
+      s"column 0 items horizontally aligned by center: $m1 vs $m3")
+    assert(m2.x >= m1.x + m1.w,
+      s"col 1 starts after col 0: $m2 vs $m1")
+    assert(m3.y >= m1.y + m1.h,
+      s"row 1 starts after row 0: $m3 vs $m1")
+  }
 }

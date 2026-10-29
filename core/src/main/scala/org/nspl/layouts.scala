@@ -170,9 +170,45 @@ private[nspl] object LayoutHelper {
         Bounds(c, r, b.w, b.h, b.anchor)
     }
   }
+
+  def uniformGrid(
+      cells: Seq[(Int, Int, Bounds)],
+      numCols: Int,
+      numRows: Int,
+      horizontalGap: Double,
+      verticalGap: Double
+  ): Seq[Bounds] = {
+    val colWidths: Vector[Double] = Vector.tabulate(numCols) { c =>
+      val widths = cells.collect { case (`c`, _, b) => b.w }
+      if (widths.isEmpty) 0d else widths.max
+    }
+    val rowHeights: Vector[Double] = Vector.tabulate(numRows) { r =>
+      val heights = cells.collect { case (_, `r`, b) => b.h }
+      if (heights.isEmpty) 0d else heights.max
+    }
+    val colXs: Vector[Double] =
+      colWidths.scanLeft(0d)((acc, w) => acc + w + horizontalGap).init
+    val rowYs: Vector[Double] =
+      rowHeights.scanLeft(0d)((acc, h) => acc + h + verticalGap).init
+    cells.map { case (c, r, b) =>
+      val cellX = colXs(c)
+      val cellY = rowYs(r)
+      val cellW = colWidths(c)
+      val cellH = rowHeights(r)
+      val newX = cellX + (cellW - b.w) * 0.5
+      val newY = cellY + (cellH - b.h) * 0.5
+      val dx = newX - b.x
+      val dy = newY - b.y
+      Bounds(newX, newY, b.w, b.h, b.anchor.map(_.translate(dx, dy)))
+    }
+  }
 }
 
-/** A Layout which puts elements into rows.*/
+/** A Layout which puts elements into rows (row-major) in a uniform grid.
+  *
+  * Each column's width is the max width of its items, each row's height is the
+  * max height of its items. Items are centered within their cells.
+  */
 case class TableLayout(
     columns: Int,
     horizontalGap: RelFontSize = 0.5 fts,
@@ -181,18 +217,27 @@ case class TableLayout(
 
   def apply[F: FC](s: Seq[Bounds]) = {
     if (s.isEmpty) s
-    else
-      LayoutHelper.alignToAnchors(
-        s.grouped(columns).toList,
-        horizontalGap,
-        verticalGap,
-        true,
-        false
+    else {
+      val cells = s.zipWithIndex.map { case (b, i) =>
+        (i % columns, i / columns, b)
+      }
+      val nRows = (s.size + columns - 1) / columns
+      LayoutHelper.uniformGrid(
+        cells,
+        columns,
+        nRows,
+        horizontalGap.value,
+        verticalGap.value
       )
+    }
   }
 }
 
-/** A Layout which puts elements into columns.*/
+/** A Layout which puts elements into columns (column-major) in a uniform grid.
+  *
+  * Each column's width is the max width of its items, each row's height is the
+  * max height of its items. Items are centered within their cells.
+  */
 case class ColumnLayout(
     numRows: Int,
     horizontalGap: RelFontSize = 0.5 fts,
@@ -200,14 +245,19 @@ case class ColumnLayout(
 ) extends Layout {
   def apply[F: FC](s: Seq[Bounds]) = {
     if (s.isEmpty) s
-    else
-      LayoutHelper.alignToAnchors(
-        s.grouped(numRows).toList,
-        horizontalGap,
-        verticalGap,
-        false,
-        true
+    else {
+      val cells = s.zipWithIndex.map { case (b, i) =>
+        (i / numRows, i % numRows, b)
+      }
+      val nCols = (s.size + numRows - 1) / numRows
+      LayoutHelper.uniformGrid(
+        cells,
+        nCols,
+        numRows,
+        horizontalGap.value,
+        verticalGap.value
       )
+    }
   }
 }
 

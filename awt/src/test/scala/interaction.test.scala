@@ -189,7 +189,7 @@ class InteractionSpec extends munit.FunSuite {
     val (initial, build) = squarePlot()
     // The initial plot has no crosshair.
     val baseCrosshairCount =
-      initial.elem.m2.m1.m1.m1.m6.members.size
+      initial.elem.m1.m1.m1.m6.members.size
     assertEquals(baseCrosshairCount, 0)
 
     val plotAreaId = initial.frameElem.identifier
@@ -198,13 +198,13 @@ class InteractionSpec extends munit.FunSuite {
 
     // Hover at the center of the canvas → world (5, 5).
     val hovered = build((Some(initial), MouseHover(Point(50, 50), plotAreaId)))
-    val hoveredCrosshair = hovered.elem.m2.m1.m1.m1.m6.members
+    val hoveredCrosshair = hovered.elem.m1.m1.m1.m6.members
     // Two lines: horizontal + vertical.
     assertEquals(hoveredCrosshair.size, 2)
 
     // Mouse leaves → crosshair gone.
     val left = build((Some(hovered), MouseLeave(plotAreaId)))
-    assertEquals(left.elem.m2.m1.m1.m1.m6.members.size, 0)
+    assertEquals(left.elem.m1.m1.m1.m6.members.size, 0)
   }
 
   /** Build a square xyplot with a configurable crosshair mode. */
@@ -231,7 +231,7 @@ class InteractionSpec extends munit.FunSuite {
       .asInstanceOf[PlotAreaIdentifier]
       .withBounds(Some(Bounds(0, 0, 100, 100)))
     val hovered = build((Some(initial), MouseHover(Point(50, 50), plotAreaId)))
-    assertEquals(hovered.elem.m2.m1.m1.m1.m6.members.size, 1)
+    assertEquals(hovered.elem.m1.m1.m1.m6.members.size, 1)
   }
 
   test("CrosshairMode.Vertical renders only the vertical line on hover") {
@@ -240,7 +240,7 @@ class InteractionSpec extends munit.FunSuite {
       .asInstanceOf[PlotAreaIdentifier]
       .withBounds(Some(Bounds(0, 0, 100, 100)))
     val hovered = build((Some(initial), MouseHover(Point(50, 50), plotAreaId)))
-    assertEquals(hovered.elem.m2.m1.m1.m1.m6.members.size, 1)
+    assertEquals(hovered.elem.m1.m1.m1.m6.members.size, 1)
   }
 
   test("CrosshairMode.None suppresses the crosshair on hover") {
@@ -249,7 +249,7 @@ class InteractionSpec extends munit.FunSuite {
       .asInstanceOf[PlotAreaIdentifier]
       .withBounds(Some(Bounds(0, 0, 100, 100)))
     val hovered = build((Some(initial), MouseHover(Point(50, 50), plotAreaId)))
-    assertEquals(hovered.elem.m2.m1.m1.m1.m6.members.size, 0)
+    assertEquals(hovered.elem.m1.m1.m1.m6.members.size, 0)
   }
 
   test("CrosshairMode survives zoom (Scroll) rebuilds") {
@@ -264,7 +264,7 @@ class InteractionSpec extends munit.FunSuite {
       .asInstanceOf[PlotAreaIdentifier]
       .withBounds(Some(Bounds(0, 0, 100, 100)))
     val hovered = build((Some(zoomed), MouseHover(Point(50, 50), zoomedId)))
-    assertEquals(hovered.elem.m2.m1.m1.m1.m6.members.size, 1)
+    assertEquals(hovered.elem.m1.m1.m1.m6.members.size, 1)
   }
 
   test("MouseHover preserves an existing zoom (xlim/ylim)") {
@@ -284,7 +284,7 @@ class InteractionSpec extends munit.FunSuite {
     // Range must be preserved — hover must not reset the zoom.
     assertEqualsDouble(hovered.xMin, 2.5, 1e-9)
     assertEqualsDouble(hovered.xMax, 7.5, 1e-9)
-    assertEquals(hovered.elem.m2.m1.m1.m1.m6.members.size, 2)
+    assertEquals(hovered.elem.m1.m1.m1.m6.members.size, 2)
   }
 
   test("DataRowIdx and TextBoxIdentifier are distinct types") {
